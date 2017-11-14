@@ -1,0 +1,1 @@
+workspace(name = "com_github_bazelbuild_bazel_toolchains")
