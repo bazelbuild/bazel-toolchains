@@ -14,13 +14,16 @@
 
 licenses(["notice"])  # Apache 2.0
 
+package(default_visibility = ["//visibility:public"])
+
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load(
-    "//rules:docker_config.bzl",
+    "@bazel_toolchains//rules:docker_config.bzl",
     "all_tools",
     "default_tools",
     "docker_toolchain_autoconfig",
 )
-load("//rules:environments.bzl", "clang_env", "gcc_env")
+load("@bazel_toolchains//rules:environments.bzl", "clang_env", "gcc_env")
 load("@distroless//cacerts:cacerts.bzl", "cacerts")
 load(
     "@jessie_package_bundle//file:packages.bzl",
@@ -33,6 +36,14 @@ load(
 load(
     "@xenial_package_bundle//file:packages.bzl",
     xenial_packages = "packages",
+)
+
+pkg_tar(
+    name = "cc-sample-project-tar",
+    srcs = [
+        "cc-sample-project/BUILD.sample",
+        "cc-sample-project/test.cc",
+    ],
 )
 
 cacerts(

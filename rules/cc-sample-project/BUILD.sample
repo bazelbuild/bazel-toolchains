@@ -16,18 +16,15 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-
-cc_test(
-    name = "test",
-    srcs = ["test.cc"],
-)
-
-pkg_tar(
-    name = "cc-sample-project",
+filegroup(
+    name = "srcs",
     srcs = [
         "BUILD",
         "test.cc",
     ],
-    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "test",
+    srcs = ["test.cc"],
 )

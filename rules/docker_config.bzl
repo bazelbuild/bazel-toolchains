@@ -71,9 +71,13 @@ load(
     "@xenial_package_bundle//file:packages.bzl",
     xenial_packages = "packages",
 )
-load("//rules:packages.bzl", "get_jessie_packages", "get_trusty_packages", "get_xenial_packages")
+load("@bazel_toolchains//rules:packages.bzl",
+    "get_jessie_packages",
+    "get_trusty_packages",
+    "get_xenial_packages",
+)
 load(
-    "//rules:package_names.bzl",
+    "@bazel_toolchains//rules:package_names.bzl",
     "tool_names",
     "jessie_tools",
     "trusty_tools",
@@ -109,8 +113,12 @@ default_tools = [
 # https://github.com/bazelbuild/bazel/issues/1262
 _EXTERNAL_FOLDER_PREFIX = "external/"
 
+# Name of the current workspace
+_WORKSPACE_NAME = "bazel_toolchains"
+_WORKSPACE_PREFIX = "@" + _WORKSPACE_NAME + "//"
+
 # Default cc project to use if no git_repo is provided.
-_DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR = "//rules/cc-sample-project:cc-sample-project"
+_DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR = _WORKSPACE_PREFIX + "rules:cc-sample-project-tar"
 
 # Build variable to define the location of the output tar produced by
 # docker_toolchain_autoconfig
@@ -183,8 +191,8 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
   # Command to run autoconfigure targets.
   bazel_cmd = "cd " + bazel_config_dir + "/" + project_repo_dir
-  if ctx.attr.create_workspace_file:
-    bazel_cmd += " && touch WORKSPACE "
+  if ctx.attr.use_default_project:
+    bazel_cmd += " && touch WORKSPACE && mv BUILD.sample BUILD"
   # For each config repo we run the target @<config_repo>//...
   bazel_targets = "@" + "//... @".join(ctx.attr.config_repos) + "//..."
   bazel_cmd += " && bazel build " + bazel_targets
@@ -193,7 +201,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
   # we start with "cd ." to make sure in case of failure everything after the
   # ";" will be executed
   clean_cmd = "cd . ; bazel clean"
-  if ctx.attr.create_workspace_file:
+  if ctx.attr.use_default_project:
     clean_cmd += " && rm WORKSPACE"
   if ctx.attr.git_repo:
     clean_cmd += " && cd " + bazel_config_dir + " && rm -drf " + project_repo_dir
@@ -222,10 +230,10 @@ def _docker_toolchain_autoconfig_impl(ctx):
   remove_repo_cmd = "cd ."
   if ctx.attr.repo_pkg_tar:
     repo_pkg_tar = str(ctx.attr.repo_pkg_tar.label.name)
+    package_name = _EXTERNAL_FOLDER_PREFIX + _WORKSPACE_NAME + "/" + str(ctx.attr.repo_pkg_tar.label.package)
     # Expand the tar file pointed by repo_pkg_tar
     expand_repo_cmd = ("mkdir ./%s ; tar -xf %s/%s.tar -C ./%s" %
-                       (project_repo_dir, ctx.attr.repo_pkg_tar.label.package,
-                        repo_pkg_tar, project_repo_dir))
+                       (project_repo_dir, package_name, repo_pkg_tar, project_repo_dir))
     remove_repo_cmd = ("rm -drf ./%s" % project_repo_dir)
 
   result = _container.image.implementation(ctx, cmd=docker_cmd, output=ctx.outputs.load_image)
@@ -263,7 +271,7 @@ docker_toolchain_autoconfig_ = rule(
     attrs = _container.image.attrs + {
         "distro": attr.string(),
         "config_repos": attr.string_list(["local_config_cc"]),
-        "create_workspace_file": attr.bool(default = False),
+        "use_default_project": attr.bool(default = False),
         "git_repo": attr.string(),
         "install_tools": attr.string_list(),
         "repo_pkg_tar": attr.label(allow_files = tar_filetype),
@@ -283,7 +291,7 @@ docker_toolchain_autoconfig_ = rule(
 # Attributes below are expected in ctx, but should not be provided
 # in the BUILD file.
 reserved_attrs = [
-    "create_workspace_file",
+    "use_default_project",
     "files",
     "srcs",
     "debs",
@@ -420,20 +428,20 @@ def docker_toolchain_autoconfig(**kwargs):
   if "git_repo" not in kwargs:
     kwargs["srcs"] = [_DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR]
     kwargs["repo_pkg_tar"] = _DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR
-    kwargs["create_workspace_file"] = True
+    kwargs["use_default_project"] = True
   kwargs["files"] = [
-      "//rules:install_bazel_head.sh",
-      "//rules:install_bazel_version.sh"
+      _WORKSPACE_PREFIX + "rules:install_bazel_head.sh",
+      _WORKSPACE_PREFIX + "rules:install_bazel_version.sh"
   ]
 
   # Set up certificates if git or wget needs to be used
   if tool_names.git in kwargs["install_tools"] or tool_names.wget in kwargs["install_tools"]:
     if kwargs["distro"] == "jessie":
-      kwargs["tars"] = ["//rules:jessie_cacerts.tar"]
+      kwargs["tars"] = [_WORKSPACE_PREFIX + "rules:jessie_cacerts.tar"]
     elif kwargs["distro"] == "trusty":
-      kwargs["tars"] = ["//rules:trusty_cacerts.tar"]
+      kwargs["tars"] = [_WORKSPACE_PREFIX + "rules:trusty_cacerts.tar"]
     elif kwargs["distro"] == "xenial":
-      kwargs["tars"] = ["//rules:xenial_cacerts.tar"]
+      kwargs["tars"] = [_WORKSPACE_PREFIX + "rules:xenial_cacerts.tar"]
 
   # Set symlinks and env vars for python / Java if installation was requested.
   symlinks = {}
@@ -456,7 +464,7 @@ def docker_toolchain_autoconfig(**kwargs):
 
   # The template for the main script to execute for this rule, which produces
   # the toolchain configs
-  kwargs["run_tpl"] = "//rules:docker_config.sh.tpl"
+  kwargs["run_tpl"] = _WORKSPACE_PREFIX + "rules:docker_config.sh.tpl"
   docker_toolchain_autoconfig_(**kwargs)
 
 def autoconf_jessie_packages(install_tools):
