@@ -118,9 +118,9 @@ dpkg_src(
 
 dpkg_src(
     name = "ubuntu_xenial_backports",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial-backports/main/binary-amd64/by-hash/SHA256/232904262324193a0c7c3f880a4e510a12d2e9100aefa415634c3227ec911a2c",
+    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial-backports/main/binary-amd64/by-hash/SHA256/7d2b09c92824087485cb660822e5895b5d225b9fad1c20a7dbb41d6efa0fbfa5",
     package_prefix = "http://archive.ubuntu.com/ubuntu/",
-    sha256 = "232904262324193a0c7c3f880a4e510a12d2e9100aefa415634c3227ec911a2c",
+    sha256 = "7d2b09c92824087485cb660822e5895b5d225b9fad1c20a7dbb41d6efa0fbfa5",
 )
 
 dpkg_src(
