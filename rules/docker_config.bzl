@@ -212,6 +212,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
   docker_cmd = [
       "/bin/sh", "-c", " && ".join([
           "set -ex",
+          ctx.attr.setup_cmd,
           install_bazel_cmd,
           "echo === Cloning project repo ===",
           clone_repo_cmd,
@@ -280,6 +281,7 @@ docker_toolchain_autoconfig_ = rule(
         "use_bazel_head": attr.bool(default = False),
         "srcs": attr.label_list(allow_files = True),
         "run_tpl": attr.label(allow_files = True),
+        "setup_cmd": attr.string(default = "cd ."),
     },
     executable = True,
     outputs = _container.image.outputs + {
@@ -408,6 +410,8 @@ def docker_toolchain_autoconfig(**kwargs):
         generate toolchain configs. Input "2" if you would like to use rc2.
     use_bazel_head = Download bazel head from github, compile it and use it
         to run autoconfigure targets.
+    setup_cmd: a customized command that will run as the very first command
+        inside the docker container.
   """
   for reserved in reserved_attrs:
     if reserved in kwargs:
