@@ -20,10 +20,11 @@ load(
     "xenial_package_names",
 )
 
-git_repository(
+http_archive(
     name = "io_bazel_rules_docker",
-    remote = "https://github.com/bazelbuild/rules_docker.git",
-    commit = "613ed0b300df4783ba0ce427b84b0632ef4f4bd8",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4.tar.gz"],
+    strip_prefix = "rules_docker-119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4",
+    sha256 = "6329b426670284c4be52969f3f0cf21431ad5012757b6e58c8e0e7014e6e6bdc",
 )
 
 load(
@@ -55,10 +56,11 @@ container_pull(
     tag = "16.04",
 )
 
-git_repository(
+http_archive(
     name = "distroless",
-    remote = "https://github.com/GoogleCloudPlatform/distroless.git",
-    commit = "21a50ebf6db9f050e772bb79292c8df6cb9f9451"
+    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/42e71c20ccd63e2573c2cd5df03a12371480549f.tar.gz"],
+    strip_prefix = "distroless-42e71c20ccd63e2573c2cd5df03a12371480549f",
+    sha256 = "78289f23eb4bcc04b9329e12901a8675f64fda6abb1eda6317ebc6a5e8b229e2",
 )
 
 load(
