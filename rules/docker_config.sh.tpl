@@ -17,7 +17,7 @@
 # Loads a container, runs it, copies outputs to tar file.
 set -ex
 
-function main {
+main() {
   export PYTHON_RUNFILES=$(pwd)/../
   trap cleanup_on_finish EXIT # always cleanup
   # Expand a tar file with the repo if needed
@@ -32,7 +32,7 @@ function main {
   cp outputs.tar %{OUTPUT}
 }
 
-function cleanup_on_finish {
+cleanup_on_finish() {
   # Remove the expanded repo if needed
   %{RM_REPO_CMD}
   # Remove the produced tar file
