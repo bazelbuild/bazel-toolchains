@@ -20,6 +20,8 @@ load(
     "xenial_package_names",
 )
 
+# Use http_archive rule instead of git_repository rule
+# https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "io_bazel_rules_docker",
     urls = ["https://github.com/bazelbuild/rules_docker/archive/119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4.tar.gz"],
@@ -56,6 +58,8 @@ container_pull(
     tag = "16.04",
 )
 
+# Use http_archive rule instead of git_repository rule
+# https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "distroless",
     urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/42e71c20ccd63e2573c2cd5df03a12371480549f.tar.gz"],
