@@ -1,0 +1,70 @@
+# Copyright 2017 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+timeout: 21600s
+
+steps:
+# Step: build python
+# (we copy compiled python3 interpreter directly from l.gcr.io/google/python)
+# TODO(yiyu): compile python3 from source so we don't need this step. See
+# https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+    - 'build'
+    - '--file=Dockerfile.py.build'
+    - '--tag=py-build-container'
+    - '.'
+    id: build-py
+    dir: '${_DIR}'
+    waitFor:
+    - "-" # wait for nothing - start immediately
+
+# Step: copy python artifact
+# Get the generated python3 artifact from py-build-container
+  -  name: "py-build-container"
+     args: ['cp', '/tmp/py.tar.gz', 'py.tar.gz']
+     id: copy-py
+     dir: '${_DIR}'
+     waitFor:
+     - 'build-py'
+
+# Step: build a custom container with gcloud, docker and bazel
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+    - 'build'
+    - '--file=Dockerfile.builder'
+    - '--tag=gcloud-bazel-builder'
+    - '.'
+    id: builder
+    dir: '${_DIR}'
+    waitFor:
+    - "-" # wait for nothing - start immediately
+
+# Step: build the fully loaded container using rules_docker
+  - name: 'gcloud-bazel-builder'
+    args: ['run' , '//${_DIR}:fl-toolchain']
+    id: 'fl-container'
+    waitFor:
+    - "builder"
+
+# Step: re-tag the image
+  - name: gcr.io/cloud-builders/docker
+    args: ['tag', 'bazel/${_DIR}:fl-toolchain', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}']
+    id: 'fl-container-tag'
+    waitFor: # wait for all artifacts to be ready
+    - 'fl-container'
+
+# Build the release-container
+images:
+  - 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}'

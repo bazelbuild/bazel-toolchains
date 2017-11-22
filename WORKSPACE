@@ -19,6 +19,10 @@ load(
     "trusty_package_names",
     "xenial_package_names",
 )
+load(
+    "//container/rules:package_names.bzl",
+    "container_jessie_package_names",
+)
 
 # Use http_archive rule instead of git_repository rule
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
@@ -36,6 +40,13 @@ load(
 )
 
 container_repositories()
+
+container_pull(
+    name = "debian8",
+    digest = "sha256:67970d5a9a9207e20dc9e3ceb791116884d6f6c298f542367c6fd92886b23c79",
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/debian8",
+)
 
 container_pull(
     name = "debian8-clang",
@@ -102,6 +113,15 @@ dpkg_src(
 )
 
 dpkg_src(
+    name = "debian_jessie_ca_certs",
+    arch = "amd64",
+    distro = "jessie",
+    sha256 = "26e8275be588d35313eac65a1a88b17a1052eb323255048b13bdf0653421a9f2",
+    snapshot = "20161107T033615Z",
+    url = "http://snapshot.debian.org/archive",
+)
+
+dpkg_src(
     name = "ubuntu_trusty",
     package_prefix = "http://archive.ubuntu.com/ubuntu/",
     packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/trusty/main/binary-amd64/Packages.gz",
@@ -162,6 +182,24 @@ dpkg_list(
     ],
 )
 
+# TODO(yiyu): merge this with jessie_package_bundle
+dpkg_list(
+    name = "container_jessie_package_bundle",
+    packages = container_jessie_package_names(),
+    sources = [
+        "@debian_jessie//file:Packages.json",
+        "@debian_jessie_backports//file:Packages.json",
+    ],
+)
+
+dpkg_list(
+    name = "jessie_ca_certs_package_bundle",
+    packages = ["ca-certificates-java"],
+    sources = [
+        "@debian_jessie_ca_certs//file:Packages.json",
+    ],
+)
+
 dpkg_list(
     name = "trusty_package_bundle",
     packages = trusty_package_names(),
@@ -180,4 +218,25 @@ dpkg_list(
         "@ubuntu_xenial_backports//file:Packages.json",
         "@ubuntu_xenial_java//file:Packages.json",
     ],
+)
+
+# Golang
+new_http_archive(
+    name = "golang_release",
+    build_file = "third_party/golang/golang.BUILD",
+    sha256 = "07d81c6b6b4c2dcf1b5ef7c27aaebd3691cdb40548500941f92b221147c5d9c7",
+    strip_prefix = "go/",
+    type = "tar.gz",
+    url = "https://storage.googleapis.com/golang/go1.9.1.linux-amd64.tar.gz",
+)
+
+# Clang
+load("//container/rules:gsutil.bzl", "gsutil_cp")
+
+gsutil_cp(
+    name = "clang_release",
+    file = "clang_r314281.tar.gz",
+    gcs_bucket = "gs://clang-builds/google-debian8",
+    md5 = "+KpE80HVzkkQUO2o87DubA==",
+    target_file = "clang.tar.gz",
 )

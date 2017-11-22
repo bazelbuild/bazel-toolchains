@@ -1,0 +1,26 @@
+# Copyright 2017 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Pin to the latest l.gcr.io/google/python container
+FROM l.gcr.io/google/python@sha256:49f0264ae8ea6993c03773aa6cc7b7bb14f977d7e67780974375cbd74b376144
+
+# Make proper alias
+WORKDIR /opt/python3.6/bin
+RUN ln -s python3.6 python3
+RUN ln -s pip3.6 pip3
+
+# Tar the python3 interpreter which was compiled from source, see
+# https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
+WORKDIR /
+RUN tar czf /tmp/py.tar.gz /opt/python3.6
