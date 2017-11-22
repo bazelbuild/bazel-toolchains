@@ -24,9 +24,9 @@ load(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "io_bazel_rules_docker",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4.tar.gz"],
-    strip_prefix = "rules_docker-119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4",
     sha256 = "6329b426670284c4be52969f3f0cf21431ad5012757b6e58c8e0e7014e6e6bdc",
+    strip_prefix = "rules_docker-119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4.tar.gz"],
 )
 
 load(
@@ -62,9 +62,9 @@ container_pull(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "distroless",
-    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/42e71c20ccd63e2573c2cd5df03a12371480549f.tar.gz"],
-    strip_prefix = "distroless-42e71c20ccd63e2573c2cd5df03a12371480549f",
     sha256 = "78289f23eb4bcc04b9329e12901a8675f64fda6abb1eda6317ebc6a5e8b229e2",
+    strip_prefix = "distroless-42e71c20ccd63e2573c2cd5df03a12371480549f",
+    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/42e71c20ccd63e2573c2cd5df03a12371480549f.tar.gz"],
 )
 
 load(
@@ -78,8 +78,8 @@ package_manager_repositories()
 
 dpkg_src(
     name = "bazel_apt",
-    packages_gz_url = "http://storage.googleapis.com/bazel-apt/dists/stable/jdk1.8/binary-amd64/Packages.gz",
     package_prefix = "http://storage.googleapis.com/bazel-apt/",
+    packages_gz_url = "http://storage.googleapis.com/bazel-apt/dists/stable/jdk1.8/binary-amd64/Packages.gz",
     sha256 = "0fc4c6988ebf24705cfab0050cb5ad58e5b2aeb0e8cfb8921898a1809042416c",
 )
 
@@ -103,43 +103,43 @@ dpkg_src(
 
 dpkg_src(
     name = "ubuntu_trusty",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/trusty/main/binary-amd64/Packages.gz",
     package_prefix = "http://archive.ubuntu.com/ubuntu/",
+    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/trusty/main/binary-amd64/Packages.gz",
     sha256 = "59fa3195fd15bb2860fad4ff9ed37b249035e05ee327bed18f95dc88a0a41eb9",
 )
 
 dpkg_src(
     name = "ubuntu_trusty_backports",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/trusty-backports/main/binary-amd64/Packages.gz",
     package_prefix = "http://archive.ubuntu.com/ubuntu/",
-    sha256 = "6c395e01200a68752387ce86c9bdddad9e119a29c4351b069aff3d76dab3514e",
+    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/trusty-backports/main/binary-amd64/Packages.gz",
+    sha256 = "8219acccd8c95a002a02b7c16f63d3425eb3dd3958d0a685fa3ba7eb45e4c09c",
 )
 
 dpkg_src(
     name = "ubuntu_xenial",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial/main/binary-amd64/by-hash/SHA256/8d6ab57abf517d7712e4e4d23d762485af49f8140a83b221ea7282f82a51c795",
     package_prefix = "http://archive.ubuntu.com/ubuntu/",
+    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial/main/binary-amd64/by-hash/SHA256/8d6ab57abf517d7712e4e4d23d762485af49f8140a83b221ea7282f82a51c795",
     sha256 = "8d6ab57abf517d7712e4e4d23d762485af49f8140a83b221ea7282f82a51c795",
 )
 
 dpkg_src(
     name = "ubuntu_xenial_backports",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial-backports/main/binary-amd64/by-hash/SHA256/7d2b09c92824087485cb660822e5895b5d225b9fad1c20a7dbb41d6efa0fbfa5",
     package_prefix = "http://archive.ubuntu.com/ubuntu/",
+    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial-backports/main/binary-amd64/by-hash/SHA256/7d2b09c92824087485cb660822e5895b5d225b9fad1c20a7dbb41d6efa0fbfa5",
     sha256 = "7d2b09c92824087485cb660822e5895b5d225b9fad1c20a7dbb41d6efa0fbfa5",
 )
 
 dpkg_src(
     name = "ubuntu_trusty_java",
-    packages_gz_url = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/dists/trusty/main/binary-amd64/Packages.gz",
     package_prefix = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/",
+    packages_gz_url = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/dists/trusty/main/binary-amd64/Packages.gz",
     sha256 = "59337826f066721b5d5247e88ef22a0970e0e5dd5a3919fe4f5629777cf68c15",
 )
 
 dpkg_src(
     name = "ubuntu_xenial_java",
-    packages_gz_url = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/dists/xenial/main/binary-amd64/Packages.gz",
     package_prefix = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/",
+    packages_gz_url = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/dists/xenial/main/binary-amd64/Packages.gz",
     sha256 = "3d1898fdfa48fda1d8982759bd6765090fefc2153d5f52108004bffb117d2a42",
 )
 
