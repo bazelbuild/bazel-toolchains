@@ -279,7 +279,6 @@ docker_toolchain_autoconfig_ = rule(
         "bazel_version": attr.string(),
         "bazel_rc_version": attr.string(),
         "use_bazel_head": attr.bool(default = False),
-        "srcs": attr.label_list(allow_files = True),
         "run_tpl": attr.label(allow_files = True),
         "setup_cmd": attr.string(default = "cd ."),
     },
@@ -295,7 +294,6 @@ docker_toolchain_autoconfig_ = rule(
 reserved_attrs = [
     "use_default_project",
     "files",
-    "srcs",
     "debs",
     "repo_pkg_tar",
     "run_tpl",
@@ -430,7 +428,6 @@ def docker_toolchain_autoconfig(**kwargs):
 
   # If the git_repo was not provided, use the default autoconfig project
   if "git_repo" not in kwargs:
-    kwargs["srcs"] = [_DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR]
     kwargs["repo_pkg_tar"] = _DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR
     kwargs["use_default_project"] = True
   kwargs["files"] = [
