@@ -2,7 +2,7 @@
 
 This folder contains artifacts for building a docker container which includes
 all necessary language toolchains (C++, Java, Python, Go and libraries). This
-container will be the recommended toolchain container for [Remote caching and
+container is the recommended toolchain container for [Remote caching and
 execution with
 Bazel](https://github.com/bazelbuild/bazel/tree/master/src/main/java/com/google/devtools/build/lib/remote).
 
