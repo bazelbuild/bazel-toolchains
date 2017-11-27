@@ -91,7 +91,7 @@ dpkg_src(
     name = "bazel_apt",
     package_prefix = "http://storage.googleapis.com/bazel-apt/",
     packages_gz_url = "http://storage.googleapis.com/bazel-apt/dists/stable/jdk1.8/binary-amd64/Packages.gz",
-    sha256 = "0fc4c6988ebf24705cfab0050cb5ad58e5b2aeb0e8cfb8921898a1809042416c",
+    sha256 = "e0d017cc11e5a8f18383073018194a4546ab43c3508c708db63deeffa0e0719c",
 )
 
 dpkg_src(
