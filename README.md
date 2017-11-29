@@ -11,6 +11,6 @@ These toolchain configs include:
 * wrapper scripts.
 
 Release information of toolchain configs can be found at:
-https://releases.bazel.build/bazel-toolchains.html\.
+https://releases.bazel.build/bazel-toolchains.html.
 
 This repository also hosts the skylark rule used to generate toolchain configs.
