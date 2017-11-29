@@ -235,7 +235,7 @@ load("//container/rules:gsutil.bzl", "gsutil_cp")
 
 gsutil_cp(
     name = "clang_release",
-    file = "clang_r314281.tar.gz",
+    file = "clang_r318288.tar.gz",
     gcs_bucket = "gs://clang-builds/google-debian8",
     md5 = "+KpE80HVzkkQUO2o87DubA==",
     target_file = "clang.tar.gz",
