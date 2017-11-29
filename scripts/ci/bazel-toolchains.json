@@ -1,0 +1,20 @@
+[
+  {
+    "configurations": [
+      {"node": "linux-x86_64"},
+      {"node": "ubuntu_16.04-x86_64"}
+    ],
+    "parameters": {
+      "build_opts": [
+        "--verbose_failures"
+      ],
+      "targets": [
+        "//rules:debian8-clang-0.7.0-autoconfig",
+        "//rules:trusty-gcc-0.7.0-autoconfig",
+        "//rules:xenial-gcc-0.7.0-autoconfig"
+      ],
+      "tests": [],
+    },
+  }
+]
+
