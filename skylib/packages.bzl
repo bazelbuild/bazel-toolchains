@@ -11,27 +11,48 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""packages.bzl contains definitions of functions that return packages.
 
-"""Definitions of functions that return packages (as opposed to package_names).
-
-Uses package_names.bzl to resolve packages needed for tools installed.
+Uses package_names.bzl to resolve packages needed for
+tools installed in different containers.
 """
 
-
-# TODO(yiyu): merge this into //rules:packages.bzl
-load(
-    "@container_jessie_package_bundle//file:packages.bzl",
-    jessie_packages = "packages",
-)
 load(
     "@jessie_ca_certs_package_bundle//file:packages.bzl",
     ca_certs_packages = "packages",
+)
+load(
+    "@jessie_package_bundle//file:packages.bzl",
+    jessie_packages="packages",
+)
+load(
+    "@trusty_package_bundle//file:packages.bzl",
+    trusty_packages="packages",
+)
+load(
+    "@xenial_package_bundle//file:packages.bzl",
+    xenial_packages="packages",
 )
 load(
     ":package_names.bzl",
     "tool_names",
     "jessie_tools",
 )
+
+
+def get_jessie_packages(pkg_list):
+  """Common function for getting jessie packages."""
+  return [jessie_packages[p] for p in pkg_list]
+
+
+def get_trusty_packages(pkg_list):
+  """Common function for getting trusty packages."""
+  return [trusty_packages[p] for p in pkg_list]
+
+
+def get_xenial_packages(pkg_list):
+  """Common function for getting xenial packages."""
+  return [xenial_packages[p] for p in pkg_list]
 
 
 def base_layer_packages():
@@ -90,8 +111,3 @@ def java_layer_packages():
     packages.extend(get_jessie_packages(jessie_tools()[tool]))
   packages.append(ca_certs_packages["ca-certificates-java"])
   return depset(packages).to_list()
-
-
-def get_jessie_packages(pkg_list):
-  """Common function for getting jessie packages."""
-  return [jessie_packages[p] for p in pkg_list]

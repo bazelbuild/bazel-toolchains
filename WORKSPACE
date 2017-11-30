@@ -14,14 +14,10 @@
 workspace(name = "bazel_toolchains")
 
 load(
-    "//rules:package_names.bzl",
+    "//skylib:package_names.bzl",
     "jessie_package_names",
     "trusty_package_names",
     "xenial_package_names",
-)
-load(
-    "//container/rules:package_names.bzl",
-    "container_jessie_package_names",
 )
 
 # Use http_archive rule instead of git_repository rule
@@ -176,16 +172,6 @@ dpkg_list(
 dpkg_list(
     name = "jessie_package_bundle",
     packages = jessie_package_names(),
-    sources = [
-        "@debian_jessie//file:Packages.json",
-        "@debian_jessie_backports//file:Packages.json",
-    ],
-)
-
-# TODO(yiyu): merge this with jessie_package_bundle
-dpkg_list(
-    name = "container_jessie_package_bundle",
-    packages = container_jessie_package_names(),
     sources = [
         "@debian_jessie//file:Packages.json",
         "@debian_jessie_backports//file:Packages.json",

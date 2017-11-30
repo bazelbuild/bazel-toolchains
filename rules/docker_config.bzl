@@ -71,13 +71,13 @@ load(
     "@xenial_package_bundle//file:packages.bzl",
     xenial_packages = "packages",
 )
-load("@bazel_toolchains//rules:packages.bzl",
+load("@bazel_toolchains//skylib:packages.bzl",
     "get_jessie_packages",
     "get_trusty_packages",
     "get_xenial_packages",
 )
 load(
-    "@bazel_toolchains//rules:package_names.bzl",
+    "@bazel_toolchains//skylib:package_names.bzl",
     "tool_names",
     "jessie_tools",
     "trusty_tools",

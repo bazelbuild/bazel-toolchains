@@ -17,14 +17,14 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("@distroless//cacerts:cacerts.bzl", "cacerts")
-load("@container_jessie_package_bundle//file:packages.bzl", "packages")
+load("@jessie_package_bundle//file:packages.bzl", "packages")
 load(
     "//container/rules:docker_toolchains.bzl",
     "language_tool_layer",
     "toolchain_container",
 )
 load(
-    "//container/rules:packages.bzl",
+    "//skylib:packages.bzl",
     "base_layer_packages",
     "clang_layer_packages",
     "java_layer_packages",
