@@ -1,8 +1,7 @@
 schemaVersion: "1.0.0"
 commandTests:
 - name: 'path'
-  command: 'sh'
-  args: ['-c', 'echo $PATH']
+  command: ['sh', '-c', 'echo $PATH']
   expectedOutput: ['/usr/local/go/bin:/opt/python3.6/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin']
 fileExistenceTests:
 - name: 'Root'
