@@ -110,4 +110,5 @@ language_tool_layer(
         "/usr/bin/python": "/usr/bin/python2.7",
     },
     tags = ["manual"],
+    tars = ["//third_party/python:tar"],
 )

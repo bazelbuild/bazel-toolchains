@@ -1,0 +1,30 @@
+commandTests:
+- name: 'path'
+  command: 'sh'
+  args: ['-c', 'echo $PATH']
+  expectedOutput: ['/usr/local/go/bin:/opt/python3.6/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin']
+fileExistenceTests:
+- name: 'Root'
+  isDirectory: true
+  path: '/'
+  shouldExist: true
+- name: 'Clang'
+  isDirectory: false
+  path: '/usr/local/bin/clang'
+  shouldExist: true
+- name: 'OpenJDK'
+  isDirectory: true
+  path: '/usr/lib/jvm/java-8-openjdk-amd64'
+  shouldExist: true
+- name: 'Python2'
+  isDirectory: false
+  path: '/usr/bin/python2.7'
+  shouldExist: true
+- name: 'Python3'
+  isDirectory: false
+  path: '/opt/python3.6/bin/python3'
+  shouldExist: true
+- name: 'Golang'
+  isDirectory: false
+  path: '/usr/local/go/bin/go'
+  shouldExist: true

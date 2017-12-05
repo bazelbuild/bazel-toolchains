@@ -35,7 +35,7 @@ steps:
   -  name: "py-build-container"
      args: ['cp', '/tmp/py.tar.gz', 'py.tar.gz']
      id: copy-py
-     dir: '${_DIR}'
+     dir: 'third_party/python'
      waitFor:
      - 'build-py'
 
@@ -64,6 +64,12 @@ steps:
     id: 'fl-container-tag'
     waitFor: # wait for all artifacts to be ready
     - 'fl-container'
+
+# Step: test the image
+  - name: gcr.io/gcp-runtimes/structure_test
+    args: [
+    '--image', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}',
+    '--config', '/workspace/container/debian8-clang-fully-loaded/test.yaml']
 
 # Build the release-container
 images:
