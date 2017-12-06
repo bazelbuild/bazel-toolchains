@@ -108,6 +108,8 @@ language_tool_layer(
     },
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
+        "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
+        "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
     },
     tags = ["manual"],
     tars = ["//third_party/python:tar"],

@@ -15,12 +15,7 @@
 # Pin to the latest l.gcr.io/google/python container
 FROM l.gcr.io/google/python@sha256:49f0264ae8ea6993c03773aa6cc7b7bb14f977d7e67780974375cbd74b376144
 
-# Make proper alias
-WORKDIR /opt/python3.6/bin
-RUN ln -s python3.6 python3
-RUN ln -s pip3.6 pip3
-
 # Tar the python3 interpreter which was compiled from source, see
 # https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
 WORKDIR /
-RUN tar czf /tmp/py.tar.gz /opt/python3.6
+RUN GZIP=-n tar -czf /tmp/py.tar.gz --mtime='1970-01-01' /opt/python3.6

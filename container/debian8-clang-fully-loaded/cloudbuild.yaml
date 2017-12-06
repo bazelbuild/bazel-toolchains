@@ -56,6 +56,7 @@ steps:
     args: ['run' , '//${_DIR}:fl-toolchain']
     id: 'fl-container'
     waitFor:
+    - "copy-py"
     - "builder"
 
 # Step: re-tag the image
