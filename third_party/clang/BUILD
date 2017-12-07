@@ -30,5 +30,5 @@ pkg_tar(
     package_dir = "/usr/local/",
     strip_prefix = ".",
     tags = ["manual"],
-    deps = ["@clang_release//:clang.tar.gz"],
+    deps = ["@clang_release//file"],
 )

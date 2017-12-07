@@ -39,25 +39,12 @@ steps:
      waitFor:
      - 'build-py'
 
-# Step: build a custom container with gcloud, docker and bazel
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-    - 'build'
-    - '--file=Dockerfile.builder'
-    - '--tag=gcloud-bazel-builder'
-    - '.'
-    id: builder
-    dir: '${_DIR}'
-    waitFor:
-    - "-" # wait for nothing - start immediately
-
 # Step: build the fully loaded container using rules_docker
-  - name: 'gcloud-bazel-builder'
+  - name: 'gcr.io/cloud-builders/bazel'
     args: ['run' , '//${_DIR}:fl-toolchain']
     id: 'fl-container'
     waitFor:
     - "copy-py"
-    - "builder"
 
 # Step: re-tag the image
   - name: gcr.io/cloud-builders/docker

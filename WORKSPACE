@@ -207,22 +207,15 @@ dpkg_list(
 )
 
 # Golang
-new_http_archive(
+http_file(
     name = "golang_release",
-    build_file = "third_party/golang/golang.BUILD",
     sha256 = "de874549d9a8d8d8062be05808509c09a88a248e77ec14eb77453530829ac02b",
-    strip_prefix = "go/",
-    type = "tar.gz",
-    url = "https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz",
+    urls = ["https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz"],
 )
 
 # Clang
-load("//container/rules:gsutil.bzl", "gsutil_cp")
-
-gsutil_cp(
+http_file(
     name = "clang_release",
-    file = "clang_r318288.tar.gz",
-    gcs_bucket = "gs://clang-builds/google-debian8",
-    md5 = "+KpE80HVzkkQUO2o87DubA==",
-    target_file = "clang.tar.gz",
+    sha256 = "8b29b525eb928cac53f5a56a9fe63924467deec6eb75844b947c2d59cc20cd5c",
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r318288.tar.gz"],
 )

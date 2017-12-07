@@ -83,7 +83,7 @@ language_tool_layer(
         "PATH": "$PATH:/usr/local/go/bin",
     },
     tags = ["manual"],
-    tars = ["@golang_release//:tar"],
+    tars = ["//third_party/golang:tar"],
 )
 
 language_tool_layer(

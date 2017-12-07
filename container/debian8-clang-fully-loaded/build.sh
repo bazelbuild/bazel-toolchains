@@ -33,7 +33,7 @@ Optional options:
 For example, running:
 $ build.sh -p my-gcp-project -c debian8-clang-fully-loaded -t latest
 will produce docker images:
-    gcr.io/my-gcp-project/debian8-clang-fully-loaded:latest
+    gcr.io/my-gcp-project/debian8-clang-fully-loaded:{latest, clang_revision}
 EOF
 )
   echo "$usage"
@@ -80,7 +80,6 @@ parse_parameters () {
      exit 1
   fi
 }
-
 
 main () {
   parse_parameters $@
