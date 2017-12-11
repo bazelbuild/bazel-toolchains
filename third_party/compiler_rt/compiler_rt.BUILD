@@ -25,13 +25,9 @@ package(default_visibility = ["//visibility:public"])
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 pkg_tar(
-    name = "tar",
-    srcs = glob(["**/*"]),
-    package_dir = "/usr/local/",
+    name = "sanitizers",
+    srcs = glob(["include/sanitizer/*"]),
+    package_dir = "/lib/clang/6.0.0",
     strip_prefix = ".",
     tags = ["manual"],
-    deps = [
-      "@clang_release//file",
-      "@compiler_rt//:sanitizers"
-    ],
 )
