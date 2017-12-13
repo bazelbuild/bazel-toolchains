@@ -65,6 +65,25 @@ container_pull(
     tag = "16.04",
 )
 
+http_archive(
+    name = "debian_docker",
+    sha256 = "4c479f8e4889ae950cd3698721d412ed120285bc3bbee23a545f2d41e0409bc0",
+    strip_prefix = "base-images-docker-9197e457d3fbad9311d521500a1daf5bf436ff4e",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/9197e457d3fbad9311d521500a1daf5bf436ff4e.tar.gz"],
+)
+
+http_file(
+    name = "bazel_gpg",
+    sha256 = "e0e806160454a3e5e308188439525896bf9881f1f2f0b887192428f517da4131",
+    url = "https://bazel.build/bazel-release.pub.gpg",
+)
+
+http_file(
+    name = "launchpad_openjdk_gpg",
+    sha256 = "54b6274820df34a936ccc6f5cb725a9b7bb46075db7faf0ef7e2d86452fa09fd",
+    url = "http://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0xEB9B1D8886F44E2A",
+)
+
 # Use http_archive rule instead of git_repository rule
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(

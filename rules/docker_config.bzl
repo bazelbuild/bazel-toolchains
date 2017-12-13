@@ -15,10 +15,10 @@
 """Rules for generating toolchain configs for a Docker container.
 
 Exposes the docker_autoconfigure rule that does the following:
-- Receive a base container as main input. Base container should have a desired
-  set of toolchains (i.e., a C compiler, C libraries, etc) installed.
-- Create a container from the base container which includes debs packages to
-  run Bazel.
+- Receive a base container as main input. Base container could have a desired
+  set of toolchains (i.e., a C compiler, C libraries, java, python, zip, and
+  other tools) installed.
+- Optionally, install more debian packages in the base container.
 - Extend the container to install sources for a project.
 - Run a bazel command to build one or more remote repos inside the container.
 - Copy toolchain configs produced from the execution of Bazel
@@ -32,13 +32,20 @@ Example:
       base = "@my_image//image:image.tar",
       config_repos = ["local_config_cc", "<some_other_skylark_repo>"],
       git_repo = "https://github.com/some_git_repo",
-      distro = "trusty", # "trusty", "xenial" and "jessie" are supported
-      install_tools = ["bazel"], # list of tools that are necessary to run
-                                 # autoconfig that will be installed in the container
       env = {
           ... Dictionary of env variables to configure Bazel properly
               for the container
       },
+      packages = [
+          "package_1",
+          "package_2=version",
+      ],
+      additional_repos = [
+          "deb http://deb.debian.org/debian jessie-backports main",
+      ],
+      keys = [
+          "@some_gpg//file",
+      ],
   )
 
 To use the rule run:
@@ -55,58 +62,9 @@ load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
-load(
-    "@bazel_package_bundle//file:packages.bzl",
-    bazel_packages = "packages",
-)
-load(
-    "@jessie_package_bundle//file:packages.bzl",
-    jessie_packages = "packages",
-)
-load(
-    "@trusty_package_bundle//file:packages.bzl",
-    trusty_packages = "packages",
-)
-load(
-    "@xenial_package_bundle//file:packages.bzl",
-    xenial_packages = "packages",
-)
-load("@bazel_toolchains//skylib:packages.bzl",
-    "get_jessie_packages",
-    "get_trusty_packages",
-    "get_xenial_packages",
-)
-load(
-    "@bazel_toolchains//skylib:package_names.bzl",
-    "tool_names",
-    "jessie_tools",
-    "trusty_tools",
-    "xenial_tools",
-)
-
-# A couple of lists of tools that are commonly used.
-# Use all_tools if your container has very little other than a base image
-all_tools = [
-    "bazel",
-    "curl",
-    "git",
-    "gcc",
-    "java",
-    "python_dev",
-    "wget",
-    "zip",
-]
-
-# Use default_tools if your container has a C/C++ compiler and little else
-default_tools = [
-    "bazel",
-    "curl",
-    "git",
-    "java",
-    "python_dev",
-    "wget",
-    "zip",
-]
+load("@debian_docker//package_managers:download_pkgs.bzl", "download_pkgs")
+load("@debian_docker//package_managers:install_pkgs.bzl", "install_pkgs")
+load("@debian_docker//package_managers:apt_key.bzl", "add_apt_key")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -115,6 +73,7 @@ _EXTERNAL_FOLDER_PREFIX = "external/"
 
 # Name of the current workspace
 _WORKSPACE_NAME = "bazel_toolchains"
+
 _WORKSPACE_PREFIX = "@" + _WORKSPACE_NAME + "//"
 
 # Default cc project to use if no git_repo is provided.
@@ -129,6 +88,47 @@ tar_filetype = [
     ".tar",
     ".tar.xz",
 ]
+
+def _container_install_pkgs(name, base, packages, additional_repos, keys):
+  """Macro to download and install deb packages in a container.
+
+  The output image with packages installed will have name {name}.tar.
+
+  Args:
+    name: name of this rule. It is also the name of the output image.
+    base: the base layers on top of which to overlay a layer with the
+      desired packages.
+    packages: list of packages to fetch and install in the base image.
+    additional_repos: list of additional debian package repos to use,
+      in sources.list format.
+    keys: label of additional gpg keys to use while downloading packages.
+  """
+
+  # Create an intermediate image which includes additional gpg keys.
+  add_apt_key(
+      name = name + "_with_keys",
+      image = base,
+      keys = keys,
+  )
+
+  # Generate the script to download packages in the container and extract only
+  # the deb packages tarball as the output.
+  download_pkgs(
+      name = name + "_pkgs",
+      additional_repos = additional_repos,
+      image_tar = ":" + name + "_with_keys",
+      packages = packages,
+  )
+
+  # Execute the package installation script in the container and commit the
+  # resulting container locally as a new image named as {name}. The resulting
+  # image is also available as target :{name}.tar.
+  install_pkgs(
+      name = name,
+      image_tar = base,
+      installables_tar = ":" + name + "_pkgs.tar",
+      output_image_name = name,
+  )
 
 def _docker_toolchain_autoconfig_impl(ctx):
   """Implementation for the docker_toolchain_autoconfig rule.
@@ -270,17 +270,18 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
 docker_toolchain_autoconfig_ = rule(
     attrs = _container.image.attrs + {
-        "distro": attr.string(),
         "config_repos": attr.string_list(["local_config_cc"]),
         "use_default_project": attr.bool(default = False),
         "git_repo": attr.string(),
-        "install_tools": attr.string_list(),
         "repo_pkg_tar": attr.label(allow_files = tar_filetype),
         "bazel_version": attr.string(),
         "bazel_rc_version": attr.string(),
         "use_bazel_head": attr.bool(default = False),
         "run_tpl": attr.label(allow_files = True),
         "setup_cmd": attr.string(default = "cd ."),
+        "packages": attr.string_list(),
+        "additional_repos": attr.string_list(),
+        "keys": attr.string_list(),
     },
     executable = True,
     outputs = _container.image.outputs + {
@@ -327,8 +328,6 @@ reserved_attrs = [
 # Attrs expected in the BUILD rule
 required_attrs = [
     "base",
-    "distro",
-    "install_tools",
 ]
 
 def docker_toolchain_autoconfig(**kwargs):
@@ -363,37 +362,9 @@ def docker_toolchain_autoconfig(**kwargs):
     **kwargs:
   Required Args
     name: A unique name for this rule.
-    base: Docker image base - the container with all tools
-        pre-installed for which a configuration will be generated
-    distro: the base distro for the docker container
-        ("jessie", "trusty", "xenial" are supported). If a different distro is used
-        you will need to extend this rule to add the correct packages.
-    install_tools: list of tools to install. The following tools
-        can be installed as part of this rule in the base container:
-          - bazel
-          - curl
-          - gcc
-          - git
-          - java
-          - python_dev
-          - wget
-          - zip
-        All tools are needed for proper execution of this rule, but
-        if the base container already has some of these tools installed you
-        should indicate so. For instance, to install all necessary tools except
-        git, gcc, python_dev and java use:
-          install_tools = ["bazel", "curl", "wget", "zip"]
-        Note: if container has a c/c++ compiler, do not request installation
-        of gcc.
-        Note: if the base container already has a tool installed and
-        installing of the tool is requested, behavior will be undefined
-        (e.g., an overriding package might break some other package that
-        depends on it in unexpected ways).
-        We also defined two macros for lists of tools that are commonly used.
-        Use all_tools if your container has very little other than a base image
-          all_tools = ["bazel", "curl", "git", "gcc", "java", "python_dev", "wget", "zip",]
-        Use default_tools if your container has a C/C++ compiler and little else
-          default_tools = ["bazel", "curl", "git", "java", "python_dev", "wget", "zip",]
+    base: Docker image base - optionally with all tools pre-installed for
+        which a configuration will be generated. Packages can also be installed
+        by listing them in the 'packages' attriute.
   Default Args:
     config_repos: a list of remote repositories. Autoconfig will run targets in
         each of these remote repositories and copy all contents to the mount
@@ -410,6 +381,10 @@ def docker_toolchain_autoconfig(**kwargs):
         to run autoconfigure targets.
     setup_cmd: a customized command that will run as the very first command
         inside the docker container.
+    packages: list of packages to fetch and install in the base image.
+    additional_repos: list of additional debian package repos to use,
+        in sources.list format.
+    keys: list of additional gpg keys to use while downloading packages.
   """
   for reserved in reserved_attrs:
     if reserved in kwargs:
@@ -423,8 +398,13 @@ def docker_toolchain_autoconfig(**kwargs):
   if "use_bazel_head" in kwargs and ("bazel_version" in kwargs or "bazel_rc_version" in kwargs):
     fail ("Only one of use_bazel_head or a combination of bazel_version and" +
           "bazel_rc_version can be set at a time.")
-  if kwargs["distro"] not in ["jessie", "trusty", "xenial"]:
-    fail("Only jessie, trusty and xenial distros are supported")
+
+  packages_is_empty = "packages" not in kwargs or kwargs["packages"] == []
+
+  if packages_is_empty and "additional_repos" in kwargs:
+    fail("'additional_repos' can only be specified when 'packages' is not empty.")
+  if packages_is_empty and "keys" in kwargs:
+    fail("'keys' can only be specified when 'packages' is not empty.")
 
   # If the git_repo was not provided, use the default autoconfig project
   if "git_repo" not in kwargs:
@@ -435,95 +415,29 @@ def docker_toolchain_autoconfig(**kwargs):
       _WORKSPACE_PREFIX + "rules:install_bazel_version.sh"
   ]
 
-  # Set up certificates if git or wget needs to be used
-  if tool_names.git in kwargs["install_tools"] or tool_names.wget in kwargs["install_tools"]:
-    if kwargs["distro"] == "jessie":
-      kwargs["tars"] = [_WORKSPACE_PREFIX + "rules:jessie_cacerts.tar"]
-    elif kwargs["distro"] == "trusty":
-      kwargs["tars"] = [_WORKSPACE_PREFIX + "rules:trusty_cacerts.tar"]
-    elif kwargs["distro"] == "xenial":
-      kwargs["tars"] = [_WORKSPACE_PREFIX + "rules:xenial_cacerts.tar"]
-
-  # Set symlinks and env vars for python / Java if installation was requested.
-  symlinks = {}
-  if tool_names.python_dev in kwargs["install_tools"]:
-    symlinks.update({"/usr/bin/python": "/usr/bin/python2.7"})
-  if tool_names.java in kwargs["install_tools"]:
-    symlinks.update({"/usr/bin/java": "/usr/lib/jvm/java-8-openjdk-amd64/bin/java"})
-  kwargs["symlinks"] = symlinks
-  if tool_names.java in kwargs["install_tools"]:
-    kwargs["env"].update({"JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64"})
-  # Set in "debs" the list with all packages we will install
-  debs = []
-  if kwargs["distro"] == "jessie":
-    debs = autoconf_jessie_packages(kwargs["install_tools"])
-  elif kwargs["distro"] == "trusty":
-    debs = autoconf_trusty_packages(kwargs["install_tools"])
-  elif kwargs["distro"] == "xenial":
-    debs = autoconf_xenial_packages(kwargs["install_tools"])
-  kwargs["debs"] = debs
-
   # The template for the main script to execute for this rule, which produces
   # the toolchain configs
   kwargs["run_tpl"] = _WORKSPACE_PREFIX + "rules:docker_config.sh.tpl"
+
+  # Do not install packags if 'packages' is not specified or is an ampty list.
+  if not packages_is_empty:
+    # "additional_repos" and "keys" are optional for docker_toolchain_autoconfig,
+    # but required for container_install_pkgs". Use empty lists as placeholder.
+    if "additional_repos" not in kwargs:
+      kwargs["additional_repos"] = []
+    if "keys" not in kwargs:
+      kwargs["keys"] = []
+
+    # Install packages in the base image.
+    _container_install_pkgs(
+      name = kwargs["name"] + "_image",
+      base = kwargs["base"],
+      packages = kwargs["packages"],
+      additional_repos = kwargs["additional_repos"],
+      keys = kwargs["keys"],
+    )
+
+    # Use the image with packages installed as the new base for autoconfiguring.
+    kwargs["base"] = ":" + kwargs["name"] + "_image.tar"
+
   docker_toolchain_autoconfig_(**kwargs)
-
-def autoconf_jessie_packages(install_tools):
-  """Return the list of debian packages given the name of tools for Jessie.
-
-  Args:
-    install_tools: a list of tool names.
-
-  Returns:
-    a list of debian packages to install
-  """
-  debs = []
-  for tool in install_tools:
-    if tool in jessie_tools().keys():
-      debs.extend(get_jessie_packages(jessie_tools()[tool]))
-    elif tool == tool_names.bazel:
-      debs.append(bazel_packages["bazel"])
-    else:
-      fail("Installation of %s was requested, but it is not supported for jessie distro" % tool)
-  # Remove duplicates using a depset
-  return depset(debs).to_list()
-
-def autoconf_trusty_packages(install_tools):
-  """Return the list of debian packages given the name of tools for Trusty.
-
-  Args:
-    install_tools: a list of tool names.
-
-  Returns:
-    a list of debian packages to install
-  """
-  debs = []
-  for tool in install_tools:
-    if tool in trusty_tools().keys():
-      debs.extend(get_trusty_packages(trusty_tools()[tool]))
-    elif tool == tool_names.bazel:
-      debs.append(bazel_packages["bazel"])
-    else:
-      fail("Installation of %s was requested, but it is not supported for trusty distro" % tool)
-  # Remove duplicates using a depset
-  return depset(debs).to_list()
-
-def autoconf_xenial_packages(install_tools):
-  """Return the list of debian packages given the name of tools for Xenial.
-
-  Args:
-    install_tools: a list of tool names.
-
-  Returns:
-    a list of debian packages to install
-  """
-  debs = []
-  for tool in install_tools:
-    if tool in xenial_tools().keys():
-      debs.extend(get_xenial_packages(xenial_tools()[tool]))
-    elif tool == tool_names.bazel:
-      debs.append(bazel_packages["bazel"])
-    else:
-      fail("Installation of %s was requested, but it is not supported for xenial distro" % tool)
-  # Remove duplicates using a depset
-  return depset(debs).to_list()

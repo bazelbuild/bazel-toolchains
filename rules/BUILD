@@ -17,26 +17,8 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-load(
-    "@bazel_toolchains//rules:docker_config.bzl",
-    "all_tools",
-    "default_tools",
-    "docker_toolchain_autoconfig",
-)
+load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load("@bazel_toolchains//rules:environments.bzl", "clang_env", "gcc_env")
-load("@distroless//cacerts:cacerts.bzl", "cacerts")
-load(
-    "@jessie_package_bundle//file:packages.bzl",
-    jessie_packages = "packages",
-)
-load(
-    "@trusty_package_bundle//file:packages.bzl",
-    trusty_packages = "packages",
-)
-load(
-    "@xenial_package_bundle//file:packages.bzl",
-    xenial_packages = "packages",
-)
 
 pkg_tar(
     name = "cc-sample-project-tar",
@@ -46,28 +28,30 @@ pkg_tar(
     ],
 )
 
-cacerts(
-    name = "jessie_cacerts",
-    deb = jessie_packages["ca-certificates"],
-)
-
-cacerts(
-    name = "trusty_cacerts",
-    deb = trusty_packages["ca-certificates"],
-)
-
-cacerts(
-    name = "xenial_cacerts",
-    deb = xenial_packages["ca-certificates"],
-)
-
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.7.0-autoconfig",
     base = "@debian8-clang//image",
     bazel_version = "0.7.0",
-    distro = "jessie",
     env = clang_env(),
-    install_tools = default_tools,
+    packages = [
+        "bazel",
+        "ca-certificates-java=20161107'*'",
+        "curl",
+        "git",
+        "openjdk-8-jdk-headless",
+        "openjdk-8-jre-headless",
+        "python-dev",
+        "unzip",
+        "wget",
+        "zip",
+    ],
+    additional_repos = [
+        "deb http://deb.debian.org/debian jessie-backports main",
+        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ],
+    keys = [
+        "@bazel_gpg//file",
+    ],
     tags = ["manual"],
 )
 
@@ -75,9 +59,26 @@ docker_toolchain_autoconfig(
     name = "trusty-gcc-0.7.0-autoconfig",
     base = "@official_trusty//image",
     bazel_version = "0.7.0",
-    distro = "trusty",
     env = gcc_env(),
-    install_tools = all_tools,
+    packages = [
+        "bazel",
+        "curl",
+        "gcc",
+        "git",
+        "openjdk-8-jdk",
+        "python-dev",
+        "unzip",
+        "wget",
+        "zip",
+    ],
+    additional_repos = [
+        "deb [arch=amd64] http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/ trusty main",
+        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ],
+    keys = [
+        "@launchpad_openjdk_gpg//file",
+        "@bazel_gpg//file",
+    ],
     tags = ["manual"],
 )
 
@@ -85,8 +86,23 @@ docker_toolchain_autoconfig(
     name = "xenial-gcc-0.7.0-autoconfig",
     base = "@official_xenial//image",
     bazel_version = "0.7.0",
-    distro = "xenial",
     env = gcc_env(),
-    install_tools = all_tools,
+    packages = [
+        "bazel",
+        "curl",
+        "gcc",
+        "git",
+        "openjdk-8-jdk",
+        "python-dev",
+        "unzip",
+        "wget",
+        "zip",
+    ],
+    additional_repos = [
+        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ],
+    keys = [
+        "@bazel_gpg//file",
+    ],
     tags = ["manual"],
 )
