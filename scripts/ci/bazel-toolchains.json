@@ -1,9 +1,6 @@
 [
   {
-    "configurations": [
-      {"node": "linux-x86_64"},
-      {"node": "ubuntu_16.04-x86_64"}
-    ],
+    "node": "docker",
     "parameters": {
       "build_opts": [
         "--verbose_failures"
@@ -13,8 +10,9 @@
         "//rules:trusty-gcc-0.7.0-autoconfig",
         "//rules:xenial-gcc-0.7.0-autoconfig"
       ],
-      "tests": [],
-    },
+      "tests": [
+        "//test:debian8_clang_autoconfig_test"
+      ],
+    }
   }
 ]
-
