@@ -1,4 +1,4 @@
-FROM gcr.io/cloud-marketplace/google/clang-debian8-fl:a7504a0482e8e7e76c5bddb4160403febe0290f21b1628f14ff90670271fbe5d
+FROM gcr.io/cloud-marketplace/google/clang-debian8@sha256:6bf186b59972019e55acb6a46da721584ae5520218b0516542efdaa1f09caccf
 
 # Install Bazel deps
 RUN apt-get update && yes | apt-get install -y \
