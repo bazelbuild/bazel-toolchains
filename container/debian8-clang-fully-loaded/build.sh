@@ -20,20 +20,27 @@ show_usage () {
   usage=$(cat << EOF
 Usage: build.sh [options]
 
-Builds the fully-loaded container using Google Cloud Container Builder.
+Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
-Required options:
+Required parameters (when build with Google Cloud Container Builder):
     -p|--project            GCP project ID
     -c|--container          docker container name
     -t|--tag                docker tag for the image
 
-Optional options:
+Optional parameters (when build with Google Cloud Container Builder):
     -a|--async              asynchronous execute Cloud Container Builder
 
-For example, running:
-$ build.sh -p my-gcp-project -c debian8-clang-fully-loaded -t latest
-will produce docker images:
+Standalone parameters
+    -l|--local              build container locally
+
+To build with Google Cloud Container Builder:
+$ ./build.sh -p my-gcp-project -c debian8-clang-fully-loaded -t latest
+will produce docker images in Google Container Registry:
     gcr.io/my-gcp-project/debian8-clang-fully-loaded:{latest, clang_revision}
+
+To build locally:
+$ ./build.sh -l
+will produce docker locally as debian8-clang-fully-loaded:latest
 EOF
 )
   echo "$usage"
@@ -66,6 +73,10 @@ parse_parameters () {
         ASYNC=" --async "
         shift
         ;;
+      -l|--local)
+        LOCAL=true
+        shift
+        ;;
       *)
         echo "Unknown argument $1"
         show_usage
@@ -74,8 +85,8 @@ parse_parameters () {
     esac
   done
 
-  if [[ "$PROJECT" == "" || "$CONTAINER" == "" || "$TAG" == "" ]]; then
-     echo "Please specify all required options"
+  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TAG" == "") && "$LOCAL" == "" ]]; then
+     echo "Please specify all required options for building in Google Cloud Container Builder"
      show_usage
      exit 1
   fi
@@ -83,9 +94,6 @@ parse_parameters () {
 
 main () {
   parse_parameters $@
-
-  # Setup GCP project id for the build
-  gcloud config set project ${PROJECT}
 
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
   DIR="container/debian8-clang-fully-loaded"
@@ -95,11 +103,28 @@ main () {
   cd ${PROJECT_ROOT}
   # We need to run clean to make sure we don't mount local build outputs
   bazel clean --async
-  # Start Google Cloud Container Builder
-  gcloud container builds submit . \
-  --config=${PROJECT_ROOT}/container/debian8-clang-fully-loaded/cloudbuild.yaml \
-  --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR} \
-  ${ASYNC}
+
+  if [[ "$LOCAL" = true ]]; then
+    echo "Building container locally."
+    bazel run //container/debian8-clang-fully-loaded:fl-toolchain
+    docker tag bazel/container/debian8-clang-fully-loaded:fl-toolchain debian8-clang-fully-loaded:latest
+    echo -e "\n" \
+      "debian8-clang-fully-loaded:lastest container is now available to use.\n" \
+      "To try it: docker run -it debian8-clang-fully-loaded:latest \n"
+  else
+    echo "Building container in Google Cloud Container Builder."
+    # Setup GCP project id for the build
+    gcloud config set project ${PROJECT}
+    # Ensure all BUILD files under /third_party have the right permission.
+    # This is because in some systems the BUILD files under /third_party (after git clone)
+    # will be with permission 640 and the build will fail in Container Builder.
+    find ${PROJECT_ROOT}/third_party -type f -print0 | xargs -0 chmod 644
+    # Start Google Cloud Container Builder
+    gcloud container builds submit . \
+      --config=${PROJECT_ROOT}/container/debian8-clang-fully-loaded/cloudbuild.yaml \
+      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR} \
+      ${ASYNC}
+  fi
 }
 
 main $@

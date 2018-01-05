@@ -23,17 +23,22 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("//skylib:container_file_export.bzl", "container_file_export")
 
-# py.tar.gz contains python3.6, and was generated from
-# container/debian8-clang-fully-loaded/Dockerfile.py.build
-# This target is broken if executed directly and needs to run from
-# container/debian8-clang-fully-loaded/cloud.yaml as it creates the py.tar.gz file
-# TODO(yiyu): better way for fetching python3.6 release from docker image
 pkg_tar(
     name = "tar",
     srcs = glob(["**/*"]),
     package_dir = "/",
     strip_prefix = ".",
     tags = ["manual"],
-    deps = [":py.tar.gz"],
+    deps = [":python3"],
+)
+
+# Get python3 interpreter from the latest l.gcr.io/google/python container
+# https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
+container_file_export(
+    name = "python3",
+    image = "l.gcr.io/google/python@sha256:49f0264ae8ea6993c03773aa6cc7b7bb14f977d7e67780974375cbd74b376144",
+    src_path = "/opt/python3.6",
+    tags = ["manual"],
 )

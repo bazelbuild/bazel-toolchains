@@ -15,36 +15,12 @@
 timeout: 21600s
 
 steps:
-# Step: build python
-# (we copy compiled python3 interpreter directly from l.gcr.io/google/python)
-# TODO(yiyu): compile python3 from source so we don't need this step. See
-# https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-    - 'build'
-    - '--file=Dockerfile.py.build'
-    - '--tag=py-build-container'
-    - '.'
-    id: build-py
-    dir: '${_DIR}'
-    waitFor:
-    - "-" # wait for nothing - start immediately
-
-# Step: copy python artifact
-# Get the generated python3 artifact from py-build-container
-  -  name: "py-build-container"
-     args: ['cp', '/tmp/py.tar.gz', 'py.tar.gz']
-     id: copy-py
-     dir: 'third_party/python'
-     waitFor:
-     - 'build-py'
-
 # Step: build the fully loaded container using rules_docker
   - name: 'gcr.io/cloud-builders/bazel'
-    args: ['run' , '//${_DIR}:fl-toolchain']
+    args: ['run' , '--verbose_failures', '--spawn_strategy=standalone', '--genrule_strategy=standalone', '//${_DIR}:fl-toolchain']
     id: 'fl-container'
     waitFor:
-    - "copy-py"
+    - "-" # wait for nothing - start immediately
 
 # Step: re-tag the image
   - name: gcr.io/cloud-builders/docker
