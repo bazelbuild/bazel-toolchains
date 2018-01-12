@@ -1,5 +1,5 @@
 # Toolchain related flags to append at the end of your .bazelrc file.
 build:remote --host_javabase=@bazel_toolchains//configs/debian8_clang/0.2.0:jdk8
 build:remote --javabase=@bazel_toolchains//configs/debian8_clang/0.2.0:jdk8
-build:remote --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.2.0/bazel_0.8.0:toolchain
+build:remote --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.2.0/bazel_0.9.0:toolchain
 build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/asci-toolchain/nosla-debian8-clang-fl@sha256:e79e367aab94c6f18a0b39950fe4f160fda07ee01e3c32604c5f8472afa7c1f0" }'
