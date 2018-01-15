@@ -32,6 +32,5 @@ pkg_tar(
     tags = ["manual"],
     deps = [
       "@clang_release//file",
-      "@compiler_rt//:sanitizers"
     ],
 )

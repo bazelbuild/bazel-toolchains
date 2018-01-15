@@ -38,7 +38,7 @@ pkg_tar(
 # https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
 container_file_export(
     name = "python3",
-    image = "l.gcr.io/google/python@sha256:49f0264ae8ea6993c03773aa6cc7b7bb14f977d7e67780974375cbd74b376144",
+    image = "l.gcr.io/google/python@sha256:8c6f86e4cec33f483aaf4155658da424fe37d3e03d3c55a823790eb56a3a8f1a",
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )

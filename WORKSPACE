@@ -216,20 +216,6 @@ http_file(
 # Clang
 http_file(
     name = "clang_release",
-    sha256 = "8b29b525eb928cac53f5a56a9fe63924467deec6eb75844b947c2d59cc20cd5c",
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r318288.tar.gz"],
-)
-
-# LLVM's compiler-rt, used to get sanitizer headers
-# Pinned to CL right after r318288
-# TODO(yiyu): make changing this pin part of the container release process
-# TODO(ngiraldo): remove this once the clang-debian8 gcs package comes with the headers pre-installed
-new_http_archive(
-    name = "compiler_rt",
-    urls = [
-        "https://github.com/llvm-mirror/compiler-rt/archive/0066b15e48e7b40e43051c9241760e7066582a96.tar.gz",
-    ],
-    sha256 = "a31b513c7b81168e88f530ace58bec53766870c22f949d2a91f767a291d682a9",
-    strip_prefix = "compiler-rt-0066b15e48e7b40e43051c9241760e7066582a96",
-    build_file = "//third_party/compiler_rt:compiler_rt.BUILD",
+    sha256 = "61699cafb7d8542f30b39eda9fc43b23f13ecbac1d349976374f7555659c2d2f",
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r319946.tar.gz"],
 )
