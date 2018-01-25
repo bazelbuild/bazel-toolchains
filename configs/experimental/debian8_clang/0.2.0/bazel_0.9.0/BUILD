@@ -38,7 +38,7 @@ filegroup(
 # by lopping off the name of --crosstool_top and searching for
 # the "${CPU}" entry in the toolchains attribute.
 cc_toolchain_suite(
-    name = "asan_experimental_toolchain",
+    name = "msan_experimental_toolchain",
     toolchains = {
         "k8|clang": ":cc-compiler-k8",
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
