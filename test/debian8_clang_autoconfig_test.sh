@@ -25,31 +25,18 @@ set -e
 # Define constants.
 WORKSPACE_ROOT=$(pwd)
 TEST_CONFIGS_DIR=${WORKSPACE_ROOT}/test/testdata/debian8_clang_test_configs
-TEMP_DIR=${WORKSPACE_ROOT}/tmp
 
-# Helper function for always deleting the containers / temporary files on exit
-function cleanup_on_finish {
-  echo -e "\n=== Cleaning up ==="
-  echo "..................."
-  rm -rf ${TEMP_DIR}
-}
-
-trap cleanup_on_finish EXIT # always delete the temporary files
-
-# Create temporary directory.
-mkdir ${TEMP_DIR}
-
-autoconfig_script=${WORKSPACE_ROOT}/rules/debian8-clang-0.7.0-autoconfig
+autoconfig_script=${WORKSPACE_ROOT}/test/debian8-clang-0.7.0-autoconfig
 
 # Change the output location to a tmp location inside the current Bazel workspace.
-sed -i "s|/tmp|${TEMP_DIR}|g" ${autoconfig_script}
+sed -i "s|/tmp|${TEST_TMPDIR}|g" ${autoconfig_script}
 
 # Execute the autoconfig script and unpack toolchain config tarball.
 ${autoconfig_script}
-tar -xf ${TEMP_DIR}/debian8-clang-0.7.0-autoconfig.tar -C ${TEMP_DIR}
+tar -xf ${TEST_TMPDIR}/debian8-clang-0.7.0-autoconfig.tar -C ${TEST_TMPDIR}
 
 # Remove generated files that are not part of toolchain configs
-rm -rf ${TEMP_DIR}/local_config_cc/tools ${TEMP_DIR}/local_config_cc/WORKSPACE
+rm -rf ${TEST_TMPDIR}/local_config_cc/tools ${TEST_TMPDIR}/local_config_cc/WORKSPACE
 
 # Rename BUILD.test to BUILD in the verified configs for easy comparison.
 mv ${TEST_CONFIGS_DIR}/BUILD.test ${TEST_CONFIGS_DIR}/BUILD
@@ -58,7 +45,7 @@ mv ${TEST_CONFIGS_DIR}/BUILD.test ${TEST_CONFIGS_DIR}/BUILD
 set +e
 
 # Compare the two directories.
-diff_result=$(diff -ry --suppress-common-lines ${TEMP_DIR}/local_config_cc ${TEST_CONFIGS_DIR})
+diff_result=$(diff -ry --suppress-common-lines ${TEST_TMPDIR}/local_config_cc ${TEST_CONFIGS_DIR})
 if [[ -n ${diff_result} ]]; then
   echo -e "Toolchain configs are changed.\n${diff_result}\n"
   exit -1

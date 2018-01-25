@@ -89,7 +89,7 @@ tar_filetype = [
     ".tar.xz",
 ]
 
-def _container_install_pkgs(name, base, packages, additional_repos, keys):
+def container_install_pkgs(name, base, packages, additional_repos, keys):
   """Macro to download and install deb packages in a container.
 
   The output image with packages installed will have name {name}.tar.
@@ -429,7 +429,7 @@ def docker_toolchain_autoconfig(**kwargs):
       kwargs["keys"] = []
 
     # Install packages in the base image.
-    _container_install_pkgs(
+    container_install_pkgs(
       name = kwargs["name"] + "_image",
       base = kwargs["base"],
       packages = kwargs["packages"],

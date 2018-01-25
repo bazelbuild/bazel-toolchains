@@ -16,9 +16,9 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["install_bazel_head.sh", "install_bazel_version.sh", "docker_config.sh.tpl"])
+
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
-load("@bazel_toolchains//rules:environments.bzl", "clang_env", "gcc_env")
 
 pkg_tar(
     name = "cc-sample-project-tar",
@@ -26,83 +26,4 @@ pkg_tar(
         "cc-sample-project/BUILD.sample",
         "cc-sample-project/test.cc",
     ],
-)
-
-docker_toolchain_autoconfig(
-    name = "debian8-clang-0.7.0-autoconfig",
-    base = "@debian8-clang//image",
-    bazel_version = "0.7.0",
-    env = clang_env(),
-    packages = [
-        "bazel",
-        "ca-certificates-java=20161107'*'",
-        "curl",
-        "git",
-        "openjdk-8-jdk-headless",
-        "openjdk-8-jre-headless",
-        "python-dev",
-        "unzip",
-        "wget",
-        "zip",
-    ],
-    additional_repos = [
-        "deb http://deb.debian.org/debian jessie-backports main",
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    keys = [
-        "@bazel_gpg//file",
-    ],
-    tags = ["manual"],
-)
-
-docker_toolchain_autoconfig(
-    name = "trusty-gcc-0.7.0-autoconfig",
-    base = "@official_trusty//image",
-    bazel_version = "0.7.0",
-    env = gcc_env(),
-    packages = [
-        "bazel",
-        "curl",
-        "gcc",
-        "git",
-        "openjdk-8-jdk",
-        "python-dev",
-        "unzip",
-        "wget",
-        "zip",
-    ],
-    additional_repos = [
-        "deb [arch=amd64] http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/ trusty main",
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    keys = [
-        "@launchpad_openjdk_gpg//file",
-        "@bazel_gpg//file",
-    ],
-    tags = ["manual"],
-)
-
-docker_toolchain_autoconfig(
-    name = "xenial-gcc-0.7.0-autoconfig",
-    base = "@official_xenial//image",
-    bazel_version = "0.7.0",
-    env = gcc_env(),
-    packages = [
-        "bazel",
-        "curl",
-        "gcc",
-        "git",
-        "openjdk-8-jdk",
-        "python-dev",
-        "unzip",
-        "wget",
-        "zip",
-    ],
-    additional_repos = [
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    keys = [
-        "@bazel_gpg//file",
-    ],
-    tags = ["manual"],
 )

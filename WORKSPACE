@@ -52,6 +52,13 @@ container_pull(
 )
 
 container_pull(
+    name = "official_jessie",
+    registry = "index.docker.io",
+    repository = "library/debian",
+    tag = "jessie",
+)
+
+container_pull(
     name = "official_trusty",
     registry = "index.docker.io",
     repository = "library/ubuntu",

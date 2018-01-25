@@ -6,11 +6,17 @@
         "--verbose_failures"
       ],
       "targets": [
-        "//rules:debian8-clang-0.7.0-autoconfig",
-        "//rules:trusty-gcc-0.7.0-autoconfig",
-        "//rules:xenial-gcc-0.7.0-autoconfig"
       ],
       "tests": [
+        "//test:debian-jessie-autoconfig_test",
+        "//test:debian-jessie-bazel-head-autoconfig_test",
+        "//test:debian-jessie-custom-bazel-version-autoconfig_test",
+        "//test:ubuntu-trusty-autoconfig_test",
+        "//test:ubuntu-trusty-bazel-head-autoconfig_test",
+        "//test:ubuntu-trusty-custom-bazel-version-autoconfig_test",
+        "//test:ubuntu-xenial-autoconfig_test",
+        "//test:ubuntu-xenial-bazel-head-autoconfig_test",
+        "//test:ubuntu-xenial-custom-bazel-version-autoconfig_test",
         "//test:debian8_clang_autoconfig_test"
       ],
     }
