@@ -27,10 +27,11 @@ set -e
 # Define constants.
 WORKSPACE_ROOT=$(pwd)
 # The test name is hardcoded as {docker_toolchain_autoconfig_name}_test.
-NAME=${TEST_BINARY%_test}
-NAME=$(echo $NAME | cut -d / -f 2)
+TARGET=${TEST_BINARY%_test}
+NAME=${TARGET##*/}
+DIR=${TARGET%${NAME}}
 
-autoconfig_script=${WORKSPACE_ROOT}/test/${NAME}
+autoconfig_script=${WORKSPACE_ROOT}/${DIR}${NAME}
 
 # Change the output location to a tmp location inside the current Bazel workspace.
 sed -i "s|/tmp|${TEST_TMPDIR}|g" ${autoconfig_script}

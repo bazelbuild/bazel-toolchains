@@ -155,19 +155,20 @@ def _docker_toolchain_autoconfig_impl(ctx):
     # it using the release version with "bazel build //src:bazel".
     install_bazel_cmd = "/install_bazel_head.sh"
   elif ctx.attr.bazel_version:
-    # If a specific Bazel or Bazel RC version is specified, install that version.
-    # We bootstrap our Bazel binary using "bazel build", and cannot use ./compile.sh as it generates
-    # cc binaries depending on incompatible dynamically linked libraries.
-    bazel_pkg_name = "bazel-" + ctx.attr.bazel_version
-    bazel_url = "https://releases.bazel.build/" + ctx.attr.bazel_version
     if ctx.attr.bazel_rc_version:
-      bazel_pkg_name += "rc" + ctx.attr.bazel_rc_version
-      bazel_url += "/rc" + ctx.attr.bazel_rc_version
+      # If a specific Bazel and Bazel RC version is specified, install that version.
+      # We bootstrap our Bazel binary using "bazel build", and cannot use ./compile.sh as it generates
+      # cc binaries depending on incompatible dynamically linked libraries.
+      bazel_url = ("https://releases.bazel.build/" +
+                  ctx.attr.bazel_version + "/rc" + ctx.attr.bazel_rc_version +
+                  "/bazel-" + ctx.attr.bazel_version + "rc" +
+                  ctx.attr.bazel_rc_version + "-dist.zip")
+      install_bazel_cmd = "/install_bazel_rc_version.sh " + bazel_url
     else:
-      bazel_url += "/release"
-    bazel_pkg_name += "-dist.zip"
-    bazel_url += "/" + bazel_pkg_name
-    install_bazel_cmd = "/install_bazel_version.sh " + bazel_url
+      bazel_url = ("https://github.com/bazelbuild/bazel/releases/download/" +
+                  ctx.attr.bazel_version +
+                  "/bazel-" + ctx.attr.bazel_version + "-installer-linux-x86_64.sh")
+      install_bazel_cmd = "/install_bazel_version.sh " + bazel_url
 
   # Command to recursively convert soft links to hard links in the config_repos
   deref_symlinks_cmd = []
@@ -282,6 +283,7 @@ docker_toolchain_autoconfig_ = rule(
         "packages": attr.string_list(),
         "additional_repos": attr.string_list(),
         "keys": attr.string_list(),
+        "test": attr.bool(default = True),
     },
     executable = True,
     outputs = _container.image.outputs + {
@@ -385,6 +387,12 @@ def docker_toolchain_autoconfig(**kwargs):
     additional_repos: list of additional debian package repos to use,
         in sources.list format.
     keys: list of additional gpg keys to use while downloading packages.
+    test: a boolean which specifies whether a test target for this
+        docker_toolchain_autoconfig will be added.
+        If True, a test target with name {name}_test will be added.
+        The test will build this docker_toolchain_autoconfig target, run the
+        output script, and check the toolchain configs for the c++ auto
+        generated config exist.
   """
   for reserved in reserved_attrs:
     if reserved in kwargs:
@@ -412,7 +420,8 @@ def docker_toolchain_autoconfig(**kwargs):
     kwargs["use_default_project"] = True
   kwargs["files"] = [
       _WORKSPACE_PREFIX + "rules:install_bazel_head.sh",
-      _WORKSPACE_PREFIX + "rules:install_bazel_version.sh"
+      _WORKSPACE_PREFIX + "rules:install_bazel_version.sh",
+      _WORKSPACE_PREFIX + "rules:install_bazel_rc_version.sh"
   ]
 
   # The template for the main script to execute for this rule, which produces
@@ -439,5 +448,18 @@ def docker_toolchain_autoconfig(**kwargs):
 
     # Use the image with packages installed as the new base for autoconfiguring.
     kwargs["base"] = ":" + kwargs["name"] + "_image.tar"
+
+  if "test" in kwargs and kwargs["test"] == True:
+    # Create a test target for the current docker_toolchain_autoconfig target,
+    # which builds this docker_toolchain_autoconfig target, runs the output
+    # script, and checks the toolchain configs for the c++ auto generated config
+    # exist.
+    native.sh_test(
+      name = kwargs["name"] + "_test",
+      size = "medium",
+      timeout = "long",
+      srcs = ["//test:autoconfig_test.sh"],
+      data = [":" + kwargs["name"]],
+    )
 
   docker_toolchain_autoconfig_(**kwargs)

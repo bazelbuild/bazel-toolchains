@@ -13,19 +13,22 @@
 # limitations under the License.
 
 #!/usr/bin/env bash
-# Obtains from given URL the bazel release srcs (in a zip file), and builds
+# Obtains from given URL the bazel release rc srcs (in a zip file), and builds
 # using bazel.
-# Script requires wget
+# Script requires wget and unzip
 # $1: bazel_url
 set -e
-echo === Installing a Bazel release version ===
+echo === Installing a Bazel rc version ===
 
 bazel_url=$1
 
 mkdir -p /src/bazel
 cd /src/bazel/
 # Use -ca-certificate flag to explicitly tell wget where to look for certs.
-wget $bazel_url --no-verbose --ca-certificate=/etc/ssl/certs/ca-certificates.crt -O /tmp/bazel-installer.sh
-chmod +x /tmp/bazel-installer.sh
-/tmp/bazel-installer.sh
-rm -f /tmp/bazel-installer.sh
+wget $bazel_url --no-verbose --ca-certificate=/etc/ssl/certs/ca-certificates.crt -O bazel.zip
+mkdir bazel
+unzip -q bazel.zip -d bazel
+cd bazel
+bazel build //src:bazel --spawn_strategy=standalone
+cp /src/bazel/bazel/bazel-bin/src/bazel /usr/bin/bazel
+rm -rf /src/bazel

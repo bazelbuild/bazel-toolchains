@@ -17,7 +17,7 @@
 # Integration test to validate the docker_toolchain_autoconfig rule.
 #
 # This test validates the docker_toolchain_autoconfig rule. It generates
-# toolchain configs for Bazel 0.7.0 release, and compares newly generated
+# toolchain configs for Bazel 0.9.0 release, and compares newly generated
 # configs with verified ones.
 
 set -e
@@ -26,14 +26,14 @@ set -e
 WORKSPACE_ROOT=$(pwd)
 TEST_CONFIGS_DIR=${WORKSPACE_ROOT}/test/testdata/debian8_clang_test_configs
 
-autoconfig_script=${WORKSPACE_ROOT}/test/debian8-clang-0.7.0-autoconfig
+autoconfig_script=${WORKSPACE_ROOT}/rules/debian8-clang-0.2.0-bazel_0.9.0-autoconfig
 
 # Change the output location to a tmp location inside the current Bazel workspace.
 sed -i "s|/tmp|${TEST_TMPDIR}|g" ${autoconfig_script}
 
 # Execute the autoconfig script and unpack toolchain config tarball.
 ${autoconfig_script}
-tar -xf ${TEST_TMPDIR}/debian8-clang-0.7.0-autoconfig.tar -C ${TEST_TMPDIR}
+tar -xf ${TEST_TMPDIR}/debian8-clang-0.2.0-bazel_0.9.0-autoconfig.tar -C ${TEST_TMPDIR}
 
 # Remove generated files that are not part of toolchain configs
 rm -rf ${TEST_TMPDIR}/local_config_cc/tools ${TEST_TMPDIR}/local_config_cc/WORKSPACE

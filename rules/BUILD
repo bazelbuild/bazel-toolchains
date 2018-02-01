@@ -62,6 +62,7 @@ docker_toolchain_autoconfig(
     packages = DEBIAN8_CLANG_DEFAULT_PACKAGES,
     additional_repos = DEBIAN8_CLANG_DEFAULT_REPOS,
     keys = DEBIAN8_CLANG_DEFAULT_KEYS,
+    test = True,
 )
 
 # Created on 2017.11.28
@@ -74,6 +75,7 @@ docker_toolchain_autoconfig(
     packages = DEBIAN8_CLANG_DEFAULT_PACKAGES,
     additional_repos = DEBIAN8_CLANG_DEFAULT_REPOS,
     keys = DEBIAN8_CLANG_DEFAULT_KEYS,
+    test = True,
 )
 
 # Created on 2018.01.10
@@ -87,4 +89,5 @@ docker_toolchain_autoconfig(
     packages = DEBIAN8_CLANG_DEFAULT_PACKAGES,
     additional_repos = DEBIAN8_CLANG_DEFAULT_REPOS,
     keys = DEBIAN8_CLANG_DEFAULT_KEYS,
+    test = True,
 )
