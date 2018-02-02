@@ -74,9 +74,9 @@ container_pull(
 
 http_archive(
     name = "debian_docker",
-    sha256 = "4c479f8e4889ae950cd3698721d412ed120285bc3bbee23a545f2d41e0409bc0",
-    strip_prefix = "base-images-docker-9197e457d3fbad9311d521500a1daf5bf436ff4e",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/9197e457d3fbad9311d521500a1daf5bf436ff4e.tar.gz"],
+    sha256 = "11692d97f7de2680028e6744f68637e7be0544df081840f1a4bb99f53735aeef",
+    strip_prefix = "base-images-docker-087fe18d18a7ae1b1a8c6dcad932b5190ad3567e",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/087fe18d18a7ae1b1a8c6dcad932b5190ad3567e.tar.gz"],
 )
 
 http_file(
