@@ -1,6 +1,6 @@
 [
   {
-    "node": "docker",
+    "node": "linux-x86_64",
     "parameters": {
       "build_opts": [
         "--verbose_failures"
