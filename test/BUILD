@@ -209,7 +209,7 @@ sh_test(
     timeout = "long",
     srcs = ["debian8_clang_autoconfig_test.sh"],
     data = [
-      "//rules:debian8-clang-0.2.0-bazel_0.9.0-autoconfig",
-      "//test/testdata:debian8_clang_test_configs",
+      "//rules:debian8-clang-0.2.0-bazel_0.10.0-autoconfig",
+      "@bazel_toolchains_test//file",
     ],
 )

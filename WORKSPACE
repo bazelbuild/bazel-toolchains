@@ -245,3 +245,14 @@ http_file(
     sha256 = "61699cafb7d8542f30b39eda9fc43b23f13ecbac1d349976374f7555659c2d2f",
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r319946.tar.gz"],
 )
+
+# Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
+# https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
+http_file(
+    name = "bazel_toolchains_test",
+    urls = [
+      "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
+      "https://github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
+    ],
+    sha256 = "f820436a685db00945df1282df7688187b48aeed91c17686023712afcf453996",
+)

@@ -17,29 +17,33 @@
 # Integration test to validate the docker_toolchain_autoconfig rule.
 #
 # This test validates the docker_toolchain_autoconfig rule. It generates
-# toolchain configs for Bazel 0.9.0 release, and compares newly generated
-# configs with verified ones.
+# toolchain configs for Bazel 0.10.0 release, and compares newly generated
+# configs with published ones.
 
 set -e
 
 # Define constants.
 WORKSPACE_ROOT=$(pwd)
-TEST_CONFIGS_DIR=${WORKSPACE_ROOT}/test/testdata/debian8_clang_test_configs
-
-autoconfig_script=${WORKSPACE_ROOT}/rules/debian8-clang-0.2.0-bazel_0.9.0-autoconfig
+COMMIT=acffd62731b1545c32e1c34e72fd526598ab9a66
+BAZEL_VERSION=0.10.0
+TEST_CONFIGS_DIR=${TEST_TMPDIR}/bazel-toolchains-${COMMIT}/configs/debian8_clang/0.2.0/bazel_${BAZEL_VERSION}/
+AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/rules/debian8-clang-0.2.0-bazel_${BAZEL_VERSION}-autoconfig
 
 # Change the output location to a tmp location inside the current Bazel workspace.
-sed -i "s|/tmp|${TEST_TMPDIR}|g" ${autoconfig_script}
+sed -i "s|/tmp|${TEST_TMPDIR}|g" ${AUTOCONFIG_SCRIPT}
 
 # Execute the autoconfig script and unpack toolchain config tarball.
-${autoconfig_script}
-tar -xf ${TEST_TMPDIR}/debian8-clang-0.2.0-bazel_0.9.0-autoconfig.tar -C ${TEST_TMPDIR}
+${AUTOCONFIG_SCRIPT}
+tar -xf ${TEST_TMPDIR}/debian8-clang-0.2.0-bazel_${BAZEL_VERSION}-autoconfig.tar -C ${TEST_TMPDIR}
 
 # Remove generated files that are not part of toolchain configs
 rm -rf ${TEST_TMPDIR}/local_config_cc/tools ${TEST_TMPDIR}/local_config_cc/WORKSPACE
 
-# Rename BUILD.test to BUILD in the verified configs for easy comparison.
-mv ${TEST_CONFIGS_DIR}/BUILD.test ${TEST_CONFIGS_DIR}/BUILD
+# Unpack the tarball containing published toolchain configs for Bazel 0.10.0 from GitHub.
+tar -xf ${TEST_SRCDIR}/bazel_toolchains_test/file/${COMMIT}.tar.gz -C ${TEST_TMPDIR}
+
+# Remove METADATA file.
+rm ${TEST_CONFIGS_DIR}/METADATA
 
 # Do not exit immediately if diff result is not empty.
 set +e
