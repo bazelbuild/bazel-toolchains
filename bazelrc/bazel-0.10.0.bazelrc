@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This .bazelrc file contains all of the flags required for the toolchain,
+# Remote Build Execution, and the Bazel Build Results UI. Specific flags in
+# your Bazel command allow you to use only the remote build, to use only the
+# results UI, or to use them both together.
+
 # Remote Build Execution requires a strong hash function, such as SHA256.
 startup --host_jvm_args=-Dbazel.DigestFunction=SHA256
 
