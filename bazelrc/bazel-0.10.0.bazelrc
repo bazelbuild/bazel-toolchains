@@ -61,3 +61,22 @@ build:remote --remote_timeout=3600
 # default. You can use --auth_credentials=some_file.json to use a service
 # account credential instead.
 build:remote --auth_enabled=true
+
+# Set flags for uploading to BES in order to view results in the Bazel Build
+# Results UI.
+build:results --bes_backend="buildeventservice.googleapis.com"
+build:results --bes_timeout=10s
+
+# If the upload to BES fails, the build will fail.
+build:results --bes_best_effort=false
+
+# Set flags for uploading to BES without Remote Build Execution.
+build:results-local --bes_backend="buildeventservice.googleapis.com"
+build:results-local --bes_timeout=10s
+build:results-local --bes_best_effort=false
+build:results-local --tls_enabled=true
+build:results-local --auth_enabled=true
+build:results-local --spawn_strategy=local
+build:results-local --experimental_remote_spawn_cache
+build:results-local --remote_cache=remotebuildexecution.googleapis.com
+build:results-local --remote_timeout=3600
