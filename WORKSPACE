@@ -16,8 +16,6 @@ workspace(name = "bazel_toolchains")
 load(
     "//skylib:package_names.bzl",
     "jessie_package_names",
-    "trusty_package_names",
-    "xenial_package_names",
 )
 
 # Use http_archive rule instead of git_repository rule
@@ -95,9 +93,9 @@ http_file(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "distroless",
-    sha256 = "78289f23eb4bcc04b9329e12901a8675f64fda6abb1eda6317ebc6a5e8b229e2",
-    strip_prefix = "distroless-42e71c20ccd63e2573c2cd5df03a12371480549f",
-    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/42e71c20ccd63e2573c2cd5df03a12371480549f.tar.gz"],
+    sha256 = "5401f820fddcc65fae34b5dc025ed522731aa55d89507078e63da85f420a0d63",
+    strip_prefix = "distroless-886114394dfed219001ec3b068b139a3456e49d4",
+    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/886114394dfed219001ec3b068b139a3456e49d4.tar.gz"],
 )
 
 load(
@@ -108,13 +106,6 @@ load(
 )
 
 package_manager_repositories()
-
-dpkg_src(
-    name = "bazel_apt",
-    package_prefix = "http://storage.googleapis.com/bazel-apt/",
-    packages_gz_url = "http://storage.googleapis.com/bazel-apt/dists/stable/jdk1.8/binary-amd64/Packages.gz",
-    sha256 = "c76f1eed46b34cd894eae5d980bddf0ea80a969d5ff12333dd99fdadfc4858d8",
-)
 
 dpkg_src(
     name = "debian_jessie",
@@ -143,58 +134,6 @@ dpkg_src(
     url = "http://snapshot.debian.org/archive",
 )
 
-dpkg_src(
-    name = "ubuntu_trusty",
-    package_prefix = "http://archive.ubuntu.com/ubuntu/",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/trusty/main/binary-amd64/Packages.gz",
-    sha256 = "59fa3195fd15bb2860fad4ff9ed37b249035e05ee327bed18f95dc88a0a41eb9",
-)
-
-dpkg_src(
-    name = "ubuntu_trusty_backports",
-    package_prefix = "http://archive.ubuntu.com/ubuntu/",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/trusty-backports/main/binary-amd64/Packages.gz",
-    sha256 = "8219acccd8c95a002a02b7c16f63d3425eb3dd3958d0a685fa3ba7eb45e4c09c",
-)
-
-dpkg_src(
-    name = "ubuntu_xenial",
-    package_prefix = "http://archive.ubuntu.com/ubuntu/",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial/main/binary-amd64/by-hash/SHA256/8d6ab57abf517d7712e4e4d23d762485af49f8140a83b221ea7282f82a51c795",
-    sha256 = "8d6ab57abf517d7712e4e4d23d762485af49f8140a83b221ea7282f82a51c795",
-)
-
-dpkg_src(
-    name = "ubuntu_xenial_backports",
-    package_prefix = "http://archive.ubuntu.com/ubuntu/",
-    packages_gz_url = "http://archive.ubuntu.com/ubuntu/dists/xenial-backports/main/binary-amd64/by-hash/SHA256/db5c10f8771cc9e623109f1f71b2d78bc55c0909e76dadc341d241ba3abdef10",
-    sha256 = "db5c10f8771cc9e623109f1f71b2d78bc55c0909e76dadc341d241ba3abdef10",
-)
-
-dpkg_src(
-    name = "ubuntu_trusty_java",
-    package_prefix = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/",
-    packages_gz_url = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/dists/trusty/main/binary-amd64/Packages.gz",
-    sha256 = "59337826f066721b5d5247e88ef22a0970e0e5dd5a3919fe4f5629777cf68c15",
-)
-
-dpkg_src(
-    name = "ubuntu_xenial_java",
-    package_prefix = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/",
-    packages_gz_url = "http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/dists/xenial/main/binary-amd64/Packages.gz",
-    sha256 = "3d1898fdfa48fda1d8982759bd6765090fefc2153d5f52108004bffb117d2a42",
-)
-
-dpkg_list(
-    name = "bazel_package_bundle",
-    packages = [
-        "bazel",
-    ],
-    sources = [
-        "@bazel_apt//file:Packages.json",
-    ],
-)
-
 dpkg_list(
     name = "jessie_package_bundle",
     packages = jessie_package_names(),
@@ -209,26 +148,6 @@ dpkg_list(
     packages = ["ca-certificates-java"],
     sources = [
         "@debian_jessie_ca_certs//file:Packages.json",
-    ],
-)
-
-dpkg_list(
-    name = "trusty_package_bundle",
-    packages = trusty_package_names(),
-    sources = [
-        "@ubuntu_trusty//file:Packages.json",
-        "@ubuntu_trusty_backports//file:Packages.json",
-        "@ubuntu_trusty_java//file:Packages.json",
-    ],
-)
-
-dpkg_list(
-    name = "xenial_package_bundle",
-    packages = xenial_package_names(),
-    sources = [
-        "@ubuntu_xenial//file:Packages.json",
-        "@ubuntu_xenial_backports//file:Packages.json",
-        "@ubuntu_xenial_java//file:Packages.json",
     ],
 )
 

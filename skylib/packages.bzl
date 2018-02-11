@@ -23,15 +23,7 @@ load(
 )
 load(
     "@jessie_package_bundle//file:packages.bzl",
-    jessie_packages="packages",
-)
-load(
-    "@trusty_package_bundle//file:packages.bzl",
-    trusty_packages="packages",
-)
-load(
-    "@xenial_package_bundle//file:packages.bzl",
-    xenial_packages="packages",
+    jessie_packages = "packages",
 )
 load(
     ":package_names.bzl",
@@ -39,21 +31,9 @@ load(
     "jessie_tools",
 )
 
-
 def get_jessie_packages(pkg_list):
   """Common function for getting jessie packages."""
   return [jessie_packages[p] for p in pkg_list]
-
-
-def get_trusty_packages(pkg_list):
-  """Common function for getting trusty packages."""
-  return [trusty_packages[p] for p in pkg_list]
-
-
-def get_xenial_packages(pkg_list):
-  """Common function for getting xenial packages."""
-  return [xenial_packages[p] for p in pkg_list]
-
 
 def base_layer_packages():
   """Base packages for fully loaded toolchain."""
@@ -72,7 +52,6 @@ def base_layer_packages():
     packages.extend(get_jessie_packages(jessie_tools()[tool]))
   return depset(packages).to_list()
 
-
 def clang_layer_packages():
   """Packages for the clang layer."""
   clang_tools = [
@@ -83,7 +62,6 @@ def clang_layer_packages():
   for tool in clang_tools:
     packages.extend(get_jessie_packages(jessie_tools()[tool]))
   return depset(packages).to_list()
-
 
 def python_layer_packages():
   """Packages for the python layer."""
@@ -99,7 +77,6 @@ def python_layer_packages():
   for tool in python_tools:
     packages.extend(get_jessie_packages(jessie_tools()[tool]))
   return depset(packages).to_list()
-
 
 def java_layer_packages():
   """Packages for the java layer."""
