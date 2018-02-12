@@ -179,7 +179,7 @@ def container_install_pkgs(name, base, packages, additional_repos, keys):
   download_pkgs(
       name = name + "_pkgs",
       additional_repos = additional_repos,
-      image_tar = ":" + name + "_with_keys",
+      image_tar = ":" + name + "_with_keys.tar",
       packages = packages,
   )
 
@@ -301,7 +301,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
                        (project_repo_dir, package_name, repo_pkg_tar, project_repo_dir))
     remove_repo_cmd = ("rm -drf ./%s" % project_repo_dir)
 
-  result = _container.image.implementation(ctx, cmd=docker_cmd, output=ctx.outputs.load_image)
+  result = _container.image.implementation(ctx, cmd=docker_cmd, output_executable=ctx.outputs.load_image)
 
   # By default we copy the produced tar file to /tmp/
   output_location = "/tmp/" + ctx.attr.name + ".tar"
@@ -521,7 +521,7 @@ def docker_toolchain_autoconfig(**kwargs):
       name = kwargs["name"] + "_test",
       size = "medium",
       timeout = "long",
-      srcs = ["//test:autoconfig_test.sh"],
+      srcs = ["//test/configs:autoconfig_test.sh"],
       data = [":" + kwargs["name"]],
     )
 

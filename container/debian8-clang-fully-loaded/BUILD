@@ -16,26 +16,13 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("@distroless//cacerts:cacerts.bzl", "cacerts")
-load("@jessie_package_bundle//file:packages.bzl", "packages")
 load(
     "//container/rules:docker_toolchains.bzl",
     "language_tool_layer",
     "toolchain_container",
-)
-load(
-    "//skylib:packages.bzl",
-    "base_layer_packages",
-    "clang_layer_packages",
-    "java_layer_packages",
-    "python_layer_packages",
+    "cleanup_commands",
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
-
-cacerts(
-    name = "cacerts",
-    deb = packages["ca-certificates"],
-)
 
 toolchain_container(
     name = "fl-toolchain",
@@ -52,29 +39,36 @@ toolchain_container(
         "java-ltl",
         "python-ltl",
     ],
-    tags = ["manual"],
 )
 
 language_tool_layer(
     name = "base-ltl",
     base = "@debian8//image",
-    debs = base_layer_packages(),
-    tags = ["manual"],
-    tars = [
-        ":cacerts.tar",
+    packages = [
+        "binutils",
+        "ca-certificates",
+        "curl",
+        "ed",
+        "file",
+        "git",
+        "openssh-client",
+        "wget",
+        "zip",
+        "unzip",
     ],
 )
 
 language_tool_layer(
     name = "clang-ltl",
     base = "@debian8//image",
-    debs = clang_layer_packages(),
     env = {
         "CC": "/usr/local/bin/clang",
         "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
     },
-    tags = ["manual"],
     tars = ["//third_party/clang:tar"],
+    packages = [
+        "libstdc++-4.9-dev",
+    ],
 )
 
 language_tool_layer(
@@ -84,27 +78,32 @@ language_tool_layer(
         "GOPATH": "/go",
         "PATH": "$PATH:/usr/local/go/bin",
     },
-    tags = ["manual"],
     tars = ["//third_party/golang:tar"],
 )
 
 language_tool_layer(
     name = "java-ltl",
     base = "@debian8//image",
-    debs = java_layer_packages(),
     env = {
         "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64",
     },
     symlinks = {
         "/usr/bin/java": "/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java",
     },
-    tags = ["manual"],
+    packages = [
+        "openjdk-8-jdk-headless",
+        "openjdk-8-jre-headless",
+        "ca-certificates-java=20161107'*'",
+    ],
+    additional_repos = [
+        "deb http://deb.debian.org/debian jessie-backports main",
+    ],
+    installation_cleanup_commands = cleanup_commands()["java"],
 )
 
 language_tool_layer(
     name = "python-ltl",
     base = "@debian8//image",
-    debs = python_layer_packages(),
     env = {
         "PATH": "$PATH:/opt/python3.6/bin",
     },
@@ -113,8 +112,16 @@ language_tool_layer(
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
     },
-    tags = ["manual"],
     tars = ["//third_party/python:tar"],
+    packages = [
+        "python-dev",
+        "python-numpy",
+        "python-pip",
+        "python3-dev",
+        "python3-numpy",
+        "python3-pip",
+    ],
+    installation_cleanup_commands = cleanup_commands()["python"],
 )
 
 container_test(

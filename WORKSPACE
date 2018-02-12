@@ -22,9 +22,9 @@ load(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "d2e6408b8f8b03ad1f2172acadf979204dedd0423c5194a82a1301cc6d1c224b",
-    strip_prefix = "rules_docker-17f2587dc58642cd494b9d56890e6210f406380d",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/17f2587dc58642cd494b9d56890e6210f406380d.tar.gz"],
+    sha256 = "3af41275396fba9fcbb88741d946ac37e51c48888cbdaba2a58a2e75a492da91",
+    strip_prefix = "rules_docker-4d8ec6570a5313fb0128e2354f2bc4323685282a",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/4d8ec6570a5313fb0128e2354f2bc4323685282a.tar.gz"],
 )
 
 load(
@@ -78,9 +78,9 @@ go_register_toolchains()
 
 http_archive(
     name = "debian_docker",
-    sha256 = "15068de8576474c1852f48f8bedc547247d121266eae537b033d9864669b1294",
-    strip_prefix = "base-images-docker-9a938f030b6eb1068ed9842bc43e2ceb601fb753",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/9a938f030b6eb1068ed9842bc43e2ceb601fb753.tar.gz"],
+    sha256 = "36a80b159ce0e1095dd0af662255318fcf1d47190cd132d16eb829cae7a211d5",
+    strip_prefix = "base-images-docker-33624db0aaa8bc98192a6ba126afa6296b9ce952",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/33624db0aaa8bc98192a6ba126afa6296b9ce952.tar.gz"],
 )
 
 http_file(
@@ -93,9 +93,9 @@ http_file(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "distroless",
-    sha256 = "5401f820fddcc65fae34b5dc025ed522731aa55d89507078e63da85f420a0d63",
-    strip_prefix = "distroless-886114394dfed219001ec3b068b139a3456e49d4",
-    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/886114394dfed219001ec3b068b139a3456e49d4.tar.gz"],
+    sha256 = "44c5d3370df6983ef53cfc2347447c6595fea2d1951a1645660baf67657b8e23",
+    strip_prefix = "distroless-94b5126dbe06c2cb4dc74f7c9bfe6394b8e6e44c",
+    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/94b5126dbe06c2cb4dc74f7c9bfe6394b8e6e44c.tar.gz"],
 )
 
 load(

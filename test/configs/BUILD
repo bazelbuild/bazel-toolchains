@@ -66,7 +66,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "debian-jessie-custom-bazel-version-autoconfig",
     base = ":jessie-with-pkgs.tar",
-    bazel_version = "0.9.0",
+    bazel_version = "0.11.0",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -125,7 +125,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-version-autoconfig",
     base = ":xenial-with-pkgs.tar",
-    bazel_version = "0.9.0",
+    bazel_version = "0.11.0",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
