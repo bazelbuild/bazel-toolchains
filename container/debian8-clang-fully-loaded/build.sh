@@ -26,6 +26,7 @@ Required parameters (when build with Google Cloud Container Builder):
     -p|--project            GCP project ID
     -c|--container          docker container name
     -t|--tag                docker tag for the image
+    -b|--bucket             GCS bucket to store the tarball of debian packages
 
 Optional parameters (when build with Google Cloud Container Builder):
     -a|--async              asynchronous execute Cloud Container Builder
@@ -34,9 +35,11 @@ Standalone parameters
     -l|--local              build container locally
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -c debian8-clang-fully-loaded -t latest
+$ ./build.sh -p my-gcp-project -c debian8-clang-fully-loaded -t latest -b my_bucket
 will produce docker images in Google Container Registry:
     gcr.io/my-gcp-project/debian8-clang-fully-loaded:{latest, clang_revision}
+and the debian packages installed will be packed as a tarball and stored in
+gs://my_bucket for future reference.
 
 To build locally:
 $ ./build.sh -l
@@ -69,6 +72,11 @@ parse_parameters () {
         TAG=$1
         shift
         ;;
+      -b|--bucket)
+        shift
+        BUCKET=$1
+        shift
+        ;;
       -a|--async)
         ASYNC=" --async "
         shift
@@ -85,7 +93,7 @@ parse_parameters () {
     esac
   done
 
-  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TAG" == "") && "$LOCAL" == "" ]]; then
+  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TAG" == "" || "$BUCKET" == "" ) && "$LOCAL" == "" ]]; then
      echo "Please specify all required options for building in Google Cloud Container Builder"
      show_usage
      exit 1
@@ -125,7 +133,7 @@ main () {
     # Start Google Cloud Container Builder
     gcloud container builds submit . \
       --config=${PROJECT_ROOT}/container/debian8-clang-fully-loaded/cloudbuild.yaml \
-      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR} \
+      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
       ${ASYNC}
   fi
 }
