@@ -107,6 +107,9 @@ main () {
   if [[ "$LOCAL" = true ]]; then
     echo "Building container locally."
     bazel run //container/debian8-clang-fully-loaded:fl-toolchain
+    echo "Testing container locally."
+    bazel test //container/debian8-clang-fully-loaded:fl-toolchain-test
+    echo "Tagging container."
     docker tag bazel/container/debian8-clang-fully-loaded:fl-toolchain debian8-clang-fully-loaded:latest
     echo -e "\n" \
       "debian8-clang-fully-loaded:lastest container is now available to use.\n" \

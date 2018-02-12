@@ -25,7 +25,10 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 pkg_tar(
     name = "tar",
-    srcs = glob(["**/*"]),
+    srcs = glob(
+        ["**/*"],
+        exclude = ["**/BUILD"],
+    ),
     package_dir = "/usr/local/",
     strip_prefix = ".",
     tags = ["manual"],

@@ -30,6 +30,7 @@ load(
     "java_layer_packages",
     "python_layer_packages",
 )
+load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
 cacerts(
     name = "cacerts",
@@ -113,4 +114,10 @@ language_tool_layer(
     },
     tags = ["manual"],
     tars = ["//third_party/python:tar"],
+)
+
+container_test(
+    name = "fl-toolchain-test",
+    configs = ["test.yaml"],
+    image = ":fl-toolchain",
 )

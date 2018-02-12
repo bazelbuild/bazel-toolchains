@@ -27,7 +27,10 @@ load("//skylib:container_file_export.bzl", "container_file_export")
 
 pkg_tar(
     name = "tar",
-    srcs = glob(["**/*"]),
+    srcs = glob(
+        ["**/*"],
+        exclude = ["**/BUILD"],
+    ),
     package_dir = "/",
     strip_prefix = ".",
     tags = ["manual"],
@@ -38,7 +41,7 @@ pkg_tar(
 # https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
 container_file_export(
     name = "python3",
-    image = "l.gcr.io/google/python@sha256:8c6f86e4cec33f483aaf4155658da424fe37d3e03d3c55a823790eb56a3a8f1a",
+    image = "l.gcr.io/google/python@sha256:de9ab4346c65a611b1721aeae0633d897f56861a0cda0b40bc032771007ac914",
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )

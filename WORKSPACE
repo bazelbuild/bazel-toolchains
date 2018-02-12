@@ -22,9 +22,9 @@ load(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "6329b426670284c4be52969f3f0cf21431ad5012757b6e58c8e0e7014e6e6bdc",
-    strip_prefix = "rules_docker-119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/119bc3f0a7871d6f25f4d4a2705b9cb19756f9c4.tar.gz"],
+    sha256 = "bc2182a51e19bf1fe5c3c33636b3e2827fac7be34af07690f9d612ca9bf31c3b",
+    strip_prefix = "rules_docker-4d49182a85c745065e621c145238c5e9420ed91b",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/4d49182a85c745065e621c145238c5e9420ed91b.tar.gz"],
 )
 
 load(
@@ -37,14 +37,14 @@ container_repositories()
 
 container_pull(
     name = "debian8",
-    digest = "sha256:527a326166d399fd2eb12df3fe1186a925ad98ea27857a67914536bfcae0e084",
+    digest = "sha256:412ef4d53215ff4a95d275ad48fe5196cb51f4f96b99c05058054b3bdf9443c1",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/debian8",
 )
 
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:e57978199c9eb156bd7f63773387f3a238adf61acd71c4942ad91da50b4f241f",
+    digest = "sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/clang-debian8",
 )
@@ -78,6 +78,19 @@ container_pull(
     repository = "library/ubuntu",
     tag = "16.04",
 )
+
+# io_bazel_rules_go is the dependency of container_test rules.
+http_archive(
+    name = "io_bazel_rules_go",
+    sha256 = "4d8d6244320dd751590f9100cf39fd7a4b75cd901e1f3ffdfd6f048328883695",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.9.0/rules_go-0.9.0.tar.gz",
+)
+
+load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+
+go_rules_dependencies()
+
+go_register_toolchains()
 
 http_archive(
     name = "debian_docker",
@@ -120,8 +133,8 @@ dpkg_src(
     name = "debian_jessie",
     arch = "amd64",
     distro = "jessie",
-    sha256 = "142cceae78a1343e66a0d27f1b142c406243d7940f626972c2c39ef71499ce61",
-    snapshot = "20170821T035341Z",
+    sha256 = "20720c9367e9454dee3d173e4d3fd85ab5530292f4ec6654feb5a810b6bb37ce",
+    snapshot = "20180130T043019Z",
     url = "http://snapshot.debian.org/archive",
 )
 
@@ -129,8 +142,8 @@ dpkg_src(
     name = "debian_jessie_backports",
     arch = "amd64",
     distro = "jessie-backports",
-    sha256 = "eba769f0a0bcaffbb82a8b61d4a9c8a0a3299d5111a68daeaf7e50cc0f76e0ab",
-    snapshot = "20170821T035341Z",
+    sha256 = "5858e520b7d7fe99bf2bd42864b5084bf86db9044b6fe4bdd98771d1ec7cc2f9",
+    snapshot = "20180130T043019Z",
     url = "http://snapshot.debian.org/archive",
 )
 
@@ -163,24 +176,24 @@ dpkg_list(
 # Golang
 http_file(
     name = "golang_release",
-    sha256 = "de874549d9a8d8d8062be05808509c09a88a248e77ec14eb77453530829ac02b",
-    urls = ["https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz"],
+    sha256 = "15b0937615809f87321a457bb1265f946f9f6e736c563d6c5e0bd2c22e44f779",
+    urls = ["https://storage.googleapis.com/golang/go1.9.4.linux-amd64.tar.gz"],
 )
 
 # Clang
 http_file(
     name = "clang_release",
-    sha256 = "61699cafb7d8542f30b39eda9fc43b23f13ecbac1d349976374f7555659c2d2f",
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r319946.tar.gz"],
+    sha256 = "2b002d1c6ede1d7627899e97a5da8a3fb81dd7cd3043b3594e4de67397b22d85",
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r322167.tar.gz"],
 )
 
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
 http_file(
     name = "bazel_toolchains_test",
-    urls = [
-      "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
-      "https://github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
-    ],
     sha256 = "f820436a685db00945df1282df7688187b48aeed91c17686023712afcf453996",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
+    ],
 )
