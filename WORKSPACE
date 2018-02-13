@@ -49,6 +49,15 @@ container_pull(
     repository = "cloud-marketplace/google/clang-debian8",
 )
 
+# Created for //test:debian8_clang_autoconfig_test.
+# Do not modify the container sha.
+container_pull(
+    name = "debian8-clang-test",
+    digest = "sha256:e57978199c9eb156bd7f63773387f3a238adf61acd71c4942ad91da50b4f241f",
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/clang-debian8",
+)
+
 container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
