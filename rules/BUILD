@@ -109,3 +109,17 @@ docker_toolchain_autoconfig(
     tags = ["manual"],
     test = True,
 )
+
+# Created on 2018.02.13
+# Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
+docker_toolchain_autoconfig(
+    name = "debian8-clang-0.3.0-bazel_0.10.0-autoconfig",
+    additional_repos = DEBIAN8_CLANG_DEFAULT_REPOS,
+    base = "@debian8-clang//image",
+    bazel_version = "0.10.0",
+    env = clang_env(),
+    keys = DEBIAN8_CLANG_DEFAULT_KEYS,
+    packages = DEBIAN8_CLANG_DEFAULT_PACKAGES,
+    tags = ["manual"],
+    test = True,
+)
