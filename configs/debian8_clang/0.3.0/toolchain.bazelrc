@@ -2,4 +2,4 @@
 build:remote --host_javabase=@bazel_toolchains//configs/debian8_clang/0.3.0:jdk8
 build:remote --javabase=@bazel_toolchains//configs/debian8_clang/0.3.0:jdk8
 build:remote --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.3.0/bazel_0.10.0:toolchain
-build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/asci-toolchain/nosla-debian8-clang-fl@sha256:b2d946c1ddc20af250fe85cf98bd648ac5519131659f7c36e64184b433175a33" }'
+build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://launcher.gcr.io/google/rbe-debian8@sha256:b2d946c1ddc20af250fe85cf98bd648ac5519131659f7c36e64184b433175a33" }'
