@@ -460,6 +460,7 @@ def docker_toolchain_autoconfig(**kwargs):
       timeout = "long",
       srcs = ["//test:autoconfig_test.sh"],
       data = [":" + kwargs["name"]],
+      tags = ["manual"],
     )
 
   docker_toolchain_autoconfig_(**kwargs)

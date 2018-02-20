@@ -203,43 +203,13 @@ docker_toolchain_autoconfig(
     test = True,
 )
 
-# Created for test. Pin to use the following container:
-# gcr.io/cloud-marketplace/google/clang-debian8@sha256:e57978199c9eb156bd7f63773387f3a238adf61acd71c4942ad91da50b4f241f
-docker_toolchain_autoconfig(
-    name = "debian8-clang-0.2.0-bazel_0.10.0-autoconfig-for-test",
-    additional_repos = [
-        "deb http://deb.debian.org/debian jessie-backports main",
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    base = "@debian8-clang-test//image",
-    bazel_version = "0.10.0",
-    env = clang_env(),
-    keys = [
-        "@bazel_gpg//file",
-    ],
-    packages = [
-        "bazel",
-        "ca-certificates-java=20161107'*'",
-        "curl",
-        "git",
-        "openjdk-8-jdk-headless",
-        "openjdk-8-jre-headless",
-        "python-dev",
-        "unzip",
-        "wget",
-        "zip",
-    ],
-    tags = ["manual"],
-    test = True,
-)
-
 sh_test(
     name = "debian8_clang_autoconfig_test",
     size = "medium",
     timeout = "long",
     srcs = ["debian8_clang_autoconfig_test.sh"],
     data = [
-      "//test:debian8-clang-0.2.0-bazel_0.10.0-autoconfig-for-test",
+      "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig",
       "@bazel_toolchains_test//file",
     ],
 )

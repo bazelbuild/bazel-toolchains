@@ -49,15 +49,6 @@ container_pull(
     repository = "cloud-marketplace/google/clang-debian8",
 )
 
-# Created for //test:debian8_clang_autoconfig_test.
-# Do not modify the container sha.
-container_pull(
-    name = "debian8-clang-test",
-    digest = "sha256:e57978199c9eb156bd7f63773387f3a238adf61acd71c4942ad91da50b4f241f",
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/clang-debian8",
-)
-
 container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
@@ -191,9 +182,9 @@ http_file(
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
 http_file(
     name = "bazel_toolchains_test",
-    sha256 = "f820436a685db00945df1282df7688187b48aeed91c17686023712afcf453996",
+    sha256 = "699b55a6916c687f4b7dc092dbbf5f64672cde0dc965f79717735ec4e5416556",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
-        "https://github.com/bazelbuild/bazel-toolchains/archive/acffd62731b1545c32e1c34e72fd526598ab9a66.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
