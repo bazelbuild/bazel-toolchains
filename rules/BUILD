@@ -66,7 +66,7 @@ docker_toolchain_autoconfig(
     keys = DEBIAN8_CLANG_DEFAULT_KEYS,
     packages = DEBIAN8_CLANG_DEFAULT_PACKAGES,
     tags = ["manual"],
-    test = True,
+    test = False,
 )
 
 # Created on 2017.11.28
@@ -79,7 +79,7 @@ docker_toolchain_autoconfig(
     keys = DEBIAN8_CLANG_DEFAULT_KEYS,
     packages = DEBIAN8_CLANG_DEFAULT_PACKAGES,
     tags = ["manual"],
-    test = True,
+    test = False,
 )
 
 # Created on 2018.01.10
@@ -107,7 +107,7 @@ docker_toolchain_autoconfig(
     keys = DEBIAN8_CLANG_DEFAULT_KEYS,
     packages = DEBIAN8_CLANG_DEFAULT_PACKAGES,
     tags = ["manual"],
-    test = True,
+    test = False,
 )
 
 # Created on 2018.02.13

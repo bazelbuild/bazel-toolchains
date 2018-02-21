@@ -84,67 +84,6 @@ docker_toolchain_autoconfig(
 )
 
 container_install_pkgs(
-    name = "trusty-with-pkgs",
-    base = "@official_trusty//image",
-    packages = [
-        "bazel",
-        "curl",
-        "gcc",
-        "git",
-        "openjdk-8-jdk",
-        "python-dev",
-        "unzip",
-        "wget",
-        "zip",
-    ],
-    additional_repos = [
-        "deb [arch=amd64] http://ppa.launchpad.net/openjdk-r/ppa/ubuntu/ trusty main",
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    keys = [
-        "@launchpad_openjdk_gpg//file",
-        "@bazel_gpg//file",
-    ],
-)
-
-docker_toolchain_autoconfig(
-    name = "ubuntu-trusty-autoconfig",
-    base = ":trusty-with-pkgs.tar",
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-)
-
-docker_toolchain_autoconfig(
-    name = "ubuntu-trusty-bazel-head-autoconfig",
-    base = ":trusty-with-pkgs.tar",
-    env = gcc_env(),
-    tags = ["manual"],
-    use_bazel_head = True,
-    test = True,
-)
-
-docker_toolchain_autoconfig(
-    name = "ubuntu-trusty-custom-bazel-version-autoconfig",
-    base = ":trusty-with-pkgs.tar",
-    bazel_version = "0.9.0",
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-)
-
-# Note that we only support Bazel rc versions at 0.10.0 or above.
-docker_toolchain_autoconfig(
-    name = "ubuntu-trusty-custom-bazel-rc-version-autoconfig",
-    base = ":trusty-with-pkgs.tar",
-    bazel_version = "0.11.0",
-    bazel_rc_version = "1",
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-)
-
-container_install_pkgs(
     name = "xenial-with-pkgs",
     base = "@official_xenial//image",
     packages = [
