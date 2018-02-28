@@ -76,7 +76,7 @@ def _toolchain_container_impl(ctx):
   symlinks = {}
   # TODO(ngiraldo): we rewrite env and symlinks if there are conficts,
   # warn the user of conflicts or error out.
-  for layer in ctx.attr.layers:
+  for layer in ctx.attr.language_layers:
     debs.extend(layer.debs)
     tars.extend(layer.tars)
     files.extend(layer.input_files)
@@ -92,7 +92,7 @@ def _toolchain_container_impl(ctx):
 
 toolchain_container_ = rule(
     attrs = _container.image.attrs + {
-        "layers": attr.label_list(),
+        "language_layers": attr.label_list(),
     },
     executable = True,
     outputs = _container.image.outputs,
