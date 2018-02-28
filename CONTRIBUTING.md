@@ -1,6 +1,6 @@
 Want to contribute? Great! First, read this page (including the small print at
 the end). Also note that we do not accept contributions to the published
-toolchain artifacts (contents under https://github.com/bazelbuild/bazel-toolchains/configs/
+toolchain configs (contents under https://github.com/bazelbuild/bazel-toolchains/configs/
 folder).
 
 ### Before you contribute
