@@ -13,9 +13,42 @@ commandTests:
 - name: 'gopath-envvar'
   command: ['sh', '-c', 'echo $GOPATH']
   expectedOutput: ['/go']
+- name: 'clang-version'
+  command: ['bash', '-c', 'clang --version']
+  expectedOutput: ['clang version 7.0.0.*']
+- name: 'java-version'
+  command: ['bash', '-c', 'java -version 2>&1']
+  expectedOutput: ['openjdk version \"1.8.*']
+- name: 'python2-version'
+  command: ['bash', '-c', 'python -V 2>&1']
+  expectedOutput: ['Python 2.7.9']
 - name: 'python3-version'
-  command: ['python3', '-V']
+  command: ['bash', '-c', 'python3 -V']
   expectedOutput: ['Python 3.6.2']
+- name: 'go-version'
+  command: ['bash', '-c', 'go version']
+  expectedOutput: ['go version go1.9.4 linux/amd64']
+- name: 'check-curl'
+  command: ['bash', '-c', 'curl --version']
+  expectedOutput: ['curl .* \(x86_64-pc-linux-gnu\).*']
+- name: 'check-ed'
+  command: ['bash', '-c', 'ed --version']
+  expectedOutput: ['GNU Ed .*']
+- name: 'check-file'
+  command: ['bash', '-c', 'file --version']
+  expectedOutput: ['file-.*']
+- name: 'check-git'
+  command: ['bash', '-c', 'git --version']
+  expectedOutput: ['git version .*']
+- name: 'check-openssl'
+  command: ['bash', '-c', 'openssl version']
+  expectedOutput: ['OpenSSL .*']
+- name: 'check-wget'
+  command: ['bash', '-c', 'wget --version']
+  expectedOutput: ['GNU Wget.* built on linux-gnu.*']
+- name: 'check-zip'
+  command: ['bash', '-c', 'zip --version']
+  expectedOutput: ['.*This is Zip.*']
 
 fileExistenceTests:
 - name: 'Root'
