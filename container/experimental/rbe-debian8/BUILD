@@ -19,11 +19,6 @@ package(default_visibility = ["//visibility:public"])
 load("@distroless//cacerts:cacerts.bzl", "cacerts")
 load("@jessie_package_bundle//file:packages.bzl", "packages")
 load(
-    "//container/rules:docker_toolchains.bzl",
-    "language_tool_layer",
-    "toolchain_container",
-)
-load(
     "//skylib:packages.bzl",
     "base_layer_packages",
     "clang_layer_packages",
@@ -31,21 +26,21 @@ load(
     "python_layer_packages",
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_image",
+    "container_layer",
+)
 
 cacerts(
     name = "cacerts",
     deb = packages["ca-certificates"],
 )
 
-toolchain_container(
+container_image(
     name = "fl-toolchain",
     base = "@debian8//image",
-    env = {
-        # PATH envvar is a special case, and currently only the one in the
-        # topmost layer is set. So that we override it here to include all.
-        "PATH": "/opt/python3.6/bin:/usr/local/go/bin:$PATH",
-    },
-    language_layers = [
+    layers = [
         "base-ltl",
         "clang-ltl",
         "go-ltl",
@@ -55,9 +50,8 @@ toolchain_container(
     tags = ["manual"],
 )
 
-language_tool_layer(
+container_layer(
     name = "base-ltl",
-    base = "@debian8//image",
     debs = base_layer_packages(),
     tags = ["manual"],
     tars = [
@@ -65,9 +59,8 @@ language_tool_layer(
     ],
 )
 
-language_tool_layer(
+container_layer(
     name = "clang-ltl",
-    base = "@debian8//image",
     debs = clang_layer_packages(),
     env = {
         "CC": "/usr/local/bin/clang",
@@ -76,20 +69,18 @@ language_tool_layer(
     tars = ["//third_party/clang:tar"],
 )
 
-language_tool_layer(
+container_layer(
     name = "go-ltl",
-    base = "@debian8//image",
     env = {
         "GOPATH": "/go",
-        "PATH": "$PATH:/usr/local/go/bin",
+        "PATH": "/usr/local/go/bin:$PATH",
     },
     tags = ["manual"],
     tars = ["//third_party/golang:tar"],
 )
 
-language_tool_layer(
+container_layer(
     name = "java-ltl",
-    base = "@debian8//image",
     debs = java_layer_packages(),
     env = {
         "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64",
@@ -100,12 +91,11 @@ language_tool_layer(
     tags = ["manual"],
 )
 
-language_tool_layer(
+container_layer(
     name = "python-ltl",
-    base = "@debian8//image",
     debs = python_layer_packages(),
     env = {
-        "PATH": "$PATH:/opt/python3.6/bin",
+        "PATH": "/opt/python3.6/bin:$PATH",
     },
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
