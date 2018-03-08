@@ -13,6 +13,7 @@ platforms:
     - "//test:debian8_clang_autoconfig_test"
     - "//rules:debian8-clang-0.2.0-bazel_0.9.0-autoconfig_test"
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
+    - "//container/debian8-clang-fully-loaded:fl-toolchain-test"
   ubuntu1604:
     test_targets:
     - "//test:debian-jessie-autoconfig_test"
@@ -26,3 +27,4 @@ platforms:
     - "//test:debian8_clang_autoconfig_test"
     - "//rules:debian8-clang-0.2.0-bazel_0.9.0-autoconfig_test"
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
+    - "//container/debian8-clang-fully-loaded:fl-toolchain-test"
