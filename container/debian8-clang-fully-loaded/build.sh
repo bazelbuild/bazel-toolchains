@@ -102,7 +102,7 @@ main () {
   # mount the full root directory (to use bazel builder properly).
   cd ${PROJECT_ROOT}
   # We need to run clean to make sure we don't mount local build outputs
-  bazel clean --async
+  bazel clean
 
   if [[ "$LOCAL" = true ]]; then
     echo "Building container locally."
