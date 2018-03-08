@@ -71,6 +71,7 @@ language_tool_layer(
     debs = clang_layer_packages(),
     env = {
         "CC": "/usr/local/bin/clang",
+        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
     },
     tags = ["manual"],
     tars = ["//third_party/clang:tar"],
