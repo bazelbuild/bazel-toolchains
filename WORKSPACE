@@ -44,7 +44,7 @@ container_pull(
 
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f",
+    digest = "sha256:feec68e34edc42f4c3b21720670003b0d76100fea8c06f965cd3687a2a66bfcf",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/clang-debian8",
 )
@@ -154,15 +154,15 @@ dpkg_list(
 # Golang
 http_file(
     name = "golang_release",
-    sha256 = "15b0937615809f87321a457bb1265f946f9f6e736c563d6c5e0bd2c22e44f779",
-    urls = ["https://storage.googleapis.com/golang/go1.9.4.linux-amd64.tar.gz"],
+    sha256 = "b5a64335f1490277b585832d1f6c7f8c6c11206cba5cd3f771dcb87b98ad1a33",
+    urls = ["https://storage.googleapis.com/golang/go1.10.linux-amd64.tar.gz"],
 )
 
 # Clang
 http_file(
     name = "clang_release",
-    sha256 = "2b002d1c6ede1d7627899e97a5da8a3fb81dd7cd3043b3594e4de67397b22d85",
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r322167.tar.gz"],
+    sha256 = "c2c4d6c9eb98686a8fcee3c75a864baaccd51e2bd6095e1b98dbf0ce3a512bf9",
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r324073.tar.gz"],
 )
 
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.

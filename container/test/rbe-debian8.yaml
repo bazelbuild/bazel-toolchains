@@ -27,7 +27,7 @@ commandTests:
   expectedOutput: ['Python 3.6.2']
 - name: 'go-version'
   command: ['bash', '-c', 'go version']
-  expectedOutput: ['go version go1.9.4 linux/amd64']
+  expectedOutput: ['go version go1.10 linux/amd64']
 - name: 'check-curl'
   command: ['bash', '-c', 'curl --version']
   expectedOutput: ['curl .* \(x86_64-pc-linux-gnu\).*']
