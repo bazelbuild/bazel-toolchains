@@ -107,12 +107,16 @@ load(
 
 package_manager_repositories()
 
+# The Debian snapshot datetime to use.
+# This is kept up-to-date with https://github.com/GoogleCloudPlatform/base-images-docker/blob/master/WORKSPACE.
+DEB_SNAPSHOT = "20180312T052343Z"
+
 dpkg_src(
     name = "debian_jessie",
     arch = "amd64",
     distro = "jessie",
     sha256 = "20720c9367e9454dee3d173e4d3fd85ab5530292f4ec6654feb5a810b6bb37ce",
-    snapshot = "20180130T043019Z",
+    snapshot = DEB_SNAPSHOT,
     url = "http://snapshot.debian.org/archive",
 )
 
@@ -120,8 +124,8 @@ dpkg_src(
     name = "debian_jessie_backports",
     arch = "amd64",
     distro = "jessie-backports",
-    sha256 = "5858e520b7d7fe99bf2bd42864b5084bf86db9044b6fe4bdd98771d1ec7cc2f9",
-    snapshot = "20180130T043019Z",
+    sha256 = "28afadff87f53bcb754d571df4174f0b8cbabd1600be82a062932df6eb4b7b70",
+    snapshot = DEB_SNAPSHOT,
     url = "http://snapshot.debian.org/archive",
 )
 
