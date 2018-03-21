@@ -259,7 +259,8 @@ def _docker_toolchain_autoconfig_impl(ctx):
     bazel_cmd += " && touch WORKSPACE && mv BUILD.sample BUILD"
   # For each config repo we run the target @<config_repo>//...
   bazel_targets = "@" + "//... @".join(ctx.attr.config_repos) + "//..."
-  bazel_cmd += " && bazel build " + bazel_targets
+  bazel_flags = "--all_incompatible_changes"
+  bazel_cmd += " && bazel build " + bazel_flags + " " + bazel_targets
 
   # Command to run to clean up after autoconfiguration.
   # we start with "cd ." to make sure in case of failure everything after the
