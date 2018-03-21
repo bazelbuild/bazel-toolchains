@@ -66,8 +66,8 @@ container_pull(
 # io_bazel_rules_go is the dependency of container_test rules.
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "4d8d6244320dd751590f9100cf39fd7a4b75cd901e1f3ffdfd6f048328883695",
-    url = "https://github.com/bazelbuild/rules_go/releases/download/0.9.0/rules_go-0.9.0.tar.gz",
+    sha256 = "4b14d8dd31c6dbaf3ff871adcd03f28c3274e42abc855cb8fb4d01233c0154dc",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz",
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
@@ -162,11 +162,16 @@ http_file(
     urls = ["https://storage.googleapis.com/golang/go1.10.linux-amd64.tar.gz"],
 )
 
+load(
+    "//third_party/clang:revision.bzl",
+    "CLANG_REVISION",
+)
+
 # Clang
 http_file(
     name = "clang_release",
     sha256 = "c2c4d6c9eb98686a8fcee3c75a864baaccd51e2bd6095e1b98dbf0ce3a512bf9",
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_r324073.tar.gz"],
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_" + CLANG_REVISION + ".tar.gz"],
 )
 
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
