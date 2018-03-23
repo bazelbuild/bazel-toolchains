@@ -30,8 +30,17 @@ WORKSPACE_ROOT=$(pwd)
 TARGET=${TEST_BINARY%_test}
 NAME=${TARGET##*/}
 DIR=${TARGET%${NAME}}
-
 autoconfig_script=${WORKSPACE_ROOT}/${DIR}${NAME}
+
+# Helper function for always delete the containers / temporary files on exit
+function cleanup_on_finish {
+  echo "=== Deleting images  ==="
+  docker images -a | grep "bazel/${DIR%/}" | awk '{print $3}' | xargs docker rmi -f
+  docker images -a | grep "test-" | awk '{print $3}' | xargs docker rmi -f
+  docker rmi $(docker images -f "dangling=true" -q)
+}
+
+trap cleanup_on_finish EXIT # always delete the containers
 
 # Change the output location to a tmp location inside the current Bazel workspace.
 sed -i "s|/tmp|${TEST_TMPDIR}|g" ${autoconfig_script}
