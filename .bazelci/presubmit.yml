@@ -14,6 +14,7 @@ platforms:
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
     - "//container/rbe-debian8:fl-toolchain-test"
     - "//container/rbe-debian9:fl-toolchain-test"
+    - "//container/rbe-ubuntu16_04:fl-toolchain-test"
   ubuntu1604:
     test_targets:
     - "//test/configs:debian-jessie-autoconfig_test"
@@ -28,3 +29,4 @@ platforms:
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
     - "//container/rbe-debian8:fl-toolchain-test"
     - "//container/rbe-debian9:fl-toolchain-test"
+    - "//container/rbe-ubuntu16_04:fl-toolchain-test"
