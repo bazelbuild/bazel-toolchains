@@ -43,6 +43,13 @@ container_pull(
 )
 
 container_pull(
+    name = "debian9",
+    digest = "sha256:1b77b1d6cbc79af00b68050880b7d8cb24b7631fe366501bd55bf3986c744f03",
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/debian9",
+)
+
+container_pull(
     name = "debian8-clang",
     digest = "sha256:feec68e34edc42f4c3b21720670003b0d76100fea8c06f965cd3687a2a66bfcf",
     registry = "gcr.io",

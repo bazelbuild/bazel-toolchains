@@ -35,13 +35,13 @@ steps:
   - name: gcr.io/gcp-runtimes/structure_test
     args: [
     '--image', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}',
-    '--config', '/workspace/container/test/rbe-debian8.yaml']
+    '--config', '/workspace/container/test/rbe-${_DISTRO}.yaml']
 
 # Step: store the tarball of debian packages in GCS
   - name: gcr.io/cloud-builders/gsutil
     args: ['cp',
-           '/workspace/bazel-out/k8-fastbuild/bin/container/debian8-clang-fully-loaded/fl-toolchain-packages.tar',
-           'gs://${_BUCKET}/fl-toolchain-packages-${_TAG}.tar'
+           '/workspace/bazel-out/k8-fastbuild/bin/container/${_CONTAINER}/fl-toolchain-packages.tar',
+           'gs://${_BUCKET}/${_CONTAINER}-${_TAG}.tar'
     ]
 
 # Build the release-container

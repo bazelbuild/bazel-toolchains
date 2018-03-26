@@ -12,7 +12,8 @@ platforms:
     - "//test/configs:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
     - "//test/configs:debian8_clang_autoconfig_test"
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
-    - "//container/debian8-clang-fully-loaded:fl-toolchain-test"
+    - "//container/rbe-debian8:fl-toolchain-test"
+    - "//container/rbe-debian9:fl-toolchain-test"
   ubuntu1604:
     test_targets:
     - "//test/configs:debian-jessie-autoconfig_test"
@@ -25,4 +26,5 @@ platforms:
     - "//test/configs:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
     - "//test/configs:debian8_clang_autoconfig_test"
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
-    - "//container/debian8-clang-fully-loaded:fl-toolchain-test"
+    - "//container/rbe-debian8:fl-toolchain-test"
+    - "//container/rbe-debian9:fl-toolchain-test"

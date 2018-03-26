@@ -3,7 +3,7 @@ schemaVersion: "1.0.0"
 commandTests:
 - name: 'os-version'
   command: ['sh', '-c', 'cat /etc/issue.net']
-  expectedOutput: ['Debian GNU/Linux 8']
+  expectedOutput: ['Debian GNU/Linux 9']
 - name: 'path-envvar'
   command: ['sh', '-c', 'echo $PATH']
   expectedOutput: ['/opt/python3.6/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin']
@@ -24,7 +24,7 @@ commandTests:
   expectedOutput: ['openjdk version \"1.8.*']
 - name: 'python2-version'
   command: ['bash', '-c', 'python -V 2>&1']
-  expectedOutput: ['Python 2.7.9']
+  expectedOutput: ['Python 2.7.13']
 - name: 'python3-version'
   command: ['bash', '-c', 'python3 -V']
   expectedOutput: ['Python 3.6.2']
