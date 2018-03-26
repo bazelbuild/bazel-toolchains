@@ -36,15 +36,15 @@ Standalone parameters
     -l|--local              build container locally
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -d {debian8, debian9} -c rbe-{debian8, debian9} -t latest -b my_bucket
+$ ./build.sh -p my-gcp-project -d {debian8, debian9, ubuntu16_04} -c rbe-{debian8, debian9, ubuntu16_04} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
-    gcr.io/my-gcp-project/rbe-{debian8, debian9}:latest
+    gcr.io/my-gcp-project/rbe-{debian8, debian9, ubuntu16_04}:latest
 and the debian packages installed will be packed as a tarball and stored in
 gs://my_bucket for future reference.
 
 To build locally:
-$ ./build.sh -d {debian8, debian9} -l
-will produce docker locally as rbe-{debian8, debian9}:latest
+$ ./build.sh -d {debian8, debian9, ubuntu16_04} -l
+will produce docker locally as rbe-{debian8, debian9, ubuntu16_04}:latest
 EOF
 )
   echo "$usage"
@@ -105,8 +105,8 @@ parse_parameters () {
      exit 1
   fi
 
-  if [[ "$DISTRO" != "debian8" && "$DISTRO" != "debian9" ]]; then
-    echo "Distro parameter can be only: 'debian8' or 'debian9'"
+  if [[ "$DISTRO" != "debian8" && "$DISTRO" != "debian9" && "$DISTRO" != "ubuntu16_04" ]]; then
+    echo "Distro parameter can be only: 'debian8', 'debian9' or 'ubuntu16_04'"
     show_usage
     exit 1
   fi

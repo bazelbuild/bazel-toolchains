@@ -50,6 +50,13 @@ container_pull(
 )
 
 container_pull(
+    name = "ubuntu16_04",
+    digest = "sha256:c81e8f6bcbab8818fdbe2df6d367990ab55d85b4dab300931a53ba5d082f4296",
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/ubuntu16_04",
+)
+
+container_pull(
     name = "debian8-clang",
     digest = "sha256:feec68e34edc42f4c3b21720670003b0d76100fea8c06f965cd3687a2a66bfcf",
     registry = "gcr.io",
