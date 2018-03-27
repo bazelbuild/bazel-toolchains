@@ -116,7 +116,11 @@ main () {
   parse_parameters $@
 
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
-  DIR="container/rbe-${DISTRO}"
+  if [[ "$DISTRO" == "debian8" ]]; then
+    DIR="container/rbe-${DISTRO}"
+  else
+    DIR="container/experimental/rbe-${DISTRO}"
+  fi
 
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
@@ -126,11 +130,11 @@ main () {
 
   if [[ "$LOCAL" = true ]]; then
     echo "Building container locally."
-    bazel run //container/rbe-${DISTRO}:fl-toolchain
+    bazel run //${DIR}:fl-toolchain
     echo "Testing container locally."
-    bazel test //container/rbe-${DISTRO}:fl-toolchain-test
+    bazel test //${DIR}:fl-toolchain-test
     echo "Tagging container."
-    docker tag bazel/container/rbe-${DISTRO}:fl-toolchain rbe-${DISTRO}:latest
+    docker tag bazel/${DIR}:fl-toolchain rbe-${DISTRO}:latest
     echo -e "\n" \
       "rbe-${DISTRO}:lastest container is now available to use.\n" \
       "To try it: docker run -it rbe-${DISTRO}:latest \n"
