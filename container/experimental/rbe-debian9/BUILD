@@ -126,6 +126,9 @@ language_tool_layer(
 
 container_test(
     name = "fl-toolchain-test",
-    configs = ["//container/test:rbe-debian9.yaml"],
+    configs = [
+        "//container/test:common.yaml",
+        "//container/test:rbe-debian9.yaml",
+    ],
     image = ":fl-toolchain",
 )

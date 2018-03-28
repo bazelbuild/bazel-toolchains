@@ -23,7 +23,7 @@ Usage: build.sh [options]
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 Required parameters (when build with Google Cloud Container Builder):
-    -d|--distro             Distro of the base image, debian 8, debian 9
+    -d|--distro             Distro of the base image: debian8, debian9, ubuntu16_04
     -p|--project            GCP project ID
     -c|--container          Docker container name
     -t|--tag                Docker tag for the image

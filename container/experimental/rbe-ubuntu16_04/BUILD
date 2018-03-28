@@ -123,6 +123,9 @@ language_tool_layer(
 
 container_test(
     name = "fl-toolchain-test",
-    configs = ["//container/test:rbe-ubuntu16_04.yaml"],
+    configs = [
+        "//container/test:common.yaml",
+        "//container/test:rbe-ubuntu16_04.yaml",
+    ],
     image = ":fl-toolchain",
 )
