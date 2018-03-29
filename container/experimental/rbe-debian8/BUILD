@@ -38,7 +38,7 @@ cacerts(
 )
 
 container_image(
-    name = "fl-toolchain",
+    name = "toolchain",
     base = "@debian8//image",
     layers = [
         "base-ltl",
@@ -107,7 +107,7 @@ container_layer(
 )
 
 container_test(
-    name = "fl-toolchain-test",
+    name = "toolchain-test",
     configs = ["//container/test:rbe-debian8.yaml"],
-    image = ":fl-toolchain",
+    image = ":toolchain",
 )

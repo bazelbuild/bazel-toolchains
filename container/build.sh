@@ -130,11 +130,11 @@ main () {
 
   if [[ "$LOCAL" = true ]]; then
     echo "Building container locally."
-    bazel run //${DIR}:fl-toolchain
+    bazel run //${DIR}:toolchain
     echo "Testing container locally."
-    bazel test //${DIR}:fl-toolchain-test
+    bazel test //${DIR}:toolchain-test
     echo "Tagging container."
-    docker tag bazel/${DIR}:fl-toolchain rbe-${DISTRO}:latest
+    docker tag bazel/${DIR}:toolchain rbe-${DISTRO}:latest
     echo -e "\n" \
       "rbe-${DISTRO}:lastest container is now available to use.\n" \
       "To try it: docker run -it rbe-${DISTRO}:latest \n"

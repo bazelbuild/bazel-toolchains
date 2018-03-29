@@ -25,7 +25,7 @@ load(
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
 toolchain_container(
-    name = "fl-toolchain",
+    name = "toolchain",
     base = "@debian9//image",
     env = {
         # PATH envvar is a special case, and currently only the one in the
@@ -125,10 +125,10 @@ language_tool_layer(
 )
 
 container_test(
-    name = "fl-toolchain-test",
+    name = "toolchain-test",
     configs = [
         "//container/test:common.yaml",
         "//container/test:rbe-debian9.yaml",
     ],
-    image = ":fl-toolchain",
+    image = ":toolchain",
 )
