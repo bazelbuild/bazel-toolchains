@@ -16,98 +16,119 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("@distroless//cacerts:cacerts.bzl", "cacerts")
-load("@jessie_package_bundle//file:packages.bzl", "packages")
 load(
-    "//skylib:packages.bzl",
-    "base_layer_packages",
-    "clang_layer_packages",
-    "java_layer_packages",
-    "python_layer_packages",
+    "//container/rules:docker_toolchains.bzl",
+    "language_tool_layer",
+    "toolchain_container",
+    "cleanup_commands",
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_image",
-    "container_layer",
-)
 
-cacerts(
-    name = "cacerts",
-    deb = packages["ca-certificates"],
-)
-
-container_image(
+toolchain_container(
     name = "toolchain",
-    base = "@debian8//image",
-    layers = [
+    base = "@debian9//image",
+    env = {
+        # PATH envvar is a special case, and currently only the one in the
+        # topmost layer is set. So that we override it here to include all.
+        "PATH": "/opt/python3.6/bin:/usr/local/go/bin:$PATH",
+    },
+    language_layers = [
         "base-ltl",
         "clang-ltl",
         "go-ltl",
         "java-ltl",
         "python-ltl",
     ],
-    tags = ["manual"],
 )
 
-container_layer(
+language_tool_layer(
     name = "base-ltl",
-    debs = base_layer_packages(),
-    tags = ["manual"],
-    tars = [
-        ":cacerts.tar",
+    base = "@debian9//image",
+    packages = [
+        "binutils",
+        "ca-certificates",
+        "curl",
+        "ed",
+        "file",
+        "git",
+        "openssh-client",
+        "unzip",
+        "wget",
+        "zip",
     ],
 )
 
-container_layer(
+language_tool_layer(
     name = "clang-ltl",
-    debs = clang_layer_packages(),
+    base = "@debian9//image",
     env = {
         "CC": "/usr/local/bin/clang",
+        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
     },
-    tags = ["manual"],
+    packages = [
+        "libstdc++-6-dev",
+    ],
     tars = ["//third_party/clang:tar"],
 )
 
-container_layer(
+language_tool_layer(
     name = "go-ltl",
+    base = "@debian9//image",
     env = {
         "GOPATH": "/go",
-        "PATH": "/usr/local/go/bin:$PATH",
+        "PATH": "$PATH:/usr/local/go/bin",
     },
-    tags = ["manual"],
     tars = ["//third_party/golang:tar"],
 )
 
-container_layer(
+language_tool_layer(
     name = "java-ltl",
-    debs = java_layer_packages(),
+    additional_repos = [
+        "deb http://deb.debian.org/debian stretch-backports main",
+    ],
+    base = "@debian9//image",
     env = {
         "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64",
     },
+    installation_cleanup_commands = cleanup_commands()["java"],
+    packages = [
+        "ca-certificates-java",
+        "openjdk-8-jdk-headless",
+        "openjdk-8-jre-headless",
+    ],
     symlinks = {
         "/usr/bin/java": "/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java",
     },
-    tags = ["manual"],
 )
 
-container_layer(
+language_tool_layer(
     name = "python-ltl",
-    debs = python_layer_packages(),
+    base = "@debian9//image",
     env = {
-        "PATH": "/opt/python3.6/bin:$PATH",
+        "PATH": "$PATH:/opt/python3.6/bin",
     },
+    installation_cleanup_commands = cleanup_commands()["python"],
+    packages = [
+        "python-dev",
+        "python-numpy",
+        "python-pip",
+        "python3-dev",
+        "python3-numpy",
+        "python3-pip",
+    ],
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
     },
-    tags = ["manual"],
     tars = ["//third_party/python:tar"],
 )
 
 container_test(
     name = "toolchain-test",
-    configs = ["//container/test:rbe-debian8.yaml"],
+    configs = [
+        "//container/test:common.yaml",
+        "//container/test:rbe-debian9.yaml",
+    ],
     image = ":toolchain",
 )
