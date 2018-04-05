@@ -25,8 +25,8 @@ load(
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
 toolchain_container(
-    name = "fl-toolchain",
-    base = "@debian8//image",
+    name = "toolchain",
+    base = "@ubuntu16_04//image",
     env = {
         # PATH envvar is a special case, and currently only the one in the
         # topmost layer is set. So that we override it here to include all.
@@ -43,7 +43,7 @@ toolchain_container(
 
 language_tool_layer(
     name = "base-ltl",
-    base = "@debian8//image",
+    base = "@ubuntu16_04//image",
     packages = [
         "binutils",
         "ca-certificates",
@@ -52,28 +52,28 @@ language_tool_layer(
         "file",
         "git",
         "openssh-client",
+        "unzip",
         "wget",
         "zip",
-        "unzip",
     ],
 )
 
 language_tool_layer(
     name = "clang-ltl",
-    base = "@debian8//image",
+    base = "@ubuntu16_04//image",
     env = {
         "CC": "/usr/local/bin/clang",
         "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
     },
-    tars = ["//third_party/clang:tar"],
     packages = [
         "libstdc++-4.9-dev",
     ],
+    tars = ["//third_party/clang:tar"],
 )
 
 language_tool_layer(
     name = "go-ltl",
-    base = "@debian8//image",
+    base = "@ubuntu16_04//image",
     env = {
         "GOPATH": "/go",
         "PATH": "$PATH:/usr/local/go/bin",
@@ -83,36 +83,28 @@ language_tool_layer(
 
 language_tool_layer(
     name = "java-ltl",
-    base = "@debian8//image",
+    base = "@ubuntu16_04//image",
     env = {
         "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64",
     },
+    installation_cleanup_commands = cleanup_commands()["java"],
+    packages = [
+        "ca-certificates-java",
+        "openjdk-8-jdk-headless",
+        "openjdk-8-jre-headless",
+    ],
     symlinks = {
         "/usr/bin/java": "/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java",
     },
-    packages = [
-        "openjdk-8-jdk-headless",
-        "openjdk-8-jre-headless",
-        "ca-certificates-java=20161107'*'",
-    ],
-    additional_repos = [
-        "deb http://deb.debian.org/debian jessie-backports main",
-    ],
-    installation_cleanup_commands = cleanup_commands()["java"],
 )
 
 language_tool_layer(
     name = "python-ltl",
-    base = "@debian8//image",
+    base = "@ubuntu16_04//image",
     env = {
         "PATH": "$PATH:/opt/python3.6/bin",
     },
-    symlinks = {
-        "/usr/bin/python": "/usr/bin/python2.7",
-        "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
-        "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
-    },
-    tars = ["//third_party/python:tar"],
+    installation_cleanup_commands = cleanup_commands()["python"],
     packages = [
         "python-dev",
         "python-numpy",
@@ -121,11 +113,19 @@ language_tool_layer(
         "python3-numpy",
         "python3-pip",
     ],
-    installation_cleanup_commands = cleanup_commands()["python"],
+    symlinks = {
+        "/usr/bin/python": "/usr/bin/python2.7",
+        "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
+        "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
+    },
+    tars = ["//third_party/python:tar"],
 )
 
 container_test(
-    name = "fl-toolchain-test",
-    configs = ["//container/test:rbe-debian8.yaml"],
-    image = ":fl-toolchain",
+    name = "toolchain-test",
+    configs = [
+        "//container/test:common.yaml",
+        "//container/test:rbe-ubuntu16_04.yaml",
+    ],
+    image = ":toolchain",
 )

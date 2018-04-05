@@ -24,6 +24,19 @@ def cleanup_commands():
         "python":"rm -rf /usr/lib/python3.4/__pycache__/ /usr/lib/python3.4/idlelib/__pycache__/ /usr/lib/python3.4/asyncio/__pycache__/",
     }
 
+def _input_validation(kwargs):
+  if "debs" in kwargs:
+    fail("debs is not supported.")
+
+  has_no_packages = "packages" not in kwargs or kwargs["packages"] == []
+  if has_no_packages and "additional_repos" in kwargs:
+    fail("'additional_repos' can only be specified when 'packages' is not empty.")
+
+  has_no_tar = "installables_tar" not in kwargs or kwargs["installables_tar"] == ""
+  if has_no_packages and has_no_tar and "installation_cleanup_commands" in kwargs:
+    fail("'installation_cleanup_commands' can only be specified when at least " +
+      "one of 'packages' or 'installables_tar' is not empty.")
+
 def _language_tool_layer_impl(ctx, symlinks=None, env=None, tars=None,
                               files=None, packages=None, additional_repos=None,
                               installables_tars=None, installation_cleanup_commands=""):
@@ -177,19 +190,13 @@ def language_tool_layer(**kwargs):
 
   Note:
     - 'additional_repos' can only be specified when 'packages' is speficified.
-    - 'installation_cleanup_commands' should also only be specified when
+    - 'installation_cleanup_commands' can only be specified when at least one of
       'packages' or 'installables_tar' is specified.
 
   Experimental rule.
   """
 
-  # Input validations
-  if "debs" in kwargs:
-    fail("debs is not supported in language_tool_layer.")
-
-  has_packages = "packages" not in kwargs or kwargs["packages"] == []
-  if has_packages and "additional_repos" in kwargs:
-    fail("'additional_repos' can only be specified when 'packages' is not empty.")
+  _input_validation(kwargs)
 
   language_tool_layer_(**kwargs)
 
@@ -281,12 +288,6 @@ def toolchain_container(**kwargs):
   Experimental rule.
   """
 
-  # Input validations
-  if "debs" in kwargs:
-    fail("debs is not supported in toolchain_container.")
-
-  has_packages = "packages" not in kwargs or kwargs["packages"] == []
-  if has_packages and "additional_repos" in kwargs:
-    fail("'additional_repos' can only be specified when 'packages' is not empty.")
+  _input_validation(kwargs)
 
   toolchain_container_(**kwargs)

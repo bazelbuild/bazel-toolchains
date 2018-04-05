@@ -23,9 +23,10 @@ Usage: build.sh [options]
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 Required parameters (when build with Google Cloud Container Builder):
+    -d|--distro             Distro of the base image: debian8, debian9, ubuntu16_04
     -p|--project            GCP project ID
-    -c|--container          docker container name
-    -t|--tag                docker tag for the image
+    -c|--container          Docker container name
+    -t|--tag                Docker tag for the image
     -b|--bucket             GCS bucket to store the tarball of debian packages
 
 Optional parameters (when build with Google Cloud Container Builder):
@@ -35,15 +36,15 @@ Standalone parameters
     -l|--local              build container locally
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -c debian8-clang-fully-loaded -t latest -b my_bucket
+$ ./build.sh -p my-gcp-project -d {debian8, debian9, ubuntu16_04} -c rbe-{debian8, debian9, ubuntu16_04} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
-    gcr.io/my-gcp-project/debian8-clang-fully-loaded:{latest, clang_revision}
+    gcr.io/my-gcp-project/rbe-{debian8, debian9, ubuntu16_04}:latest
 and the debian packages installed will be packed as a tarball and stored in
 gs://my_bucket for future reference.
 
 To build locally:
-$ ./build.sh -l
-will produce docker locally as debian8-clang-fully-loaded:latest
+$ ./build.sh -d {debian8, debian9, ubuntu16_04} -l
+will produce docker locally as rbe-{debian8, debian9, ubuntu16_04}:latest
 EOF
 )
   echo "$usage"
@@ -60,6 +61,11 @@ parse_parameters () {
       -p|--project)
         shift
         PROJECT=$1
+        shift
+        ;;
+      -d|--distro)
+        shift
+        DISTRO=$1
         shift
         ;;
       -c|--container)
@@ -93,10 +99,16 @@ parse_parameters () {
     esac
   done
 
-  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TAG" == "" || "$BUCKET" == "" ) && "$LOCAL" == "" ]]; then
+  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$DISTRO" == "" || "$TAG" == "" || "$BUCKET" == "" ) && "$LOCAL" == "" ]]; then
      echo "Please specify all required options for building in Google Cloud Container Builder"
      show_usage
      exit 1
+  fi
+
+  if [[ "$DISTRO" != "debian8" && "$DISTRO" != "debian9" && "$DISTRO" != "ubuntu16_04" ]]; then
+    echo "Distro parameter can be only: 'debian8', 'debian9' or 'ubuntu16_04'"
+    show_usage
+    exit 1
   fi
 }
 
@@ -104,7 +116,11 @@ main () {
   parse_parameters $@
 
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
-  DIR="container/debian8-clang-fully-loaded"
+  if [[ "$DISTRO" == "debian8" ]]; then
+    DIR="container/rbe-${DISTRO}"
+  else
+    DIR="container/experimental/rbe-${DISTRO}"
+  fi
 
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
@@ -114,14 +130,14 @@ main () {
 
   if [[ "$LOCAL" = true ]]; then
     echo "Building container locally."
-    bazel run //container/debian8-clang-fully-loaded:fl-toolchain
+    bazel run //${DIR}:toolchain
     echo "Testing container locally."
-    bazel test //container/debian8-clang-fully-loaded:fl-toolchain-test
+    bazel test //${DIR}:toolchain-test
     echo "Tagging container."
-    docker tag bazel/container/debian8-clang-fully-loaded:fl-toolchain debian8-clang-fully-loaded:latest
+    docker tag bazel/${DIR}:toolchain rbe-${DISTRO}:latest
     echo -e "\n" \
-      "debian8-clang-fully-loaded:lastest container is now available to use.\n" \
-      "To try it: docker run -it debian8-clang-fully-loaded:latest \n"
+      "rbe-${DISTRO}:lastest container is now available to use.\n" \
+      "To try it: docker run -it rbe-${DISTRO}:latest \n"
   else
     echo "Building container in Google Cloud Container Builder."
     # Setup GCP project id for the build
@@ -132,8 +148,8 @@ main () {
     find ${PROJECT_ROOT}/third_party -type f -print0 | xargs -0 chmod 644
     # Start Google Cloud Container Builder
     gcloud container builds submit . \
-      --config=${PROJECT_ROOT}/container/debian8-clang-fully-loaded/cloudbuild.yaml \
-      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
+      --config=${PROJECT_ROOT}/container/cloudbuild.yaml \
+      --substitutions _PROJECT=${PROJECT},_DISTRO=${DISTRO},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
       ${ASYNC}
   fi
 }

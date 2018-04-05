@@ -19,29 +19,29 @@ steps:
   - name: 'gcr.io/cloud-builders/bazel'
     # Set Bazel output_base to /workspace, which is a mounted directory on Google Cloud Builder.
     # This is to make sure Bazel generated files can be accessed by multiple containers.
-    args: ['--output_base=/workspace', 'run' , '--verbose_failures', '--spawn_strategy=standalone', '--genrule_strategy=standalone', '//${_DIR}:fl-toolchain']
-    id: 'fl-container'
+    args: ['--output_base=/workspace', 'run' , '--verbose_failures', '--spawn_strategy=standalone', '--genrule_strategy=standalone', '//${_DIR}:toolchain']
+    id: 'container-build'
     waitFor:
     - "-" # wait for nothing - start immediately
 
 # Step: re-tag the image
   - name: gcr.io/cloud-builders/docker
-    args: ['tag', 'bazel/${_DIR}:fl-toolchain', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}']
-    id: 'fl-container-tag'
+    args: ['tag', 'bazel/${_DIR}:toolchain', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}']
+    id: 'container-tag'
     waitFor: # wait for all artifacts to be ready
-    - 'fl-container'
+    - 'container-build'
 
 # Step: test the image
   - name: gcr.io/gcp-runtimes/structure_test
     args: [
     '--image', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}',
-    '--config', '/workspace/container/test/rbe-debian8.yaml']
+    '--config', '/workspace/container/test/rbe-${_DISTRO}.yaml']
 
 # Step: store the tarball of debian packages in GCS
   - name: gcr.io/cloud-builders/gsutil
     args: ['cp',
-           '/workspace/bazel-out/k8-fastbuild/bin/container/debian8-clang-fully-loaded/fl-toolchain-packages.tar',
-           'gs://${_BUCKET}/fl-toolchain-packages-${_TAG}.tar'
+           '/workspace/bazel-out/k8-fastbuild/bin/${_DIR}/toolchain-packages.tar',
+           'gs://${_BUCKET}/${_CONTAINER}-${_TAG}.tar'
     ]
 
 # Build the release-container

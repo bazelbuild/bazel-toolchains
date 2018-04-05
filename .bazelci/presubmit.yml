@@ -12,7 +12,10 @@ platforms:
     - "//test/configs:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
     - "//test/configs:debian8_clang_autoconfig_test"
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
-    - "//container/debian8-clang-fully-loaded:fl-toolchain-test"
+    - "//container/rbe-debian8:toolchain-test"
+    # TODO: turn in these tests once issue with Bazel CI is resolved
+    # - "//container/experimental/rbe-debian9:toolchain-test"
+    # - "//container/experimental/rbe-ubuntu16_04:toolchain-test"
   ubuntu1604:
     test_targets:
     - "//test/configs:debian-jessie-autoconfig_test"
@@ -25,4 +28,7 @@ platforms:
     - "//test/configs:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
     - "//test/configs:debian8_clang_autoconfig_test"
     - "//rules:debian8-clang-0.3.0-bazel_0.10.0-autoconfig_test"
-    - "//container/debian8-clang-fully-loaded:fl-toolchain-test"
+    - "//container/rbe-debian8:toolchain-test"
+    # TODO: turn in these tests once issue with Bazel CI is resolved
+    # - "//container/experimental/rbe-debian9:toolchain-test"
+    # - "//container/experimental/rbe-ubuntu16_04:toolchain-test"
