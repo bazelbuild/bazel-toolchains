@@ -35,8 +35,14 @@ autoconfig_script=${WORKSPACE_ROOT}/${DIR}${NAME}
 # Helper function for always delete the containers / temporary files on exit
 function cleanup_on_finish {
   echo "=== Deleting images  ==="
-  docker images -a | grep "bazel/${DIR%/}" | awk '{print $3}' | xargs -r docker rmi -f
-  docker images -a | grep "test-" | awk '{print $3}' | xargs -r docker rmi -f
+  images=($(docker images -a | grep "bazel/${DIR%/}\|test-" | awk '{print $3}'))
+  for image in "${images[@]}"
+  do
+    # Only delete the image if it is not used by any running container.
+    if [[ -z $(docker ps -q -f ancestor=${image}) ]]; then
+       docker rmi -f ${image}
+    fi
+  done
   docker images -f "dangling=true" -q | xargs -r docker rmi -f
 }
 

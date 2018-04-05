@@ -33,7 +33,14 @@ AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/rules/debian8-clang-${CONFIG_VERSION}-bazel_
 # Helper function for always delete the containers / temporary files on exit
 function cleanup_on_finish {
   echo "=== Deleting images  ==="
-  docker images -a | grep "debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig" | awk '{print $3}' | xargs -r docker rmi -f
+  images=($(docker images -a | grep "debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig" | awk '{print $3}'))
+  for image in "${images[@]}"
+  do
+    # Only delete the image if it is not used by any running container.
+    if [[ -z $(docker ps -q -f ancestor=${image}) ]]; then
+       docker rmi -f ${image}
+    fi
+  done
   docker images -f "dangling=true" -q | xargs -r docker rmi -f
 }
 
