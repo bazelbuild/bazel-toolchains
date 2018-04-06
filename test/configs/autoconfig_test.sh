@@ -30,8 +30,24 @@ WORKSPACE_ROOT=$(pwd)
 TARGET=${TEST_BINARY%_test}
 NAME=${TARGET##*/}
 DIR=${TARGET%${NAME}}
-
 autoconfig_script=${WORKSPACE_ROOT}/${DIR}${NAME}
+
+# Helper function for always delete the containers / temporary files on exit
+function cleanup_on_finish {
+  echo "=== Deleting images  ==="
+  # Images to be removed are expected to have "rbe-test-" as name prefix.
+  images=($(docker images -a | grep "rbe-test-" | awk '{print $3}'))
+  for image in "${images[@]}"
+  do
+    # Only delete the image if it is not used by any running container.
+    if [[ -z $(docker ps -q -f ancestor=${image}) ]]; then
+       docker rmi -f ${image}
+    fi
+  done
+  docker images -f "dangling=true" -q | xargs -r docker rmi -f
+}
+
+trap cleanup_on_finish EXIT # always delete the containers
 
 # Change the output location to a tmp location inside the current Bazel workspace.
 sed -i "s|/tmp|${TEST_TMPDIR}|g" ${autoconfig_script}
