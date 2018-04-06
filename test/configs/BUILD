@@ -17,31 +17,21 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_toolchains//rules:docker_config.bzl", "container_install_pkgs", "docker_toolchain_autoconfig")
-load("@bazel_toolchains//rules:environments.bzl", "clang_env", "gcc_env")
+load("@bazel_toolchains//rules:environments.bzl", 
+    "gcc_env",
+    "debian8_clang_default_keys",
+    "debian8_clang_default_packages",
+    "debian8_clang_default_repos"
+)
 
 container_install_pkgs(
     name = "jessie-with-pkgs",
     base = "@official_jessie//image",
-    packages = [
-        "bazel",
-        "ca-certificates-java=20161107'*'",
-        "curl",
+    packages = debian8_clang_default_packages() + [
         "gcc",
-        "git",
-        "openjdk-8-jdk-headless",
-        "openjdk-8-jre-headless",
-        "python-dev",
-        "unzip",
-        "wget",
-        "zip",
     ],
-    additional_repos = [
-        "deb http://deb.debian.org/debian jessie-backports main",
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    keys = [
-        "@bazel_gpg//file",
-    ],
+    additional_repos = debian8_clang_default_repos(),
+    keys = debian8_clang_default_keys(),
 )
 
 # Targets here are for testing purposes, we do not actually
