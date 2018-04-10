@@ -335,7 +335,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
 docker_toolchain_autoconfig_ = rule(
     attrs = _container.image.attrs + {
-        "config_repos": attr.string_list(["local_config_cc"]),
+        "config_repos": attr.string_list(default = ["local_config_cc"]),
         "use_default_project": attr.bool(default = False),
         "git_repo": attr.string(),
         "repo_pkg_tar": attr.label(allow_files = tar_filetype),

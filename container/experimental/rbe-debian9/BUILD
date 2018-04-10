@@ -128,7 +128,8 @@ container_test(
     name = "toolchain-test",
     configs = [
         "//container/test:common.yaml",
-        "//container/test:rbe-debian9.yaml",
+        # TODO: find a better way for testing distro version
+        # "//container/test:rbe-debian9.yaml",
     ],
     image = ":toolchain",
 )

@@ -125,7 +125,8 @@ container_test(
     name = "toolchain-test",
     configs = [
         "//container/test:common.yaml",
-        "//container/test:rbe-ubuntu16_04.yaml",
+        # TODO: find a better way for testing distro version
+        # "//container/test:rbe-ubuntu16_04.yaml",
     ],
     image = ":toolchain",
 )
