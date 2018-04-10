@@ -41,7 +41,7 @@ steps:
   - name: gcr.io/cloud-builders/gsutil
     args: ['cp',
            '/workspace/bazel-out/k8-fastbuild/bin/${_DIR}/toolchain-packages.tar',
-           'gs://${_BUCKET}/${_CONTAINER}-${_TAG}.tar'
+           'gs://${_BUCKET}/${_CONTAINER}-${_TAG}-${BUILD_ID}.tar'
     ]
 
 # Build the release-container
