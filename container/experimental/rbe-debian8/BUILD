@@ -66,7 +66,7 @@ container_layer(
         "CC": "/usr/local/bin/clang",
     },
     tags = ["manual"],
-    tars = ["//third_party/clang:tar"],
+    tars = ["//third_party/clang:debian8_tar"],
 )
 
 container_layer(
