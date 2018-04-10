@@ -3,3 +3,22 @@ build:remote --host_javabase=@bazel_toolchains//configs/debian8_clang/0.3.0:jdk8
 build:remote --javabase=@bazel_toolchains//configs/debian8_clang/0.3.0:jdk8
 build:remote --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.3.0/bazel_0.10.0:toolchain
 build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:1ede2a929b44d629ec5abe86eee6d7ffea1d5a4d247489a8867d46cfde3e38bd" }'
+
+# Experimental configs for sanitizers, use --config=remote,remote-xxsan,remote-<asan/tsan/msan> (in that order)
+build:remote-xxsan --copt=-gmlt
+build:remote-xxsan --strip=never
+
+build:remote-asan --copt=-fsanitize=address
+build:remote-asan --linkopt=-fsanitize=address
+
+build:remote-tsan --copt=-fsanitize=thread
+build:remote-tsan --linkopt=-fsanitize=thread
+
+build:remote-msan --copt=-fsanitize=memory
+build:remote-msan --linkopt=-fsanitize=memory
+build:remote-msan --cxxopt=--stdlib=libc++
+build:remote-msan --copt=-fsanitize-memory-track-origins
+build:remote-msan --host_crosstool_top=@bazel_toolchains//configs/debian8_clang/0.3.0/bazel_0.10.0:toolchain
+build:remote-msan --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.3.0/bazel_0.11.0/msan:toolchain
+# TODO(ngiraldo): experimental container to be removed once rbe-debian8 includes msan instrumented libc++
+build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/asci-toolchain/nosla-debian8-clang-msan@sha256:8f381d55c0456fb65821c90ada902c2584977e03a1eaca8fba8ce77e644c775b" }'
