@@ -25,7 +25,7 @@ main() {
   # Call the script produced by the docker_build rule to load the image
   %{LOAD_IMAGE_SH}
   # Run the container image to build the config repos
-  docker run -e USER_ID="$(id -u)" -v $(pwd):/bazel-config -i %{IMAGE_NAME}
+  docker run --rm -e USER_ID="$(id -u)" -v $(pwd):/bazel-config -i %{IMAGE_NAME}
   # Create a tar file with all the config repos that were built
   tar -cf outputs.tar %{CONFIG_REPOS}
   # Copy the tar file to its desired output location

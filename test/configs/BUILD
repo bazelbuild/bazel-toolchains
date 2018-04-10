@@ -24,8 +24,9 @@ load("@bazel_toolchains//rules:environments.bzl",
     "debian8_clang_default_repos"
 )
 
+# Use "rbe-test-" prefix for easy identification of images to remove after the tests.
 container_install_pkgs(
-    name = "jessie-with-pkgs",
+    name = "rbe-test-jessie-with-pkgs",
     base = "@official_jessie//image",
     packages = debian8_clang_default_packages() + [
         "gcc",
@@ -38,7 +39,7 @@ container_install_pkgs(
 # maintain these configs anywhere
 docker_toolchain_autoconfig(
     name = "debian-jessie-autoconfig",
-    base = ":jessie-with-pkgs.tar",
+    base = ":rbe-test-jessie-with-pkgs.tar",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -46,7 +47,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "debian-jessie-bazel-head-autoconfig",
-    base = ":jessie-with-pkgs.tar",
+    base = ":rbe-test-jessie-with-pkgs.tar",
     env = gcc_env(),
     tags = ["manual"],
     use_bazel_head = True,
@@ -55,7 +56,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "debian-jessie-custom-bazel-version-autoconfig",
-    base = ":jessie-with-pkgs.tar",
+    base = ":rbe-test-jessie-with-pkgs.tar",
     bazel_version = "0.11.0",
     env = gcc_env(),
     tags = ["manual"],
@@ -65,7 +66,7 @@ docker_toolchain_autoconfig(
 # Note that we only support Bazel rc versions at 0.10.0 or above.
 docker_toolchain_autoconfig(
     name = "debian-jessie-custom-bazel-rc-version-autoconfig",
-    base = ":jessie-with-pkgs.tar",
+    base = ":rbe-test-jessie-with-pkgs.tar",
     bazel_version = "0.11.0",
     bazel_rc_version = "1",
     env = gcc_env(),
@@ -73,8 +74,9 @@ docker_toolchain_autoconfig(
     test = True,
 )
 
+# Use "rbe-test-" prefix for easy identification of images to remove after the tests.
 container_install_pkgs(
-    name = "xenial-with-pkgs",
+    name = "rbe-test-xenial-with-pkgs",
     base = "@official_xenial//image",
     packages = [
         "bazel",
@@ -97,7 +99,7 @@ container_install_pkgs(
 
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-autoconfig",
-    base = ":xenial-with-pkgs.tar",
+    base = ":rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -105,7 +107,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
-    base = ":xenial-with-pkgs.tar",
+    base = ":rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
     tags = ["manual"],
     use_bazel_head = True,
@@ -114,7 +116,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-version-autoconfig",
-    base = ":xenial-with-pkgs.tar",
+    base = ":rbe-test-xenial-with-pkgs.tar",
     bazel_version = "0.11.0",
     env = gcc_env(),
     tags = ["manual"],
@@ -124,7 +126,7 @@ docker_toolchain_autoconfig(
 # Note that we only support Bazel rc versions at 0.10.0 or above.
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
-    base = ":xenial-with-pkgs.tar",
+    base = ":rbe-test-xenial-with-pkgs.tar",
     bazel_version = "0.11.0",
     bazel_rc_version = "1",
     env = gcc_env(),
