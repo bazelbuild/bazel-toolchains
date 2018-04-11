@@ -68,7 +68,7 @@ language_tool_layer(
     packages = [
         "libstdc++-4.9-dev",
     ],
-    tars = ["//third_party/clang:tar"],
+    tars = ["//third_party/clang:debian8_tar"],
 )
 
 language_tool_layer(
