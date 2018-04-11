@@ -25,7 +25,7 @@ package(default_visibility = ["//visibility:public"])
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 pkg_tar(
-    name = "tar",
+    name = "debian8_tar",
     srcs = glob(
         ["**/*"],
         exclude = ["**/BUILD"],
@@ -34,6 +34,20 @@ pkg_tar(
     strip_prefix = ".",
     tags = ["manual"],
     deps = [
-        "@clang_release//file",
+        "@debian8_clang_release//file",
+    ],
+)
+
+pkg_tar(
+    name = "ubuntu16_04_tar",
+    srcs = glob(
+        ["**/*"],
+        exclude = ["**/BUILD"],
+    ),
+    package_dir = "/usr/local/",
+    strip_prefix = ".",
+    tags = ["manual"],
+    deps = [
+        "@ubuntu16_04_clang_release//file",
     ],
 )

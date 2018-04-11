@@ -58,7 +58,7 @@ container_pull(
 
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:feec68e34edc42f4c3b21720670003b0d76100fea8c06f965cd3687a2a66bfcf",
+    digest = "sha256:213da2494bb763f55363213db45d9bfa5eb906039fc02e6cb2e6637dc4917caf",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/clang-debian8",
 )
@@ -183,9 +183,15 @@ load(
 
 # Clang
 http_file(
-    name = "clang_release",
-    sha256 = "c2c4d6c9eb98686a8fcee3c75a864baaccd51e2bd6095e1b98dbf0ce3a512bf9",
+    name = "debian8_clang_release",
+    sha256 = "588ddbd83c32e7ab87fad58038c3712f6d1b0056f12ea746169ac7ecd33c93bf",
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_" + CLANG_REVISION + ".tar.gz"],
+)
+
+http_file(
+    name = "ubuntu16_04_clang_release",
+    sha256 = "48bfc470810d483ffb2e826ed3540efc1da45fa89f416f8efa439242495e6239",
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/clang_" + CLANG_REVISION + ".tar.gz"],
 )
 
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
