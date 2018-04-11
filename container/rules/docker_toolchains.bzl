@@ -18,12 +18,6 @@ load("@io_bazel_rules_docker//container:container.bzl", _container = "container"
 load("@debian_docker//package_managers:download_pkgs.bzl", _download = "download")
 load("@debian_docker//package_managers:install_pkgs.bzl", _install = "install")
 
-def cleanup_commands():
-    return {
-        "java":"rm -rf /etc/ssl/certs/java/cacerts /tmp/hsperfdata_root/* /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/classes.jsa",
-        "python":"rm -rf /usr/lib/python3.4/__pycache__/ /usr/lib/python3.4/idlelib/__pycache__/ /usr/lib/python3.4/asyncio/__pycache__/",
-    }
-
 def _input_validation(kwargs):
   if "debs" in kwargs:
     fail("debs is not supported.")
