@@ -20,5 +20,5 @@ build:remote-msan --cxxopt=--stdlib=libc++
 build:remote-msan --copt=-fsanitize-memory-track-origins
 build:remote-msan --host_crosstool_top=@bazel_toolchains//configs/debian8_clang/0.3.0/bazel_0.10.0:toolchain
 build:remote-msan --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.3.0/bazel_0.11.0/msan:toolchain
-# TODO(ngiraldo): experimental container to be removed once rbe-debian8 includes msan instrumented libc++
+# TODO: experimental container to be removed once rbe-debian8 includes msan instrumented libc++
 build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/asci-toolchain/nosla-debian8-clang-msan@sha256:8f381d55c0456fb65821c90ada902c2584977e03a1eaca8fba8ce77e644c775b" }'
