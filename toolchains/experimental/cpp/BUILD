@@ -16,20 +16,17 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
-    "install_bazel_head.sh",
-    "install_bazel_version.sh",
-    "install_bazel_rc_version.sh",
-    "docker_config.sh.tpl",
-])
-
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-
-pkg_tar(
-    name = "cc-sample-project-tar",
-    srcs = [
-        "cc-sample-project/BUILD.sample",
-        "cc-sample-project/test.cc",
+toolchain(
+    name = "cc-toolchain-clang-x86_64",
+    exec_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//tools/cpp:clang",
     ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+    ],
+    toolchain = "//configs/debian8_clang/0.3.0/bazel_0.10.0:cc-compiler-k8",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
-

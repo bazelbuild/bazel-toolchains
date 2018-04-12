@@ -16,20 +16,27 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
-    "install_bazel_head.sh",
-    "install_bazel_version.sh",
-    "install_bazel_rc_version.sh",
-    "docker_config.sh.tpl",
-])
+# Constraints used in configuring the remote platforms and toolchains.
+constraint_setting(name = "linux_distribution")
 
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-
-pkg_tar(
-    name = "cc-sample-project-tar",
-    srcs = [
-        "cc-sample-project/BUILD.sample",
-        "cc-sample-project/test.cc",
-    ],
+constraint_value(
+    name = "jessie",
+    constraint_setting = ":linux_distribution",
 )
 
+# RBE Debian8
+platform(
+    name = "rbe_debian8",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        ":jessie",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:1ede2a929b44d629ec5abe86eee6d7ffea1d5a4d247489a8867d46cfde3e38bd"
+         }
+         """,
+)

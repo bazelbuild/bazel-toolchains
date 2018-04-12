@@ -28,7 +28,7 @@ COMMIT=44200e0c026d86c53470d107b3697a3e46469c43
 BAZEL_VERSION=0.10.0
 CONFIG_VERSION=0.3.0
 TEST_CONFIGS_DIR=${TEST_TMPDIR}/bazel-toolchains-${COMMIT}/configs/debian8_clang/${CONFIG_VERSION}/bazel_${BAZEL_VERSION}/
-AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/rules/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig
+AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/configs/debian8_clang/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig
 
 # Helper function for always delete the containers / temporary files on exit
 function cleanup_on_finish {

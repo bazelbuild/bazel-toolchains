@@ -189,6 +189,12 @@ http_file(
 )
 
 http_file(
+    name = "debian9_clang_release",
+    sha256 = "434bbe2195845e42eb36ad2b88f6aec658d192614d47f71e15b861e09f71b4bd",
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/clang_" + CLANG_REVISION + ".tar.gz"],
+)
+
+http_file(
     name = "ubuntu16_04_clang_release",
     sha256 = "48bfc470810d483ffb2e826ed3540efc1da45fa89f416f8efa439242495e6239",
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/clang_" + CLANG_REVISION + ".tar.gz"],
