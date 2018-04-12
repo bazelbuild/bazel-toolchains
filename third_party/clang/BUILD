@@ -39,6 +39,20 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "debian9_tar",
+    srcs = glob(
+        ["**/*"],
+        exclude = ["**/BUILD"],
+    ),
+    package_dir = "/usr/local/",
+    strip_prefix = ".",
+    tags = ["manual"],
+    deps = [
+        "@debian9_clang_release//file",
+    ],
+)
+
+pkg_tar(
     name = "ubuntu16_04_tar",
     srcs = glob(
         ["**/*"],
