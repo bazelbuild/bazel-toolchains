@@ -20,9 +20,23 @@ load(
     "//container/rules:docker_toolchains.bzl",
     "language_tool_layer",
     "toolchain_container",
-    "cleanup_commands",
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+
+JAVA_CLEANUP_COMMANDS=(
+    "rm -rf " +
+    "/etc/ssl/certs/java/cacerts " +
+    "/tmp/hsperfdata_root/* " +
+    "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/classes.jsa"
+)
+PYTHON_CLEANUP_COMMANDS=(
+    "rm -rf " +
+    "/usr/lib/python3.5/__pycache__/ " +
+    "/usr/lib/python3.5/idlelib/__pycache__/ " +
+    "/usr/lib/python3.5/asyncio/__pycache__/ " +
+    "/usr/lib/python3.5/json/__pycache__/ " +
+    "/usr/lib/python3/dist-packages/numpy/testing/__pycache__/"
+)
 
 toolchain_container(
     name = "toolchain",
@@ -90,7 +104,7 @@ language_tool_layer(
     env = {
         "JAVA_HOME": "/usr/lib/jvm/java-8-openjdk-amd64",
     },
-    installation_cleanup_commands = cleanup_commands()["java"],
+    installation_cleanup_commands = JAVA_CLEANUP_COMMANDS,
     packages = [
         "ca-certificates-java",
         "openjdk-8-jdk-headless",
@@ -107,7 +121,7 @@ language_tool_layer(
     env = {
         "PATH": "$PATH:/opt/python3.6/bin",
     },
-    installation_cleanup_commands = cleanup_commands()["python"],
+    installation_cleanup_commands = PYTHON_CLEANUP_COMMANDS,
     packages = [
         "python-dev",
         "python-numpy",
