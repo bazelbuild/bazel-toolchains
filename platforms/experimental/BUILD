@@ -36,7 +36,7 @@ platform(
     remote_execution_properties = """
           properties: {
             name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:1ede2a929b44d629ec5abe86eee6d7ffea1d5a4d247489a8867d46cfde3e38bd"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:d84a7de5175a22505209f56b02f1da20ccec64880da09ee38eaef3670fbd2a56"
          }
          """,
 )
