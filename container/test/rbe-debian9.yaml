@@ -1,6 +1,7 @@
 schemaVersion: "1.0.0"
 
-commandTests:
-- name: 'os-version'
-  command: ['sh', '-c', 'cat /etc/issue.net']
-  expectedOutput: ['Debian GNU/Linux 9']
+fileExistenceTests:
+- name: 'Python3'
+  isDirectory: false
+  path: '/usr/bin/python3'
+  shouldExist: true

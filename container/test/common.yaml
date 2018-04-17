@@ -24,7 +24,7 @@ commandTests:
   expectedOutput: ['Python 2.7.*']
 - name: 'python3-version'
   command: ['bash', '-c', 'python3 -V']
-  expectedOutput: ['Python 3.6.2']
+  expectedOutput: ['Python 3.6.*']
 - name: 'go-version'
   command: ['bash', '-c', 'go version']
   expectedOutput: ['go version go1.10 linux/amd64']
@@ -66,10 +66,6 @@ fileExistenceTests:
 - name: 'Python2'
   isDirectory: false
   path: '/usr/bin/python2.7'
-  shouldExist: true
-- name: 'Python3'
-  isDirectory: false
-  path: '/opt/python3.6/bin/python3'
   shouldExist: true
 - name: 'Golang'
   isDirectory: false

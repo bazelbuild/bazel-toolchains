@@ -23,17 +23,15 @@ load(
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
-JAVA_CLEANUP_COMMANDS=(
+JAVA_CLEANUP_COMMANDS = (
     "rm -rf " +
     "/etc/ssl/certs/java/cacerts " +
     "/tmp/hsperfdata_root/* " +
     "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/classes.jsa"
 )
-PYTHON_CLEANUP_COMMANDS=(
-    "rm -rf " +
-    "/usr/lib/python3.5/__pycache__/ " +
-    "/usr/lib/python3.5/idlelib/__pycache__/ " +
-    "/usr/lib/python3.5/asyncio/__pycache__/"
+
+PYTHON_CLEANUP_COMMANDS = (
+    "find /usr/lib/python* -name __pycache__ -exec rm -rf {} +"
 )
 
 toolchain_container(
@@ -129,8 +127,9 @@ language_tool_layer(
         "/usr/bin/python": "/usr/bin/python2.7",
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
+        "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
     },
-    tars = ["//third_party/python:tar"],
+    tars = ["//third_party/python:ubuntu16_04_tar"],
 )
 
 container_test(
@@ -138,7 +137,7 @@ container_test(
     configs = [
         "//container/test:common.yaml",
         # TODO: find a better way for testing distro version
-        # "//container/test:rbe-ubuntu16_04.yaml",
+        "//container/test:rbe-ubuntu16_04.yaml",
     ],
     image = ":toolchain",
 )

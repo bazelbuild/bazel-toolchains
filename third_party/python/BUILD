@@ -26,7 +26,7 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("//skylib:container_file_export.bzl", "container_file_export")
 
 pkg_tar(
-    name = "tar",
+    name = "debian8_tar",
     srcs = glob(
         ["**/*"],
         exclude = ["**/BUILD"],
@@ -34,14 +34,37 @@ pkg_tar(
     package_dir = "/",
     strip_prefix = ".",
     tags = ["manual"],
-    deps = [":python3"],
+    deps = [":debian8_python3"],
 )
 
-# Get python3 interpreter from the latest l.gcr.io/google/python container
-# https://github.com/GoogleCloudPlatform/python-runtime/tree/master/python-interpreter-builder
+pkg_tar(
+    name = "ubuntu16_04_tar",
+    srcs = glob(
+        ["**/*"],
+        exclude = ["**/BUILD"],
+    ),
+    package_dir = "/",
+    strip_prefix = ".",
+    tags = ["manual"],
+    deps = [":ubuntu16_04_python3"],
+)
+
+# Get debian8-built python3 interpreter from l.gcr.io/google/python container
+# Base image: gcr.io/google-appengine/debian8:latest
+# https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
 container_file_export(
-    name = "python3",
+    name = "debian8_python3",
     image = "l.gcr.io/google/python@sha256:de9ab4346c65a611b1721aeae0633d897f56861a0cda0b40bc032771007ac914",
+    src_path = "/opt/python3.6",
+    tags = ["manual"],
+)
+
+# Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:staging
+# Base image: gcr.io/gcp-runtimes/ubuntu_16_0_4:latest
+# https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
+container_file_export(
+    name = "ubuntu16_04_python3",
+    image = "gcr.io/google-appengine/python@sha256:e720c0e853697373efe5e3eed6f4db113f9291327a6f169feb54271fe364b40b",
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )
