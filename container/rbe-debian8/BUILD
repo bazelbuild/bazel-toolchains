@@ -122,9 +122,11 @@ language_tool_layer(
         "python-dev",
         "python-numpy",
         "python-pip",
+        "python-setuptools",
         "python3-dev",
         "python3-numpy",
         "python3-pip",
+        "python3-setuptools",
     ],
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
@@ -138,8 +140,6 @@ language_tool_layer(
 container_test(
     name = "toolchain-test",
     configs = [
-        "//container/test:common.yaml",
-        # TODO: find a better way for testing distro version
         "//container/test:rbe-debian8.yaml",
     ],
     image = ":toolchain",

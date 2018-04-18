@@ -1,7 +1,135 @@
 schemaVersion: "1.0.0"
 
+# TODO: split out the common tests once resolve the CI issues
+
+# Distro-specific tests
+commandTests:
+- name: 'os-version'
+  command: ['sh', '-c', 'cat /etc/issue.net']
+  expectedOutput: ['Ubuntu 16.04.3 LTS']
 fileExistenceTests:
 - name: 'Python3'
   isDirectory: false
   path: '/opt/python3.6/bin/python3'
+  shouldExist: true
+
+# Common tests
+commandTests:
+- name: 'path-envvar'
+  command: ['sh', '-c', 'echo $PATH']
+  expectedOutput: ['/opt/python3.6/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin']
+- name: 'cc-envvar'
+  command: ['sh', '-c', 'echo $CC']
+  expectedOutput: ['/usr/local/bin/clang']
+- name: 'javahome-envvar'
+  command: ['sh', '-c', 'echo $JAVA_HOME']
+  expectedOutput: ['/usr/lib/jvm/java-8-openjdk-amd64']
+- name: 'gopath-envvar'
+  command: ['sh', '-c', 'echo $GOPATH']
+  expectedOutput: ['/go']
+- name: 'clang-version'
+  command: ['bash', '-c', 'clang --version']
+  expectedOutput: ['clang version 7.0.0.*']
+- name: 'java-version'
+  command: ['bash', '-c', 'java -version 2>&1']
+  expectedOutput: ['openjdk version \"1.8.*']
+- name: 'python2-version'
+  command: ['bash', '-c', 'python -V 2>&1']
+  expectedOutput: ['Python 2.7.*']
+- name: 'python3-version'
+  command: ['bash', '-c', 'python3 -V']
+  expectedOutput: ['Python 3.6.*']
+- name: 'go-version'
+  command: ['bash', '-c', 'go version']
+  expectedOutput: ['go version go1.10 linux/amd64']
+- name: 'check-curl'
+  command: ['bash', '-c', 'curl --version']
+  expectedOutput: ['curl .* \(x86_64-pc-linux-gnu\).*']
+- name: 'check-ed'
+  command: ['bash', '-c', 'ed --version']
+  expectedOutput: ['GNU Ed .*']
+- name: 'check-file'
+  command: ['bash', '-c', 'file --version']
+  expectedOutput: ['file-.*']
+- name: 'check-git'
+  command: ['bash', '-c', 'git --version']
+  expectedOutput: ['git version .*']
+- name: 'check-openssl'
+  command: ['bash', '-c', 'openssl version']
+  expectedOutput: ['OpenSSL .*']
+- name: 'check-wget'
+  command: ['bash', '-c', 'wget --version']
+  expectedOutput: ['GNU Wget.* built on linux-gnu.*']
+- name: 'check-zip'
+  command: ['bash', '-c', 'zip --version']
+  expectedOutput: ['.*This is Zip.*']
+
+fileExistenceTests:
+- name: 'Root'
+  isDirectory: true
+  path: '/'
+  shouldExist: true
+- name: 'Clang'
+  isDirectory: false
+  path: '/usr/local/bin/clang'
+  shouldExist: true
+- name: 'OpenJDK'
+  isDirectory: true
+  path: '/usr/lib/jvm/java-8-openjdk-amd64'
+  shouldExist: true
+- name: 'Python2'
+  isDirectory: false
+  path: '/usr/bin/python2.7'
+  shouldExist: true
+- name: 'Golang'
+  isDirectory: false
+  path: '/usr/local/go/bin/go'
+  shouldExist: true
+- name: 'sanitizer'
+  isDirectory: true
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer'
+  shouldExist: true
+- name: 'sanitizer-allocator'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/allocator_interface.h'
+  shouldExist: true
+- name: 'sanitizer-asan'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/asan_interface.h'
+  shouldExist: true
+- name: 'sanitizer-common_defs'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/common_interface_defs.h'
+  shouldExist: true
+- name: 'sanitizer-coverage'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/coverage_interface.h'
+  shouldExist: true
+- name: 'sanitizer-dfsan'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/dfsan_interface.h'
+  shouldExist: true
+- name: 'sanitizer-esan'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/esan_interface.h'
+  shouldExist: true
+- name: 'sanitizer-linux_syscall_hooks'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/linux_syscall_hooks.h'
+  shouldExist: true
+- name: 'sanitizer-lsan'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/lsan_interface.h'
+  shouldExist: true
+- name: 'sanitizer-msan'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/msan_interface.h'
+  shouldExist: true
+- name: 'sanitizer-tsan_atomic'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/tsan_interface_atomic.h'
+  shouldExist: true
+- name: 'sanitizer-tsan'
+  isDirectory: false
+  path: '/usr/local/lib/clang/7.0.0/include/sanitizer/tsan_interface.h'
   shouldExist: true
