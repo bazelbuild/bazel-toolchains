@@ -47,7 +47,7 @@ commandTests:
   expectedOutput: ['curl .* \(x86_64-pc-linux-gnu\).*']
 - name: 'check-ed'
   command: ['bash', '-c', 'ed --version']
-  expectedOutput: ['GNU Ed .*']
+  expectedOutput: ['GNU [eE]d .*']
 - name: 'check-file'
   command: ['bash', '-c', 'file --version']
   expectedOutput: ['file-.*']
