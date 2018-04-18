@@ -22,6 +22,9 @@ def _input_validation(kwargs):
   if "debs" in kwargs:
     fail("debs is not supported.")
 
+  if "packages" in kwargs and "installables_tar" in kwargs:
+    fail("'packages' and 'installables_tar' cannot be specified at the same time.")
+
   has_no_packages = "packages" not in kwargs or kwargs["packages"] == []
   if has_no_packages and "additional_repos" in kwargs:
     fail("'additional_repos' can only be specified when 'packages' is not empty.")
