@@ -92,9 +92,9 @@ go_register_toolchains()
 
 http_archive(
     name = "debian_docker",
-    sha256 = "44ad4c5f21771926350f1976d0e4300d9149622c6d4484378a3d00d232c0eb8f",
-    strip_prefix = "base-images-docker-d5313e6a3f6d277490148df35c6716e65af5aa57",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/d5313e6a3f6d277490148df35c6716e65af5aa57.tar.gz"],
+    sha256 = "d17612c25ee9e5985641beb2a1cb56f9d4332d69b22ca27f3c95a456b5e4ab6c",
+    strip_prefix = "base-images-docker-6360d9a3f781a0fa2cd7f7a91d3dcd7941b74026",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/6360d9a3f781a0fa2cd7f7a91d3dcd7941b74026.tar.gz"],
 )
 
 http_file(
