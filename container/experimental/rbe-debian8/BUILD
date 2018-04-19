@@ -101,9 +101,10 @@ container_layer(
         "/usr/bin/python": "/usr/bin/python2.7",
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
+        "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
     },
     tags = ["manual"],
-    tars = ["//third_party/python:tar"],
+    tars = ["//third_party/python:debian8_tar"],
 )
 
 container_test(

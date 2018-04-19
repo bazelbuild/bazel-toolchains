@@ -23,19 +23,15 @@ load(
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
-JAVA_CLEANUP_COMMANDS=(
+JAVA_CLEANUP_COMMANDS = (
     "rm -rf " +
     "/etc/ssl/certs/java/cacerts " +
     "/tmp/hsperfdata_root/* " +
     "/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server/classes.jsa"
 )
-PYTHON_CLEANUP_COMMANDS=(
-    "rm -rf " +
-    "/usr/lib/python3.5/__pycache__/ " +
-    "/usr/lib/python3.5/idlelib/__pycache__/ " +
-    "/usr/lib/python3.5/asyncio/__pycache__/ " +
-    "/usr/lib/python3.5/json/__pycache__/ " +
-    "/usr/lib/python3/dist-packages/numpy/testing/__pycache__/"
+
+PYTHON_CLEANUP_COMMANDS = (
+    "find /usr/lib/python* -name __pycache__ -exec rm -rf {} +"
 )
 
 toolchain_container(
@@ -117,33 +113,31 @@ language_tool_layer(
 
 language_tool_layer(
     name = "python-ltl",
+    additional_repos = [
+        "deb http://httpredir.debian.org/debian testing main",
+    ],
     base = "@debian9//image",
-    env = {
-        "PATH": "$PATH:/opt/python3.6/bin",
-    },
     installation_cleanup_commands = PYTHON_CLEANUP_COMMANDS,
     packages = [
         "python-dev",
         "python-numpy",
         "python-pip",
-        "python3-dev",
+        "python-setuptools",
+        "python3.6",
+        "python3.6-dev",
         "python3-numpy",
         "python3-pip",
+        "python3-setuptools",
     ],
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
-        "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
-        "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
     },
-    tars = ["//third_party/python:tar"],
 )
 
 container_test(
     name = "toolchain-test",
     configs = [
-        "//container/test:common.yaml",
-        # TODO: find a better way for testing distro version
-        # "//container/test:rbe-debian9.yaml",
+        "//container/test:rbe-debian9.yaml",
     ],
     image = ":toolchain",
 )
