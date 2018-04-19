@@ -23,7 +23,7 @@
 
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 main() {
   if [ "$#" -ne 3 ]; then
@@ -34,7 +34,8 @@ main() {
   SOURCE=$2
   TARGET=$3
 
-  container_name="data-container-$RANDOM"
+  random_number=$RANDOM
+  container_name="data-container-${random_number}"
   docker run -t -d --name ${container_name} $IMAGE sleep infinity
   docker exec -e GZIP=-n ${container_name} tar -czf /tmp/data.tar.gz --mtime='1970-01-01' $SOURCE
   docker cp ${container_name}:/tmp/data.tar.gz $TARGET
