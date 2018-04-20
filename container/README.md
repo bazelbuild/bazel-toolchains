@@ -29,16 +29,22 @@ You can build a toolchain-container with
 [debian8](https://console.cloud.google.com/launcher/details/google/debian8) as
 the base container by running:
 
-    container/debian8-clang-fully-loaded/build.sh -p your-project-id -c debian8-clang-fully-loaded -t latest
+``` shell
+container/build.sh -p your-project-id -d debian8 -c rbe-debian8 -t latest
+```
 
 Congratulations! Your docker container is now available in [Container
 Registry](https://cloud.google.com/container-registry/)
 
-    gcr.io/your-project-id/debian8-clang-fully-loaded:latest
+```shell
+gcr.io/your-project-id/rbe-debian8:latest
+```
 
 You can pull the built container to local
 
-    gcloud docker -- pull gcr.io/your-project-id/debian8-clang-fully-loaded:latest
+```shell
+gcloud docker -- pull gcr.io/your-project-id/rbe-debian8:latest
+```
 
 ### Build locally
 
@@ -49,8 +55,12 @@ test. You would need
 
 Run the following command:
 
-container/debian8-clang-fully-loaded/build.sh -l
+```shell
+container/build.sh -l -d debian8
+```
 
 You docker container is now available locally and you can try it out by running:
 
-docker run -it debian8-clang-fully-loaded:latest
+```shell
+docker run -it rbe-debian8:latest /bin/bash
+```
