@@ -30,20 +30,20 @@ You can build a toolchain-container with
 the base container by running:
 
 ``` shell
-container/build.sh -p your-project-id -d debian8 -c rbe-debian8 -t latest
+container/build.sh -p my-project-id -d debian8 -c rbe-debian8 -t latest -b my-gcs-bucket
 ```
 
 Congratulations! Your docker container is now available in [Container
 Registry](https://cloud.google.com/container-registry/)
 
 ```shell
-gcr.io/your-project-id/rbe-debian8:latest
+gcr.io/my-project-id/rbe-debian8:latest
 ```
 
 You can pull the built container to local
 
 ```shell
-gcloud docker -- pull gcr.io/your-project-id/rbe-debian8:latest
+gcloud docker -- pull gcr.io/my-project-id/rbe-debian8:latest
 ```
 
 ### Build locally
