@@ -169,34 +169,43 @@ dpkg_list(
     ],
 )
 
+load(
+    "//third_party/golang:revision.bzl",
+    "GOLANG_REVISION",
+    "GOLANG_SHA256",
+)
+
 # Golang
 http_file(
     name = "golang_release",
-    sha256 = "b5a64335f1490277b585832d1f6c7f8c6c11206cba5cd3f771dcb87b98ad1a33",
-    urls = ["https://storage.googleapis.com/golang/go1.10.linux-amd64.tar.gz"],
+    sha256 = GOLANG_SHA256,
+    urls = ["https://storage.googleapis.com/golang/go" + GOLANG_REVISION + ".linux-amd64.tar.gz"],
 )
 
 load(
     "//third_party/clang:revision.bzl",
     "CLANG_REVISION",
+    "DEBIAN8_CLANG_SHA256",
+    "DEBIAN9_CLANG_SHA256",
+    "UBUNTU16_04_CLANG_SHA256",
 )
 
 # Clang
 http_file(
     name = "debian8_clang_release",
-    sha256 = "588ddbd83c32e7ab87fad58038c3712f6d1b0056f12ea746169ac7ecd33c93bf",
+    sha256 = DEBIAN8_CLANG_SHA256,
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_" + CLANG_REVISION + ".tar.gz"],
 )
 
 http_file(
     name = "debian9_clang_release",
-    sha256 = "434bbe2195845e42eb36ad2b88f6aec658d192614d47f71e15b861e09f71b4bd",
+    sha256 = DEBIAN9_CLANG_SHA256,
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/clang_" + CLANG_REVISION + ".tar.gz"],
 )
 
 http_file(
     name = "ubuntu16_04_clang_release",
-    sha256 = "48bfc470810d483ffb2e826ed3540efc1da45fa89f416f8efa439242495e6239",
+    sha256 = UBUNTU16_04_CLANG_SHA256,
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/clang_" + CLANG_REVISION + ".tar.gz"],
 )
 
