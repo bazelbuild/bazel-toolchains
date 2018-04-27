@@ -85,6 +85,10 @@ fileExistenceTests:
   isDirectory: false
   path: '/usr/local/go/bin/go'
   shouldExist: true
+- name: 'llvm-symbolizer'
+  isDirectory: false
+  path: '/usr/local/bin/llvm-symbolizer'
+  shouldExist: true
 - name: 'sanitizer'
   isDirectory: true
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer'
