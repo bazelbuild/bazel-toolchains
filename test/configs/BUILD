@@ -17,7 +17,7 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_toolchains//rules:docker_config.bzl", "container_install_pkgs", "docker_toolchain_autoconfig")
-load("@bazel_toolchains//rules:environments.bzl", 
+load("@bazel_toolchains//rules:environments.bzl",
     "gcc_env",
     "debian8_clang_default_keys",
     "debian8_clang_default_packages",
@@ -57,7 +57,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "debian-jessie-custom-bazel-version-autoconfig",
     base = ":rbe-test-jessie-with-pkgs.tar",
-    bazel_version = "0.11.0",
+    bazel_version = "0.13.0",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -67,7 +67,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "debian-jessie-custom-bazel-rc-version-autoconfig",
     base = ":rbe-test-jessie-with-pkgs.tar",
-    bazel_version = "0.11.0",
+    bazel_version = "0.13.0",
     bazel_rc_version = "1",
     env = gcc_env(),
     tags = ["manual"],
@@ -117,7 +117,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-version-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
-    bazel_version = "0.11.0",
+    bazel_version = "0.13.0",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -127,7 +127,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
-    bazel_version = "0.11.0",
+    bazel_version = "0.13.0",
     bazel_rc_version = "1",
     env = gcc_env(),
     tags = ["manual"],
