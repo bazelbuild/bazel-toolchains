@@ -64,9 +64,14 @@ container_layer(
     debs = clang_layer_packages(),
     env = {
         "CC": "/usr/local/bin/clang",
+        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
+        "MSAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
     },
     tags = ["manual"],
-    tars = ["//third_party/clang:debian8_tar"],
+    tars = [
+        "//third_party/clang:debian8_tar",
+        "//third_party/libcxx:debian8_tar",
+    ],
 )
 
 container_layer(
