@@ -209,6 +209,33 @@ http_file(
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/clang_" + CLANG_REVISION + ".tar.gz"],
 )
 
+load(
+    "//third_party/libcxx:revision.bzl",
+    "LIBCXX_REVISION",
+    "DEBIAN8_LIBCXX_SHA256",
+    "DEBIAN9_LIBCXX_SHA256",
+    "UBUNTU16_04_LIBCXX_SHA256",
+)
+
+# libcxx
+http_file(
+    name = "debian8_libcxx_release",
+    sha256 = DEBIAN8_LIBCXX_SHA256,
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
+)
+
+http_file(
+    name = "debian9_libcxx_release",
+    sha256 = DEBIAN9_LIBCXX_SHA256,
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
+)
+
+http_file(
+    name = "ubuntu16_04_libcxx_release",
+    sha256 = UBUNTU16_04_LIBCXX_SHA256,
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
+)
+
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
 http_file(

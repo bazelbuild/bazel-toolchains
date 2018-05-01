@@ -74,11 +74,15 @@ language_tool_layer(
     env = {
         "CC": "/usr/local/bin/clang",
         "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
+        "MSAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
     },
     packages = [
         "libstdc++-4.9-dev",
     ],
-    tars = ["//third_party/clang:ubuntu16_04_tar"],
+    tars = [
+        "//third_party/clang:ubuntu16_04_tar",
+        "//third_party/libcxx:ubuntu16_04_tar",
+    ],
 )
 
 language_tool_layer(
