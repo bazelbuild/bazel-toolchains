@@ -259,7 +259,9 @@ def _docker_toolchain_autoconfig_impl(ctx):
     bazel_cmd += " && touch WORKSPACE && mv BUILD.sample BUILD"
   # For each config repo we run the target @<config_repo>//...
   bazel_targets = "@" + "//... @".join(ctx.attr.config_repos) + "//..."
-  bazel_flags = " --all_incompatible_changes"
+  bazel_flags = ""
+  if not ctx.attr.incompatible_changes_off:
+    bazel_flags += " --all_incompatible_changes"
   bazel_cmd += " && bazel build " + bazel_flags + " " + bazel_targets
 
   # Command to run to clean up after autoconfiguration.
@@ -347,6 +349,7 @@ docker_toolchain_autoconfig_ = rule(
         "packages": attr.string_list(),
         "additional_repos": attr.string_list(),
         "keys": attr.string_list(),
+        "incompatible_changes_off": attr.bool(default = False),
         "test": attr.bool(default = True),
     },
     executable = True,
@@ -451,6 +454,8 @@ def docker_toolchain_autoconfig(**kwargs):
     additional_repos: list of additional debian package repos to use,
         in sources.list format.
     keys: list of additional gpg keys to use while downloading packages.
+    incompatible_changes_off: If True Bazel will run without the
+        all_incompatible_changes flag. Default False.
     test: a boolean which specifies whether a test target for this
         docker_toolchain_autoconfig will be added.
         If True, a test target with name {name}_test will be added.
