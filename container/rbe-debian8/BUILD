@@ -40,7 +40,7 @@ toolchain_container(
     env = {
         # PATH envvar is a special case, and currently only the one in the
         # topmost layer is set. So that we override it here to include all.
-        "PATH": "/opt/python3.6/bin:/usr/local/go/bin:$PATH",
+        "PATH": "$PATH:/opt/python3.6/bin:/usr/local/go/bin",
     },
     language_layers = [
         "base-ltl",
@@ -134,6 +134,7 @@ language_tool_layer(
     ],
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
+        "/usr/bin/pip2": "/usr/local/bin/pip2",
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
         "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",

@@ -40,7 +40,7 @@ toolchain_container(
     env = {
         # PATH envvar is a special case, and currently only the one in the
         # topmost layer is set. So that we override it here to include all.
-        "PATH": "/opt/python3.6/bin:/usr/local/go/bin:$PATH",
+        "PATH": "$PATH:/usr/local/go/bin",
     },
     language_layers = [
         "base-ltl",
