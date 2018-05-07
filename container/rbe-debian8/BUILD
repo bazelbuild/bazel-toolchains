@@ -125,16 +125,12 @@ language_tool_layer(
     packages = [
         "python-dev",
         "python-numpy",
-        "python-pip",
         "python-setuptools",
         "python3-dev",
-        "python3-numpy",
-        "python3-pip",
-        "python3-setuptools",
     ],
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
-        "/usr/bin/pip2": "/usr/local/bin/pip2",
+        "/usr/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
         "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
