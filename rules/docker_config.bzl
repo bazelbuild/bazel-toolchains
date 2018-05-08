@@ -67,7 +67,7 @@ Add to your WORKSPACE file the following:
   )
 
   http_archive(
-      name = "debian_docker",
+      name = "base_images_docker",
       sha256 = "<sha256>",
       strip_prefix = "base-images-docker-<latest_release>",
       urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/<latest_release>.tar.gz"],
@@ -125,9 +125,9 @@ load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
-load("@debian_docker//package_managers:download_pkgs.bzl", "download_pkgs")
-load("@debian_docker//package_managers:install_pkgs.bzl", "install_pkgs")
-load("@debian_docker//package_managers:apt_key.bzl", "add_apt_key")
+load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
+load("@base_images_docker//package_managers:install_pkgs.bzl", "install_pkgs")
+load("@base_images_docker//package_managers:apt_key.bzl", "add_apt_key")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
