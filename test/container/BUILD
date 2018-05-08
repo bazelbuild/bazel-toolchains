@@ -15,3 +15,107 @@
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
+
+load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
+load("@base_images_docker//package_managers:install_pkgs.bzl", "install_pkgs")
+load("@base_images_docker//package_managers:apt_key.bzl", "add_apt_key")
+
+load("@bazel_toolchains//rules:docker_config.bzl", "container_install_pkgs")
+
+# This file contains some sample targets that excersise the container rules
+# We just keep these as examples that should not break (unless indicated)
+# with changes.
+
+# The two targets below test that container_install_pkgs can sequentially
+# install packages
+container_install_pkgs(
+    name = "rbe-test-xenial-base",
+    base = "@official_xenial//image",
+    packages = [
+        "curl",
+        "gcc",
+        "git",
+        "openjdk-8-jdk",
+        "python-dev",
+        "unzip",
+        "wget",
+        "zip",
+    ],
+)
+
+container_install_pkgs(
+    name = "rbe-test-xenial-with-pkgs",
+    base = ":rbe-test-xenial-base.tar",
+    packages = [
+        "bazel",
+    ],
+    additional_repos = [
+        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ],
+    keys = [
+        "@bazel_gpg//file",
+    ],
+)
+
+# The target below (marked manual, should not be run by CI) shows a case of a
+# package that cannot be installed because downloading it requires an additional
+# package (apt-transport-https) not present in the base.
+container_install_pkgs(
+    name = "docker-noprereq-fails",
+    additional_repos = [
+        "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable",
+    ],
+    base = "@debian8//image",
+    packages = [
+        "docker-ce",
+        "apt-transport-https",
+    ],
+    keys = [
+      "@debian_docker_gpg//file",
+    ],
+    tags = ["manual"],
+)
+
+# The targets below exemplify how to install a package whose download
+# has pre-requisites in a way that the final container in which the
+# package is installed does not need the pre-requisites
+download_pkgs(
+    name = "docker-prereq-packages",
+    image_tar = "@debian8//image",
+    packages = [
+        "apt-transport-https",
+    ],
+)
+
+install_pkgs(
+      name = "docker-prereq-test",
+      image_tar = "@debian8//image",
+      installables_tar = ":docker-prereq-packages.tar",
+      output_image_name = "bazel/container/rbe-debian8:docker-prereq-test",
+)
+
+add_apt_key(
+      name = "test-docker-with-keys",
+      image = ":docker-prereq-test.tar",
+      keys = [
+        "@debian_docker_gpg//file",
+      ],
+)
+
+download_pkgs(
+      name = "test-docker-packages",
+      additional_repos = [
+        "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable",
+      ],
+      image_tar = ":test-docker-with-keys.tar",
+      packages = [
+        "docker-ce",
+      ],
+)
+
+install_pkgs(
+      name = "docker",
+      image_tar = "@debian8//image",
+      installables_tar = ":test-docker-packages.tar",
+      output_image_name = "bazel/container/rbe-debian8:docker",
+)
