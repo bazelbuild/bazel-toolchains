@@ -170,7 +170,7 @@ def container_install_pkgs(name, base, packages, additional_repos, keys):
   # Create an intermediate image which includes additional gpg keys.
   add_apt_key(
       name = name + "_with_keys",
-      image = base,
+      image_tar = base,
       keys = keys,
   )
 
