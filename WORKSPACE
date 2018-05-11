@@ -111,6 +111,12 @@ http_file(
     url = "https://bazel.build/bazel-release.pub.gpg",
 )
 
+http_file(
+    name = "debian_docker_gpg",
+    sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
+    url = "https://download.docker.com/linux/debian/gpg",
+)
+
 # Use http_archive rule instead of git_repository rule
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(

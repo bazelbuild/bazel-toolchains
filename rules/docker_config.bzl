@@ -152,7 +152,7 @@ tar_filetype = [
     ".tar.xz",
 ]
 
-def container_install_pkgs(name, base, packages, additional_repos, keys):
+def container_install_pkgs(name, base, packages, additional_repos = [], keys = [], tags = []):
   """Macro to download and install deb packages in a container.
 
   The output image with packages installed will have name {name}.tar.
@@ -165,6 +165,7 @@ def container_install_pkgs(name, base, packages, additional_repos, keys):
     additional_repos: list of additional debian package repos to use,
       in sources.list format.
     keys: label of additional gpg keys to use while downloading packages.
+    tags: tags to pass down to generated rules
   """
 
   # Create an intermediate image which includes additional gpg keys.
@@ -181,6 +182,7 @@ def container_install_pkgs(name, base, packages, additional_repos, keys):
       additional_repos = additional_repos,
       image_tar = ":" + name + "_with_keys.tar",
       packages = packages,
+      tags = tags,
   )
 
   # Execute the package installation script in the container and commit the
@@ -190,7 +192,8 @@ def container_install_pkgs(name, base, packages, additional_repos, keys):
       name = name,
       image_tar = base,
       installables_tar = ":" + name + "_pkgs.tar",
-      output_image_name = name,
+      output_image_name = "bazel/" + native.package_name() + ":" + name,
+      tags = tags,
   )
 
 def _docker_toolchain_autoconfig_impl(ctx):
