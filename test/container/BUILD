@@ -117,5 +117,5 @@ install_pkgs(
       name = "docker",
       image_tar = "@debian8//image",
       installables_tar = ":test-docker-packages.tar",
-      output_image_name = "bazel/container/rbe-debian8:docker",
+      output_image_name = "bazel/test/container:docker",
 )
