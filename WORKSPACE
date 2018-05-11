@@ -65,6 +65,13 @@ container_pull(
 )
 
 container_pull(
+    name = "ubuntu16_04-clang",
+    digest = "sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7",
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/clang-ubuntu",
+)
+
+container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
     repository = "library/debian",

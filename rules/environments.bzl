@@ -57,10 +57,38 @@ def debian8_clang_default_packages():
 def debian8_clang_default_repos():
   return [
     "deb http://deb.debian.org/debian jessie-backports main",
-    "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    bazel_repo(),
   ]
 
 def debian8_clang_default_keys():
+  return bazel_key()
+
+def ubuntu16_04_clang_default_packages():
+  return [
+    "bazel",
+    "ca-certificates-java",
+    "curl",
+    "git",
+    "openjdk-8-jdk-headless",
+    "openjdk-8-jre-headless",
+    "python-dev",
+    "unzip",
+    "wget",
+    "zip",
+  ]
+
+def ubuntu16_04_clang_default_repos():
+  return [
+    bazel_repo(),
+  ]
+
+def ubuntu16_04_clang_default_keys():
+  return bazel_key()
+
+def bazel_key():
   return [
     "@bazel_gpg//file",
   ]
+
+def bazel_repo():
+  return "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8"
