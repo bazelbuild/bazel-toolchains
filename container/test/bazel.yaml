@@ -1,0 +1,34 @@
+schemaVersion: "1.0.0"
+
+# TODO: split out the common tests once resolve the CI issues
+
+# Distro-specific tests
+commandTests:
+- name: 'os-version'
+  command: ['sh', '-c', 'cat /etc/issue.net']
+  expectedOutput: ['Debian GNU/Linux 8']
+
+# Common tests
+commandTests:
+- name: 'path-envvar'
+  command: ['sh', '-c', 'echo $PATH']
+  expectedOutput: ['/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin']
+- name: 'javahome-envvar'
+  command: ['sh', '-c', 'echo $JAVA_HOME']
+  expectedOutput: ['/usr/lib/jvm/java-8-openjdk-amd64']
+- name: 'java-version'
+  command: ['bash', '-c', 'java -version 2>&1']
+  expectedOutput: ['openjdk version \"1.8.*']
+- name: 'check-openssl'
+  command: ['bash', '-c', 'openssl version']
+  expectedOutput: ['OpenSSL .*']
+- name: 'bazel'
+  command: ['bazel']
+  expectedOutput: ['Usage: bazel <command> <options>.*']
+
+# File existence tests
+fileExistenceTests:
+- name: 'OpenJDK'
+  isDirectory: true
+  path: '/usr/lib/jvm/java-8-openjdk-amd64'
+  shouldExist: true

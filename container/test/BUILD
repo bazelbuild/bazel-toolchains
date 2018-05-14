@@ -17,3 +17,31 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 exports_files(glob(["**"]))
+
+load("//container/rules:docker_toolchains.bzl", "toolchain_container")
+load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+
+toolchain_container(
+    name = "bazel-toolchain",
+    base = "@debian8//image",
+    packages = [
+        "bazel",
+    ],
+    additional_repos = [
+      "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ],
+    keys = [
+      "@bazel_gpg//file",
+    ],
+    language_layers = [
+        "//container/rbe-debian8:java-ltl",
+    ],
+)
+
+container_test(
+    name = "bazel-toolchain-test",
+    configs = [
+        "//container/test:bazel.yaml",
+    ],
+    image = ":bazel-toolchain",
+)

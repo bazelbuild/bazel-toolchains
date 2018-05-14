@@ -18,6 +18,7 @@ platforms:
     - "//container/rbe-debian8:toolchain-test"
     - "//container/experimental/rbe-debian9:toolchain-test"
     - "//container/experimental/rbe-ubuntu16_04:toolchain-test"
+    - "//container/test:bazel-toolchain-test"
   ubuntu1604:
     test_targets:
     - "//test/configs:debian-jessie-autoconfig_test"
@@ -36,3 +37,4 @@ platforms:
     - "//container/rbe-debian8:toolchain-test"
     - "//container/experimental/rbe-debian9:toolchain-test"
     - "//container/experimental/rbe-ubuntu16_04:toolchain-test"
+    - "//container/test:bazel-toolchain-test"
