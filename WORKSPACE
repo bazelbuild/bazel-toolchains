@@ -93,9 +93,9 @@ go_register_toolchains()
 
 http_archive(
     name = "base_images_docker",
-    sha256 = "dc489a91aca23c930d9b6827f75aedacbb5cf76ede8464372c3d1be68c93d5fc",
-    strip_prefix = "base-images-docker-76f2d6a6a3bd4f3b0c66eb99eff434587d4ac1d9",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/76f2d6a6a3bd4f3b0c66eb99eff434587d4ac1d9.tar.gz"],
+    sha256 = "44c5d801ea553938b06cd7f82c605d46c79da79a0f1c2ee1a24bed7c49934906",
+    strip_prefix = "base-images-docker-521a8d65328303c45b72818dc97d24fd7a73b400",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/521a8d65328303c45b72818dc97d24fd7a73b400.tar.gz"],
 )
 
 http_file(
