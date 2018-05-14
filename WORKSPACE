@@ -65,6 +65,13 @@ container_pull(
 )
 
 container_pull(
+    name = "ubuntu16_04-clang",
+    digest = "sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7",
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/clang-ubuntu",
+)
+
+container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
     repository = "library/debian",
@@ -102,6 +109,12 @@ http_file(
     name = "bazel_gpg",
     sha256 = "e0e806160454a3e5e308188439525896bf9881f1f2f0b887192428f517da4131",
     url = "https://bazel.build/bazel-release.pub.gpg",
+)
+
+http_file(
+    name = "debian_docker_gpg",
+    sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
+    url = "https://download.docker.com/linux/debian/gpg",
 )
 
 # Use http_archive rule instead of git_repository rule
