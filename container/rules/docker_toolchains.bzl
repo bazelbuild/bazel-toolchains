@@ -15,8 +15,8 @@
 """Definitions of language_tool_layer and toolchain_container rules."""
 
 load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
-load("@debian_docker//package_managers:download_pkgs.bzl", _download = "download")
-load("@debian_docker//package_managers:install_pkgs.bzl", _install = "install")
+load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
+load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 
 def _input_validation(kwargs):
   if "debs" in kwargs:

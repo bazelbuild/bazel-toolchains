@@ -1,0 +1,22 @@
+# Toolchain related flags to append at the end of your .bazelrc file.
+build:remote --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
+build:remote --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
+build:remote --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.13.0/default:toolchain
+build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b940d4f08ea79ce9a07220754052da2ac4a4316e035d8799769cea3c24d10c66" }'
+
+# Experimental configs for sanitizers, use --config=remote,remote-xxsan,remote-<asan/tsan/msan> (in that order)
+build:remote-xxsan --copt=-gmlt
+build:remote-xxsan --strip=never
+
+build:remote-asan --copt=-fsanitize=address
+build:remote-asan --linkopt=-fsanitize=address
+
+build:remote-tsan --copt=-fsanitize=thread
+build:remote-tsan --linkopt=-fsanitize=thread
+
+build:remote-msan --copt=-fsanitize=memory
+build:remote-msan --linkopt=-fsanitize=memory
+build:remote-msan --cxxopt=--stdlib=libc++
+build:remote-msan --copt=-fsanitize-memory-track-origins
+build:remote-msan --host_crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.13.0/default:toolchain
+build:remote-msan --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.13.0/msan:toolchain

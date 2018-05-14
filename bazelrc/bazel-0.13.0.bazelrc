@@ -28,12 +28,12 @@ build:remote --jobs=50
 
 # Set several flags related to specifying the toolchain and java properties.
 # These flags are duplicated rather than imported from (for example)
-# %workspace%/configs/debian8_clang/0.3.0/toolchain.bazelrc to make this
+# %workspace%/configs/ubuntu16_04_clang/1.0/toolchain.bazelrc to make this
 # bazelrc a standalone file that can be copied more easily.
-build:remote --host_javabase=@bazel_toolchains//configs/debian8_clang/0.3.0:jdk8
-build:remote --javabase=@bazel_toolchains//configs/debian8_clang/0.3.0:jdk8
-build:remote --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.3.0/bazel_0.13.0/default:toolchain
-build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:d84a7de5175a22505209f56b02f1da20ccec64880da09ee38eaef3670fbd2a56" }'
+build:remote --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
+build:remote --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
+build:remote --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.13.0/default:toolchain
+build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b940d4f08ea79ce9a07220754052da2ac4a4316e035d8799769cea3c24d10c66" }'
 
 # Set various strategies so that all actions execute remotely. Mixing remote
 # and local execution will lead to errors unless the toolchain and remote

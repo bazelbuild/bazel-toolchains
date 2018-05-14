@@ -65,6 +65,13 @@ container_pull(
 )
 
 container_pull(
+    name = "ubuntu16_04-clang",
+    digest = "sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7",
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/clang-ubuntu",
+)
+
+container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
     repository = "library/debian",
@@ -92,16 +99,22 @@ go_rules_dependencies()
 go_register_toolchains()
 
 http_archive(
-    name = "debian_docker",
-    sha256 = "d17612c25ee9e5985641beb2a1cb56f9d4332d69b22ca27f3c95a456b5e4ab6c",
-    strip_prefix = "base-images-docker-6360d9a3f781a0fa2cd7f7a91d3dcd7941b74026",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/6360d9a3f781a0fa2cd7f7a91d3dcd7941b74026.tar.gz"],
+    name = "base_images_docker",
+    sha256 = "8297bd2afd5dc14c062d0fca062fe0c9fa9fe5e755c98ed94aa94aa681bb8f79",
+    strip_prefix = "base-images-docker-6472e597b35456d27de76799e29cd3e5d40ade8a",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/6472e597b35456d27de76799e29cd3e5d40ade8a.tar.gz"],
 )
 
 http_file(
     name = "bazel_gpg",
     sha256 = "e0e806160454a3e5e308188439525896bf9881f1f2f0b887192428f517da4131",
     url = "https://bazel.build/bazel-release.pub.gpg",
+)
+
+http_file(
+    name = "debian_docker_gpg",
+    sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
+    url = "https://download.docker.com/linux/debian/gpg",
 )
 
 # Use http_archive rule instead of git_repository rule
