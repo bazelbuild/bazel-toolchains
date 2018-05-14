@@ -19,7 +19,6 @@ package(default_visibility = ["//visibility:public"])
 load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
 load("@base_images_docker//package_managers:install_pkgs.bzl", "install_pkgs")
 load("@base_images_docker//package_managers:apt_key.bzl", "add_apt_key")
-
 load("@bazel_toolchains//rules:docker_config.bzl", "container_install_pkgs")
 
 # This file contains some sample targets that excersise the container rules
@@ -45,15 +44,15 @@ container_install_pkgs(
 
 container_install_pkgs(
     name = "rbe-test-xenial-with-pkgs",
-    base = ":rbe-test-xenial-base.tar",
-    packages = [
-        "bazel",
-    ],
     additional_repos = [
         "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
     ],
+    base = ":rbe-test-xenial-base.tar",
     keys = [
         "@bazel_gpg//file",
+    ],
+    packages = [
+        "bazel",
     ],
 )
 
@@ -66,12 +65,12 @@ container_install_pkgs(
         "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable",
     ],
     base = "@debian8//image",
-    packages = [
-        "docker-ce",
-        "apt-transport-https",
-    ],
     keys = [
-      "@debian_docker_gpg//file",
+        "@debian_docker_gpg//file",
+    ],
+    packages = [
+        "apt-transport-https",
+        "docker-ce",
     ],
     tags = ["manual"],
 )
@@ -88,34 +87,34 @@ download_pkgs(
 )
 
 install_pkgs(
-      name = "docker-prereq-test",
-      image_tar = "@debian8//image",
-      installables_tar = ":docker-prereq-packages.tar",
-      output_image_name = "bazel/test/container:docker-prereq-test",
+    name = "docker-prereq-test",
+    image_tar = "@debian8//image",
+    installables_tar = ":docker-prereq-packages.tar",
+    output_image_name = "bazel/test/container:docker-prereq-test",
 )
 
 add_apt_key(
-      name = "test-docker-with-keys",
-      image = ":docker-prereq-test.tar",
-      keys = [
+    name = "test-docker-with-keys",
+    image_tar = ":docker-prereq-test.tar",
+    keys = [
         "@debian_docker_gpg//file",
-      ],
+    ],
 )
 
 download_pkgs(
-      name = "test-docker-packages",
-      additional_repos = [
+    name = "test-docker-packages",
+    additional_repos = [
         "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable",
-      ],
-      image_tar = ":test-docker-with-keys.tar",
-      packages = [
+    ],
+    image_tar = ":test-docker-with-keys.tar",
+    packages = [
         "docker-ce",
-      ],
+    ],
 )
 
 install_pkgs(
-      name = "docker",
-      image_tar = "@debian8//image",
-      installables_tar = ":test-docker-packages.tar",
-      output_image_name = "bazel/test/container:docker",
+    name = "docker",
+    image_tar = "@debian8//image",
+    installables_tar = ":test-docker-packages.tar",
+    output_image_name = "bazel/test/container:docker",
 )
