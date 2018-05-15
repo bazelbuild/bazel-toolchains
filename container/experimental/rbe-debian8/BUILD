@@ -78,7 +78,7 @@ container_layer(
     name = "go-ltl",
     env = {
         "GOPATH": "/go",
-        "PATH": "/usr/local/go/bin:$PATH",
+        "PATH": "$PATH:/usr/local/go/bin",
     },
     tags = ["manual"],
     tars = ["//third_party/golang:tar"],
@@ -100,7 +100,7 @@ container_layer(
     name = "python-ltl",
     debs = python_layer_packages(),
     env = {
-        "PATH": "/opt/python3.6/bin:$PATH",
+        "PATH": "$PATH:/opt/python3.6/bin",
     },
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
