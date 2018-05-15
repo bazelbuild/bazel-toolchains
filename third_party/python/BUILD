@@ -54,7 +54,7 @@ pkg_tar(
 # https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
 container_file_export(
     name = "debian8_python3",
-    image = "l.gcr.io/google/python@sha256:de9ab4346c65a611b1721aeae0633d897f56861a0cda0b40bc032771007ac914",
+    image = "l.gcr.io/google/python@sha256:5c5394b9d43b06188a866fd11df84ffb808a91495492a7d727dd258dedee796e",
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )

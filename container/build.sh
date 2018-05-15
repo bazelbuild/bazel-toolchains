@@ -116,7 +116,7 @@ main () {
   parse_parameters $@
 
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
-  if [[ "$DISTRO" == "debian8" ]]; then
+  if [[ "$DISTRO" != "debian9" ]]; then
     DIR="container/rbe-${DISTRO}"
   else
     DIR="container/experimental/rbe-${DISTRO}"
