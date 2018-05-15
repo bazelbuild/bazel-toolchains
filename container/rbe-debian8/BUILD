@@ -124,7 +124,6 @@ language_tool_layer(
     installation_cleanup_commands = PYTHON_CLEANUP_COMMANDS,
     packages = [
         "python-dev",
-        "python-numpy",
         "python-setuptools",
         "python3-dev",
     ],
