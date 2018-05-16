@@ -16,8 +16,8 @@ platforms:
     - "//configs/ubuntu16_04_clang:ubuntu16_04-clang-0.3.0-bazel_0.13.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-0.3.0-bazel_0.13.0-autoconfig_test"
     - "//container/rbe-debian8:toolchain-test"
+    - "//container/rbe-ubuntu16_04:toolchain-test"
     - "//container/experimental/rbe-debian9:toolchain-test"
-    - "//container/experimental/rbe-ubuntu16_04:toolchain-test"
     - "//container/test:bazel-toolchain-test"
   ubuntu1604:
     test_targets:
@@ -35,6 +35,6 @@ platforms:
     - "//configs/ubuntu16_04_clang:ubuntu16_04-clang-0.3.0-bazel_0.13.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-0.3.0-bazel_0.13.0-autoconfig_test"
     - "//container/rbe-debian8:toolchain-test"
+    - "//container/rbe-ubuntu16_04:toolchain-test"
     - "//container/experimental/rbe-debian9:toolchain-test"
-    - "//container/experimental/rbe-ubuntu16_04:toolchain-test"
     - "//container/test:bazel-toolchain-test"

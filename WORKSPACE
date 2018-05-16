@@ -38,28 +38,28 @@ container_repositories()
 
 container_pull(
     name = "debian8",
-    digest = "sha256:412ef4d53215ff4a95d275ad48fe5196cb51f4f96b99c05058054b3bdf9443c1",
+    digest = "sha256:943025384b0efebacf5473490333658dd190182e406e956ee4af65208d104332",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/debian8",
 )
 
 container_pull(
     name = "debian9",
-    digest = "sha256:1b77b1d6cbc79af00b68050880b7d8cb24b7631fe366501bd55bf3986c744f03",
+    digest = "sha256:6b3aa04751aa2ac3b0c7be4ee71148b66d693ad212ce6d3244bd2a2a147f314a",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/debian9",
 )
 
 container_pull(
     name = "ubuntu16_04",
-    digest = "sha256:c81e8f6bcbab8818fdbe2df6d367990ab55d85b4dab300931a53ba5d082f4296",
+    digest = "sha256:c5f4c61e72b1f872e16b64577f8abb041a237f28f0513d4d482fc06d2532bb81",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/ubuntu16_04",
 )
 
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:213da2494bb763f55363213db45d9bfa5eb906039fc02e6cb2e6637dc4917caf",
+    digest = "sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/clang-debian8",
 )

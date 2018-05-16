@@ -40,6 +40,9 @@ cacerts(
 container_image(
     name = "toolchain",
     base = "@debian8//image",
+    env = {
+        "LC_ALL ": "C.UTF-8",
+    }
     layers = [
         "base-ltl",
         "clang-ltl",

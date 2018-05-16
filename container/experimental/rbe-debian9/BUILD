@@ -41,6 +41,7 @@ toolchain_container(
         # PATH envvar is a special case, and currently only the one in the
         # topmost layer is set. So that we override it here to include all.
         "PATH": "$PATH:/usr/local/go/bin",
+        "LC_ALL ": "C.UTF-8",
     },
     language_layers = [
         "base-ltl",
