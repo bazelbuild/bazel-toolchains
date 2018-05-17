@@ -16,7 +16,8 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("@bazel_toolchains//rules:docker_config.bzl", "container_install_pkgs", "docker_toolchain_autoconfig")
+load("//container/rules:docker_toolchains.bzl", "toolchain_container")
+load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load("@bazel_toolchains//rules:environments.bzl",
     "gcc_env",
     "debian8_clang_default_keys",
@@ -25,7 +26,7 @@ load("@bazel_toolchains//rules:environments.bzl",
 )
 
 # Use "rbe-test-" prefix for easy identification of images to remove after the tests.
-container_install_pkgs(
+toolchain_container(
     name = "rbe-test-jessie-with-pkgs",
     base = "@official_jessie//image",
     packages = debian8_clang_default_packages() + [
@@ -75,7 +76,7 @@ docker_toolchain_autoconfig(
 )
 
 # Use "rbe-test-" prefix for easy identification of images to remove after the tests.
-container_install_pkgs(
+toolchain_container(
     name = "rbe-test-xenial-with-pkgs",
     base = "@official_xenial//image",
     packages = [
