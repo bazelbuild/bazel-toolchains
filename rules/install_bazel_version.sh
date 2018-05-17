@@ -13,12 +13,11 @@
 # limitations under the License.
 
 #!/usr/bin/env bash
-# Obtains from given URL the bazel release srcs (in a zip file), and builds
-# using bazel.
+# Obtains from given URL the Bazel release/rc installer, and installs Bazel.
 # Script requires wget
 # $1: bazel_url
 set -e
-echo === Installing a Bazel release version ===
+echo === Installing a Bazel release/rc version ===
 
 bazel_url=$1
 
