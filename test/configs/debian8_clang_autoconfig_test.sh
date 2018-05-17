@@ -36,11 +36,16 @@ function cleanup_on_finish {
   images=($(docker images -a | grep "debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig" | awk '{print $3}'))
   for image in "${images[@]}"
   do
+    echo "Attempting to delete ${image}..."
     # Only delete the image if it is not used by any running container.
     if [[ -z $(docker ps -q -f ancestor=${image}) ]]; then
-       docker rmi -f ${image}
+      docker rmi -f ${image}
+      echo "${image} deleted..."
+    else
+      echo "${image} is used by another container, not deleted..."
     fi
   done
+  echo "Deleting all dangling images..."
   docker images -f "dangling=true" -q | xargs -r docker rmi -f
 }
 
