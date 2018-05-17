@@ -19,7 +19,6 @@ package(default_visibility = ["//visibility:public"])
 exports_files([
     "install_bazel_head.sh",
     "install_bazel_version.sh",
-    "install_bazel_rc_version.sh",
     "docker_config.sh.tpl",
 ])
 

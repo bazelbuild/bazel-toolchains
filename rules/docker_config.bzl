@@ -221,20 +221,16 @@ def _docker_toolchain_autoconfig_impl(ctx):
     # it using the release version with "bazel build //src:bazel".
     install_bazel_cmd = "/install_bazel_head.sh"
   elif ctx.attr.bazel_version:
+    # If a specific Bazel and Bazel RC version is specified, install that version.
+    bazel_url = "https://releases.bazel.build/" + ctx.attr.bazel_version
     if ctx.attr.bazel_rc_version:
-      # If a specific Bazel and Bazel RC version is specified, install that version.
-      # We bootstrap our Bazel binary using "bazel build", and cannot use ./compile.sh as it generates
-      # cc binaries depending on incompatible dynamically linked libraries.
-      bazel_url = ("https://releases.bazel.build/" +
-                  ctx.attr.bazel_version + "/rc" + ctx.attr.bazel_rc_version +
-                  "/bazel-" + ctx.attr.bazel_version + "rc" +
-                  ctx.attr.bazel_rc_version + "-dist.zip")
-      install_bazel_cmd = "/install_bazel_rc_version.sh " + bazel_url
+      bazel_url += ("/rc" + ctx.attr.bazel_rc_version +
+                    "/bazel-" + ctx.attr.bazel_version + "rc" +
+                    ctx.attr.bazel_rc_version)
     else:
-      bazel_url = ("https://github.com/bazelbuild/bazel/releases/download/" +
-                  ctx.attr.bazel_version +
-                  "/bazel-" + ctx.attr.bazel_version + "-installer-linux-x86_64.sh")
-      install_bazel_cmd = "/install_bazel_version.sh " + bazel_url
+      bazel_url += "/release/bazel-" + ctx.attr.bazel_version
+    bazel_url += "-installer-linux-x86_64.sh"
+    install_bazel_cmd = "/install_bazel_version.sh " + bazel_url
 
   # Command to recursively convert soft links to hard links in the config_repos
   deref_symlinks_cmd = []
@@ -493,7 +489,6 @@ def docker_toolchain_autoconfig(**kwargs):
   kwargs["files"] = [
       _WORKSPACE_PREFIX + "rules:install_bazel_head.sh",
       _WORKSPACE_PREFIX + "rules:install_bazel_version.sh",
-      _WORKSPACE_PREFIX + "rules:install_bazel_rc_version.sh"
   ]
 
   # The template for the main script to execute for this rule, which produces
