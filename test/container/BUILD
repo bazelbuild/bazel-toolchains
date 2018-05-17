@@ -19,15 +19,15 @@ package(default_visibility = ["//visibility:public"])
 load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
 load("@base_images_docker//package_managers:install_pkgs.bzl", "install_pkgs")
 load("@base_images_docker//package_managers:apt_key.bzl", "add_apt_key")
-load("@bazel_toolchains//rules:docker_config.bzl", "container_install_pkgs")
+load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 
 # This file contains some sample targets that excersise the container rules
 # We just keep these as examples that should not break (unless indicated)
 # with changes.
 
-# The two targets below test that container_install_pkgs can sequentially
+# The two targets below test that toolchain_container can sequentially
 # install packages
-container_install_pkgs(
+toolchain_container(
     name = "rbe-test-xenial-base",
     base = "@official_xenial//image",
     packages = [
@@ -42,7 +42,7 @@ container_install_pkgs(
     ],
 )
 
-container_install_pkgs(
+toolchain_container(
     name = "rbe-test-xenial-with-pkgs",
     additional_repos = [
         "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
@@ -59,7 +59,7 @@ container_install_pkgs(
 # The target below (marked manual, should not be run by CI) shows a case of a
 # package that cannot be installed because downloading it requires an additional
 # package (apt-transport-https) not present in the base.
-container_install_pkgs(
+toolchain_container(
     name = "docker-noprereq-fails",
     additional_repos = [
         "deb [arch=amd64] https://download.docker.com/linux/debian jessie stable",
