@@ -17,16 +17,35 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 toolchain(
-    name = "cc-toolchain-clang-x86_64",
+    name = "cc-toolchain-clang-x86_64-default",
     exec_compatible_with = [
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
     ],
     target_compatible_with = [
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//configs/debian8_clang/0.3.0/bazel_0.13.0/default:cc-compiler-k8",
+    toolchain = "//configs/ubuntu16_04_clang/1.0/bazel_0.13.0/default:cc-compiler-k8",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+
+toolchain(
+    name = "cc-toolchain-clang-x86_64-msan",
+    exec_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+    ],
+    toolchain = "//configs/ubuntu16_04_clang/1.0/bazel_0.13.0/msan:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
