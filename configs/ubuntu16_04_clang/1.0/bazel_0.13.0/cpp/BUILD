@@ -22,6 +22,7 @@ toolchain(
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
     ],
     target_compatible_with = [
         "@bazel_tools//platforms:linux",
@@ -38,6 +39,7 @@ toolchain(
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
         "//constraints:support_msan",
     ],
     target_compatible_with = [
