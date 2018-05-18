@@ -24,6 +24,11 @@ constraint_value(
     constraint_setting = ":linux_distribution",
 )
 
+constraint_value(
+    name = "xenial",
+    constraint_setting = ":linux_distribution",
+)
+
 # RBE Debian8
 platform(
     name = "rbe_debian8",
@@ -32,6 +37,23 @@ platform(
         "@bazel_tools//platforms:linux",
         "@bazel_tools//tools/cpp:clang",
         ":jessie",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f"
+         }
+         """,
+)
+
+# RBE Ubuntu16.04
+platform(
+    name = "rbe_ubuntu16_04",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        ":xenial",
     ],
     remote_execution_properties = """
           properties: {
