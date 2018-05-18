@@ -16,15 +16,11 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-# Constraints used in configuring the remote platforms and toolchains.
-constraint_setting(name = "linux_distribution")
+# Constraints used to configure sanitizers.
+
+constraint_setting(name = "msan")
 
 constraint_value(
-    name = "jessie",
-    constraint_setting = ":linux_distribution",
-)
-
-constraint_value(
-    name = "xenial",
-    constraint_setting = ":linux_distribution",
+    name = "support_msan",
+    constraint_setting = ":msan",
 )

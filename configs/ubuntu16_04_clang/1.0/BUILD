@@ -40,7 +40,7 @@ platform(
         "@bazel_tools//platforms:linux",
         "@bazel_tools//tools/cpp:clang",
         "//constraints:xenial",
-        "//constraints:support_msan",
+        "//constraints/sanitizers:support_msan",
     ],
     remote_execution_properties = """
           properties: {
