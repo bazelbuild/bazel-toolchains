@@ -125,9 +125,7 @@ load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
-load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
-load("@base_images_docker//package_managers:install_pkgs.bzl", "install_pkgs")
-load("@base_images_docker//package_managers:apt_key.bzl", "add_apt_key")
+load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -151,50 +149,6 @@ tar_filetype = [
     ".tar",
     ".tar.xz",
 ]
-
-def container_install_pkgs(name, base, packages, additional_repos = [], keys = [], tags = []):
-  """Macro to download and install deb packages in a container.
-
-  The output image with packages installed will have name {name}.tar.
-
-  Args:
-    name: name of this rule. It is also the name of the output image.
-    base: the base layers on top of which to overlay a layer with the
-      desired packages.
-    packages: list of packages to fetch and install in the base image.
-    additional_repos: list of additional debian package repos to use,
-      in sources.list format.
-    keys: label of additional gpg keys to use while downloading packages.
-    tags: tags to pass down to generated rules
-  """
-
-  # Create an intermediate image which includes additional gpg keys.
-  add_apt_key(
-      name = name + "_with_keys",
-      image_tar = base,
-      keys = keys,
-  )
-
-  # Generate the script to download packages in the container and extract only
-  # the deb packages tarball as the output.
-  download_pkgs(
-      name = name + "_pkgs",
-      additional_repos = additional_repos,
-      image_tar = ":" + name + "_with_keys.tar",
-      packages = packages,
-      tags = tags,
-  )
-
-  # Execute the package installation script in the container and commit the
-  # resulting container locally as a new image named as {name}. The resulting
-  # image is also available as target :{name}.tar.
-  install_pkgs(
-      name = name,
-      image_tar = base,
-      installables_tar = ":" + name + "_pkgs.tar",
-      output_image_name = "bazel/" + native.package_name() + ":" + name,
-      tags = tags,
-  )
 
 def _docker_toolchain_autoconfig_impl(ctx):
   """Implementation for the docker_toolchain_autoconfig rule.
@@ -498,14 +452,14 @@ def docker_toolchain_autoconfig(**kwargs):
   # Do not install packags if 'packages' is not specified or is an ampty list.
   if not packages_is_empty:
     # "additional_repos" and "keys" are optional for docker_toolchain_autoconfig,
-    # but required for container_install_pkgs". Use empty lists as placeholder.
+    # but required for toolchain_container". Use empty lists as placeholder.
     if "additional_repos" not in kwargs:
       kwargs["additional_repos"] = []
     if "keys" not in kwargs:
       kwargs["keys"] = []
 
     # Install packages in the base image.
-    container_install_pkgs(
+    toolchain_container(
       name = kwargs["name"] + "_image",
       base = kwargs["base"],
       packages = kwargs["packages"],
