@@ -24,19 +24,14 @@ constraint_value(
     constraint_setting = ":linux_distribution",
 )
 
-# RBE Debian8
-platform(
-    name = "rbe_debian8",
-    constraint_values = [
-        "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//tools/cpp:clang",
-        ":jessie",
-    ],
-    remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:d84a7de5175a22505209f56b02f1da20ccec64880da09ee38eaef3670fbd2a56"
-         }
-         """,
+constraint_value(
+    name = "xenial",
+    constraint_setting = ":linux_distribution",
+)
+
+constraint_setting(name = "msan")
+
+constraint_value(
+    name = "support_msan",
+    constraint_setting = ":msan",
 )

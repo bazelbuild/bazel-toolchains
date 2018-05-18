@@ -24,3 +24,28 @@ java_runtime(
     srcs = [],
     java_home = "/usr/lib/jvm/java-8-openjdk-amd64",
 )
+
+# Latest RBE Ubuntu16_04 container
+# Update every time when a new container is released.
+alias(
+    name = "rbe_ubuntu1604",
+    actual = ":rbe_ubuntu1604_r328903",
+)
+
+# RBE Ubuntu16_04 r328903
+platform(
+    name = "rbe_ubuntu1604_r328903",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints:support_msan",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f"
+         }
+         """,
+)
