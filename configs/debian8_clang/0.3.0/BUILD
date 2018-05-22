@@ -24,3 +24,28 @@ java_runtime(
     srcs = [],
     java_home = "/usr/lib/jvm/java-8-openjdk-amd64",
 )
+
+# Latest RBE Debian8 container.
+# Update every time when a new container is released.
+alias(
+    name = "rbe_debian8",
+    actual = ":rbe_debian8_r328903",
+)
+
+# RBE Debian8 r328903
+platform(
+    name = "rbe_debian8_r328903",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints/sanitizers:support_msan",
+        "//constraints:jessie",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:0d5db936f8fa04638ca31e4fc117415068dca43dc343d605c0db2a15f433a327"
+         }
+         """,
+)
