@@ -16,7 +16,4 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-sh_binary(
-    name = "container_file_export",
-    srcs = ["container_file_export.sh"],
-)
+exports_files(["container_file_export.sh"])
