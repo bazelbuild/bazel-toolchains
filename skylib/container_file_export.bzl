@@ -16,7 +16,7 @@
 def _container_file_export_impl(ctx):
   """Implementation of the container_file_export rule."""
   input = ctx.file._container_file_export_exec
-  arguments = [
+  args = [
       input.path,
       ctx.attr.image,
       ctx.attr.src_path,
@@ -24,7 +24,7 @@ def _container_file_export_impl(ctx):
   ]
   # The command may only access files declared in inputs.
   ctx.actions.run_shell(
-      args = args,
+      arguments = args,
       inputs = [input],
       outputs = [ctx.outputs.out],
       progress_message = "copying %{} out of docker image %{} ...".format(ctx.attr.src_path, ctx.attr.image),
