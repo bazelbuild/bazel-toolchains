@@ -15,18 +15,20 @@
 
 def _container_file_export_impl(ctx):
   """Implementation of the container_file_export rule."""
+  input = ctx.file._container_file_export_exec
   args = [
+      input.path,
       ctx.attr.image,
       ctx.attr.src_path,
       ctx.outputs.out.path,
   ]
-  ctx.actions.run(
-      executable = ctx.executable._container_file_export_exec,
+  # The command may only access files declared in inputs.
+  ctx.actions.run_shell(
       arguments = args,
+      inputs = [input],
       outputs = [ctx.outputs.out],
-      mnemonic = "ContainerCp",
       progress_message = "copying %{} out of docker image %{} ...".format(ctx.attr.src_path, ctx.attr.image),
-      use_default_shell_env = True,
+      command = "$1 $2 $3 $4",
   )
 
 _container_file_export = rule(
@@ -35,9 +37,8 @@ _container_file_export = rule(
         "image": attr.string(mandatory=True),
         "src_path": attr.string(mandatory=True),
         "_container_file_export_exec": attr.label(
-            default=Label("//skylib:container_file_export"),
-            cfg="host",
-            executable=True,
+            default=Label("//skylib:container_file_export.sh"),
+            single_file=True,
             allow_files=True)
     },
     outputs = {
