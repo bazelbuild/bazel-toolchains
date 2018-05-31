@@ -22,9 +22,18 @@ commandTests:
 - name: 'check-openssl'
   command: ['bash', '-c', 'openssl version']
   expectedOutput: ['OpenSSL .*']
-- name: 'bazel'
-  command: ['bazel']
+- name: 'check-bazel'
+  command: ['bash', '-c', 'bazel']
   expectedOutput: ['Usage: bazel <command> <options>.*']
+- name: 'check-docker'
+  command: ['bash', '-c', 'docker --version']
+  expectedOutput: ['Docker version .*']
+- name: 'check-git'
+  command: ['bash', '-c', 'git --version']
+  expectedOutput: ['git version .*']
+- name: 'check-unzip'
+  command: ['bash', '-c', 'unzip']
+  expectedOutput: ['.*Usage: unzip .*']
 
 # File existence tests
 fileExistenceTests:

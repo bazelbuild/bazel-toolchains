@@ -100,9 +100,9 @@ go_register_toolchains()
 
 http_archive(
     name = "base_images_docker",
-    sha256 = "44c5d801ea553938b06cd7f82c605d46c79da79a0f1c2ee1a24bed7c49934906",
-    strip_prefix = "base-images-docker-521a8d65328303c45b72818dc97d24fd7a73b400",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/521a8d65328303c45b72818dc97d24fd7a73b400.tar.gz"],
+    sha256 = "3d09c6f34671ee56c5cd39d215aaf639917ee487ec09e57643b1d6d55bc77bf6",
+    strip_prefix = "base-images-docker-1782ac3d587c748805e9964f250a1d32a6033642",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/1782ac3d587c748805e9964f250a1d32a6033642.tar.gz"],
 )
 
 http_file(
@@ -115,6 +115,12 @@ http_file(
     name = "debian_docker_gpg",
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
     url = "https://download.docker.com/linux/debian/gpg",
+)
+
+http_file(
+    name = "xenial_docker_gpg",
+    sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
+    url = "https://download.docker.com/linux/ubuntu/gpg",
 )
 
 # Use http_archive rule instead of git_repository rule

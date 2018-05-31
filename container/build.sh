@@ -23,7 +23,11 @@ Usage: build.sh [options]
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 Required parameters (when build with Google Cloud Container Builder):
-    -d|--distro             Distro of the base image: debian8, debian9, ubuntu16_04
+    -d|--type               Type of the container:
+                              rbe-debian8,
+                              rbe-debian9,
+                              rbe-ubuntu16_04,
+                              bazel
     -p|--project            GCP project ID
     -c|--container          Docker container name
     -t|--tag                Docker tag for the image
@@ -36,15 +40,15 @@ Standalone parameters
     -l|--local              build container locally
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -d {debian8, debian9, ubuntu16_04} -c rbe-{debian8, debian9, ubuntu16_04} -t latest -b my_bucket
+$ ./build.sh -p my-gcp-project -d {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} -c {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
-    gcr.io/my-gcp-project/rbe-{debian8, debian9, ubuntu16_04}:latest
+    gcr.io/my-gcp-project/{rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel}:latest
 and the debian packages installed will be packed as a tarball and stored in
 gs://my_bucket for future reference.
 
 To build locally:
-$ ./build.sh -d {debian8, debian9, ubuntu16_04} -l
-will produce docker locally as rbe-{debian8, debian9, ubuntu16_04}:latest
+$ ./build.sh -d {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} -l
+will produce docker locally as {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel}:latest
 EOF
 )
   echo "$usage"
@@ -63,9 +67,9 @@ parse_parameters () {
         PROJECT=$1
         shift
         ;;
-      -d|--distro)
+      -d|--type)
         shift
-        DISTRO=$1
+        TYPE=$1
         shift
         ;;
       -c|--container)
@@ -99,14 +103,14 @@ parse_parameters () {
     esac
   done
 
-  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$DISTRO" == "" || "$TAG" == "" || "$BUCKET" == "" ) && "$LOCAL" == "" ]]; then
+  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TYPE" == "" || "$TAG" == "" || "$BUCKET" == "") && "$LOCAL" == "" ]]; then
      echo "Please specify all required options for building in Google Cloud Container Builder"
      show_usage
      exit 1
   fi
 
-  if [[ "$DISTRO" != "debian8" && "$DISTRO" != "debian9" && "$DISTRO" != "ubuntu16_04" ]]; then
-    echo "Distro parameter can be only: 'debian8', 'debian9' or 'ubuntu16_04'"
+  if [[ "$TYPE" != "rbe-debian8" && "$TYPE" != "rbe-debian9" && "$TYPE" != "rbe-ubuntu16_04" && "$TYPE" != "bazel" ]]; then
+    echo "Type parameter can be only: 'rbe-debian8', 'rbe-debian9', 'rbe-ubuntu16_04' or 'bazel'"
     show_usage
     exit 1
   fi
@@ -116,10 +120,13 @@ main () {
   parse_parameters $@
 
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
-  if [[ "$DISTRO" != "debian9" ]]; then
-    DIR="container/rbe-${DISTRO}"
+
+  if [[ "$TYPE" == "rbe-debian9" ]]; then
+    DIR="container/experimental/${TYPE}"
+  elif [[ "$TYPE" == "bazel" ]]; then
+    DIR="container/ubuntu16_04/${TYPE}"
   else
-    DIR="container/experimental/rbe-${DISTRO}"
+    DIR="container/${TYPE}"
   fi
 
   # We need to start the build from the root of the project, so that we can
@@ -134,10 +141,10 @@ main () {
     echo "Testing container locally."
     bazel test //${DIR}:toolchain-test
     echo "Tagging container."
-    docker tag bazel/${DIR}:toolchain rbe-${DISTRO}:latest
+    docker tag bazel/${DIR}:toolchain ${TYPE}:latest
     echo -e "\n" \
-      "rbe-${DISTRO}:lastest container is now available to use.\n" \
-      "To try it: docker run -it rbe-${DISTRO}:latest \n"
+      "${TYPE}:lastest container is now available to use.\n" \
+      "To try it: docker run -it ${TYPE}:latest \n"
   else
     echo "Building container in Google Cloud Container Builder."
     # Setup GCP project id for the build
@@ -149,7 +156,7 @@ main () {
     # Start Google Cloud Container Builder
     gcloud container builds submit . \
       --config=${PROJECT_ROOT}/container/cloudbuild.yaml \
-      --substitutions _PROJECT=${PROJECT},_DISTRO=${DISTRO},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
+      --substitutions _PROJECT=${PROJECT},_TYPE=${TYPE},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
       ${ASYNC}
   fi
 }
