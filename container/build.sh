@@ -31,20 +31,21 @@ Required parameters (when build with Google Cloud Container Builder):
     -p|--project            GCP project ID
     -c|--container          Docker container name
     -t|--tag                Docker tag for the image
-    -b|--bucket             GCS bucket to store the tarball of debian packages
 
 Optional parameters (when build with Google Cloud Container Builder):
     -a|--async              asynchronous execute Cloud Container Builder
+    -b|--bucket             GCS bucket to store the tarball of debian packages
 
 Standalone parameters
     -l|--local              build container locally
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -d {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} -c {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} -t latest -b my_bucket
+$ ./build.sh -p my-gcp-project -d {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} \
+    -c {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
     gcr.io/my-gcp-project/{rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel}:latest
 and the debian packages installed will be packed as a tarball and stored in
-gs://my_bucket for future reference.
+gs://my_bucket for future reference, if -b is specified.
 
 To build locally:
 $ ./build.sh -d {rbe-debian8, rbe-debian9, rbe-ubuntu16_04, bazel} -l
@@ -103,7 +104,7 @@ parse_parameters () {
     esac
   done
 
-  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TYPE" == "" || "$TAG" == "" || "$BUCKET" == "") && "$LOCAL" == "" ]]; then
+  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TYPE" == "" || "$TAG" == "") && "$LOCAL" == "" ]]; then
      echo "Please specify all required options for building in Google Cloud Container Builder"
      show_usage
      exit 1
@@ -153,11 +154,20 @@ main () {
     # This is because in some systems the BUILD files under /third_party (after git clone)
     # will be with permission 640 and the build will fail in Container Builder.
     find ${PROJECT_ROOT}/third_party -type f -print0 | xargs -0 chmod 644
-    # Start Google Cloud Container Builder
-    gcloud container builds submit . \
-      --config=${PROJECT_ROOT}/container/cloudbuild.yaml \
-      --substitutions _PROJECT=${PROJECT},_TYPE=${TYPE},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
-      ${ASYNC}
+
+    if [[ "$BUCKET" != "" ]]; then
+      # Start Google Cloud Container Builder
+      gcloud container builds submit . \
+        --config=${PROJECT_ROOT}/container/cloudbuild.yaml \
+        --substitutions _PROJECT=${PROJECT},_TYPE=${TYPE},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
+        ${ASYNC}
+    else
+      # Start Google Cloud Container Builder
+      gcloud container builds submit . \
+        --config=${PROJECT_ROOT}/container/cloudbuild_no_bucket.yaml \
+        --substitutions _PROJECT=${PROJECT},_TYPE=${TYPE},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR} \
+        ${ASYNC}
+    fi
   fi
 }
 
