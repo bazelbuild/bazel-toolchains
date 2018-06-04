@@ -55,9 +55,18 @@ commandTests:
 - name: 'check-git'
   command: ['bash', '-c', 'git --version']
   expectedOutput: ['git version .*']
+- name: 'check-less'
+  command: ['bash', '-c', 'less --version']
+  expectedOutput: ['less .*']
+- name: 'check-netcat'
+  command: ['bash', '-c', 'nc -h']
+  expectedOutput: ['[v.*']
 - name: 'check-openssl'
   command: ['bash', '-c', 'openssl version']
   expectedOutput: ['OpenSSL .*']
+- name: 'check-patch'
+  command: ['bash', '-c', 'patch --version']
+  expectedOutput: ['GNU patch .*']
 - name: 'check-wget'
   command: ['bash', '-c', 'wget --version']
   expectedOutput: ['GNU Wget.* built on linux-gnu.*']
