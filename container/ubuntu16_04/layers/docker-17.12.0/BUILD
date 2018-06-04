@@ -20,6 +20,8 @@ load("//container/rules:docker_toolchains.bzl", "language_tool_layer", "toolchai
 load("@base_images_docker//package_managers:apt_key.bzl", "add_apt_key")
 load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
 
+exports_files(["docker-17.12.0.yaml"])
+
 toolchain_container(
     name = "docker-prereq",
     base = "@ubuntu16_04//image",

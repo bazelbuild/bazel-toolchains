@@ -33,6 +33,7 @@ language_tool_layer(
     ]
 )
 
+# Install deb packages.
 toolchain_container(
     name = "toolchain_with_debs",
     base = "@ubuntu16_04//image",
@@ -41,22 +42,26 @@ toolchain_container(
         "//container/rbe-ubuntu16_04:java-ltl",
         "//container/rbe-ubuntu16_04:python-ltl",
         "//container/ubuntu16_04/layers/bazel:bazel-ltl",
-        "//container/ubuntu16_04/layers/docker:docker-ltl",
+        "//container/ubuntu16_04/layers/docker-17.12.0:docker-ltl",
     ],
 )
 
+# Setup other information, e.g. entrypoint.
 container_image(
     name = "toolchain",
     base = ":toolchain_with_debs",
-    directory = "/root",
-    files = [":.bazelrc"],
     entrypoint = ["bazel"],
 )
 
 container_test(
     name = "toolchain-test",
     configs = [
-        ":bazel.yaml",
+        ":container.yaml",
+        "//container/ubuntu16_04/layers/bazel:bazel.yaml",
+        "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
     ],
-    image = ":toolchain",
+    # TODO(xingao) Test using :toolchain once rules_docker is updated with
+    # latest version of the structure_test
+    # https://github.com/bazelbuild/rules_docker/pull/416
+    image = ":toolchain_with_debs",
 )

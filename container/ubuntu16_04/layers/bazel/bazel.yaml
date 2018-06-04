@@ -1,0 +1,7 @@
+schemaVersion: "1.0.0"
+
+# Common tests
+commandTests:
+- name: 'check-bazel'
+  command: ['bash', '-c', 'bazel']
+  expectedOutput: ['Usage: bazel <command> <options>.*']

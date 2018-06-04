@@ -18,6 +18,8 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 
+exports_files(["bazel.yaml"])
+
 language_tool_layer(
     name = "bazel-ltl",
     base = "@ubuntu16_04//image",

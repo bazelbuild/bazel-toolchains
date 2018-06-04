@@ -159,13 +159,15 @@ main () {
       # Start Google Cloud Container Builder
       gcloud container builds submit . \
         --config=${PROJECT_ROOT}/container/cloudbuild.yaml \
-        --substitutions _PROJECT=${PROJECT},_TYPE=${TYPE},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
+        --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
+        --machine-type=n1-highcpu-32 \
         ${ASYNC}
     else
       # Start Google Cloud Container Builder
       gcloud container builds submit . \
         --config=${PROJECT_ROOT}/container/cloudbuild_no_bucket.yaml \
-        --substitutions _PROJECT=${PROJECT},_TYPE=${TYPE},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR} \
+        --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR} \
+        --machine-type=n1-highcpu-32 \
         ${ASYNC}
     fi
   fi
