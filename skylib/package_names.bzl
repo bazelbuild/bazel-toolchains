@@ -239,7 +239,7 @@ def _jessie_less_package_names():
     return [
         "libc6",
         "libtinfo5",
-        "debianutils"，
+        "debianutils",
     ]
 
 def _jessie_lib_cpp_package_names():
@@ -261,9 +261,9 @@ def _jessie_lib_cpp_package_names():
     ]
 
 def _jessie_netcat_package_names():
-  return [
-      "netcat-traditional",
-  ]
+    return [
+        "netcat-traditional",
+    ]
 
 def _jessie_openssh_client_package_names():
     return [
