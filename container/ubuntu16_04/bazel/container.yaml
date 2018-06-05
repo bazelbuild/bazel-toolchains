@@ -1,3 +1,4 @@
+# TODO(xingao) Update to 2.0.0 to enable metadataTest.
 schemaVersion: "1.0.0"
 
 # TODO: split out the common tests once resolve the CI issues

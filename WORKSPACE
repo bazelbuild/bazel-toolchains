@@ -23,9 +23,9 @@ load(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "0c2a63f09e7e85e08d83a32af41fc93a3b4796c80fc3fe4626df82a63b92bcff",
-    strip_prefix = "rules_docker-1144f83122750fe4aca139bd0f205d99c9bd94c1",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/1144f83122750fe4aca139bd0f205d99c9bd94c1.tar.gz"],
+    sha256 = "33ef2a5d3992bc44494b84f932cd114d1fc44c377a76e033adcf09a5d258dbb7",
+    strip_prefix = "rules_docker-b1ea0f972422e246fb6f39d9a21ec435d78a80de",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/b1ea0f972422e246fb6f39d9a21ec435d78a80de.tar.gz"],
 )
 
 load(

@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# ==========================================================
+# This yaml file should be kept synced with cloudbuild.yaml.
+# ==========================================================
+
 timeout: 21600s
 
 steps:
@@ -39,6 +43,8 @@ steps:
     - 'container-build'
 
 # Step: test the image
+# We use container_test rule, which is a Bazel wrapper of container_structure_test.
+# https://github.com/bazelbuild/rules_docker/blob/master/contrib/test.bzl
   - name: 'gcr.io/cloud-builders/bazel'
     args: [
       '--output_base=/workspace',

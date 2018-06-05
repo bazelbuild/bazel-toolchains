@@ -155,21 +155,19 @@ main () {
     # will be with permission 640 and the build will fail in Container Builder.
     find ${PROJECT_ROOT}/third_party -type f -print0 | xargs -0 chmod 644
 
-    if [[ "$BUCKET" != "" ]]; then
-      # Start Google Cloud Container Builder
-      gcloud container builds submit . \
-        --config=${PROJECT_ROOT}/container/cloudbuild.yaml \
-        --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
-        --machine-type=n1-highcpu-32 \
-        ${ASYNC}
-    else
-      # Start Google Cloud Container Builder
-      gcloud container builds submit . \
-        --config=${PROJECT_ROOT}/container/cloudbuild_no_bucket.yaml \
-        --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR} \
-        --machine-type=n1-highcpu-32 \
-        ${ASYNC}
+    config_file=${PROJECT_ROOT}/container/cloudbuild.yaml
+    bucket_substitution=",_BUCKET=${BUCKET}"
+    if [[ "$BUCKET" == "" ]]; then
+      config_file=${PROJECT_ROOT}/container/cloudbuild_no_bucket.yaml
+      bucket_substitution=""
     fi
+
+    gcloud container builds submit . \
+      --config=${config_file} \
+      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR}${bucket_substitution} \
+      --machine-type=n1-highcpu-32 \
+      ${ASYNC}
+
   fi
 }
 

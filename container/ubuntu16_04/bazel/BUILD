@@ -60,8 +60,6 @@ container_test(
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
     ],
-    # TODO(xingao) Test using :toolchain once rules_docker is updated with
-    # latest version of the structure_test
-    # https://github.com/bazelbuild/rules_docker/pull/416
-    image = ":toolchain_with_debs",
+    image = ":toolchain",
+    verbose = True,
 )
