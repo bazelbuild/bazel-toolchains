@@ -15,9 +15,18 @@
 #!/usr/bin/env bash
 set -e
 
+# Map to store all supported container type and the directory containing the
+# BUILD file.
+declare -A TYPE_DIR_MAP=(
+  ["rbe-debian8"]="container/rbe-debian8"
+  ["rbe-debian9"]="container/experimental/rbe-debian9"
+  ["rbe-ubuntu16_04"]="container/rbe-ubuntu16_04"
+  ["bazel"]="container/ubuntu16_04/bazel"
+)
 
 show_usage () {
   usage=$(cat << EOF
+
 Usage: build.sh [options]
 
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
@@ -54,7 +63,6 @@ EOF
 )
   echo "$usage"
 }
-
 
 parse_parameters () {
   while [[ $# -gt 0 ]]; do
@@ -110,8 +118,9 @@ parse_parameters () {
      exit 1
   fi
 
-  if [[ "$TYPE" != "rbe-debian8" && "$TYPE" != "rbe-debian9" && "$TYPE" != "rbe-ubuntu16_04" && "$TYPE" != "bazel" ]]; then
-    echo "Type parameter can be only: 'rbe-debian8', 'rbe-debian9', 'rbe-ubuntu16_04' or 'bazel'"
+  if [[ -z ${TYPE_DIR_MAP[$TYPE]} ]]; then
+    echo "Type parameter can only be the following:"
+    for type in "${!TYPE_DIR_MAP[@]}"; do echo "$type"; done
     show_usage
     exit 1
   fi
@@ -121,14 +130,7 @@ main () {
   parse_parameters $@
 
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
-
-  if [[ "$TYPE" == "rbe-debian9" ]]; then
-    DIR="container/experimental/${TYPE}"
-  elif [[ "$TYPE" == "bazel" ]]; then
-    DIR="container/ubuntu16_04/${TYPE}"
-  else
-    DIR="container/${TYPE}"
-  fi
+  DIR=${TYPE_DIR_MAP[$TYPE]}
 
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
