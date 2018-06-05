@@ -58,7 +58,7 @@ commandTests:
   command: ['bash', '-c', 'less --version']
   expectedOutput: ['less .*']
 - name: 'check-netcat'
-  command: ['bash', '-c', 'nc -h']
+  command: ['bash', '-c', 'nc -h 2>&1']
   expectedOutput: ['\[v.*']
 - name: 'check-openssl'
   command: ['bash', '-c', 'openssl version']
