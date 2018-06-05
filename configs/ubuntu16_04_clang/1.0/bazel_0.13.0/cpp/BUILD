@@ -32,7 +32,6 @@ toolchain(
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
-
 toolchain(
     name = "cc-toolchain-clang-x86_64-msan",
     exec_compatible_with = [

@@ -65,7 +65,6 @@ cc_toolchain(
     supports_param_files = 1,
 )
 
-
 # Android tooling requires a default toolchain for the armeabi-v7a cpu.
 cc_toolchain(
     name = "cc-compiler-armeabi-v7a",

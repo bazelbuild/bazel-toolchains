@@ -14,32 +14,34 @@
 """Rules to export a file/directory located inside a container available as a tarball."""
 
 def _container_file_export_impl(ctx):
-  """Implementation of the container_file_export rule."""
-  input = ctx.file._container_file_export_exec
-  args = [
-      input.path,
-      ctx.attr.image,
-      ctx.attr.src_path,
-      ctx.outputs.out.path,
-  ]
-  # The command may only access files declared in inputs.
-  ctx.actions.run_shell(
-      arguments = args,
-      inputs = [input],
-      outputs = [ctx.outputs.out],
-      progress_message = "copying %{} out of docker image %{} ...".format(ctx.attr.src_path, ctx.attr.image),
-      command = "$1 $2 $3 $4",
-  )
+    """Implementation of the container_file_export rule."""
+    input = ctx.file._container_file_export_exec
+    args = [
+        input.path,
+        ctx.attr.image,
+        ctx.attr.src_path,
+        ctx.outputs.out.path,
+    ]
+
+    # The command may only access files declared in inputs.
+    ctx.actions.run_shell(
+        arguments = args,
+        inputs = [input],
+        outputs = [ctx.outputs.out],
+        progress_message = "copying %{} out of docker image %{} ...".format(ctx.attr.src_path, ctx.attr.image),
+        command = "$1 $2 $3 $4",
+    )
 
 _container_file_export = rule(
     implementation = _container_file_export_impl,
     attrs = {
-        "image": attr.string(mandatory=True),
-        "src_path": attr.string(mandatory=True),
+        "image": attr.string(mandatory = True),
+        "src_path": attr.string(mandatory = True),
         "_container_file_export_exec": attr.label(
-            default=Label("//skylib:container_file_export.sh"),
-            single_file=True,
-            allow_files=True)
+            default = Label("//skylib:container_file_export.sh"),
+            single_file = True,
+            allow_files = True,
+        ),
     },
     outputs = {
         "out": "%{name}.tar.gz",
@@ -57,4 +59,4 @@ _container_file_export = rule(
 #     src_path = '/opt/python3.6'
 #   )
 def container_file_export(**kwargs):
-  _container_file_export(**kwargs)
+    _container_file_export(**kwargs)

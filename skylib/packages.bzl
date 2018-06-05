@@ -27,64 +27,64 @@ load(
 )
 load(
     ":package_names.bzl",
-    "tool_names",
     "jessie_tools",
+    "tool_names",
 )
 
 def get_jessie_packages(pkg_list):
-  """Common function for getting jessie packages."""
-  return [jessie_packages[p] for p in pkg_list]
+    """Common function for getting jessie packages."""
+    return [jessie_packages[p] for p in pkg_list]
 
 def base_layer_packages():
-  """Base packages for fully loaded toolchain."""
-  base_tools = [
-      tool_names.binutils,
-      tool_names.curl,
-      tool_names.ed,
-      tool_names.file,
-      tool_names.git,
-      tool_names.openssh_client,
-      tool_names.wget,
-      tool_names.zip,
-  ]
-  packages = []
-  for tool in base_tools:
-    packages.extend(get_jessie_packages(jessie_tools()[tool]))
-  return depset(packages).to_list()
+    """Base packages for fully loaded toolchain."""
+    base_tools = [
+        tool_names.binutils,
+        tool_names.curl,
+        tool_names.ed,
+        tool_names.file,
+        tool_names.git,
+        tool_names.openssh_client,
+        tool_names.wget,
+        tool_names.zip,
+    ]
+    packages = []
+    for tool in base_tools:
+        packages.extend(get_jessie_packages(jessie_tools()[tool]))
+    return depset(packages).to_list()
 
 def clang_layer_packages():
-  """Packages for the clang layer."""
-  clang_tools = [
-      tool_names.binutils,
-      tool_names.lib_cpp,
-  ]
-  packages = []
-  for tool in clang_tools:
-    packages.extend(get_jessie_packages(jessie_tools()[tool]))
-  return depset(packages).to_list()
+    """Packages for the clang layer."""
+    clang_tools = [
+        tool_names.binutils,
+        tool_names.lib_cpp,
+    ]
+    packages = []
+    for tool in clang_tools:
+        packages.extend(get_jessie_packages(jessie_tools()[tool]))
+    return depset(packages).to_list()
 
 def python_layer_packages():
-  """Packages for the python layer."""
-  python_tools = [
-      tool_names.python_dev,
-      tool_names.python_numpy,
-      tool_names.python_pip,
-      tool_names.python3_dev,
-      tool_names.python3_numpy,
-      tool_names.python3_pip,
-  ]
-  packages = []
-  for tool in python_tools:
-    packages.extend(get_jessie_packages(jessie_tools()[tool]))
-  return depset(packages).to_list()
+    """Packages for the python layer."""
+    python_tools = [
+        tool_names.python_dev,
+        tool_names.python_numpy,
+        tool_names.python_pip,
+        tool_names.python3_dev,
+        tool_names.python3_numpy,
+        tool_names.python3_pip,
+    ]
+    packages = []
+    for tool in python_tools:
+        packages.extend(get_jessie_packages(jessie_tools()[tool]))
+    return depset(packages).to_list()
 
 def java_layer_packages():
-  """Packages for the java layer."""
-  java_tools = [
-      tool_names.java_no_ca_certs,
-  ]
-  packages = []
-  for tool in java_tools:
-    packages.extend(get_jessie_packages(jessie_tools()[tool]))
-  packages.append(ca_certs_packages["ca-certificates-java"])
-  return depset(packages).to_list()
+    """Packages for the java layer."""
+    java_tools = [
+        tool_names.java_no_ca_certs,
+    ]
+    packages = []
+    for tool in java_tools:
+        packages.extend(get_jessie_packages(jessie_tools()[tool]))
+    packages.append(ca_certs_packages["ca-certificates-java"])
+    return depset(packages).to_list()

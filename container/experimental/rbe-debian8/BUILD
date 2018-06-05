@@ -42,13 +42,13 @@ container_image(
     base = "@debian8//image",
     env = {
         "LC_ALL ": "C.UTF-8",
-    }
+    },
     layers = [
-        "base-ltl",
-        "clang-ltl",
-        "go-ltl",
-        "java-ltl",
-        "python-ltl",
+        ":base-ltl",
+        ":clang-ltl",
+        ":go-ltl",
+        ":java-ltl",
+        ":python-ltl",
     ],
     tags = ["manual"],
 )

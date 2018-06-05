@@ -23,18 +23,18 @@ load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
 toolchain_container(
     name = "bazel-toolchain",
-    base = "@debian8//image",
-    packages = [
-        "bazel",
-    ],
     additional_repos = [
-      "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
     ],
+    base = "@debian8//image",
     keys = [
-      "@bazel_gpg//file",
+        "@bazel_gpg//file",
     ],
     language_layers = [
         "//container/rbe-debian8:java-ltl",
+    ],
+    packages = [
+        "bazel",
     ],
 )
 

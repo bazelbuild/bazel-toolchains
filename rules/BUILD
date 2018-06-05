@@ -31,4 +31,3 @@ pkg_tar(
         "cc-sample-project/test.cc",
     ],
 )
-
