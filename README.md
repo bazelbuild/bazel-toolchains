@@ -1,5 +1,6 @@
-[![Build status](https://badge.buildkite.com/940075452c1c5ff91dc832664c4c8f05e6ec736916688cd894.svg)](https://buildkite.com/bazel/bazel-toolchains-postsubmit)
-[![Build Status](https://travis-ci.org/bazelbuild/bazel-toolchains.svg?branch=master)](https://travis-ci.org/bazelbuild/bazel-toolchains)
+Travis CI | Bazel CI
+:---: | :---:
+[![Build Status](https://travis-ci.org/bazelbuild/bazel-toolchains.svg?branch=master)](https://travis-ci.org/bazelbuild/bazel-toolchains) | [![Build status](https://badge.buildkite.com/940075452c1c5ff91dc832664c4c8f05e6ec736916688cd894.svg)](https://buildkite.com/bazel/bazel-toolchains-postsubmit)
 
 # bazel-toolchains
 
