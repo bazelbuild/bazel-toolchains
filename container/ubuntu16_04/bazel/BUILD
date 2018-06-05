@@ -27,10 +27,10 @@ language_tool_layer(
     name = "add-on-ltl",
     base = "@ubuntu16_04//image",
     packages = [
+        "git",
         "software-properties-common",
         "unzip",
-        "git",
-    ]
+    ],
 )
 
 # Install deb packages.

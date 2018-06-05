@@ -40,16 +40,16 @@ add_apt_key(
 
 download_pkgs(
     name = "docker-packages",
-    image_tar = ":docker-key-image.tar",
     additional_repos = [
         "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable edge",
     ],
+    image_tar = ":docker-key-image.tar",
     packages = [
-        "linux-image-extra-virtual",
         "apt-transport-https",
-        "curl",
         "ca-certificates",
+        "curl",
         "docker-ce=17.12.0~ce-0~ubuntu",
+        "linux-image-extra-virtual",
     ],
 )
 

@@ -22,14 +22,14 @@ exports_files(["bazel.yaml"])
 
 language_tool_layer(
     name = "bazel-ltl",
+    additional_repos = [
+        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ],
     base = "@ubuntu16_04//image",
+    keys = [
+        "@bazel_gpg//file",
+    ],
     packages = [
         "bazel",
-    ],
-    additional_repos = [
-      "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    keys = [
-      "@bazel_gpg//file",
     ],
 )

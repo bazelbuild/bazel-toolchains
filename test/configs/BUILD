@@ -20,10 +20,10 @@ load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load(
     "@bazel_toolchains//rules:environments.bzl",
+    "gcc_env",
     "debian8_clang_default_keys",
     "debian8_clang_default_packages",
     "debian8_clang_default_repos",
-    "gcc_env",
 )
 
 # Use "rbe-test-" prefix for easy identification of images to remove after the tests.
