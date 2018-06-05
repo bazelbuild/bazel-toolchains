@@ -28,7 +28,7 @@ addons:
 install:
   - go get -u github.com/bazelbuild/buildifier/buildifier
 
-  script:
+script:
   # Check that our direct testing passes.
   # The tests takes long to finish and currently we cover bazel tests in Bazel CI
   # TODO: add tests cannot be run by bazel here
