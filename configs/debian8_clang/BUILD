@@ -17,11 +17,12 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
-load("@bazel_toolchains//rules:environments.bzl",
+load(
+    "@bazel_toolchains//rules:environments.bzl",
     "clang_env",
     "debian8_clang_default_keys",
     "debian8_clang_default_packages",
-    "debian8_clang_default_repos"
+    "debian8_clang_default_repos",
 )
 
 # Created on 2017.10.18
@@ -100,7 +101,7 @@ docker_toolchain_autoconfig(
     base = "@debian8-clang//image",
     bazel_version = "0.11.0",
     env = clang_env() + {
-      "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
     },
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
@@ -130,7 +131,7 @@ docker_toolchain_autoconfig(
     base = "@debian8-clang//image",
     bazel_version = "0.12.0",
     env = clang_env() + {
-      "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
     },
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
@@ -160,7 +161,7 @@ docker_toolchain_autoconfig(
     base = "@debian8-clang//image",
     bazel_version = "0.13.0",
     env = clang_env() + {
-      "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
     },
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),

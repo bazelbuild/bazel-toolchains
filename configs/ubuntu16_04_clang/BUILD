@@ -17,11 +17,12 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
-load("@bazel_toolchains//rules:environments.bzl",
+load(
+    "@bazel_toolchains//rules:environments.bzl",
     "clang_env",
     "ubuntu16_04_clang_default_keys",
     "ubuntu16_04_clang_default_packages",
-    "ubuntu16_04_clang_default_repos"
+    "ubuntu16_04_clang_default_repos",
 )
 
 # Created on 2018.05.09
@@ -46,7 +47,7 @@ docker_toolchain_autoconfig(
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.13.0",
     env = clang_env() + {
-      "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
     },
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),

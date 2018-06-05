@@ -13,82 +13,80 @@
 # limitations under the License.
 """Default dictionaries of env variables."""
 
-
 def gcc_env():
-  return {
-      "ABI_VERSION": "gcc",
-      "ABI_LIBC_VERSION": "glibc_2.19",
-      "BAZEL_COMPILER": "gcc",
-      "BAZEL_HOST_SYSTEM": "i686-unknown-linux-gnu",
-      "BAZEL_TARGET_LIBC": "glibc_2.19",
-      "BAZEL_TARGET_CPU": "k8",
-      "BAZEL_TARGET_SYSTEM": "x86_64-unknown-linux-gnu",
-      "CC_TOOLCHAIN_NAME": "linux_gnu_x86"
-  }
-
+    return {
+        "ABI_VERSION": "gcc",
+        "ABI_LIBC_VERSION": "glibc_2.19",
+        "BAZEL_COMPILER": "gcc",
+        "BAZEL_HOST_SYSTEM": "i686-unknown-linux-gnu",
+        "BAZEL_TARGET_LIBC": "glibc_2.19",
+        "BAZEL_TARGET_CPU": "k8",
+        "BAZEL_TARGET_SYSTEM": "x86_64-unknown-linux-gnu",
+        "CC_TOOLCHAIN_NAME": "linux_gnu_x86",
+    }
 
 def clang_env():
-  return {
-      "ABI_VERSION": "clang",
-      "ABI_LIBC_VERSION": "glibc_2.19",
-      "BAZEL_COMPILER": "clang",
-      "BAZEL_HOST_SYSTEM": "i686-unknown-linux-gnu",
-      "BAZEL_TARGET_LIBC": "glibc_2.19",
-      "BAZEL_TARGET_CPU": "k8",
-      "BAZEL_TARGET_SYSTEM": "x86_64-unknown-linux-gnu",
-      "CC_TOOLCHAIN_NAME": "linux_gnu_x86",
-      "CC": "clang"
-  }
+    return {
+        "ABI_VERSION": "clang",
+        "ABI_LIBC_VERSION": "glibc_2.19",
+        "BAZEL_COMPILER": "clang",
+        "BAZEL_HOST_SYSTEM": "i686-unknown-linux-gnu",
+        "BAZEL_TARGET_LIBC": "glibc_2.19",
+        "BAZEL_TARGET_CPU": "k8",
+        "BAZEL_TARGET_SYSTEM": "x86_64-unknown-linux-gnu",
+        "CC_TOOLCHAIN_NAME": "linux_gnu_x86",
+        "CC": "clang",
+    }
 
 def debian8_clang_default_packages():
-  return [
-    "bazel",
-    "ca-certificates-java=20161107'*'",
-    "curl",
-    "git",
-    "openjdk-8-jdk-headless",
-    "openjdk-8-jre-headless",
-    "python-dev",
-    "unzip",
-    "wget",
-    "zip",
-  ]
+    return [
+        "bazel",
+        "ca-certificates-java=20161107'*'",
+        "curl",
+        "git",
+        "openjdk-8-jdk-headless",
+        "openjdk-8-jre-headless",
+        "python-dev",
+        "unzip",
+        "wget",
+        "zip",
+    ]
 
 def debian8_clang_default_repos():
-  return [
-    "deb http://deb.debian.org/debian jessie-backports main",
-    bazel_repo(),
-  ]
+    return [
+        "deb http://deb.debian.org/debian jessie-backports main",
+        bazel_repo(),
+    ]
 
 def debian8_clang_default_keys():
-  return bazel_key()
+    return bazel_key()
 
 def ubuntu16_04_clang_default_packages():
-  return [
-    "bazel",
-    "ca-certificates-java",
-    "curl",
-    "git",
-    "openjdk-8-jdk-headless",
-    "openjdk-8-jre-headless",
-    "python-dev",
-    "unzip",
-    "wget",
-    "zip",
-  ]
+    return [
+        "bazel",
+        "ca-certificates-java",
+        "curl",
+        "git",
+        "openjdk-8-jdk-headless",
+        "openjdk-8-jre-headless",
+        "python-dev",
+        "unzip",
+        "wget",
+        "zip",
+    ]
 
 def ubuntu16_04_clang_default_repos():
-  return [
-    bazel_repo(),
-  ]
+    return [
+        bazel_repo(),
+    ]
 
 def ubuntu16_04_clang_default_keys():
-  return bazel_key()
+    return bazel_key()
 
 def bazel_key():
-  return [
-    "@bazel_gpg//file",
-  ]
+    return [
+        "@bazel_gpg//file",
+    ]
 
 def bazel_repo():
-  return "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8"
+    return "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8"

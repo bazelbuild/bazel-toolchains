@@ -30,8 +30,8 @@ http_archive(
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
-    container_repositories = "repositories",
     "container_pull",
+    container_repositories = "repositories",
 )
 
 container_repositories()
@@ -92,7 +92,7 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz",
 )
 
-load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@io_bazel_rules_go//go:def.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
 
@@ -128,9 +128,9 @@ http_archive(
 
 load(
     "@distroless//package_manager:package_manager.bzl",
-    "package_manager_repositories",
-    "dpkg_src",
     "dpkg_list",
+    "dpkg_src",
+    "package_manager_repositories",
 )
 
 package_manager_repositories()
@@ -225,9 +225,9 @@ http_file(
 
 load(
     "//third_party/libcxx:revision.bzl",
-    "LIBCXX_REVISION",
     "DEBIAN8_LIBCXX_SHA256",
     "DEBIAN9_LIBCXX_SHA256",
+    "LIBCXX_REVISION",
     "UBUNTU16_04_LIBCXX_SHA256",
 )
 
