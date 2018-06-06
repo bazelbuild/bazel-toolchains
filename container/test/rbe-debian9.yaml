@@ -18,6 +18,9 @@ commandTests:
 - name: 'path-envvar'
   command: ['sh', '-c', 'echo $PATH']
   expectedOutput: ['/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin']
+- name: 'check-locale'
+  command: ['sh', '-c', 'echo $LC_ALL']
+  expectedOutput: ['C.UTF-8']
 - name: 'cc-envvar'
   command: ['sh', '-c', 'echo $CC']
   expectedOutput: ['/usr/local/bin/clang']
