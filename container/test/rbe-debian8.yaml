@@ -85,6 +85,14 @@ fileExistenceTests:
   isDirectory: false
   path: '/usr/local/bin/clang'
   shouldExist: true
+- name: 'libcxx-header'
+  isDirectory: true
+  path: '/usr/local/include/c++/v1'
+  shouldExist: true
+- name: 'libcxx-lib'
+  isDirectory: false
+  path: '/usr/local/lib/libc++.a'
+  shouldExist: true
 - name: 'OpenJDK'
   isDirectory: true
   path: '/usr/lib/jvm/java-8-openjdk-amd64'
