@@ -35,6 +35,15 @@ declare -A TYPE_TARGET_MAP=(
   ["ubuntu16_04-bazel-docker"]="bazel_docker"
 )
 
+# Map to store all supported container type and the name of target to build it.
+declare -A TYPE_TARBALL_MAP=(
+  ["rbe-debian8"]="toolchain-packages.tar"
+  ["rbe-debian9"]="toolchain-packages.tar"
+  ["rbe-ubuntu16_04"]="toolchain-packages.tar"
+  ["ubuntu16_04-bazel"]="bazel_with_debs-packages.tar"
+  ["ubuntu16_04-bazel-docker"]="bazel_docker_with_debs-packages.tar"
+)
+
 show_usage () {
   usage=$(cat << EOF
 
@@ -139,6 +148,7 @@ main () {
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
   PACKAGE=${TYPE_PACKAGE_MAP[$TYPE]}
   TARGET=${TYPE_TARGET_MAP[$TYPE]}
+  TARBALL=${TYPE_TARBALL_MAP[$TYPE]}
 
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
@@ -166,15 +176,15 @@ main () {
     find ${PROJECT_ROOT}/third_party -type f -print0 | xargs -0 chmod 644
 
     config_file=${PROJECT_ROOT}/container/cloudbuild.yaml
-    bucket_substitution=",_BUCKET=${BUCKET}"
+    extra_substitution=",_BUCKET=${BUCKET},_TARBALL=${TARBALL}"
     if [[ "$BUCKET" == "" ]]; then
       config_file=${PROJECT_ROOT}/container/cloudbuild_no_bucket.yaml
-      bucket_substitution=""
+      extra_substitution=""
     fi
 
     gcloud container builds submit . \
       --config=${config_file} \
-      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_PACKAGE=${PACKAGE},_TARGET=${TARGET}${bucket_substitution} \
+      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_PACKAGE=${PACKAGE},_TARGET=${TARGET}${extra_substitution} \
       --machine-type=n1-highcpu-32 \
       ${ASYNC}
 

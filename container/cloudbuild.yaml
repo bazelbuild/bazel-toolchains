@@ -59,7 +59,7 @@ steps:
 # Step: store the tarball of debian packages in GCS
   - name: gcr.io/cloud-builders/gsutil
     args: ['cp',
-           '/workspace/bazel-out/k8-fastbuild/bin/${_PACKAGE}/${_TARGET}-packages.tar',
+           '/workspace/bazel-out/k8-fastbuild/bin/${_PACKAGE}/${_TARBALL}',
            'gs://${_BUCKET}/${_CONTAINER}-${_TAG}-${BUILD_ID}.tar'
     ]
 
