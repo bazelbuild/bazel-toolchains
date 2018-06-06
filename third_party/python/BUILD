@@ -54,7 +54,7 @@ pkg_tar(
 # https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
 container_file_export(
     name = "debian8_python3",
-    image = "l.gcr.io/google/python@sha256:5c5394b9d43b06188a866fd11df84ffb808a91495492a7d727dd258dedee796e",
+    image = "l.gcr.io/google/python@sha256:ace668f0f01e5e562ad09c3f128488ec33fa9126313f16505a86ae77865d1696",
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )
@@ -64,7 +64,7 @@ container_file_export(
 # https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
 container_file_export(
     name = "ubuntu16_04_python3",
-    image = "gcr.io/google-appengine/python@sha256:e720c0e853697373efe5e3eed6f4db113f9291327a6f169feb54271fe364b40b",
+    image = "gcr.io/google-appengine/python@sha256:73f43d9b52e95c821dcd2d6e1bc42ebb1b002623263cea5ae517e6f81d56bc37",
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )

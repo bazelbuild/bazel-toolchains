@@ -52,21 +52,21 @@ container_pull(
 
 container_pull(
     name = "ubuntu16_04",
-    digest = "sha256:c5f4c61e72b1f872e16b64577f8abb041a237f28f0513d4d482fc06d2532bb81",
+    digest = "sha256:5125aac627c68226c6ad6083d0e3419bc6252bea1eb9d6e7258ecfd67233d655",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/ubuntu16_04",
 )
 
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f",
+    digest = "sha256:c85ca4729d378ffde330376f2314fb3e0c99ef94d48207cfc11add34741dc8b7",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/clang-debian8",
 )
 
 container_pull(
     name = "ubuntu16_04-clang",
-    digest = "sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7",
+    digest = "sha256:be5ce2e9d779b94195656be4c7a998a93a29067fb921a9bda97bf99a034a18d3",
     registry = "gcr.io",
     repository = "cloud-marketplace/google/clang-ubuntu",
 )
