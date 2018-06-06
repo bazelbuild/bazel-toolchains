@@ -20,12 +20,12 @@ commandTests:
 - name: 'java-version'
   command: ['bash', '-c', 'java -version 2>&1']
   expectedOutput: ['openjdk version \"1.8.*']
+- name: 'gcc-version'
+  command: ['bash', '-c', 'gcc --version 2>&1']
+  expectedOutput: ['gcc .*']
 - name: 'check-openssl'
   command: ['bash', '-c', 'openssl version']
   expectedOutput: ['OpenSSL .*']
-- name: 'check-git'
-  command: ['bash', '-c', 'git --version']
-  expectedOutput: ['git version .*']
 - name: 'check-unzip'
   command: ['bash', '-c', 'unzip']
   expectedOutput: ['.*Usage: unzip .*']

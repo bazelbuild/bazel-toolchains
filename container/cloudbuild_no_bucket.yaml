@@ -29,7 +29,7 @@ steps:
       '--verbose_failures',
       '--spawn_strategy=standalone',
       '--genrule_strategy=standalone',
-      '//${_DIR}:toolchain'
+      '//${_PACKAGE}:${_TARGET}'
     ]
     id: 'container-build'
     waitFor:
@@ -37,7 +37,7 @@ steps:
 
 # Step: re-tag the image
   - name: gcr.io/cloud-builders/docker
-    args: ['tag', 'bazel/${_DIR}:toolchain', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}']
+    args: ['tag', 'bazel/${_PACKAGE}:${_TARGET}', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}']
     id: 'container-tag'
     waitFor: # wait for all artifacts to be ready
     - 'container-build'
@@ -53,7 +53,7 @@ steps:
       '--verbose_failures',
       '--spawn_strategy=standalone',
       '--genrule_strategy=standalone',
-      '//${_DIR}:toolchain-test'
+      '//${_PACKAGE}:${_TARGET}-test'
     ]
 
 # Build the release-container

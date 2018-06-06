@@ -16,50 +16,70 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//container/rules:docker_toolchains.bzl", "language_tool_layer", "toolchain_container")
+load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     "container_image",
 )
 
-language_tool_layer(
-    name = "add-on-ltl",
+# Install deb packages.
+toolchain_container(
+    name = "bazel_with_debs",
     base = "@ubuntu16_04//image",
-    packages = [
-        "git",
-        "software-properties-common",
-        "unzip",
+    language_layers = [
+        "//container/rbe-ubuntu16_04:java-ltl",
+        "//container/rbe-ubuntu16_04:python-ltl",
+        "//container/ubuntu16_04/layers/bazel:bazel-tools",
+        "//container/ubuntu16_04/layers/bazel:bazel-ltl",
+        "//container/ubuntu16_04/layers/git:git-ltl",
     ],
+)
+
+# Setup other information, e.g. entrypoint.
+# TODO(xingao): set entrypoint in toolchain_container once supported.
+container_image(
+    name = "bazel",
+    base = ":bazel_with_debs",
+    entrypoint = ["bazel"],
+)
+
+container_test(
+    name = "bazel-test",
+    configs = [
+        ":container.yaml",
+        "//container/ubuntu16_04/layers/bazel:bazel.yaml",
+        "//container/ubuntu16_04/layers/git:git.yaml",
+    ],
+    image = ":bazel",
+    verbose = True,
 )
 
 # Install deb packages.
 toolchain_container(
-    name = "toolchain_with_debs",
-    base = "@ubuntu16_04//image",
+    name = "bazel_docker_with_debs",
+    base = ":bazel_with_debs.tar",
     language_layers = [
-        ":add-on-ltl",
-        "//container/rbe-ubuntu16_04:java-ltl",
-        "//container/rbe-ubuntu16_04:python-ltl",
-        "//container/ubuntu16_04/layers/bazel:bazel-ltl",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-ltl",
     ],
 )
 
 # Setup other information, e.g. entrypoint.
+# TODO(xingao): set entrypoint in toolchain_container once supported.
 container_image(
-    name = "toolchain",
-    base = ":toolchain_with_debs",
+    name = "bazel_docker",
+    base = ":bazel_docker_with_debs",
     entrypoint = ["bazel"],
 )
 
 container_test(
-    name = "toolchain-test",
+    name = "bazel_docker-test",
     configs = [
         ":container.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
+        "//container/ubuntu16_04/layers/git:git.yaml",
     ],
-    image = ":toolchain",
+    image = ":bazel_docker",
     verbose = True,
 )
