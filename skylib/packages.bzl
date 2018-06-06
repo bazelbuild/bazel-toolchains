@@ -43,7 +43,10 @@ def base_layer_packages():
         tool_names.ed,
         tool_names.file,
         tool_names.git,
+        tool_names.less,
+        tool_names.netcat,
         tool_names.openssh_client,
+        tool_names.patch,
         tool_names.wget,
         tool_names.zip,
     ]

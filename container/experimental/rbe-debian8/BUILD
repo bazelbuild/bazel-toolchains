@@ -46,9 +46,9 @@ container_image(
     layers = [
         ":base-ltl",
         ":clang-ltl",
-        ":go-ltl",
         ":java-ltl",
         ":python-ltl",
+        ":go-ltl",
     ],
     tags = ["manual"],
 )
@@ -107,6 +107,7 @@ container_layer(
     },
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
+        "/usr/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
         "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",

@@ -30,8 +30,11 @@ tool_names = struct(
     git = "git",
     java = "java",
     java_no_ca_certs = "java_no_ca_certs",
+    less = "less",
     lib_cpp = "lib_cpp",
+    netcat = "netcat",
     openssh_client = "openssh_client",
+    patch = "patch",
     python3_dev = "python3_dev",
     python3_numpy = "python3_numpy",
     python3_pip = "python3_pip",
@@ -52,8 +55,11 @@ def jessie_tools():
         tool_names.git: _jessie_git_package_names(),
         tool_names.java: _jessie_java_package_names(),
         tool_names.java_no_ca_certs: _jessie_java_no_ca_certs_package_names(),
+        tool_names.less: _jessie_less_package_names(),
         tool_names.lib_cpp: _jessie_lib_cpp_package_names(),
+        tool_names.netcat: _jessie_netcat_package_names(),
         tool_names.openssh_client: _jessie_openssh_client_package_names(),
+        tool_names.patch: _jessie_patch_package_names(),
         tool_names.python_dev: _jessie_python_dev_package_names(),
         tool_names.python_numpy: _jessie_python_numpy_package_names(),
         tool_names.python_pip: _jessie_python_pip_package_names(),
@@ -229,6 +235,14 @@ def _jessie_java_no_ca_certs_package_names():
 def _jessie_java_package_names():
     return _jessie_java_no_ca_certs_package_names() + ["ca-certificates-java"]
 
+def _jessie_less_package_names():
+    return [
+        "less",
+        "libc6",
+        "libtinfo5",
+        "debianutils",
+    ]
+
 def _jessie_lib_cpp_package_names():
     return [
         "libasan1",
@@ -247,6 +261,12 @@ def _jessie_lib_cpp_package_names():
         "linux-libc-dev",
     ]
 
+def _jessie_netcat_package_names():
+    return [
+        "netcat",
+        "netcat-traditional",
+    ]
+
 def _jessie_openssh_client_package_names():
     return [
         "libbsd0",
@@ -257,6 +277,12 @@ def _jessie_openssh_client_package_names():
         "libkrb5-3",
         "libkrb5support0",
         "openssh-client",
+    ]
+
+def _jessie_patch_package_names():
+    return [
+        "libc6",
+        "patch",
     ]
 
 def _jessie_python3_dev_package_names():
