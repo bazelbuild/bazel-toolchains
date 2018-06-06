@@ -37,11 +37,18 @@ PYTHON_CLEANUP_COMMANDS = (
 toolchain_container(
     name = "toolchain",
     base = "@ubuntu16_04//image",
+    cmd = [
+        "/bin/sh",
+        "-c",
+        "/bin/bash",
+    ],
     env = {
         # PATH envvar is a special case, and currently only the one in the
         # topmost layer is set. So that we override it here to include all.
         "PATH": "$PATH:/opt/python3.6/bin:/usr/local/go/bin",
-        "LC_ALL ": "C.UTF-8",
+        "LANG": "C.UTF-8",
+        "LANGUAGE": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
     },
     language_layers = [
         "base-ltl",
@@ -63,6 +70,8 @@ language_tool_layer(
         "file",
         "git",
         "less",
+        "locales",
+        "locales-all",
         "netcat",
         "openssh-client",
         "patch",
