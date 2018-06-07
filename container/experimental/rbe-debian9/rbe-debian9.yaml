@@ -18,6 +18,9 @@ commandTests:
 - name: 'path-envvar'
   command: ['sh', '-c', 'echo $PATH']
   expectedOutput: ['/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin']
+- name: 'check-locale'
+  command: ['sh', '-c', 'echo $LC_ALL']
+  expectedOutput: ['C.UTF-8']
 - name: 'cc-envvar'
   command: ['sh', '-c', 'echo $CC']
   expectedOutput: ['/usr/local/bin/clang']
@@ -55,9 +58,18 @@ commandTests:
 - name: 'check-git'
   command: ['bash', '-c', 'git --version']
   expectedOutput: ['git version .*']
+- name: 'check-less'
+  command: ['bash', '-c', 'less --version']
+  expectedOutput: ['less .*']
+- name: 'check-netcat'
+  command: ['bash', '-c', 'nc -h 2>&1']
+  expectedOutput: ['\[v.*']
 - name: 'check-openssl'
   command: ['bash', '-c', 'openssl version']
   expectedOutput: ['OpenSSL .*']
+- name: 'check-patch'
+  command: ['bash', '-c', 'patch --version']
+  expectedOutput: ['GNU patch .*']
 - name: 'check-wget'
   command: ['bash', '-c', 'wget --version']
   expectedOutput: ['GNU Wget.* built on linux-gnu.*']
@@ -73,6 +85,14 @@ fileExistenceTests:
 - name: 'Clang'
   isDirectory: false
   path: '/usr/local/bin/clang'
+  shouldExist: true
+- name: 'libcxx-header'
+  isDirectory: true
+  path: '/usr/local/include/c++/v1'
+  shouldExist: true
+- name: 'libcxx-lib'
+  isDirectory: false
+  path: '/usr/local/lib/libc++.a'
   shouldExist: true
 - name: 'OpenJDK'
   isDirectory: true

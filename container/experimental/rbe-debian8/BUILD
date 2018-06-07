@@ -40,8 +40,15 @@ cacerts(
 container_image(
     name = "toolchain",
     base = "@debian8//image",
+    cmd = [
+        "/bin/sh",
+        "-c",
+        "/bin/bash",
+    ],
     env = {
-        "LC_ALL ": "C.UTF-8",
+        "LANG": "C.UTF-8",
+        "LANGUAGE": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
     },
     layers = [
         "base-ltl",
@@ -107,6 +114,7 @@ container_layer(
     },
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
+        "/usr/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
         "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
