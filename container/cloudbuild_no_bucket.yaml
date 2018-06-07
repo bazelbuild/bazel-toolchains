@@ -49,7 +49,7 @@ steps:
     args: [
       '--output_base=/workspace',
       'test',
-      '--test_output=errors',
+      '--test_output=all',
       '--verbose_failures',
       '--spawn_strategy=standalone',
       '--genrule_strategy=standalone',
