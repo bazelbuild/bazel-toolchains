@@ -22,6 +22,8 @@ load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
 
 exports_files(["docker-17.12.0.yaml"])
 
+# Downloading "docker-ce" requires "apt-transport-https" to be installed
+# in the container. So create a prerequisite container first.
 toolchain_container(
     name = "docker-prereq",
     base = "@ubuntu16_04//image",
