@@ -28,6 +28,7 @@ language_tool_layer(
         "g++",
         "software-properties-common",
         "unzip",
+        "zip",
     ],
 )
 

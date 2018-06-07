@@ -29,6 +29,9 @@ commandTests:
 - name: 'check-unzip'
   command: ['bash', '-c', 'unzip']
   expectedOutput: ['.*Usage: unzip .*']
+- name: 'check-zip'
+  command: ['bash', '-c', 'zip --version']
+  expectedOutput: ['.*This is Zip.*']
 
 # File existence tests
 fileExistenceTests:
