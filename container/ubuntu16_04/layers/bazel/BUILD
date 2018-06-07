@@ -16,4 +16,32 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(glob(["**"]))
+load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
+
+exports_files(["bazel.yaml"])
+
+#  gcc + other tools required by Bazel
+language_tool_layer(
+    name = "bazel-tools",
+    base = "@ubuntu16_04//image",
+    packages = [
+        "g++",
+        "software-properties-common",
+        "unzip",
+        "zip",
+    ],
+)
+
+language_tool_layer(
+    name = "bazel-ltl",
+    additional_repos = [
+        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
+    ],
+    base = "@ubuntu16_04//image",
+    keys = [
+        "@bazel_gpg//file",
+    ],
+    packages = [
+        "bazel",
+    ],
+)

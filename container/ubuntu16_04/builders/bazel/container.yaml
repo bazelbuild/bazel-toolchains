@@ -1,3 +1,4 @@
+# TODO(xingao) Update to 2.0.0 to enable metadataTest.
 schemaVersion: "1.0.0"
 
 # TODO: split out the common tests once resolve the CI issues
@@ -6,7 +7,7 @@ schemaVersion: "1.0.0"
 commandTests:
 - name: 'os-version'
   command: ['sh', '-c', 'cat /etc/issue.net']
-  expectedOutput: ['Debian GNU/Linux 8']
+  expectedOutput: ['Ubuntu 16.04.3 LTS']
 
 # Common tests
 commandTests:
@@ -19,12 +20,18 @@ commandTests:
 - name: 'java-version'
   command: ['bash', '-c', 'java -version 2>&1']
   expectedOutput: ['openjdk version \"1.8.*']
+- name: 'gcc-version'
+  command: ['bash', '-c', 'gcc --version 2>&1']
+  expectedOutput: ['gcc .*']
 - name: 'check-openssl'
   command: ['bash', '-c', 'openssl version']
   expectedOutput: ['OpenSSL .*']
-- name: 'bazel'
-  command: ['bazel']
-  expectedOutput: ['Usage: bazel <command> <options>.*']
+- name: 'check-unzip'
+  command: ['bash', '-c', 'unzip']
+  expectedOutput: ['.*Usage: unzip .*']
+- name: 'check-zip'
+  command: ['bash', '-c', 'zip --version']
+  expectedOutput: ['.*This is Zip.*']
 
 # File existence tests
 fileExistenceTests:
@@ -32,3 +39,9 @@ fileExistenceTests:
   isDirectory: true
   path: '/usr/lib/jvm/java-8-openjdk-amd64'
   shouldExist: true
+
+# TODO(xingao) Test entry point once rules_docker is updated with latest
+# version of the structure_test
+# https://github.com/bazelbuild/rules_docker/pull/416
+# metadataTest:
+#   entrypoint: ['bazel']

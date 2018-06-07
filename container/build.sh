@@ -15,41 +15,70 @@
 #!/usr/bin/env bash
 set -e
 
+# TODO(xingao): Rewrite the script in Python or Go
+
+# Map to store all supported container type and the package of target to build it.
+declare -A TYPE_PACKAGE_MAP=(
+  ["rbe-debian8"]="container/rbe-debian8"
+  ["rbe-debian9"]="container/experimental/rbe-debian9"
+  ["rbe-ubuntu16_04"]="container/rbe-ubuntu16_04"
+  ["ubuntu16_04-bazel"]="container/ubuntu16_04/builders/bazel"
+  ["ubuntu16_04-bazel-docker"]="container/ubuntu16_04/builders/bazel"
+)
+
+# Map to store all supported container type and the name of target to build it.
+declare -A TYPE_TARGET_MAP=(
+  ["rbe-debian8"]="toolchain"
+  ["rbe-debian9"]="toolchain"
+  ["rbe-ubuntu16_04"]="toolchain"
+  ["ubuntu16_04-bazel"]="bazel"
+  ["ubuntu16_04-bazel-docker"]="bazel_docker"
+)
+
+# Map to store all supported container type and the name of target to build it.
+declare -A TYPE_TARBALL_MAP=(
+  ["rbe-debian8"]="toolchain-packages.tar"
+  ["rbe-debian9"]="toolchain-packages.tar"
+  ["rbe-ubuntu16_04"]="toolchain-packages.tar"
+  ["ubuntu16_04-bazel"]="bazel_with_debs-packages.tar"
+  ["ubuntu16_04-bazel-docker"]="bazel_docker_with_debs-packages.tar"
+)
 
 show_usage () {
   usage=$(cat << EOF
+
 Usage: build.sh [options]
 
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 Required parameters (when build with Google Cloud Container Builder):
-    -d|--distro             Distro of the base image: debian8, debian9, ubuntu16_04
+    -d|--type               Type of the container: see TYPE_TARGET_MAP
     -p|--project            GCP project ID
     -c|--container          Docker container name
     -t|--tag                Docker tag for the image
-    -b|--bucket             GCS bucket to store the tarball of debian packages
 
 Optional parameters (when build with Google Cloud Container Builder):
     -a|--async              asynchronous execute Cloud Container Builder
+    -b|--bucket             GCS bucket to store the tarball of debian packages
 
 Standalone parameters
     -l|--local              build container locally
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -d {debian8, debian9, ubuntu16_04} -c rbe-{debian8, debian9, ubuntu16_04} -t latest -b my_bucket
+$ ./build.sh -p my-gcp-project -d {container_type} \
+    -c {container_name} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
-    gcr.io/my-gcp-project/rbe-{debian8, debian9, ubuntu16_04}:latest
+    gcr.io/my-gcp-project/{container_type}:latest
 and the debian packages installed will be packed as a tarball and stored in
-gs://my_bucket for future reference.
+gs://my_bucket for future reference, if -b is specified.
 
 To build locally:
-$ ./build.sh -d {debian8, debian9, ubuntu16_04} -l
-will produce docker locally as rbe-{debian8, debian9, ubuntu16_04}:latest
+$ ./build.sh -d {container_type} -l
+will produce docker locally as {container_type}:latest
 EOF
 )
   echo "$usage"
 }
-
 
 parse_parameters () {
   while [[ $# -gt 0 ]]; do
@@ -63,9 +92,9 @@ parse_parameters () {
         PROJECT=$1
         shift
         ;;
-      -d|--distro)
+      -d|--type)
         shift
-        DISTRO=$1
+        TYPE=$1
         shift
         ;;
       -c|--container)
@@ -99,14 +128,15 @@ parse_parameters () {
     esac
   done
 
-  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$DISTRO" == "" || "$TAG" == "" || "$BUCKET" == "" ) && "$LOCAL" == "" ]]; then
+  if [[ ("$PROJECT" == "" || "$CONTAINER" == "" || "$TYPE" == "" || "$TAG" == "") && "$LOCAL" == "" ]]; then
      echo "Please specify all required options for building in Google Cloud Container Builder"
      show_usage
      exit 1
   fi
 
-  if [[ "$DISTRO" != "debian8" && "$DISTRO" != "debian9" && "$DISTRO" != "ubuntu16_04" ]]; then
-    echo "Distro parameter can be only: 'debian8', 'debian9' or 'ubuntu16_04'"
+  if [[ -z ${TYPE_TARGET_MAP[$TYPE]} ]]; then
+    echo "Type parameter can only be the following:"
+    for type in "${!TYPE_TARGET_MAP[@]}"; do echo "$type"; done
     show_usage
     exit 1
   fi
@@ -116,11 +146,9 @@ main () {
   parse_parameters $@
 
   PROJECT_ROOT=$(git rev-parse --show-toplevel)
-  if [[ "$DISTRO" != "debian9" ]]; then
-    DIR="container/rbe-${DISTRO}"
-  else
-    DIR="container/experimental/rbe-${DISTRO}"
-  fi
+  PACKAGE=${TYPE_PACKAGE_MAP[$TYPE]}
+  TARGET=${TYPE_TARGET_MAP[$TYPE]}
+  TARBALL=${TYPE_TARBALL_MAP[$TYPE]}
 
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
@@ -130,14 +158,14 @@ main () {
 
   if [[ "$LOCAL" = true ]]; then
     echo "Building container locally."
-    bazel run //${DIR}:toolchain
+    bazel run //${PACKAGE}:${TARGET}
     echo "Testing container locally."
-    bazel test //${DIR}:toolchain-test
+    bazel test //${PACKAGE}:${TARGET}-test
     echo "Tagging container."
-    docker tag bazel/${DIR}:toolchain rbe-${DISTRO}:latest
+    docker tag bazel/${PACKAGE}:${TARGET} ${TYPE}:latest
     echo -e "\n" \
-      "rbe-${DISTRO}:lastest container is now available to use.\n" \
-      "To try it: docker run -it rbe-${DISTRO}:latest \n"
+      "${TYPE}:lastest container is now available to use.\n" \
+      "To try it: docker run -it ${TYPE}:latest \n"
   else
     echo "Building container in Google Cloud Container Builder."
     # Setup GCP project id for the build
@@ -146,11 +174,20 @@ main () {
     # This is because in some systems the BUILD files under /third_party (after git clone)
     # will be with permission 640 and the build will fail in Container Builder.
     find ${PROJECT_ROOT}/third_party -type f -print0 | xargs -0 chmod 644
-    # Start Google Cloud Container Builder
+
+    config_file=${PROJECT_ROOT}/container/cloudbuild.yaml
+    extra_substitution=",_BUCKET=${BUCKET},_TARBALL=${TARBALL}"
+    if [[ "$BUCKET" == "" ]]; then
+      config_file=${PROJECT_ROOT}/container/cloudbuild_no_bucket.yaml
+      extra_substitution=""
+    fi
+
     gcloud container builds submit . \
-      --config=${PROJECT_ROOT}/container/cloudbuild.yaml \
-      --substitutions _PROJECT=${PROJECT},_DISTRO=${DISTRO},_CONTAINER=${CONTAINER},_TAG=${TAG},_DIR=${DIR},_BUCKET=${BUCKET} \
+      --config=${config_file} \
+      --substitutions _PROJECT=${PROJECT},_CONTAINER=${CONTAINER},_TAG=${TAG},_PACKAGE=${PACKAGE},_TARGET=${TARGET}${extra_substitution} \
+      --machine-type=n1-highcpu-32 \
       ${ASYNC}
+
   fi
 }
 

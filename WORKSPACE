@@ -23,9 +23,9 @@ load(
 # https://docs.bazel.build/versions/master/be/workspace.html#git_repository
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "0c2a63f09e7e85e08d83a32af41fc93a3b4796c80fc3fe4626df82a63b92bcff",
-    strip_prefix = "rules_docker-1144f83122750fe4aca139bd0f205d99c9bd94c1",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/1144f83122750fe4aca139bd0f205d99c9bd94c1.tar.gz"],
+    sha256 = "33ef2a5d3992bc44494b84f932cd114d1fc44c377a76e033adcf09a5d258dbb7",
+    strip_prefix = "rules_docker-b1ea0f972422e246fb6f39d9a21ec435d78a80de",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/b1ea0f972422e246fb6f39d9a21ec435d78a80de.tar.gz"],
 )
 
 load(
@@ -100,9 +100,9 @@ go_register_toolchains()
 
 http_archive(
     name = "base_images_docker",
-    sha256 = "44c5d801ea553938b06cd7f82c605d46c79da79a0f1c2ee1a24bed7c49934906",
-    strip_prefix = "base-images-docker-521a8d65328303c45b72818dc97d24fd7a73b400",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/521a8d65328303c45b72818dc97d24fd7a73b400.tar.gz"],
+    sha256 = "7693aa6302443b908f2d70c0ac6be10c8d0023be4266c4f76a9195773f85bed9",
+    strip_prefix = "base-images-docker-4f2fc8da248a61c3f8e13bbb43e9db6c0ed44ba3",
+    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/4f2fc8da248a61c3f8e13bbb43e9db6c0ed44ba3.tar.gz"],
 )
 
 http_file(
@@ -115,6 +115,12 @@ http_file(
     name = "debian_docker_gpg",
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
     url = "https://download.docker.com/linux/debian/gpg",
+)
+
+http_file(
+    name = "xenial_docker_gpg",
+    sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
+    url = "https://download.docker.com/linux/ubuntu/gpg",
 )
 
 # Use http_archive rule instead of git_repository rule

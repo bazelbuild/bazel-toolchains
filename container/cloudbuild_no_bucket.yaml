@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# ====================================================================
-# This yaml file should be kept synced with cloudbuild_no_bucket.yaml.
-# ====================================================================
+# ==========================================================
+# This yaml file should be kept synced with cloudbuild.yaml.
+# ==========================================================
 
 timeout: 21600s
 
@@ -54,13 +54,6 @@ steps:
       '--spawn_strategy=standalone',
       '--genrule_strategy=standalone',
       '//${_PACKAGE}:${_TARGET}-test'
-    ]
-
-# Step: store the tarball of debian packages in GCS
-  - name: gcr.io/cloud-builders/gsutil
-    args: ['cp',
-           '/workspace/bazel-out/k8-fastbuild/bin/${_PACKAGE}/${_TARBALL}',
-           'gs://${_BUCKET}/${_CONTAINER}-${_TAG}-${BUILD_ID}.tar'
     ]
 
 # Build the release-container

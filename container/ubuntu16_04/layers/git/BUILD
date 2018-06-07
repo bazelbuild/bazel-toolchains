@@ -16,4 +16,14 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(glob(["**"]))
+load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
+
+exports_files(["git.yaml"])
+
+language_tool_layer(
+    name = "git-ltl",
+    base = "@ubuntu16_04//image",
+    packages = [
+        "git",
+    ],
+)

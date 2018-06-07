@@ -150,7 +150,7 @@ language_tool_layer(
 container_test(
     name = "toolchain-test",
     configs = [
-        "//container/test:rbe-ubuntu16_04.yaml",
+        ":rbe-ubuntu16_04.yaml",
     ],
     image = ":toolchain",
 )

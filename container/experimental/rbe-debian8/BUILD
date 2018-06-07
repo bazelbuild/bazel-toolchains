@@ -51,11 +51,11 @@ container_image(
         "LC_ALL": "C.UTF-8",
     },
     layers = [
-        ":base-ltl",
-        ":clang-ltl",
-        ":java-ltl",
-        ":python-ltl",
-        ":go-ltl",
+        "base-ltl",
+        "clang-ltl",
+        "python-ltl",
+        "go-ltl",
+        "java-ltl",
     ],
     tags = ["manual"],
 )
@@ -125,6 +125,6 @@ container_layer(
 
 container_test(
     name = "toolchain-test",
-    configs = ["//container/test:rbe-debian8.yaml"],
+    configs = ["//container/rbe-debian8:rbe-debian8.yaml"],
     image = ":toolchain",
 )

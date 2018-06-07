@@ -152,7 +152,7 @@ language_tool_layer(
 container_test(
     name = "toolchain-test",
     configs = [
-        "//container/test:rbe-debian9.yaml",
+        ":rbe-debian9.yaml",
     ],
     image = ":toolchain",
 )

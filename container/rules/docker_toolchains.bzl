@@ -33,9 +33,12 @@ def _input_validation(kwargs):
         fail("'keys' can only be specified when 'packages' is not empty.")
 
     has_no_tar = "installables_tar" not in kwargs or kwargs["installables_tar"] == ""
-    if has_no_packages and has_no_tar and "installation_cleanup_commands" in kwargs:
+    has_no_layer = "language_layers" not in kwargs or kwargs["language_layers"] == []
+
+    if has_no_packages and has_no_tar and has_no_layer and "installation_cleanup_commands" in kwargs:
         fail("'installation_cleanup_commands' can only be specified when at least " +
-             "one of 'packages' or 'installables_tar' is not empty.")
+             "one of 'packages', 'installables_tar' or 'language_layers' " +
+             "(if 'toolchain_container' rule) is not empty.")
 
 def _language_tool_layer_impl(
         ctx,
