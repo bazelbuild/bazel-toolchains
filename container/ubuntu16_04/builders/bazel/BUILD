@@ -27,6 +27,10 @@ load(
 toolchain_container(
     name = "bazel_with_debs",
     base = "@ubuntu16_04//image",
+    # TODO(xingao) Fix this. We should not remove /etc/ssl/certs/java/cacerts
+    # file in the java-ltl, but instead, archive it for future container
+    # reproduction.
+    installation_cleanup_commands = "update-ca-certificates -f",
     language_layers = [
         "//container/rbe-ubuntu16_04:java-ltl",
         "//container/rbe-ubuntu16_04:python-ltl",
@@ -34,10 +38,6 @@ toolchain_container(
         "//container/ubuntu16_04/layers/bazel:bazel-ltl",
         "//container/ubuntu16_04/layers/git:git-ltl",
     ],
-    # TODO(xingao) Fix this. We should not remove /etc/ssl/certs/java/cacerts
-    # file in the java-ltl, but instead, archive it for future container
-    # reproduction.
-    installation_cleanup_commands = "update-ca-certificates -f",
 )
 
 # Setup other information, e.g. entrypoint.
