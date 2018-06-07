@@ -1,0 +1,22 @@
+# TODO(xingao) Update to 2.0.0 to enable metadataTest.
+schemaVersion: "1.0.0"
+
+fileExistenceTests:
+- name: 'Python3'
+  isDirectory: false
+  path: '/opt/python3.6/bin/python3'
+  shouldExist: true
+
+# Common tests
+commandTests:
+- name: 'path-envvar'
+  command: ['sh', '-c', 'echo $PATH']
+  expectedOutput: ['/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/python3.6/bin:/usr/local/go/bin']
+- name: 'python3-version'
+  command: ['bash', '-c', 'python3 -V']
+  expectedOutput: ['Python 3.6.*']
+# This is failing in Debian9 base. Once resolved, move this test to
+# container/common/yamls/rbe-base.yaml.
+- name: 'check-curl'
+  command: ['bash', '-c', 'curl --version']
+  expectedOutput: ['curl .* \(x86_64-pc-linux-gnu\).*']

@@ -1,0 +1,8 @@
+# TODO(xingao) Update to 2.0.0 to enable metadataTest.
+schemaVersion: "1.0.0"
+
+# Distro-specific tests
+commandTests:
+- name: 'os-version'
+  command: ['sh', '-c', 'cat /etc/issue.net']
+  expectedOutput: ['Debian GNU/Linux 8']

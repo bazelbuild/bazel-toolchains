@@ -19,9 +19,9 @@ set -e
 
 # Map to store all supported container type and the package of target to build it.
 declare -A TYPE_PACKAGE_MAP=(
-  ["rbe-debian8"]="container/rbe-debian8"
+  ["rbe-debian8"]="container/debian8/builders/rbe-debian8"
   ["rbe-debian9"]="container/experimental/rbe-debian9"
-  ["rbe-ubuntu16_04"]="container/rbe-ubuntu16_04"
+  ["rbe-ubuntu16_04"]="container/ubuntu16_04/builders/rbe-ubuntu16_04"
   ["ubuntu16_04-bazel"]="container/ubuntu16_04/builders/bazel"
   ["ubuntu16_04-bazel-docker"]="container/ubuntu16_04/builders/bazel"
 )
