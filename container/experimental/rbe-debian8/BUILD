@@ -127,4 +127,5 @@ container_test(
     name = "toolchain-test",
     configs = ["//container/rbe-debian8:rbe-debian8.yaml"],
     image = ":toolchain",
+    verbose = True,
 )

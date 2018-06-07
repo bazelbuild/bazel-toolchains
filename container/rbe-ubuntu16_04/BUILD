@@ -153,4 +153,5 @@ container_test(
         ":rbe-ubuntu16_04.yaml",
     ],
     image = ":toolchain",
+    verbose = True,
 )

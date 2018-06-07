@@ -155,4 +155,5 @@ container_test(
         ":rbe-debian9.yaml",
     ],
     image = ":toolchain",
+    verbose = True,
 )
