@@ -1,0 +1,13 @@
+# TODO(xingao) Update to 2.0.0 to enable metadataTest.
+schemaVersion: "1.0.0"
+
+commandTests:
+- name: 'python2-version'
+  command: ['bash', '-c', 'python -V 2>&1']
+  expectedOutput: ['Python 2.7.*']
+
+fileExistenceTests:
+- name: 'Python2'
+  isDirectory: false
+  path: '/usr/bin/python2.7'
+  shouldExist: true

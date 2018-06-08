@@ -125,7 +125,15 @@ container_layer(
 
 container_test(
     name = "toolchain-test",
-    configs = ["//container/rbe-debian8:rbe-debian8.yaml"],
+    configs = [
+        "//container/common:clang.yaml",
+        "//container/common:go.yaml",
+        "//container/common:java.yaml",
+        "//container/common:python2.yaml",
+        "//container/common:rbe-base.yaml",
+        "//container/debian8:debian8.yaml",
+        "//container/debian8/builders/rbe-debian8:rbe-debian8.yaml",
+    ],
     image = ":toolchain",
     verbose = True,
 )
