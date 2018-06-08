@@ -52,8 +52,8 @@ container_test(
     name = "bazel-test",
     configs = [
         ":container.yaml",
-        "//container/common/yamls:java.yaml",
-        "//container/common/yamls:python2.yaml",
+        "//container/common:java.yaml",
+        "//container/common:python2.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/git:git.yaml",
@@ -83,8 +83,8 @@ container_test(
     name = "bazel_docker-test",
     configs = [
         ":container.yaml",
-        "//container/common/yamls:java.yaml",
-        "//container/common/yamls:python2.yaml",
+        "//container/common:java.yaml",
+        "//container/common:python2.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
