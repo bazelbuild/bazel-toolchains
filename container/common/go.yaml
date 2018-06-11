@@ -1,0 +1,16 @@
+# TODO(xingao) Update to 2.0.0 to enable metadataTest.
+schemaVersion: "1.0.0"
+
+commandTests:
+- name: 'gopath-envvar'
+  command: ['sh', '-c', 'echo $GOPATH']
+  expectedOutput: ['/go']
+- name: 'go-version'
+  command: ['bash', '-c', 'go version']
+  expectedOutput: ['go version go1.10 linux/amd64']
+
+fileExistenceTests:
+- name: 'Golang'
+  isDirectory: false
+  path: '/usr/local/go/bin/go'
+  shouldExist: true

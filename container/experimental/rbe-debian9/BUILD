@@ -153,6 +153,11 @@ container_test(
     name = "toolchain-test",
     configs = [
         ":rbe-debian9.yaml",
+        "//container/common:clang.yaml",
+        "//container/common:go.yaml",
+        "//container/common:java.yaml",
+        "//container/common:python2.yaml",
+        "//container/common:rbe-base.yaml",
     ],
     image = ":toolchain",
     verbose = True,

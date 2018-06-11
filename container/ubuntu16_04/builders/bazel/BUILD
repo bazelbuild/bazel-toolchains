@@ -32,8 +32,8 @@ toolchain_container(
     # reproduction.
     installation_cleanup_commands = "update-ca-certificates -f",
     language_layers = [
-        "//container/rbe-ubuntu16_04:java-ltl",
-        "//container/rbe-ubuntu16_04:python-ltl",
+        "//container/ubuntu16_04/layers/java:java-ltl",
+        "//container/ubuntu16_04/layers/python:python-ltl",
         "//container/ubuntu16_04/layers/bazel:bazel-tools",
         "//container/ubuntu16_04/layers/bazel:bazel-ltl",
         "//container/ubuntu16_04/layers/git:git-ltl",
@@ -52,6 +52,9 @@ container_test(
     name = "bazel-test",
     configs = [
         ":container.yaml",
+        "//container/common:java.yaml",
+        "//container/common:python2.yaml",
+        "//container/ubuntu16_04:ubuntu16_04.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/git:git.yaml",
     ],
@@ -80,6 +83,9 @@ container_test(
     name = "bazel_docker-test",
     configs = [
         ":container.yaml",
+        "//container/common:java.yaml",
+        "//container/common:python2.yaml",
+        "//container/ubuntu16_04:ubuntu16_04.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
         "//container/ubuntu16_04/layers/git:git.yaml",
