@@ -228,6 +228,9 @@ toolchain {
   supports_incremental_linker: false
   supports_fission: false
   feature {
+    name: "no_legacy_features"
+  }
+  feature {
     name: "legacy_compile_flags"
     flag_set {
       action: "assemble"
