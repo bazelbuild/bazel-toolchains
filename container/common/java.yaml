@@ -1,16 +1,18 @@
-# TODO(xingao) Update to 2.0.0 to enable metadataTest.
-schemaVersion: "1.0.0"
+schemaVersion: "2.0.0"
 
 commandTests:
-- name: 'javahome-envvar'
-  command: ['sh', '-c', 'echo $JAVA_HOME']
-  expectedOutput: ['/usr/lib/jvm/java-8-openjdk-amd64']
 - name: 'java-version'
-  command: ['bash', '-c', 'java -version 2>&1']
-  expectedOutput: ['openjdk version \"1.8.*']
+  command: 'java'
+  args: ['-version']
+  expectedError: ["openjdk version \"1.8.*"]
 
 fileExistenceTests:
 - name: 'OpenJDK'
   isDirectory: true
   path: '/usr/lib/jvm/java-8-openjdk-amd64'
   shouldExist: true
+
+metadataTest:
+  env:
+    - key: 'JAVA_HOME'
+      value: '/usr/lib/jvm/java-8-openjdk-amd64'
