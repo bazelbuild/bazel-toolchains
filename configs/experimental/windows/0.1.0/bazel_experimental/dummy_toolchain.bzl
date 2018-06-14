@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
- 
+
 """Skylark rule that stubs a toolchain."""
 
 def _dummy_toolchain_impl(ctx):
-  ctx = ctx  # unused argument
-  toolchain = platform_common.ToolchainInfo()
-  return [toolchain]
- 
+    ctx = ctx  # unused argument
+    toolchain = platform_common.ToolchainInfo()
+    return [toolchain]
+
 dummy_toolchain = rule(_dummy_toolchain_impl, attrs = {})
