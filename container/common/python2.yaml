@@ -4,6 +4,7 @@ commandTests:
 - name: 'python2-version'
   command: 'python'
   args: ['-V']
+  # python outputs to stderr.
   expectedError: ['Python 2.7.*']
 
 fileExistenceTests:

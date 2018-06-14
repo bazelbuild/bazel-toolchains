@@ -20,6 +20,7 @@ commandTests:
 - name: 'check-netcat'
   command: 'nc'
   args: ['-h']
+  # nc outputs to stderr.
   expectedError: ['\[v.*']
 - name: 'check-openssl'
   command: 'openssl'

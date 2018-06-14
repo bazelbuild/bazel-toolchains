@@ -4,6 +4,7 @@ commandTests:
 - name: 'java-version'
   command: 'java'
   args: ['-version']
+  # java outputs to stderr.
   expectedError: ["openjdk version \"1.8.*"]
 
 fileExistenceTests:
