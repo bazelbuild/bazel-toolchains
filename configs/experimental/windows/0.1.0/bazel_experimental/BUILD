@@ -1,0 +1,162 @@
+# Copyright 2016 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "malloc",
+)
+
+cc_library(
+    name = "stl",
+)
+
+filegroup(
+    name = "empty",
+    srcs = [],
+)
+
+# Hardcoded toolchain, legacy behaviour.
+cc_toolchain_suite(
+    name = "toolchain",
+    toolchains = {
+        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+        "freebsd|compiler": ":cc-compiler-freebsd",
+        "x64_windows|msvc-cl": ":cc-compiler-x64_windows",
+        "x64_windows|msys-gcc": ":cc-compiler-x64_windows_msys",
+        "x64_windows|mingw-gcc": ":cc-compiler-x64_windows_mingw",
+        "ios_x86_64|compiler": ":cc-compiler-ios_x86_64",
+    },
+)
+
+cc_toolchain(
+    name = "cc-compiler-armeabi-v7a",
+    all_files = ":empty",
+    compiler_files = ":empty",
+    cpu = "local",
+    dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
+    strip_files = ":empty",
+    supports_param_files = 1,
+)
+
+cc_toolchain(
+    name = "cc-compiler-freebsd",
+    all_files = ":empty",
+    compiler_files = ":empty",
+    cpu = "local",
+    dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
+    strip_files = ":empty",
+    supports_param_files = 0,
+)
+
+cc_toolchain(
+    name = "cc-compiler-x64_windows_msys",
+    all_files = ":empty",
+    compiler_files = ":empty",
+    cpu = "local",
+    dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
+    strip_files = ":empty",
+    supports_param_files = 1,
+)
+
+cc_toolchain(
+    name = "cc-compiler-x64_windows_mingw",
+    all_files = ":empty",
+    compiler_files = ":empty",
+    cpu = "x64_windows",
+    dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
+    strip_files = ":empty",
+    supports_param_files = 1,
+)
+
+cc_toolchain(
+    name = "cc-compiler-x64_windows",
+    all_files = ":every-file-x64_windows",
+    compiler_files = ":compile-x64_windows",
+    cpu = "x64_windows",
+    dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
+    strip_files = ":empty",
+    supports_param_files = 1,
+)
+
+cc_toolchain(
+    name = "cc-compiler-ios_x86_64",
+    all_files = ":empty",
+    compiler_files = ":empty",
+    cpu = "local",
+    dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
+    strip_files = ":empty",
+    supports_param_files = 0,
+)
+
+filegroup(
+    name = "every-file-x64_windows",
+    srcs = [
+        ":compile-x64_windows",
+    ],
+)
+
+filegroup(
+    name = "compile-x64_windows",
+    srcs = glob([
+        "wrapper/bin/msvc_*",
+        "wrapper/bin/pydir/msvc*",
+    ]),
+)
+
+# link_dynamic_library is unused. Because we don't copy link_dynamic_library.sh
+# over, Bazel complains about a missing input file.
+# filegroup(
+#     name = "link_dynamic_library",
+#     srcs = ["link_dynamic_library.sh"],
+# )
+
+cc_toolchain_type(name = "toolchain_type")
+
+# A dummy toolchain is necessary to satisfy toolchain resolution until platforms
+# are used in c++ by default.
+# TODO(b/64754003): Remove once platforms are used in c++ by default.
+toolchain(
+    name = "dummy_cc_toolchain",
+    toolchain = "dummy_cc_toolchain_impl",
+    toolchain_type = ":toolchain_type",
+)
+
+load(":dummy_toolchain.bzl", "dummy_toolchain")
+
+dummy_toolchain(name = "dummy_cc_toolchain_impl")
