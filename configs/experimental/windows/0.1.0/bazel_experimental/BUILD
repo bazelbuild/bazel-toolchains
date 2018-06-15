@@ -1,4 +1,4 @@
-# Copyright 2016 The Bazel Authors. All rights reserved.
+# Copyright 2018 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# This becomes the BUILD file for @local_config_cc// under Windows.
 
 package(default_visibility = ["//visibility:public"])
 
@@ -32,40 +34,11 @@ cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
-        "freebsd|compiler": ":cc-compiler-freebsd",
         "x64_windows|msvc-cl": ":cc-compiler-x64_windows",
         "x64_windows|msys-gcc": ":cc-compiler-x64_windows_msys",
         "x64_windows|mingw-gcc": ":cc-compiler-x64_windows_mingw",
         "ios_x86_64|compiler": ":cc-compiler-ios_x86_64",
     },
-)
-
-cc_toolchain(
-    name = "cc-compiler-armeabi-v7a",
-    all_files = ":empty",
-    compiler_files = ":empty",
-    cpu = "local",
-    dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
-    linker_files = ":empty",
-    objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
-    strip_files = ":empty",
-    supports_param_files = 1,
-)
-
-cc_toolchain(
-    name = "cc-compiler-freebsd",
-    all_files = ":empty",
-    compiler_files = ":empty",
-    cpu = "local",
-    dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
-    linker_files = ":empty",
-    objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
-    strip_files = ":empty",
-    supports_param_files = 0,
 )
 
 cc_toolchain(
@@ -82,6 +55,21 @@ cc_toolchain(
     supports_param_files = 1,
 )
 
+toolchain(
+    name = "cc-toolchain-x64_windows_msys",
+    exec_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+        "@bazel_tools//tools/cpp:msys",
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+    ],
+    toolchain = ":cc-compiler-x64_windows_msys",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
 cc_toolchain(
     name = "cc-compiler-x64_windows_mingw",
     all_files = ":empty",
@@ -93,7 +81,22 @@ cc_toolchain(
     objcopy_files = ":empty",
     static_runtime_libs = [":empty"],
     strip_files = ":empty",
-    supports_param_files = 1,
+    supports_param_files = 0,
+)
+
+toolchain(
+    name = "cc-toolchain-x64_windows_mingw",
+    exec_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+        "@bazel_tools//tools/cpp:mingw",
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+    ],
+    toolchain = ":cc-compiler-x64_windows_mingw",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
 cc_toolchain(
@@ -110,6 +113,46 @@ cc_toolchain(
     supports_param_files = 1,
 )
 
+toolchain(
+    name = "cc-toolchain-x64_windows",
+    exec_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+    ],
+    toolchain = ":cc-compiler-x64_windows",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+cc_toolchain(
+    name = "cc-compiler-armeabi-v7a",
+    all_files = ":empty",
+    compiler_files = ":empty",
+    cpu = "local",
+    dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
+    strip_files = ":empty",
+    supports_param_files = 1,
+)
+
+toolchain(
+    name = "cc-toolchain-armeabi-v7a",
+    exec_compatible_with = [
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:arm",
+        "@bazel_tools//platforms:android",
+    ],
+    toolchain = ":cc-compiler-armeabi-v7a",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
 cc_toolchain(
     name = "cc-compiler-ios_x86_64",
     all_files = ":empty",
@@ -122,6 +165,18 @@ cc_toolchain(
     static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 0,
+)
+
+toolchain(
+    name = "cc-toolchain-ios_x86_64",
+    exec_compatible_with = [
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:ios",
+    ],
+    toolchain = ":cc-compiler-ios_x86_64",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
 filegroup(
@@ -138,25 +193,3 @@ filegroup(
         "wrapper/bin/pydir/msvc*",
     ]),
 )
-
-# link_dynamic_library is unused. Because we don't copy link_dynamic_library.sh
-# over, Bazel complains about a missing input file.
-# filegroup(
-#     name = "link_dynamic_library",
-#     srcs = ["link_dynamic_library.sh"],
-# )
-
-cc_toolchain_type(name = "toolchain_type")
-
-# A dummy toolchain is necessary to satisfy toolchain resolution until platforms
-# are used in c++ by default.
-# TODO(b/64754003): Remove once platforms are used in c++ by default.
-toolchain(
-    name = "dummy_cc_toolchain",
-    toolchain = "dummy_cc_toolchain_impl",
-    toolchain_type = ":toolchain_type",
-)
-
-load(":dummy_toolchain.bzl", "dummy_toolchain")
-
-dummy_toolchain(name = "dummy_cc_toolchain_impl")
