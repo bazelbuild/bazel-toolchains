@@ -1,36 +1,42 @@
-# TODO(xingao) Update to 2.0.0 to enable metadataTest.
-schemaVersion: "1.0.0"
+schemaVersion: "2.0.0"
 
 commandTests:
-- name: 'check-locale'
-  command: ['sh', '-c', 'echo $LC_ALL']
-  expectedOutput: ['C.UTF-8']
 - name: 'check-ed'
-  command: ['bash', '-c', 'ed --version']
+  command: 'ed'
+  args: ['--version']
   expectedOutput: ['GNU [eE]d .*']
 - name: 'check-file'
-  command: ['bash', '-c', 'file --version']
+  command: 'file'
+  args: ['--version']
   expectedOutput: ['file-.*']
 - name: 'check-git'
-  command: ['bash', '-c', 'git --version']
+  command: 'git'
+  args: ['--version']
   expectedOutput: ['git version .*']
 - name: 'check-less'
-  command: ['bash', '-c', 'less --version']
+  command: 'less'
+  args: ['--version']
   expectedOutput: ['less .*']
 - name: 'check-netcat'
-  command: ['bash', '-c', 'nc -h 2>&1']
-  expectedOutput: ['\[v.*']
+  command: 'nc'
+  args: ['-h']
+  # nc outputs to stderr.
+  expectedError: ['\[v.*']
 - name: 'check-openssl'
-  command: ['bash', '-c', 'openssl version']
+  command: 'openssl'
+  args: ['version']
   expectedOutput: ['OpenSSL .*']
 - name: 'check-patch'
-  command: ['bash', '-c', 'patch --version']
+  command: 'patch'
+  args: ['--version']
   expectedOutput: ['GNU patch .*']
 - name: 'check-wget'
-  command: ['bash', '-c', 'wget --version']
+  command: 'wget'
+  args: ['--version']
   expectedOutput: ['GNU Wget.* built on linux-gnu.*']
 - name: 'check-zip'
-  command: ['bash', '-c', 'zip --version']
+  command: 'zip'
+  args: ['--version']
   expectedOutput: ['.*This is Zip.*']
 
 fileExistenceTests:
@@ -38,3 +44,8 @@ fileExistenceTests:
   isDirectory: true
   path: '/'
   shouldExist: true
+
+metadataTest:
+  env:
+    - key: 'LC_ALL'
+      value: 'C.UTF-8'
