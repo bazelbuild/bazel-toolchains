@@ -18,15 +18,16 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_image",
-)
 
 # Install deb packages.
 toolchain_container(
-    name = "bazel_with_debs",
+    name = "bazel",
     base = "@ubuntu16_04//image",
+    cmd = [
+        "/bin/sh",
+        "-c",
+        "/bin/bash",
+    ],
     # TODO(xingao) Fix this. We should not remove /etc/ssl/certs/java/cacerts
     # file in the java-ltl, but instead, archive it for future container
     # reproduction.
@@ -38,14 +39,6 @@ toolchain_container(
         "//container/ubuntu16_04/layers/bazel:bazel-ltl",
         "//container/ubuntu16_04/layers/git:git-ltl",
     ],
-)
-
-# Setup other information, e.g. entrypoint.
-# TODO(xingao): set entrypoint in toolchain_container once supported.
-container_image(
-    name = "bazel",
-    base = ":bazel_with_debs",
-    entrypoint = ["bazel"],
 )
 
 container_test(
@@ -64,19 +57,16 @@ container_test(
 
 # Install deb packages.
 toolchain_container(
-    name = "bazel_docker_with_debs",
+    name = "bazel_docker",
     base = ":bazel_with_debs.tar",
+    cmd = [
+        "/bin/sh",
+        "-c",
+        "/bin/bash",
+    ],
     language_layers = [
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-ltl",
     ],
-)
-
-# Setup other information, e.g. entrypoint.
-# TODO(xingao): set entrypoint in toolchain_container once supported.
-container_image(
-    name = "bazel_docker",
-    base = ":bazel_docker_with_debs",
-    entrypoint = ["bazel"],
 )
 
 container_test(
