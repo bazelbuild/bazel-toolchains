@@ -20,6 +20,7 @@ platforms:
     - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
     test_flags:
     - "--test_output=errors"
+    - "--verbose_failures"
   ubuntu1604:
     test_targets:
     - "//test/configs:debian-jessie-autoconfig_test"
@@ -40,3 +41,4 @@ platforms:
     - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
     test_flags:
     - "--test_output=errors"
+    - "--verbose_failures"
