@@ -58,7 +58,7 @@ container_test(
 # Install deb packages.
 toolchain_container(
     name = "bazel_docker",
-    base = ":bazel_with_debs.tar",
+    base = ":bazel.tar",
     cmd = [
         "/bin/sh",
         "-c",
