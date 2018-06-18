@@ -1,22 +1,24 @@
-# TODO(xingao) Update to 2.0.0 to enable metadataTest.
-schemaVersion: "1.0.0"
+schemaVersion: "2.0.0"
 
 # Distro-specific tests
-commandTests:
+fileContentTests:
 - name: 'os-version'
-  command: ['sh', '-c', 'cat /etc/issue.net']
-  expectedOutput: ['Debian GNU/Linux 9']
+  expectedContents: ['Debian GNU/Linux 9']
+  path: '/etc/issue.net'
+
 fileExistenceTests:
 - name: 'Python3'
   isDirectory: false
   path: '/usr/bin/python3'
   shouldExist: true
 
-# Common tests
 commandTests:
-- name: 'path-envvar'
-  command: ['sh', '-c', 'echo $PATH']
-  expectedOutput: ['/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin']
 - name: 'python3-version'
-  command: ['bash', '-c', 'python3 -V']
+  command: 'python3'
+  args: ['-V']
   expectedOutput: ['Python 3.6.*']
+
+metadataTest:
+  env:
+    -key: 'PATH'
+     value: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin'

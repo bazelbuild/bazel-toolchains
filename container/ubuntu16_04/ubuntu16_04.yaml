@@ -1,8 +1,7 @@
-# TODO(xingao) Update to 2.0.0 to enable metadataTest.
-schemaVersion: "1.0.0"
+schemaVersion: "2.0.0"
 
 # Distro-specific tests
-commandTests:
+fileContentTests:
 - name: 'os-version'
-  command: ['sh', '-c', 'cat /etc/issue.net']
-  expectedOutput: ['Ubuntu 16.04.4 LTS']
+  expectedContents: ['Ubuntu 16.04.4 LTS']
+  path: '/etc/issue.net'

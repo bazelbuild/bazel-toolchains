@@ -1,12 +1,9 @@
-# TODO(xingao) Update to 2.0.0 to enable metadataTest.
-schemaVersion: "1.0.0"
+schemaVersion: "2.0.0"
 
 commandTests:
-- name: 'cc-envvar'
-  command: ['sh', '-c', 'echo $CC']
-  expectedOutput: ['/usr/local/bin/clang']
 - name: 'clang-version'
-  command: ['bash', '-c', 'clang --version']
+  command: 'clang'
+  args: ['--version']
   expectedOutput: ['clang version 7.0.0.*']
 
 fileExistenceTests:
@@ -74,3 +71,8 @@ fileExistenceTests:
   isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/tsan_interface.h'
   shouldExist: true
+
+metadataTest:
+  env:
+    - key: 'CC'
+      value: '/usr/local/bin/clang'

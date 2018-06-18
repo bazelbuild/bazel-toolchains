@@ -1,27 +1,26 @@
-# TODO(xingao) Update to 2.0.0 to enable metadataTest.
-schemaVersion: "1.0.0"
+schemaVersion: "2.0.0"
 
 # Common tests
 commandTests:
-- name: 'path-envvar'
-  command: ['sh', '-c', 'echo $PATH']
-  expectedOutput: ['/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin']
 - name: 'gcc-version'
-  command: ['bash', '-c', 'gcc --version 2>&1']
+  command: 'gcc'
+  args: ['--version']
   expectedOutput: ['gcc .*']
 - name: 'check-openssl'
-  command: ['bash', '-c', 'openssl version']
+  command: 'openssl'
+  args: ['version']
   expectedOutput: ['OpenSSL .*']
 - name: 'check-unzip'
-  command: ['bash', '-c', 'unzip']
+  command: 'unzip'
   expectedOutput: ['.*Usage: unzip .*']
 - name: 'check-zip'
-  command: ['bash', '-c', 'zip --version']
+  command: 'zip'
+  args: ['--version']
   expectedOutput: ['.*This is Zip.*']
 
 
-# TODO(xingao) Test entry point once rules_docker is updated with latest
-# version of the structure_test
-# https://github.com/bazelbuild/rules_docker/pull/416
-# metadataTest:
-#   entrypoint: ['bazel']
+metadataTest:
+  env:
+    - key: 'PATH'
+      value: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/python3.6/bin'
+  entrypoint: ['bazel']
