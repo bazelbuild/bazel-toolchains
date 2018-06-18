@@ -41,15 +41,16 @@ function cleanup_on_finish {
   do
     echo "Attempting to delete ${image}..."
     # Only delete the image if it is not used by any running container.
+    # Do not return error code if unable to delete.
     if [[ -z $(docker ps -q -f ancestor=${image}) ]]; then
-      docker rmi -f ${image} 2>/dev/null
+      docker rmi -f ${image} | true
       echo "${image} deleted..."
     else
       echo "${image} is used by another container, not deleted..."
     fi
   done
   echo "Deleting all dangling images..."
-  docker images -f "dangling=true" -q | xargs -r docker rmi -f 2>/dev/null
+  docker images -f "dangling=true" -q | xargs -r docker rmi -f | true
 }
 
 trap cleanup_on_finish EXIT # always delete the containers
