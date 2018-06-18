@@ -197,6 +197,10 @@ language_tool_layer_attrs = _container.image.attrs + _key.attrs + _download.attr
         allow_files = True,
         single_file = True,
     ),
+    "image": attr.label(
+        allow_files = True,
+        single_file = True,
+    ),
     "packages": attr.string_list(),
     "keys": attr.label_list(
         allow_files = True,
