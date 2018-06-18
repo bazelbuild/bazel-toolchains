@@ -19,6 +19,9 @@ Bazel](https://github.com/bazelbuild/bazel/tree/master/src/main/java/com/google/
 
         gcloud init
 
+1.  Authenticate `docker` to talk to `gcr.io` by following the instructions [here](https://cloud.google.com/sdk/gcloud/reference/auth/configure-docker).
+
+
 ## Usage
 
 ### Build with [Google Cloud Container Builder](https://cloud.google.com/container-builder/)
