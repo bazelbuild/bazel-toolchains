@@ -40,9 +40,9 @@ def repositories():
     if "base_images_docker" not in excludes:
         http_archive(
             name = "base_images_docker",
-            sha256 = "89f1855aab28f6ebfbfba0dee46fa211dd36577ce45e7f01aef64733656dc51e",
-            strip_prefix = "base-images-docker-0d0080ed000d0ad00489d87e0016e05000a6937f",
-            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/0d0080ed000d0ad00489d87e0016e05000a6937f.tar.gz"],
+            sha256 = "1e7ece9c01dc7ca85ad59c0fd85cbef082022a5928a3b937787fc003c54e3a75",
+            strip_prefix = "base-images-docker-e3d0e2124e06cabe4346be9273c32aba17ef6a4e",
+            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/e3d0e2124e06cabe4346be9273c32aba17ef6a4e.tar.gz"],
         )
 
     if "distroless" not in excludes:
