@@ -34,7 +34,7 @@ toolchain_container(
 
 add_apt_key(
     name = "docker-key-image",
-    image_tar = ":docker-prereq.tar",
+    image = ":docker-prereq.tar",
     keys = [
         "@xenial_docker_gpg//file",
     ],
