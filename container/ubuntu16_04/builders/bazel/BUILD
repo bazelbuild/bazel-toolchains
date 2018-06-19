@@ -38,6 +38,7 @@ toolchain_container(
         "//container/ubuntu16_04/layers/bazel:bazel-tools",
         "//container/ubuntu16_04/layers/bazel:bazel-ltl",
         "//container/ubuntu16_04/layers/git:git-ltl",
+        "//container/ubuntu16_04/layers/wget:wget-ltl",
     ],
 )
 
@@ -50,6 +51,7 @@ container_test(
         "//container/ubuntu16_04:ubuntu16_04.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/git:git.yaml",
+        "//container/ubuntu16_04/layers/wget:wget.yaml",
     ],
     image = ":bazel",
     verbose = True,
@@ -64,6 +66,10 @@ toolchain_container(
         "-c",
         "/bin/bash",
     ],
+    # TODO(xingao) Fix this. We should not remove /etc/ssl/certs/java/cacerts
+    # file in the java-ltl, but instead, archive it for future container
+    # reproduction.
+    installation_cleanup_commands = "update-ca-certificates -f",
     language_layers = [
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-ltl",
     ],
@@ -79,6 +85,7 @@ container_test(
         "//container/ubuntu16_04/layers/bazel:bazel.yaml",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
         "//container/ubuntu16_04/layers/git:git.yaml",
+        "//container/ubuntu16_04/layers/wget:wget.yaml",
     ],
     image = ":bazel_docker",
     verbose = True,
