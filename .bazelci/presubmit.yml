@@ -21,6 +21,7 @@ platforms:
     test_flags:
     - "--test_output=errors"
     - "--jobs=1"
+    - "--verbose_failures"
   ubuntu1604:
     test_targets:
     - "//test/configs:debian-jessie-autoconfig_test"
@@ -42,3 +43,4 @@ platforms:
     test_flags:
     - "--test_output=errors"
     - "--jobs=1"
+    - "--verbose_failures"
