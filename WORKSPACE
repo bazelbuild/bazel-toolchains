@@ -26,8 +26,8 @@ bazel_toolchains_repositories()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
-    container_repositories = "repositories",
     "container_pull",
+    container_repositories = "repositories",
 )
 
 container_repositories()
@@ -40,9 +40,9 @@ go_register_toolchains()
 
 load(
     "@distroless//package_manager:package_manager.bzl",
-    "package_manager_repositories",
     "dpkg_list",
     "dpkg_src",
+    "package_manager_repositories",
 )
 
 # This is only needed by the old package manager.
