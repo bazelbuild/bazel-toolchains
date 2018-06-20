@@ -1,6 +1,5 @@
 schemaVersion: "2.0.0"
 
-# Common tests
 commandTests:
 - name: 'gcc-version'
   command: 'gcc'

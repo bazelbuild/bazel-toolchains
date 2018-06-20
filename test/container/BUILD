@@ -95,7 +95,7 @@ install_pkgs(
 
 add_apt_key(
     name = "test-docker-with-keys",
-    image_tar = ":docker-prereq-test.tar",
+    image = ":docker-prereq-test.tar",
     keys = [
         "@debian_docker_gpg//file",
     ],

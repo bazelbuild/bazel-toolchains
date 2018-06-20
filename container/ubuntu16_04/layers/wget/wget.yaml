@@ -1,0 +1,6 @@
+schemaVersion: "2.0.0"
+
+- name: 'check-wget'
+  command: 'wget'
+  args: ['--version']
+  expectedOutput: ['GNU Wget.* built on linux-gnu.*']
