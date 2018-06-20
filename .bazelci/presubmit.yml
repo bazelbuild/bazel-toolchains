@@ -20,6 +20,7 @@ platforms:
     - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
     test_flags:
     - "--test_output=errors"
+    - "--jobs=1"
     - "--verbose_failures"
   ubuntu1604:
     test_targets:
@@ -41,4 +42,5 @@ platforms:
     - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
     test_flags:
     - "--test_output=errors"
+    - "--jobs=1"
     - "--verbose_failures"
