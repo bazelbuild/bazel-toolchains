@@ -17,6 +17,7 @@ platforms:
     - "//container/ubuntu16_04/builders/rbe-ubuntu16_04:toolchain-test"
     - "//container/experimental/rbe-debian9:toolchain-test"
     - "//container/ubuntu16_04/builders/bazel:bazel-test"
+    # TODO(xingao) Re-enable the test.
     # - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
     test_flags:
     - "--test_output=errors"
@@ -38,6 +39,7 @@ platforms:
     - "//container/ubuntu16_04/builders/rbe-ubuntu16_04:toolchain-test"
     - "//container/experimental/rbe-debian9:toolchain-test"
     - "//container/ubuntu16_04/builders/bazel:bazel-test"
+    # TODO(xingao) Re-enable the test.
     # - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
     test_flags:
     - "--test_output=errors"
