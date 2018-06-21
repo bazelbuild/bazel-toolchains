@@ -90,7 +90,7 @@ install_pkgs(
     name = "docker-prereq-test",
     image_tar = "@debian8//image",
     installables_tar = ":docker-prereq-packages.tar",
-    output_image_name = "docker-prereq-test:intermediate",
+    output_image_name = "docker-prereq-test:latest",
 )
 
 add_apt_key(
@@ -116,5 +116,5 @@ install_pkgs(
     name = "docker",
     image_tar = "@debian8//image",
     installables_tar = ":test-docker-packages.tar",
-    output_image_name = "docker:intermediate",
+    output_image_name = "docker:latest",
 )
