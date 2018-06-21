@@ -18,7 +18,7 @@ load(
     "jessie_package_names",
 )
 load(
-    "@bazel_toolchains//repositories:repositories.bzl",
+    "//repositories:repositories.bzl",
     bazel_toolchains_repositories = "repositories",
 )
 
