@@ -34,7 +34,7 @@ def repositories():
         http_archive(
             name = "io_bazel_rules_go",
             sha256 = "4b14d8dd31c6dbaf3ff871adcd03f28c3274e42abc855cb8fb4d01233c0154dc",
-            url = "https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz",
+            urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz"],
         )
 
     if "base_images_docker" not in excludes:
