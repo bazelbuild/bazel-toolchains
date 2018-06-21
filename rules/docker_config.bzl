@@ -66,19 +66,12 @@ Add to your WORKSPACE file the following:
     sha256 = "<sha256>",
   )
 
-  http_archive(
-      name = "base_images_docker",
-      sha256 = "<sha256>",
-      strip_prefix = "base-images-docker-<latest_release>",
-      urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/<latest_release>.tar.gz"],
+  load(
+    "@bazel_toolchains//repositories:repositories.bzl",
+    bazel_toolchains_repositories = "repositories",
   )
 
-  http_archive(
-      name = "io_bazel_rules_docker",
-      sha256 = "<sha256>",
-      strip_prefix = "rules_docker-<latest_release>",
-      urls = ["https://github.com/bazelbuild/rules_docker/archive/<latest_release>.tar.gz"],
-  )
+  bazel_toolchains_repositories()
 
   load(
       "@io_bazel_rules_docker//container:container.bzl",
