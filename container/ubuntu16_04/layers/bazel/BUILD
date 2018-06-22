@@ -26,6 +26,7 @@ language_tool_layer(
     base = "@ubuntu16_04//image",
     packages = [
         "g++",
+        "patch",
         "software-properties-common",
         "unzip",
         "zip",
