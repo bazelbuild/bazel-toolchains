@@ -9,6 +9,10 @@ commandTests:
   command: 'openssl'
   args: ['version']
   expectedOutput: ['OpenSSL .*']
+- name: 'check-patch'
+  command: 'patch'
+  args: ['--version']
+  expectedOutput: ['GNU patch .*']
 - name: 'check-unzip'
   command: 'unzip'
   expectedOutput: ['.*Usage: unzip .*']
@@ -16,6 +20,7 @@ commandTests:
   command: 'zip'
   args: ['--version']
   expectedOutput: ['.*This is Zip.*']
+
 
 
 metadataTest:
