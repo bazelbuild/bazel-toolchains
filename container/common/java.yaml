@@ -6,6 +6,10 @@ commandTests:
   args: ['-version']
   # java outputs to stderr.
   expectedError: ["openjdk version \"1.8.*"]
+- name: 'check-openssl'
+  command: 'openssl'
+  args: ['version']
+  expectedOutput: ['OpenSSL .*']
 
 fileExistenceTests:
 - name: 'OpenJDK'
