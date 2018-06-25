@@ -18,7 +18,7 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 
-exports_files(["bazel.yaml"])
+exports_files(glob(["*.yaml"]))
 
 # Tools required by Bazel. Note that we do not add a CC complier here as we
 # will include that in the final container.
