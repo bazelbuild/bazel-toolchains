@@ -18,8 +18,6 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 
-exports_files(["wget.yaml"])
-
 language_tool_layer(
     name = "wget-ltl",
     base = "@ubuntu16_04//image",

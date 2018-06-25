@@ -18,16 +18,15 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 
-exports_files(["bazel.yaml"])
+exports_files(glob(["*.yaml"]))
 
-#  gcc + other tools required by Bazel
+# Tools required by Bazel. Note that we do not add a CC complier here as we
+# will include that in the final container.
 language_tool_layer(
     name = "bazel-tools",
     base = "@ubuntu16_04//image",
     packages = [
-        "g++",
         "patch",
-        "software-properties-common",
         "unzip",
         "zip",
     ],

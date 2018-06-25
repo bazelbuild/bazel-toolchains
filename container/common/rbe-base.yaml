@@ -22,10 +22,6 @@ commandTests:
   args: ['-h']
   # nc outputs to stderr.
   expectedError: ['\[v.*']
-- name: 'check-openssl'
-  command: 'openssl'
-  args: ['version']
-  expectedOutput: ['OpenSSL .*']
 - name: 'check-patch'
   command: 'patch'
   args: ['--version']
