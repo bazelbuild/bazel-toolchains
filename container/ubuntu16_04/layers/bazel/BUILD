@@ -27,7 +27,6 @@ language_tool_layer(
     base = "@ubuntu16_04//image",
     packages = [
         "patch",
-        "software-properties-common",
         "unzip",
         "zip",
     ],

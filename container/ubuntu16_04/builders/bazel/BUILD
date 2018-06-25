@@ -33,7 +33,7 @@ toolchain_container(
     # reproduction.
     installation_cleanup_commands = "update-ca-certificates -f",
     language_layers = [
-        "//container/ubuntu16_04/layers/java:clang-ltl",
+        "//container/ubuntu16_04/layers/clang:clang-ltl",
         "//container/ubuntu16_04/layers/java:java-ltl",
         "//container/ubuntu16_04/layers/python:python-ltl",
         "//container/ubuntu16_04/layers/bazel:bazel-tools",
