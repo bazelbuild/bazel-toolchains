@@ -17,6 +17,9 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@io_bazel_rules_docker//container:image.bzl", "container_image")
+load("@base_images_docker//util:run.bzl", "container_run_and_extract")
 
 exports_files(glob(["*.yaml"]))
 
@@ -26,22 +29,32 @@ language_tool_layer(
     name = "bazel-tools",
     base = "@ubuntu16_04//image",
     packages = [
+        "bash-completion",
+        "binutils",
         "patch",
         "unzip",
         "zip",
     ],
 )
 
+genrule(
+    name = "rename_bazel_binary",
+    srcs = ["@bazel_binary//file"],
+    outs = ["bazel"],
+    cmd = "mv $< $@",
+    tags = ["manual"],
+)
+
+pkg_tar(
+    name = "bazel_tar",
+    srcs = [":bazel"],
+    modes = {"bazel": "0555"},
+    package_dir = "/usr/bin",
+    tags = ["manual"],
+)
+
 language_tool_layer(
     name = "bazel-ltl",
-    additional_repos = [
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
     base = "@ubuntu16_04//image",
-    keys = [
-        "@bazel_gpg//file",
-    ],
-    packages = [
-        "bazel",
-    ],
+    tars = [":bazel_tar"],
 )

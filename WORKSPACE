@@ -238,3 +238,14 @@ http_file(
         "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
+
+BAZEL_VERSION="0.15.0"
+
+http_file(
+    name = "bazel_binary",
+    sha256 = "edfb15c18a5d6be935f6986e496f2368ea8d1b384a398be1b756284ae028d5a4",
+    urls = [
+        "https://releases.bazel.build/" + BAZEL_VERSION + "/release/bazel-" + BAZEL_VERSION + "-linux-x86_64",
+        "https://github.com/bazelbuild/bazel/releases/download/" + BAZEL_VERSION + "/bazel-" + BAZEL_VERSION + "-linux-x86_64",
+    ],
+)
