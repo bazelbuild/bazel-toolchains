@@ -48,7 +48,7 @@ load(
 # This is only needed by the old package manager.
 package_manager_repositories()
 
-load("//:toolchain_containers.bzl", "toolchain_container_sha256s")
+load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
 
 container_pull(
     name = "debian8",

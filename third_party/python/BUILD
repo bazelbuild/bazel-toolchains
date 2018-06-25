@@ -24,7 +24,7 @@ package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("//skylib:container_file_export.bzl", "container_file_export")
-load("//:toolchain_containers.bzl", "toolchain_container_sha256s")
+load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
 
 pkg_tar(
     name = "debian8_tar",
