@@ -236,3 +236,12 @@ http_file(
         "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
+
+http_file(
+    name = "bazel_0141_release",
+    sha256 = "31946d067901fb10e38a6497996906b5c777feffabe1b3de0039cac0c3c02318",
+    urls = [
+        "https://releases.bazel.build/0.14.1/release/bazel_0.14.1-linux-x86_64.deb",
+        "https://github.com/bazelbuild/bazel/releases/download/0.14.1/bazel_0.14.1-linux-x86_64.deb",
+    ]
+)
