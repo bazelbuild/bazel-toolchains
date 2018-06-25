@@ -24,6 +24,7 @@ package(default_visibility = ["//visibility:public"])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("//skylib:container_file_export.bzl", "container_file_export")
+load("//:toolchain_containers.bzl", "toolchain_container_sha256s")
 
 pkg_tar(
     name = "debian8_tar",
@@ -54,7 +55,7 @@ pkg_tar(
 # https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
 container_file_export(
     name = "debian8_python3",
-    image = "l.gcr.io/google/python@sha256:ace668f0f01e5e562ad09c3f128488ec33fa9126313f16505a86ae77865d1696",
+    image = "l.gcr.io/google/python@" + toolchain_container_sha256s()["debian8_python3"],
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )
@@ -64,7 +65,7 @@ container_file_export(
 # https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
 container_file_export(
     name = "ubuntu16_04_python3",
-    image = "gcr.io/google-appengine/python@sha256:73f43d9b52e95c821dcd2d6e1bc42ebb1b002623263cea5ae517e6f81d56bc37",
+    image = "gcr.io/google-appengine/python@" + toolchain_container_sha256s()["ubuntu16_04_python3"],
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )

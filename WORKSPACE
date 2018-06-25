@@ -48,23 +48,25 @@ load(
 # This is only needed by the old package manager.
 package_manager_repositories()
 
+load("//:toolchain_containers.bzl", "toolchain_container_sha256s")
+
 container_pull(
     name = "debian8",
-    digest = "sha256:943025384b0efebacf5473490333658dd190182e406e956ee4af65208d104332",
+    digest = toolchain_container_sha256s()["debian8"],
     registry = "gcr.io",
     repository = "cloud-marketplace/google/debian8",
 )
 
 container_pull(
     name = "debian9",
-    digest = "sha256:6b3aa04751aa2ac3b0c7be4ee71148b66d693ad212ce6d3244bd2a2a147f314a",
+    digest = toolchain_container_sha256s()["debian9"],
     registry = "gcr.io",
     repository = "cloud-marketplace/google/debian9",
 )
 
 container_pull(
     name = "ubuntu16_04",
-    digest = "sha256:5125aac627c68226c6ad6083d0e3419bc6252bea1eb9d6e7258ecfd67233d655",
+    digest = toolchain_container_sha256s()["ubuntu16_04"],
     registry = "gcr.io",
     repository = "cloud-marketplace/google/ubuntu16_04",
 )
