@@ -90,12 +90,12 @@ install_pkgs(
     name = "docker-prereq-test",
     image_tar = "@debian8//image",
     installables_tar = ":docker-prereq-packages.tar",
-    output_image_name = "bazel/test/container:docker-prereq-test",
+    output_image_name = "docker-prereq-test:latest",
 )
 
 add_apt_key(
     name = "test-docker-with-keys",
-    image_tar = ":docker-prereq-test.tar",
+    image = ":docker-prereq-test.tar",
     keys = [
         "@debian_docker_gpg//file",
     ],
@@ -116,5 +116,5 @@ install_pkgs(
     name = "docker",
     image_tar = "@debian8//image",
     installables_tar = ":test-docker-packages.tar",
-    output_image_name = "bazel/test/container:docker",
+    output_image_name = "docker:latest",
 )

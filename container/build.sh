@@ -40,8 +40,8 @@ declare -A TYPE_TARBALL_MAP=(
   ["rbe-debian8"]="toolchain-packages.tar"
   ["rbe-debian9"]="toolchain-packages.tar"
   ["rbe-ubuntu16_04"]="toolchain-packages.tar"
-  ["ubuntu16_04-bazel"]="bazel_with_debs-packages.tar"
-  ["ubuntu16_04-bazel-docker"]="bazel_docker_with_debs-packages.tar"
+  ["ubuntu16_04-bazel"]="bazel-packages.tar"
+  ["ubuntu16_04-bazel-docker"]="bazel_docker-packages.tar"
 )
 
 show_usage () {

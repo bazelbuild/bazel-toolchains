@@ -13,20 +13,16 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load(
     "//skylib:package_names.bzl",
     "jessie_package_names",
 )
-
-# Use http_archive rule instead of git_repository rule
-# https://docs.bazel.build/versions/master/be/workspace.html#git_repository
-http_archive(
-    name = "io_bazel_rules_docker",
-    sha256 = "5466861acd1e0a2afe745fdf383e5a4b5e06d19e571d49d252828cb2f2de13cb",
-    strip_prefix = "rules_docker-e325ffbf6508fe4cbaa3f5a0b09898f15e912d6a",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/e325ffbf6508fe4cbaa3f5a0b09898f15e912d6a.tar.gz"],
+load(
+    "//repositories:repositories.bzl",
+    bazel_toolchains_repositories = "repositories",
 )
+
+bazel_toolchains_repositories()
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",
@@ -36,23 +32,41 @@ load(
 
 container_repositories()
 
+load("@io_bazel_rules_go//go:def.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+go_register_toolchains()
+
+load(
+    "@distroless//package_manager:package_manager.bzl",
+    "dpkg_list",
+    "dpkg_src",
+    "package_manager_repositories",
+)
+
+# This is only needed by the old package manager.
+package_manager_repositories()
+
+load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
+
 container_pull(
     name = "debian8",
-    digest = "sha256:943025384b0efebacf5473490333658dd190182e406e956ee4af65208d104332",
+    digest = toolchain_container_sha256s()["debian8"],
     registry = "gcr.io",
     repository = "cloud-marketplace/google/debian8",
 )
 
 container_pull(
     name = "debian9",
-    digest = "sha256:6b3aa04751aa2ac3b0c7be4ee71148b66d693ad212ce6d3244bd2a2a147f314a",
+    digest = toolchain_container_sha256s()["debian9"],
     registry = "gcr.io",
     repository = "cloud-marketplace/google/debian9",
 )
 
 container_pull(
     name = "ubuntu16_04",
-    digest = "sha256:5125aac627c68226c6ad6083d0e3419bc6252bea1eb9d6e7258ecfd67233d655",
+    digest = toolchain_container_sha256s()["ubuntu16_04"],
     registry = "gcr.io",
     repository = "cloud-marketplace/google/ubuntu16_04",
 )
@@ -87,32 +101,6 @@ container_pull(
     tag = "16.04",
 )
 
-# io_bazel_rules_go is the dependency of container_test rules.
-http_archive(
-    name = "io_bazel_rules_go",
-    sha256 = "4b14d8dd31c6dbaf3ff871adcd03f28c3274e42abc855cb8fb4d01233c0154dc",
-    url = "https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz",
-)
-
-load("@io_bazel_rules_go//go:def.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-go_rules_dependencies()
-
-go_register_toolchains()
-
-http_archive(
-    name = "base_images_docker",
-    sha256 = "7693aa6302443b908f2d70c0ac6be10c8d0023be4266c4f76a9195773f85bed9",
-    strip_prefix = "base-images-docker-4f2fc8da248a61c3f8e13bbb43e9db6c0ed44ba3",
-    urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/4f2fc8da248a61c3f8e13bbb43e9db6c0ed44ba3.tar.gz"],
-)
-
-http_file(
-    name = "bazel_gpg",
-    sha256 = "30af2ca7abfb65987cd61802ca6e352aadc6129dfb5bfc9c81f16617bc3a4416",
-    url = "https://bazel.build/bazel-release.pub.gpg",
-)
-
 http_file(
     name = "debian_docker_gpg",
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
@@ -124,24 +112,6 @@ http_file(
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
     url = "https://download.docker.com/linux/ubuntu/gpg",
 )
-
-# Use http_archive rule instead of git_repository rule
-# https://docs.bazel.build/versions/master/be/workspace.html#git_repository
-http_archive(
-    name = "distroless",
-    sha256 = "44c5d3370df6983ef53cfc2347447c6595fea2d1951a1645660baf67657b8e23",
-    strip_prefix = "distroless-94b5126dbe06c2cb4dc74f7c9bfe6394b8e6e44c",
-    urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/94b5126dbe06c2cb4dc74f7c9bfe6394b8e6e44c.tar.gz"],
-)
-
-load(
-    "@distroless//package_manager:package_manager.bzl",
-    "dpkg_list",
-    "dpkg_src",
-    "package_manager_repositories",
-)
-
-package_manager_repositories()
 
 # The Debian snapshot datetime to use.
 # This is kept up-to-date with https://github.com/GoogleCloudPlatform/base-images-docker/blob/master/WORKSPACE.

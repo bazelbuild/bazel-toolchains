@@ -21,10 +21,6 @@ use Bazel 0.7.0 to generate toolchain configs for:
 # Authentication
 
 If you are generating toolchain configs for the first time, you will probably encounter permission
-issues. You can use [`docker-credential-gcr`](https://github.com/bazelbuild/rules_docker#authorization)
-to enable `docker` to talk to `gcr.io` directly by executing the following commands:
+issues while `docker` is trying to talk to `gcr.io`.
 
-```shell
-gcloud components install docker-credential-gcr
-docker-credential-gcr configure-docker
-```
+If `gcloud` is installed, use `gcloud` as the Docker credential helper by following the instructions [here](https://cloud.google.com/sdk/gcloud/reference/auth/configure-docker). Otherwise, use `docker-credential-gcr` by following the instructions [here](https://github.com/GoogleCloudPlatform/docker-credential-gcr).
