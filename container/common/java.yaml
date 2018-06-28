@@ -13,7 +13,6 @@ commandTests:
 
 fileExistenceTests:
 - name: 'OpenJDK'
-  isDirectory: true
   path: '/usr/lib/jvm/java-8-openjdk-amd64'
   shouldExist: true
 

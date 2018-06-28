@@ -8,7 +8,6 @@ fileContentTests:
 
 fileExistenceTests:
 - name: 'Python3'
-  isDirectory: false
   path: '/usr/bin/python3'
   shouldExist: true
 
