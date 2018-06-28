@@ -9,6 +9,5 @@ commandTests:
 
 fileExistenceTests:
 - name: 'Python2'
-  isDirectory: false
   path: '/usr/bin/python2.7'
   shouldExist: true
