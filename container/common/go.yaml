@@ -8,7 +8,6 @@ commandTests:
 
 fileExistenceTests:
 - name: 'Golang'
-  isDirectory: false
   path: '/usr/local/go/bin/go'
   shouldExist: true
 
