@@ -198,3 +198,33 @@ docker_toolchain_autoconfig(
     tags = ["manual"],
     test = True,
 )
+
+# Created on 2018.06.27
+# Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f
+docker_toolchain_autoconfig(
+    name = "debian8-clang-0.3.0-bazel_0.15.0-autoconfig",
+    additional_repos = debian8_clang_default_repos(),
+    base = "@debian8-clang//image",
+    bazel_version = "0.15.0",
+    env = clang_env(),
+    keys = debian8_clang_default_keys(),
+    packages = debian8_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
+
+# Created on 2018.06.27
+# Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f
+docker_toolchain_autoconfig(
+    name = "msan-debian8-clang-0.3.0-bazel_0.15.0-autoconfig",
+    additional_repos = debian8_clang_default_repos(),
+    base = "@debian8-clang//image",
+    bazel_version = "0.15.0",
+    env = clang_env() + {
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+    },
+    keys = debian8_clang_default_keys(),
+    packages = debian8_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
