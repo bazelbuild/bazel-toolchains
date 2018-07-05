@@ -239,13 +239,13 @@ http_file(
     ],
 )
 
-BAZEL_VERSION="0.15.0"
+BAZEL_VERSION = "0.15.0"
 
 http_file(
-    name = "bazel_binary",
-    sha256 = "edfb15c18a5d6be935f6986e496f2368ea8d1b384a398be1b756284ae028d5a4",
+    name = "bazel_deb",
+    sha256 = "67364e9be2af264746be06ad68188d29ad2cee7fe3a3675b8221af3ac1c3d07b",
     urls = [
-        "https://releases.bazel.build/" + BAZEL_VERSION + "/release/bazel-" + BAZEL_VERSION + "-linux-x86_64",
-        "https://github.com/bazelbuild/bazel/releases/download/" + BAZEL_VERSION + "/bazel-" + BAZEL_VERSION + "-linux-x86_64",
+        "https://releases.bazel.build/" + BAZEL_VERSION + "/release/bazel_" + BAZEL_VERSION + "-linux-x86_64.deb",
+        "https://github.com/bazelbuild/bazel/releases/download/" + BAZEL_VERSION + "/bazel_" + BAZEL_VERSION + "-linux-x86_64.deb",
     ],
 )

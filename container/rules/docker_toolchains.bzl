@@ -20,9 +20,6 @@ load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "insta
 load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
 
 def _input_validation(kwargs):
-    if "debs" in kwargs:
-        fail("debs is not supported.")
-
     if "packages" in kwargs and "installables_tar" in kwargs:
         fail("'packages' and 'installables_tar' cannot be specified at the same time.")
 
@@ -46,6 +43,7 @@ def _language_tool_layer_impl(
         env = None,
         tars = None,
         files = None,
+        debs = None,
         packages = None,
         additional_repos = None,
         keys = None,
@@ -65,6 +63,7 @@ def _language_tool_layer_impl(
       env: str Dict, overrides ctx.attr.env
       tars: File list, overrides ctx.files.tars
       files: File list, overrides ctx.files.files
+      debs: File list, overrides ctx.files.debs
       packages: str List, overrides ctx.attr.packages
       additional_repos: str List, overrides ctx.attr.additional_repos
       keys: File list, overrides ctx.files.keys
@@ -78,6 +77,7 @@ def _language_tool_layer_impl(
     env = env or ctx.attr.env
     tars = tars or ctx.files.tars
     files = files or ctx.files.files
+    debs = debs or ctx.files.debs
     packages = packages or ctx.attr.packages
     additional_repos = additional_repos or ctx.attr.additional_repos
     keys = keys or ctx.files.keys
@@ -174,7 +174,15 @@ def _language_tool_layer_impl(
         new_base = install_pkgs_out
 
     # Install tars and configure env, symlinks using the container_image rule.
-    result = _container.image.implementation(ctx, base = new_base, symlinks = symlinks, env = env, tars = tars, files = files)
+    result = _container.image.implementation(
+        ctx,
+        base = new_base,
+        symlinks = symlinks,
+        env = env,
+        tars = tars,
+        files = files,
+        debs = debs,
+    )
 
     return struct(
         runfiles = result.runfiles,
@@ -182,6 +190,7 @@ def _language_tool_layer_impl(
         container_parts = result.container_parts,
         tars = tars,
         input_files = files,
+        debs = debs,
         env = env,
         symlinks = symlinks,
         packages = packages,
@@ -228,9 +237,6 @@ def language_tool_layer(**kwargs):
 
     Args:
       Same args as https://github.com/bazelbuild/rules_docker#container_image-1
-      minus:
-        debs: debian packages should be listed in 'packages', or be included in
-              'installables_tar' as .deb files.
       plus:
         packages: list of packages to fetch and install in the base image.
         additional_repos: list of additional debian package repos to use,
@@ -242,9 +248,16 @@ def language_tool_layer(**kwargs):
           installation.
 
     Note:
-      - 'additional_repos' can only be specified when 'packages' is speficified.
-      - 'installation_cleanup_commands' can only be specified when at least one of
-        'packages' or 'installables_tar' is specified.
+        - 'additional_repos' can only be specified when 'packages' is speficified.
+        - 'installation_cleanup_commands' can only be specified when at least one of
+          'packages' or 'installables_tar' is specified.
+        - We support installing simple debian packages through 'debs' attribute,
+          which just unpacks the .deb file into the container.
+          Be careful with it because it does not invoke any pre or post
+          installation scripts of the debian package.
+          In addition, these copy/paste actions happen after the installation of
+          debian packages specified through 'packages' or 'installables_tar',
+          so previously installed packages might get overriden.
 
     Experimental rule.
     """
@@ -266,6 +279,7 @@ def _toolchain_container_impl(ctx):
 
     tars = []
     files = []
+    debs = []
     env = {}
     symlinks = {}
     packages = []
@@ -279,6 +293,7 @@ def _toolchain_container_impl(ctx):
     for layer in ctx.attr.language_layers:
         tars.extend(layer.tars)
         files.extend(layer.input_files)
+        debs.extend(layer.debs)
         env.update(layer.env)
         symlinks.update(layer.symlinks)
         packages.extend(layer.packages)
@@ -289,6 +304,8 @@ def _toolchain_container_impl(ctx):
         if layer.installation_cleanup_commands:
             installation_cleanup_commands += (" && " + layer.installation_cleanup_commands)
     tars.extend(ctx.files.tars)
+    files.extend(ctx.files.files)
+    debs.extend(ctx.files.debs)
     env.update(ctx.attr.env)
     symlinks.update(ctx.attr.symlinks)
     packages.extend(ctx.attr.packages)
@@ -297,7 +314,9 @@ def _toolchain_container_impl(ctx):
     if ctx.attr.installation_cleanup_commands:
         installation_cleanup_commands += (" && " + ctx.attr.installation_cleanup_commands)
 
+    tars = depset(tars).to_list()
     files = depset(files).to_list()
+    debs = depset(debs).to_list()
     packages = depset(packages).to_list()
     additional_repos = depset(additional_repos).to_list()
     keys = depset(keys).to_list()
@@ -309,6 +328,7 @@ def _toolchain_container_impl(ctx):
         env = env,
         tars = tars,
         files = files,
+        debs = debs,
         packages = packages,
         additional_repos = additional_repos,
         keys = keys,
@@ -330,9 +350,6 @@ def toolchain_container(**kwargs):
 
     Args:
       Same args as https://github.com/bazelbuild/rules_docker#container_image-1
-      minus:
-        debs: debian packages should be listed in 'packages', or be included in
-              'installables_tar' as .deb files.
       plus:
         language_layers: a list of language_tool_layer.
         installables_tar: a tar of debian packages to install in the base image.
@@ -344,9 +361,18 @@ def toolchain_container(**kwargs):
         installation_cleanup_commands: cleanup commands to run after package
           installation.
 
-    If 'installables_tar' is specified in the 'toolchain_container' rule, then
-    'packages' or 'installables_tar' specified in any of the 'language_layers'
-    passed to this 'toolchain_container' rule will be ignored.
+    Note:
+        - If 'installables_tar' is specified in the 'toolchain_container' rule, then
+          'packages' or 'installables_tar' specified in any of the 'language_layers'
+          passed to this 'toolchain_container' rule will be ignored.
+
+        - We support installing simple debian packages through 'debs' attribute,
+          which just unpacks the .deb file into the container.
+          Be careful with it because it does not invoke any pre or post
+          installation scripts of the debian package.
+          In addition, these copy/paste actions happen after the installation of
+          debian packages specified through 'packages' or 'installables_tar',
+          so previously installed packages might get overriden.
 
     Experimental rule.
     """
