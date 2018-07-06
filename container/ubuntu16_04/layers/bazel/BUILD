@@ -54,7 +54,7 @@ container_run_and_extract(
         "cd /",
         "chmod +x bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
         "./bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
-        "tar cvf bazel.tar /usr/local/bin/bazel /usr/local/lib/bazel/*",
+        "tar cvf bazel.tar --mtime='1970-01-01' /usr/local/bin/bazel /usr/local/lib/bazel/*",
     ],
     extract_file = "/bazel.tar",
     image = ":bazel_installer_image.tar",
