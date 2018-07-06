@@ -132,7 +132,6 @@ build:remote-cache --tls_enabled=true
 build:remote-cache --experimental_strict_action_env=true
 build:remote-cache --remote_timeout=3600
 build:remote-cache --auth_enabled=true
->>>>>>> upstream/master
 build:remote-cache --spawn_strategy=remote
 build:remote-cache --strategy=Javac=remote
 build:remote-cache --strategy=Closure=remote
