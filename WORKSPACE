@@ -239,13 +239,13 @@ http_file(
     ],
 )
 
-BAZEL_VERSION = "0.15.0"
+load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION")
 
 http_file(
-    name = "bazel_deb",
-    sha256 = "67364e9be2af264746be06ad68188d29ad2cee7fe3a3675b8221af3ac1c3d07b",
+    name = "bazel_installer",
+    sha256 = "7f6748b48a7ea6bdf00b0e1967909ce2181ebe6f377638aa454a7d09a0e3ea7b",
     urls = [
-        "https://releases.bazel.build/" + BAZEL_VERSION + "/release/bazel_" + BAZEL_VERSION + "-linux-x86_64.deb",
-        "https://github.com/bazelbuild/bazel/releases/download/" + BAZEL_VERSION + "/bazel_" + BAZEL_VERSION + "-linux-x86_64.deb",
+        "https://releases.bazel.build/" + BAZEL_VERSION + "/release/bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
+        "https://github.com/bazelbuild/bazel/releases/download/" + BAZEL_VERSION + "/bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
     ],
 )

@@ -17,6 +17,9 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
+load("//container/rules:docker_toolchains.bzl", "toolchain_container")
+load("@base_images_docker//util:run.bzl", "container_run_and_extract")
+load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION")
 
 exports_files(glob(["*.yaml"]))
 
@@ -34,8 +37,31 @@ language_tool_layer(
     ],
 )
 
+toolchain_container(
+    name = "bazel_installer_image",
+    base = "@ubuntu16_04//image",
+    files = [
+        "@bazel_installer//file",
+    ],
+    packages = [
+        "unzip",
+    ],
+)
+
+container_run_and_extract(
+    name = "bazel_tar",
+    commands = [
+        "cd /",
+        "chmod +x bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
+        "./bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
+        "tar cvf bazel.tar /usr/local/bin/bazel /usr/local/lib/bazel/*",
+    ],
+    extract_file = "/bazel.tar",
+    image = ":bazel_installer_image.tar",
+)
+
 language_tool_layer(
     name = "bazel-ltl",
     base = "@ubuntu16_04//image",
-    debs = ["@bazel_deb//file"],
+    tars = [":bazel_tar"],
 )
