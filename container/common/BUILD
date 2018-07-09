@@ -17,3 +17,15 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 exports_files(glob(["*.yaml"]))
+
+load(
+    "//third_party/clang:revision.bzl",
+    "CLANG_REVISION",
+)
+
+genrule(
+    name = "generate_clang_yaml",
+    srcs = ["clang.yaml.tpl"],
+    outs = ["clang.yaml"],
+    cmd = "sed 's|{_CLANG_REVISION}|" + CLANG_REVISION + "|' <$< >$@",
+)
