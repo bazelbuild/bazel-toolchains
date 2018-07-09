@@ -19,9 +19,9 @@ package(default_visibility = ["//visibility:public"])
 load(
     "//container/rules:docker_toolchains.bzl",
     "language_tool_layer",
-    "toolchain_container",
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+load(":toolchain_build.bzl", "toolchain_build")
 
 language_tool_layer(
     name = "base-ltl",
@@ -43,42 +43,6 @@ language_tool_layer(
     ],
 )
 
-toolchain_container(
+toolchain_build(
     name = "toolchain",
-    base = "@debian8//image",
-    cmd = [
-        "/bin/sh",
-        "-c",
-        "/bin/bash",
-    ],
-    env = {
-        # PATH envvar is a special case, and currently only the one in the
-        # topmost layer is set. So that we override it here to include all.
-        "PATH": "$PATH:/opt/python3.6/bin:/usr/local/go/bin",
-        "LANG": "C.UTF-8",
-        "LANGUAGE": "C.UTF-8",
-        "LC_ALL": "C.UTF-8",
-    },
-    language_layers = [
-        "base-ltl",
-        "//container/debian8/layers/clang:clang-ltl",
-        "//container/debian8/layers/go:go-ltl",
-        "//container/debian8/layers/java:java-ltl",
-        "//container/debian8/layers/python:python-ltl",
-    ],
-)
-
-container_test(
-    name = "toolchain-test",
-    configs = [
-        ":rbe-debian8.yaml",
-        "//container/common:clang.yaml",
-        "//container/common:go.yaml",
-        "//container/common:java.yaml",
-        "//container/common:python2.yaml",
-        "//container/common:rbe-base.yaml",
-        "//container/debian8:debian8.yaml",
-    ],
-    image = ":toolchain",
-    verbose = True,
 )
