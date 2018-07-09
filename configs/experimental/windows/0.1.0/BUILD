@@ -14,13 +14,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
-java_runtime_suite(
-    name = "jdk8",
-    default = ":jdk8-default",
-)
-
 java_runtime(
-    name = "jdk8-default",
+    name = "jdk8",
     srcs = [],
     java_home = "C:/openjdk",
 )

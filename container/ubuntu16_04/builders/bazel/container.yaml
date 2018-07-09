@@ -1,23 +1,5 @@
 schemaVersion: "2.0.0"
 
-commandTests:
-- name: 'gcc-version'
-  command: 'gcc'
-  args: ['--version']
-  expectedOutput: ['gcc .*']
-- name: 'check-openssl'
-  command: 'openssl'
-  args: ['version']
-  expectedOutput: ['OpenSSL .*']
-- name: 'check-unzip'
-  command: 'unzip'
-  expectedOutput: ['.*Usage: unzip .*']
-- name: 'check-zip'
-  command: 'zip'
-  args: ['--version']
-  expectedOutput: ['.*This is Zip.*']
-
-
 metadataTest:
   env:
     - key: 'PATH'
