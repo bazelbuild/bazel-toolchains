@@ -19,7 +19,7 @@ package(default_visibility = ["//visibility:public"])
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@base_images_docker//util:run.bzl", "container_run_and_extract")
-load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION")
+load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 exports_files(glob(["*.yaml"]))
 
@@ -37,31 +37,30 @@ language_tool_layer(
     ],
 )
 
-toolchain_container(
-    name = "bazel_installer_image",
+[toolchain_container(
+    name = "bazel_%s_installer_image" % bazel_version,
     base = "@ubuntu16_04//image",
     files = [
-        "@bazel_installer//file",
+        "@bazel_%s_installer//file" % bazel_version.replace(".", ""),
     ],
     packages = [
         "unzip",
     ],
-)
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
-container_run_and_extract(
-    name = "bazel_tar",
+[container_run_and_extract(
+    name = "bazel_%s_tar" % bazel_version,
     commands = [
-        "cd /",
-        "chmod +x bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
-        "./bazel-" + BAZEL_VERSION + "-installer-linux-x86_64.sh",
-        "tar cvf bazel.tar --mtime='1970-01-01' /usr/local/bin/bazel /usr/local/lib/bazel/*",
+        "chmod +x /bazel-" + bazel_version + "-installer-linux-x86_64.sh",
+        "/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
+        "tar cvf /bazel.tar --mtime='1970-01-01' /usr/local/bin/bazel /usr/local/lib/bazel/*",
     ],
     extract_file = "/bazel.tar",
-    image = ":bazel_installer_image.tar",
-)
+    image = ":bazel_%s_installer_image.tar" % bazel_version,
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
-language_tool_layer(
-    name = "bazel-ltl",
+[language_tool_layer(
+    name = "bazel_%s-ltl" % bazel_version,
     base = "@ubuntu16_04//image",
-    tars = [":bazel_tar"],
-)
+    tars = [":bazel_%s_tar" % bazel_version],
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]

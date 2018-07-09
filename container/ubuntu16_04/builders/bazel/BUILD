@@ -18,10 +18,11 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 # Install deb packages.
-toolchain_container(
-    name = "bazel",
+[toolchain_container(
+    name = "bazel_%s" % bazel_version,
     base = "@ubuntu16_04//image",
     cmd = [
         "/bin/sh",
@@ -37,10 +38,19 @@ toolchain_container(
         "//container/ubuntu16_04/layers/java:java-ltl",
         "//container/ubuntu16_04/layers/python:python-ltl",
         "//container/ubuntu16_04/layers/bazel:bazel-tools",
-        "//container/ubuntu16_04/layers/bazel:bazel-ltl",
+        "//container/ubuntu16_04/layers/bazel:bazel_%s-ltl" % bazel_version,
         "//container/ubuntu16_04/layers/git:git-ltl",
         "//container/ubuntu16_04/layers/wget:wget-ltl",
     ],
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
+
+LATEST_BAZEL_VERSION = "0.15.0"
+
+# Latest Bazel container.
+# Update every time when a new container is released.
+alias(
+    name = "bazel",
+    actual = ":bazel_%s" % LATEST_BAZEL_VERSION,
 )
 
 container_test(
