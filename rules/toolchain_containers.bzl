@@ -4,11 +4,11 @@ def toolchain_container_sha256s():
         # Base images                                             #
         ###########################################################
         # gcr.io/cloud-marketplace/google/debian8:latest
-        "debian8": "sha256:943025384b0efebacf5473490333658dd190182e406e956ee4af65208d104332",
+        "debian8": "sha256:a6df7738c401aef6bf9c113eb1eea7f3921417fd4711ea28100681f2fe483ea2",
         # gcr.io/cloud-marketplace/google/debian9:latest
-        "debian9": "sha256:6b3aa04751aa2ac3b0c7be4ee71148b66d693ad212ce6d3244bd2a2a147f314a",
+        "debian9": "sha256:1d6a9a6d106bd795098f60f4abb7083626354fa6735e81743c7f8cfca11259f0",
         # gcr.io/cloud-marketplace/google/ubuntu16_04:latest
-        "ubuntu16_04": "sha256:5125aac627c68226c6ad6083d0e3419bc6252bea1eb9d6e7258ecfd67233d655",
+        "ubuntu16_04": "sha256:9f9775c124417057fd58d28835b42b30f5d0410530256d857b12eae640d0a359",
 
         ###########################################################
         # Python3 images                                          #
