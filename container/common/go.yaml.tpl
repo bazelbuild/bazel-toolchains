@@ -4,7 +4,7 @@ commandTests:
 - name: 'go-version'
   command: 'go'
   args: ['version']
-  expectedOutput: ['go version go1.10.3 linux/amd64']
+  expectedOutput: ['go version go{_GOLANG_REVISION} linux/amd64']
 
 fileExistenceTests:
 - name: 'Golang'
