@@ -37,6 +37,7 @@ language_tool_layer(
     ],
 )
 
+# Create image with Bazel installer for all supported versions.
 [toolchain_container(
     name = "bazel_%s_installer_image" % bazel_version,
     base = "@ubuntu16_04//image",
@@ -48,6 +49,7 @@ language_tool_layer(
     ],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
+# Extract Bazel binaries for all supported versions.
 [container_run_and_extract(
     name = "bazel_%s_tar" % bazel_version,
     commands = [
@@ -59,8 +61,17 @@ language_tool_layer(
     image = ":bazel_%s_installer_image.tar" % bazel_version,
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
+# Language_tool_layer targets for all supported Bazel versions.
 [language_tool_layer(
     name = "bazel_%s-ltl" % bazel_version,
     base = "@ubuntu16_04//image",
     tars = [":bazel_%s_tar" % bazel_version],
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
+
+# Generate Bazel container testing yaml files with all supported Bazel versions.
+[genrule(
+    name = "generate_bazel_%s_yaml" % bazel_version,
+    srcs = ["bazel.yaml.tpl"],
+    outs = ["bazel_%s.yaml" % bazel_version],
+    cmd = "sed 's|{_BAZEL_VERSION}|" + bazel_version + "|' <$< >$@",
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]

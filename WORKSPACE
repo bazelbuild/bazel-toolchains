@@ -244,6 +244,7 @@ load(
     "BAZEL_VERSION_SHA256S",
 )
 
+# Download the Bazel installer.sh for all supported versions.
 [http_file(
     name = "bazel_%s_installer" % (bazel_version.replace(".", "")),
     sha256 = bazel_sha256,

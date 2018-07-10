@@ -20,7 +20,8 @@ load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
-# Install deb packages.
+# Generate the Bazel container for all supported versions using the
+# corresponding Bazel language_tool_layer targets.
 [toolchain_container(
     name = "bazel_%s" % bazel_version,
     base = "@ubuntu16_04//image",
@@ -44,17 +45,9 @@ load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION_SHA256S"
     ],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
-LATEST_BAZEL_VERSION = "0.15.0"
-
-# Latest Bazel container.
-# Update every time when a new container is released.
-alias(
-    name = "bazel",
-    actual = ":bazel_%s" % LATEST_BAZEL_VERSION,
-)
-
-container_test(
-    name = "bazel-test",
+# container_test targets for all supported Bazel versions.
+[container_test(
+    name = "bazel_%s-test" % bazel_version,
     configs = [
         ":container.yaml",
         "//container/common:clang.yaml",
@@ -63,17 +56,18 @@ container_test(
         "//container/common:python2.yaml",
         "//container/common:wget.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
-        "//container/ubuntu16_04/layers/bazel:bazel.yaml",
+        "//container/ubuntu16_04/layers/bazel:bazel_%s.yaml" % bazel_version,
         "//container/ubuntu16_04/layers/bazel:bazel_tools.yaml",
     ],
-    image = ":bazel",
+    image = ":bazel_%s" % bazel_version,
     verbose = True,
-)
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
-# Install deb packages.
-toolchain_container(
-    name = "bazel_docker",
-    base = ":bazel.tar",
+# Generate the container with Bazel and Docker for all supported versions of
+# Bazel.
+[toolchain_container(
+    name = "bazel_%s_docker" % bazel_version,
+    base = ":bazel_%s.tar" % bazel_version,
     cmd = [
         "/bin/sh",
         "-c",
@@ -86,10 +80,11 @@ toolchain_container(
     language_layers = [
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-ltl",
     ],
-)
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
-container_test(
-    name = "bazel_docker-test",
+# container_test targets for all supported bazel_docker containers..
+[container_test(
+    name = "bazel_%s_docker-test" % bazel_version,
     configs = [
         ":container.yaml",
         "//container/common:clang.yaml",
@@ -98,10 +93,10 @@ container_test(
         "//container/common:python2.yaml",
         "//container/common:wget.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
-        "//container/ubuntu16_04/layers/bazel:bazel.yaml",
+        "//container/ubuntu16_04/layers/bazel:bazel_%s.yaml" % bazel_version,
         "//container/ubuntu16_04/layers/bazel:bazel_tools.yaml",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
     ],
-    image = ":bazel_docker",
+    image = ":bazel_%s_docker" % bazel_version,
     verbose = True,
-)
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
