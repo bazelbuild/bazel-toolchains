@@ -17,3 +17,26 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 exports_files(glob(["*.yaml"]))
+
+load(
+    "//third_party/clang:revision.bzl",
+    "CLANG_REVISION",
+)
+load(
+    "//third_party/golang:revision.bzl",
+    "GOLANG_REVISION",
+)
+
+genrule(
+    name = "generate_clang_yaml",
+    srcs = ["clang.yaml.tpl"],
+    outs = ["clang.yaml"],
+    cmd = "sed 's|{_CLANG_REVISION}|" + CLANG_REVISION.lstrip("r") + "|' <$< >$@",
+)
+
+genrule(
+    name = "generate_go_yaml",
+    srcs = ["go.yaml.tpl"],
+    outs = ["go.yaml"],
+    cmd = "sed 's|{_GOLANG_REVISION}|" + GOLANG_REVISION + "|' <$< >$@",
+)

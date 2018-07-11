@@ -4,7 +4,7 @@ commandTests:
 - name: 'clang-version'
   command: 'clang'
   args: ['--version']
-  expectedOutput: ['clang version 7.0.0.*']
+  expectedOutput: ['clang version 7.0.0 [(]trunk {_CLANG_REVISION}[)]']
 
 fileExistenceTests:
 - name: 'Clang'
