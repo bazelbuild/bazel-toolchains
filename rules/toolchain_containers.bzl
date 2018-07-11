@@ -13,8 +13,8 @@ def toolchain_container_sha256s():
         ###########################################################
         # Python3 images                                          #
         ###########################################################
-        # l.gcr.io/google/python:latest
+        # gcr.io/cloud-marketplace/google/python:latest
         "debian8_python3": "sha256:ace668f0f01e5e562ad09c3f128488ec33fa9126313f16505a86ae77865d1696",
         # gcr.io/google-appengine/python:latest
-        "ubuntu16_04_python3": "sha256:73f43d9b52e95c821dcd2d6e1bc42ebb1b002623263cea5ae517e6f81d56bc37",
+        "ubuntu16_04_python3": "sha256:67fd35064a812fd0ba0a6e9485410f9f2710ebf7b0787a7b350ce6a20f166bfe",
     }
