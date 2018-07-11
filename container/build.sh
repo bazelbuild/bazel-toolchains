@@ -17,6 +17,8 @@ set -e
 
 # TODO(xingao): Rewrite the script in Python or Go
 
+LATEST_BAZEL_VERSION="0.15.0"
+
 # Map to store all supported container type and the package of target to build it.
 declare -A TYPE_PACKAGE_MAP=(
   ["rbe-debian8"]="container/debian8/builders/rbe-debian8"
@@ -31,8 +33,8 @@ declare -A TYPE_TARGET_MAP=(
   ["rbe-debian8"]="toolchain"
   ["rbe-debian9"]="toolchain"
   ["rbe-ubuntu16_04"]="toolchain"
-  ["ubuntu16_04-bazel"]="bazel"
-  ["ubuntu16_04-bazel-docker"]="bazel_docker"
+  ["ubuntu16_04-bazel"]="bazel_${LATEST_BAZEL_VERSION}"
+  ["ubuntu16_04-bazel-docker"]="bazel_${LATEST_BAZEL_VERSION}_docker"
 )
 
 # Map to store all supported container type and the name of target to build it.
@@ -40,8 +42,8 @@ declare -A TYPE_TARBALL_MAP=(
   ["rbe-debian8"]="toolchain-packages.tar"
   ["rbe-debian9"]="toolchain-packages.tar"
   ["rbe-ubuntu16_04"]="toolchain-packages.tar"
-  ["ubuntu16_04-bazel"]="bazel-packages.tar"
-  ["ubuntu16_04-bazel-docker"]="bazel_docker-packages.tar"
+  ["ubuntu16_04-bazel"]="bazel_${LATEST_BAZEL_VERSION}-packages.tar"
+  ["ubuntu16_04-bazel-docker"]="bazel_${LATEST_BAZEL_VERSION}_docker-packages.tar"
 )
 
 show_usage () {
