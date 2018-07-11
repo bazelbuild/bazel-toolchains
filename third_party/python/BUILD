@@ -50,19 +50,19 @@ pkg_tar(
     deps = [":ubuntu16_04_python3"],
 )
 
-# Get debian8-built python3 interpreter from l.gcr.io/google/python container
+# Get debian8-built python3 interpreter from gcr.io/cloud-marketplace/google/python:latest.
 # Base image: gcr.io/google-appengine/debian8:latest
-# https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
+# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
 container_file_export(
     name = "debian8_python3",
-    image = "l.gcr.io/google/python@" + toolchain_container_sha256s()["debian8_python3"],
+    image = "gcr.io/cloud-marketplace/google/python@" + toolchain_container_sha256s()["debian8_python3"],
     src_path = "/opt/python3.6",
     tags = ["manual"],
 )
 
-# Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:staging
+# Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:latest.
 # Base image: gcr.io/gcp-runtimes/ubuntu_16_0_4:latest
-# https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
+# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
 container_file_export(
     name = "ubuntu16_04_python3",
     image = "gcr.io/google-appengine/python@" + toolchain_container_sha256s()["ubuntu16_04_python3"],
