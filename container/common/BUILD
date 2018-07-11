@@ -31,7 +31,7 @@ genrule(
     name = "generate_clang_yaml",
     srcs = ["clang.yaml.tpl"],
     outs = ["clang.yaml"],
-    cmd = "sed 's|{_CLANG_REVISION}|" + CLANG_REVISION + "|' <$< >$@",
+    cmd = "sed 's|{_CLANG_REVISION}|" + CLANG_REVISION.lstrip("r") + "|' <$< >$@",
 )
 
 genrule(
