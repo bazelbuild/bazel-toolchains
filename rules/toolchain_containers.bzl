@@ -17,4 +17,12 @@ def toolchain_container_sha256s():
         "debian8_python3": "sha256:ace668f0f01e5e562ad09c3f128488ec33fa9126313f16505a86ae77865d1696",
         # gcr.io/google-appengine/python:latest
         "ubuntu16_04_python3": "sha256:67fd35064a812fd0ba0a6e9485410f9f2710ebf7b0787a7b350ce6a20f166bfe",
+
+        ###########################################################
+        # Clang images                                            #
+        ###########################################################
+        # gcr.io/cloud-marketplace/google/clang-debian8:r333878
+        "debian8_clang": "sha256:7d204d8e2dff80c67e65c39096d3ef0671919d1a6170ab535db606aa550e2395",
+        # gcr.io/cloud-marketplace/google/clang-ubuntu:r333878
+        "ubuntu16_04_clang": "sha256:38f658a36015f3091b8f0b808eca586aa45b97e1ec98f03656c1262f9591f63b",
     }
