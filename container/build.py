@@ -113,6 +113,32 @@ def main(type_, project, container, tag, async_, bucket, local):
         shell=True)
 
 
+'''
+usage: build.py [-h] [-a] [-b BUCKET] -l
+                type project container tag
+
+Builds the fully-loaded container, with Google Cloud Container Builder or
+locally.
+
+positional arguments:
+  type                  Type of the container: see TYPE_TARGET_MAP
+  project               GCP project ID
+  container             Docker container name
+  tag                   Docker tag for the image
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a, --async           Asynchronous execute Cloud Container Builder
+  -b BUCKET, --bucket BUCKET
+                        GCS bucket to store the tarball of debian packages
+  -l, --local           Build container locally
+
+
+
+
+'''
+
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(
       description=
@@ -146,7 +172,7 @@ if __name__ == "__main__":
       "-l",
       "--local",
       help="Build container locally",
-      required=False,
+      required=True,
       default=False,
       action="store_true")
 
