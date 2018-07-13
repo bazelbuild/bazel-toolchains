@@ -18,6 +18,9 @@ from __future__ import print_function
 import argparse
 import os
 import subprocess
+import sys
+
+LATEST_BAZEL_VERSION="0.15.0"
 
 # Map to store all supported container type and the package of target to build it.
 TYPE_PACKAGE_MAP = {
@@ -33,8 +36,8 @@ TYPE_TARGET_MAP = {
     "rbe-debian8": "toolchain",
     "rbe-debian9": "toolchain",
     "rbe-ubuntu16_04": "toolchain",
-    "ubuntu16_04-bazel": "bazel",
-    "ubuntu16_04-bazel-docker": "bazel_docker",
+    "ubuntu16_04-bazel": "bazel_{}".format(LATEST_BAZEL_VERSION),
+    "ubuntu16_04-bazel-docker": "bazel_{}_docker".format(LATEST_BAZEL_VERSION),
 }
 
 # Map to store all supported container type and the name of target to build it.
@@ -42,62 +45,58 @@ TYPE_TARBALL_MAP = {
     "rbe-debian8": "toolchain-packages.tar",
     "rbe-debian9": "toolchain-packages.tar",
     "rbe-ubuntu16_04": "toolchain-packages.tar",
-    "ubuntu16_04-bazel": "bazel-packages.tar",
-    "ubuntu16_04-bazel-docker": "bazel_docker-packages.tar",
+    "ubuntu16_04-bazel": "bazel_{}-packages.tar".format(LATEST_BAZEL_VERSION),
+    "ubuntu16_04-bazel-docker": "bazel_{}_docker-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
 
 def main(type_, project, container, tag, async_, bucket, local):
-    project_root = subprocess.check_output(
-        "git rev-parse --show-toplevel", shell=True).strip()
-    package = TYPE_PACKAGE_MAP[type_]
-    target = TYPE_TARGET_MAP[type_]
-    tarball = TYPE_TARBALL_MAP[type_]
+  project_root = subprocess.check_output(
+      "git rev-parse --show-toplevel", shell=True).strip()
+  package = TYPE_PACKAGE_MAP[type_]
+  target = TYPE_TARGET_MAP[type_]
+  tarball = TYPE_TARBALL_MAP[type_]
 
-    # We need to start the build from the root of the project, so that we can
-    # mount the full root directory (to use bazel builder properly).
-    os.chdir(project_root)
-    # We need to run clean to make sure we don't mount local build outputs
-    subprocess.call("bazel clean", shell=True)
+  # We need to start the build from the root of the project, so that we can
+  # mount the full root directory (to use bazel builder properly).
+  os.chdir(project_root)
+  # We need to run clean to make sure we don't mount local build outputs
+  subprocess.call("bazel clean", shell=True)
 
-    if local:
-        print("Building container locally.")
-        subprocess.call(
-            "bazel run //{}:{}".format(package, target), shell=True)
-        print("Testing container locally.")
-        subprocess.call(
-            "bazel test //{}:{}-test".format(package, target), shell=True)
-        print("Tagging container.")
-        subprocess.call(
-            "docker tag bazel/{}:{} {}:latest".format(package, tarball, type_))
-        print(("\n" +
-               "{TYPE}:lastest container is now available to use.\n" +
-               "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_)
-              )
-    else:
-        print("Building container in Google Cloud Container Builder.")
-        # Setup GCP project id for the build
-        subprocess.call(
-            "gcloud config set project {}".format(project), shell=True)
-        # Ensure all BUILD files under /third_party have the right permission.
-        # This is because in some systems the BUILD files under /third_party (after git clone)
-        # will be with permission 640 and the build will fail in Container Builder.
-        for dirpath, _, files in os.walk(project_root+'/third_party'):
-            for f in files:
-                full_path = os.path.join(dirpath, f)
-                os.chmod(full_path, 0o644)
+  if local:
+    print("Building container locally.")
+    subprocess.call("bazel run //{}:{}".format(package, target), shell=True)
+    print("Testing container locally.")
+    subprocess.call(
+        "bazel test //{}:{}-test".format(package, target), shell=True)
+    print("Tagging container.")
+    subprocess.call("docker tag bazel/{}:{} {}:latest".format(
+        package, tarball, type_))
+    print(("\n" + "{TYPE}:lastest container is now available to use.\n" +
+           "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_))
+  else:
+    print("Building container in Google Cloud Container Builder.")
+    # Setup GCP project id for the build
+    subprocess.call("gcloud config set project {}".format(project), shell=True)
+    # Ensure all BUILD files under /third_party have the right permission.
+    # This is because in some systems the BUILD files under /third_party (after git clone)
+    # will be with permission 640 and the build will fail in Container Builder.
+    for dirpath, _, files in os.walk(project_root + "/third_party"):
+      for f in files:
+        full_path = os.path.join(dirpath, f)
+        os.chmod(full_path, 0o644)
 
-        config_file = "{}/container/cloudbuild.yaml".format(project_root)
-        extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
-        if not bucket:
-            config_file = "{}/container/cloudbuild_no_bucket.yaml".format(
-                project_root)
-            extra_substitution = ""
-        ASYNC = ""
-        if async_:
-            ASYNC = "--async"
-        subprocess.call(
-            "gcloud container builds submit . \
+    config_file = "{}/container/cloudbuild.yaml".format(project_root)
+    extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
+    if not bucket:
+      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(
+          project_root)
+      extra_substitution = ""
+    async_arg = ""
+    if async_:
+      async_arg = "--async"
+    subprocess.call(
+        "gcloud container builds submit . \
             --config={CONFIG} \
             --substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTION} \
             --machine-type=n1-highcpu-32 \
@@ -109,74 +108,106 @@ def main(type_, project, container, tag, async_, bucket, local):
             PACKAGE=package,
             TARGET=target,
             EXTRA_SUBSTITUTION=extra_substitution,
-            ASYNC=ASYNC),
+            ASYNC=async_arg),
         shell=True)
 
 
+
 '''
-usage: build.py [-h] [-a] [-b BUCKET] -l
-                type project container tag
+usage: build.py -d,
+                {rbe-debian8,rbe-debian9,rbe-ubuntu16_04,ubuntu16_04-bazel-docker,ubuntu16_04-bazel}
+                [-p PROJECT] [-c CONTAINER] [-t TAG] [-a] [-b BUCKET] [-h]
+                [-l]
 
-Builds the fully-loaded container, with Google Cloud Container Builder or
-locally.
-
-positional arguments:
-  type                  Type of the container: see TYPE_TARGET_MAP
-  project               GCP project ID
-  container             Docker container name
-  tag                   Docker tag for the image
+required arguments:
+  -d TYPE, --type TYPE  Type of the container: see TYPE_TARGET_MAP
+  -p PROJECT, --project PROJECT
+                        GCP project ID
+  -c CONTAINER, --container CONTAINER
+                        Docker container name
+  -t TAG, --tag TAG     Docker tag for the image
 
 optional arguments:
-  -h, --help            show this help message and exit
   -a, --async           Asynchronous execute Cloud Container Builder
   -b BUCKET, --bucket BUCKET
                         GCS bucket to store the tarball of debian packages
+  -h, --help            print this help text and exit
+
+standalone arguments:
   -l, --local           Build container locally
-
-
-
-
 '''
-
-
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(
-      description=
-      "Builds the fully-loaded container, with Google Cloud Container Builder or locally."
+      add_help=False,
+      formatter_class=argparse.RawDescriptionHelpFormatter,
+      description='''
+Builds the fully-loaded container, with Google Cloud Container Builder or locally.
+
+To build with Google Cloud Container Builder:
+$ ./build.sh -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
+will produce docker images in Google Container Registry:
+    gcr.io/my-gcp-project/{container_type}:latest
+and the debian packages installed will be packed as a tarball and stored in
+gs://my_bucket for future reference, if -b is specified.
+To build locally:
+$ ./build.sh -d {container_type} -l
+will produce docker locally as {container_type}:latest
+
+''',
   )
 
-  parser.add_argument(
-      "type",
+  required = parser.add_argument_group("required arguments")
+
+  required.add_argument(
+      "-d,",
+      "--type",
       help="Type of the container: see TYPE_TARGET_MAP",
       type=str,
-      choices=TYPE_PACKAGE_MAP.keys())
-  parser.add_argument("project", help="GCP project ID", type=str)
-  parser.add_argument("container", help="Docker container name", type=str)
-  parser.add_argument("tag", help="Docker tag for the image", type=str)
+      choices=TYPE_PACKAGE_MAP.keys(),
+      required=True)
+  required.add_argument("-p", "--project", help="GCP project ID", type=str)
+  required.add_argument(
+      "-c", "--container", help="Docker container name", type=str)
+  required.add_argument(
+      "-t", "--tag", help="Docker tag for the image", type=str)
 
-  parser.add_argument(
+  optional = parser.add_argument_group("optional arguments")
+
+  optional.add_argument(
       "-a",
       "--async",
       help="Asynchronous execute Cloud Container Builder",
       required=False,
       default=False,
       action="store_true")
-  parser.add_argument(
+  optional.add_argument(
       "-b",
       "--bucket",
       help="GCS bucket to store the tarball of debian packages",
       type=str,
       required=False,
       default="")
-  parser.add_argument(
+
+  optional.add_argument(
+      "-h", "--help", help="print this help text and exit", action="help")
+
+  standalone = parser.add_argument_group("standalone arguments")
+
+  standalone.add_argument(
       "-l",
       "--local",
       help="Build container locally",
-      required=True,
       default=False,
       action="store_true")
 
   args = parser.parse_args()
+
+  #Check arguments
+  if not args.local and not (args.tag and args.project and args.container):
+    print(
+        "error: If build is not local (-l), then -p, -c, and -t are required",
+        file=sys.stderr)
+    exit(1)
 
   main(args.type, args.project, args.container, args.tag, args.async,
        args.bucket, args.local)
