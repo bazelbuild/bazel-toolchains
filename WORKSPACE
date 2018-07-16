@@ -50,41 +50,67 @@ package_manager_repositories()
 
 load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
 
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
 container_pull(
     name = "debian8",
     digest = toolchain_container_sha256s()["debian8"],
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/debian8",
+    registry = "l.gcr.io",
+    repository = "google/debian8",
 )
 
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
 container_pull(
     name = "debian9",
     digest = toolchain_container_sha256s()["debian9"],
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/debian9",
+    registry = "l.gcr.io",
+    repository = "google/debian9",
 )
 
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
 container_pull(
     name = "ubuntu16_04",
     digest = toolchain_container_sha256s()["ubuntu16_04"],
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/ubuntu16_04",
+    registry = "l.gcr.io",
+    repository = "google/ubuntu16_04",
 )
 
-# gcr.io/cloud-marketplace/google/clang-debian8:r333878
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
+# Get debian8-built python3 interpreter from l.gcr.io/google/python:latest.
+# Base image: gcr.io/google-appengine/debian8:latest
+# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
+container_pull(
+    name = "debian8_python3",
+    digest = toolchain_container_sha256s()["debian8_python3"],
+    registry = "l.gcr.io",
+    repository = "google/python",
+)
+
+# Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:latest.
+# Base image: gcr.io/gcp-runtimes/ubuntu_16_0_4:latest
+# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
+container_pull(
+    name = "ubuntu16_04_python3",
+    digest = toolchain_container_sha256s()["ubuntu16_04_python3"],
+    registry = "gcr.io",
+    repository = "google-appengine/python",
+)
+
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
+# l.gcr.io/google/clang-debian8:r333878
 container_pull(
     name = "debian8-clang",
     digest = "sha256:7d204d8e2dff80c67e65c39096d3ef0671919d1a6170ab535db606aa550e2395",
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/clang-debian8",
+    registry = "l.gcr.io",
+    repository = "google/clang-debian8",
 )
 
-# gcr.io/cloud-marketplace/google/clang-ubuntu:r333878
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
+# l.gcr.io/google/clang-ubuntu:r333878
 container_pull(
     name = "ubuntu16_04-clang",
     digest = "sha256:38f658a36015f3091b8f0b808eca586aa45b97e1ec98f03656c1262f9591f63b",
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/clang-ubuntu",
+    registry = "l.gcr.io",
+    repository = "google/clang-ubuntu",
 )
 
 container_pull(

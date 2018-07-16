@@ -22,50 +22,22 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-load("//skylib:container_file_export.bzl", "container_file_export")
-load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
+load("@base_images_docker//util:run.bzl", "container_run_and_extract")
 
-pkg_tar(
+container_run_and_extract(
     name = "debian8_tar",
-    srcs = glob(
-        ["**/*"],
-        exclude = ["**/BUILD"],
-    ),
-    package_dir = "/",
-    strip_prefix = ".",
-    tags = ["manual"],
-    deps = [":debian8_python3"],
+    commands = [
+        "tar cvf /python.tar --mtime='1970-01-01' /opt/python3.6",
+    ],
+    extract_file = "/python.tar",
+    image = "@debian8_python3//image",
 )
 
-pkg_tar(
+container_run_and_extract(
     name = "ubuntu16_04_tar",
-    srcs = glob(
-        ["**/*"],
-        exclude = ["**/BUILD"],
-    ),
-    package_dir = "/",
-    strip_prefix = ".",
-    tags = ["manual"],
-    deps = [":ubuntu16_04_python3"],
-)
-
-# Get debian8-built python3 interpreter from gcr.io/cloud-marketplace/google/python:latest.
-# Base image: gcr.io/google-appengine/debian8:latest
-# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
-container_file_export(
-    name = "debian8_python3",
-    image = "gcr.io/cloud-marketplace/google/python@" + toolchain_container_sha256s()["debian8_python3"],
-    src_path = "/opt/python3.6",
-    tags = ["manual"],
-)
-
-# Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:latest.
-# Base image: gcr.io/gcp-runtimes/ubuntu_16_0_4:latest
-# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
-container_file_export(
-    name = "ubuntu16_04_python3",
-    image = "gcr.io/google-appengine/python@" + toolchain_container_sha256s()["ubuntu16_04_python3"],
-    src_path = "/opt/python3.6",
-    tags = ["manual"],
+    commands = [
+        "tar cvf /python.tar --mtime='1970-01-01' /opt/python3.6",
+    ],
+    extract_file = "/python.tar",
+    image = "@ubuntu16_04_python3//image",
 )
