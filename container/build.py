@@ -59,6 +59,14 @@ import sys
 
 LATEST_BAZEL_VERSION = "0.15.0"
 
+supported_types = [
+                    "rbe-debian8", 
+                    "rbe-debian9",
+                    "rbe-ubuntu16_04",
+                    "ubuntu16_04-bazel",
+                    "ubuntu16_04-bazel-docker"
+                  ]
+
 # Map to store all supported container type and
 # the package of target to build it.
 TYPE_PACKAGE_MAP = {
@@ -92,8 +100,12 @@ TYPE_TARBALL_MAP = {
         "bazel_{}_docker-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
+assert set(supported_types) == set(TYPE_PACKAGE_MAP.keys()) == set(TYPE_TARGET_MAP.keys()) == set(TYPE_TARBALL_MAP.keys()), "TYPES ARE OUT OF SYNC"
+
 
 def main(type_, project, container, tag, async_, bucket, local):
+  '''Runs the build. More info in module docstring at the top.
+  '''
   project_root = subprocess.check_output(
       shlex.split("git rev-parse --show-toplevel")).strip()
   package = TYPE_PACKAGE_MAP[type_]
@@ -107,53 +119,63 @@ def main(type_, project, container, tag, async_, bucket, local):
   subprocess.call(["bazel", "clean"])
 
   if local:
-    print("Building container locally.")
-    subprocess.call(shlex.split("bazel run //{}:{}".format(package, target)))
-    print("Testing container locally.")
-    subprocess.call(
-        "bazel test //{}:{}-test".format(package, target).split())
-    print("Tagging container.")
-    subprocess.call("docker tag bazel/{}:{} {}:latest".format(
-        package, tarball, type_))
-    print(("\n{TYPE}:lastest container is now available to use.\n"
-           "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_))
+    local_build(type_, package, target, tarball)
   else:
-    print("Building container in Google Cloud Container Builder.")
-    # Setup GCP project id for the build
-    subprocess.call(shlex.split("gcloud config set project {}".format(project)))
-    # Ensure all BUILD files under /third_party have the right permission.
-    # This is because in some systems the BUILD files under /third_party
-    # (after git clone) will be with permission 640 and the build will
-    # fail in Container Builder.
-    for dirpath, _, files in os.walk(project_root + "/third_party"):
-      for f in files:
-        full_path = os.path.join(dirpath, f)
-        os.chmod(full_path, 0o644)
+    cloud_build(project_root, project, container, tag, async_, bucket, package, target, tarball)
 
-    config_file = "{}/container/cloudbuild.yaml".format(project_root)
-    extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
-    if not bucket:
-      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(
-          project_root)
-      extra_substitution = ""
-    async_arg = ""
-    if async_:
-      async_arg = "--async"
-    subprocess.call(shlex.split((
-        "gcloud container builds submit . "
-        "--config={CONFIG} "
-        "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
-        "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTION} "
-        "--machine-type=n1-highcpu-32 "
-        "{ASYNC}").format(
-            CONFIG=config_file,
-            PROJECT=project,
-            CONTAINER=container,
-            TAG=tag,
-            PACKAGE=package,
-            TARGET=target,
-            EXTRA_SUBSTITUTION=extra_substitution,
-            ASYNC=async_arg)))
+def local_build(type_, package, target, tarball):
+  '''Runs the build locally. More info in module docstring at the top.
+  '''
+  print("Building container locally.")
+  subprocess.call(shlex.split("bazel run //{}:{}".format(package, target)))
+  print("Testing container locally.")
+  subprocess.call(
+      "bazel test //{}:{}-test".format(package, target).split())
+  print("Tagging container.")
+  subprocess.call("docker tag bazel/{}:{} {}:latest".format(
+      package, tarball, type_))
+  print(("\n{TYPE}:lastest container is now available to use.\n"
+          "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_))
+
+def cloud_build(project_root, project, container, tag, async_, bucket, package, target, tarball):
+  '''Runs the build in the cloud. More info in module docstring at the top.
+  '''
+  print("Building container in Google Cloud Container Builder.")
+  # Setup GCP project id for the build
+  subprocess.call(shlex.split("gcloud config set project {}".format(project)))
+  # Ensure all BUILD files under /third_party have the right permission.
+  # This is because in some systems the BUILD files under /third_party
+  # (after git clone) will be with permission 640 and the build will
+  # fail in Container Builder.
+  for dirpath, _, files in os.walk(project_root + "/third_party"):
+    for f in files:
+      full_path = os.path.join(dirpath, f)
+      os.chmod(full_path, 0o644)
+
+  config_file = "{}/container/cloudbuild.yaml".format(project_root)
+  extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
+  if not bucket:
+    config_file = "{}/container/cloudbuild_no_bucket.yaml".format(
+        project_root)
+    extra_substitution = ""
+  async_arg = ""
+  if async_:
+    async_arg = "--async"
+  subprocess.call(shlex.split((
+      "gcloud container builds submit . "
+      "--config={CONFIG} "
+      "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
+      "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTION} "
+      "--machine-type=n1-highcpu-32 "
+      "{ASYNC}").format(
+          CONFIG=config_file,
+          PROJECT=project,
+          CONTAINER=container,
+          TAG=tag,
+          PACKAGE=package,
+          TARGET=target,
+          EXTRA_SUBSTITUTION=extra_substitution,
+          ASYNC=async_arg)))
 
 
 def parse_arguments():
