@@ -132,8 +132,8 @@ def local_build(type_, package, target, tarball):
   subprocess.call(
       "bazel test //{}:{}-test".format(package, target).split())
   print("Tagging container.")
-  subprocess.call("docker tag bazel/{}:{} {}:latest".format(
-      package, tarball, type_))
+  subprocess.call(shlex.split("docker tag bazel/{}:{} {}:latest".format(
+      package, tarball, type_)))
   print(("\n{TYPE}:lastest container is now available to use.\n"
           "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_))
 
