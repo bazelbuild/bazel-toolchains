@@ -119,11 +119,11 @@ def main(type_, project, container, tag, async_, bucket, local):
   subprocess.call(["bazel", "clean"])
 
   if local:
-    local_build(type_, package, target, tarball)
+    local_build(type_, package, target)
   else:
     cloud_build(project_root, project, container, tag, async_, bucket, package, target, tarball)
 
-def local_build(type_, package, target, tarball):
+def local_build(type_, package, target):
   '''Runs the build locally. More info in module docstring at the top.
   '''
   print("Building container locally.")
