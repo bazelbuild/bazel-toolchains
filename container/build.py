@@ -17,13 +17,13 @@
 """Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
+$ python build.py -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
     gcr.io/my-gcp-project/{container_type}:latest
 and the debian packages installed will be packed as a tarball and stored in
 gs://my_bucket for future reference, if -b is specified.
 To build locally:
-$ ./build.sh -d {container_type} -l
+$ python build.py -d {container_type} -l
 will produce docker locally as {container_type}:latest
 
 usage:
@@ -191,13 +191,13 @@ def parse_arguments():
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 To build with Google Cloud Container Builder:
-$ ./build.sh -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
+$ python build.py -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
     gcr.io/my-gcp-project/{container_type}:latest
 and the debian packages installed will be packed as a tarball and stored in
 gs://my_bucket for future reference, if -b is specified.
 To build locally:
-$ ./build.sh -d {container_type} -l
+$ python build.py -d {container_type} -l
 will produce docker locally as {container_type}:latest
 
 """,
