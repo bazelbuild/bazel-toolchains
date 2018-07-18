@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Builds the fully-loaded container, with Google Cloud Container Builder or locally.
+"""Builds a toolchain container, with Google Cloud Container Builder or locally.
 
 To build with Google Cloud Container Builder:
 $ python build.py -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
@@ -27,8 +27,7 @@ $ python build.py -d {container_type} -l
 will produce docker locally as {container_type}:latest
 
 usage:
-  build.py -d,
-      {rbe-debian8,rbe-debian9,rbe-ubuntu16_04,ubuntu16_04-bazel-docker,ubuntu16_04-bazel}
+  build.py -d {rbe-debian8,rbe-debian9,rbe-ubuntu16_04,ubuntu16_04-bazel-docker,ubuntu16_04-bazel}
       [-p PROJECT] [-c CONTAINER] [-t TAG] [-a] [-b BUCKET] [-h]
       [-l]
 
@@ -100,7 +99,11 @@ TYPE_TARBALL_MAP = {
         "bazel_{}_docker-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
-assert set(supported_types) == set(TYPE_PACKAGE_MAP.keys()) == set(TYPE_TARGET_MAP.keys()) == set(TYPE_TARBALL_MAP.keys()), "TYPES ARE OUT OF SYNC"
+assert set(supported_types) \
+        == set(TYPE_PACKAGE_MAP.keys()) \
+        == set(TYPE_TARGET_MAP.keys()) \
+        == set(TYPE_TARBALL_MAP.keys()), \
+            "TYPES ARE OUT OF SYNC"
 
 
 def main(type_, project, container, tag, async_, bucket, local):
