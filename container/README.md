@@ -32,7 +32,7 @@ You can build a toolchain-container with
 the base container by running:
 
 ``` shell
-container/build.sh -p my-project-id -d rbe-ubuntu16_04 -c test-rbe-ubuntu16_04 -t latest -b my-gcs-bucket
+python container/build.py -p my-project-id -d rbe-ubuntu16_04 -c test-rbe-ubuntu16_04 -t latest -b my-gcs-bucket
 ```
 
 Congratulations! Your docker container is now available in [Container
@@ -58,7 +58,7 @@ test. You would need
 Run the following command:
 
 ```shell
-container/build.sh -l -d rbe-ubuntu16_04
+python container/build.py -l -d rbe-ubuntu16_04
 ```
 
 You docker container is now available locally and you can try it out by running:
