@@ -26,10 +26,6 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 pkg_tar(
     name = "debian8_tar",
-    srcs = glob(
-        ["**/*"],
-        exclude = ["**/BUILD"],
-    ),
     package_dir = "/usr/local/",
     strip_prefix = ".",
     tags = ["manual"],
@@ -40,10 +36,6 @@ pkg_tar(
 
 pkg_tar(
     name = "debian9_tar",
-    srcs = glob(
-        ["**/*"],
-        exclude = ["**/BUILD"],
-    ),
     package_dir = "/usr/local/",
     strip_prefix = ".",
     tags = ["manual"],
@@ -54,10 +46,6 @@ pkg_tar(
 
 pkg_tar(
     name = "ubuntu16_04_tar",
-    srcs = glob(
-        ["**/*"],
-        exclude = ["**/BUILD"],
-    ),
     package_dir = "/usr/local/",
     strip_prefix = ".",
     tags = ["manual"],
