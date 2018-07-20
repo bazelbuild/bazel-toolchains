@@ -63,7 +63,8 @@ tar -xf ${TEST_TMPDIR}/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-au
 rm -rf ${TEST_TMPDIR}/local_config_cc/tools ${TEST_TMPDIR}/local_config_cc/WORKSPACE
 
 # Unpack the tarball containing published toolchain configs for Bazel 0.10.0 from GitHub.
-tar -xf ${TEST_SRCDIR}/bazel_toolchains_test/file/${COMMIT}.tar.gz -C ${TEST_TMPDIR}
+# The downloaded file of `http_file` rule is hardcoded as `file/downloaded`.
+tar -xf ${TEST_SRCDIR}/bazel_toolchains_test/file/downloaded -C ${TEST_TMPDIR}
 
 # Remove METADATA file.
 rm ${TEST_CONFIGS_DIR}/METADATA
