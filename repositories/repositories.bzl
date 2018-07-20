@@ -24,9 +24,9 @@ def repositories():
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
-            sha256 = "713492a0d0475f97a4900221dbd683ef203794a3fc34f77de20c277b1791d619",
-            strip_prefix = "rules_docker-7638f4de352bd1d5e92c274c7f5286f13f6fb58d",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/7638f4de352bd1d5e92c274c7f5286f13f6fb58d.tar.gz"],
+            sha256 = "b4775b7c4fc76e3113dab643ee35eefbabca0b44908d0d1c85dcf29cab7c0638",
+            strip_prefix = "rules_docker-c7a93454d27e09ef707dfca53887ed0ff4372f04",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/c7a93454d27e09ef707dfca53887ed0ff4372f04.tar.gz"],
         )
 
     # io_bazel_rules_go is the dependency of container_test rules.
@@ -40,9 +40,9 @@ def repositories():
     if "base_images_docker" not in excludes:
         http_archive(
             name = "base_images_docker",
-            sha256 = "36811d6d020a21150fe2054449e3dafcc5b572e15d75d8c68ffb91b755e83416",
-            strip_prefix = "base-images-docker-94f68b83c431713855b4f282562b346f262d0383",
-            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/94f68b83c431713855b4f282562b346f262d0383.tar.gz"],
+            sha256 = "86f58a17d250d8d44ab24a2455d675e19d5d7d1dbfa0abc4053d7ef2476ae79f",
+            strip_prefix = "base-images-docker-bdfb6ec297cd3590eac228ce94ef6687560a901c",
+            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/bdfb6ec297cd3590eac228ce94ef6687560a901c.tar.gz"],
         )
 
     if "distroless" not in excludes:
