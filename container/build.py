@@ -32,12 +32,14 @@ usage:
       [-l]
 
 required arguments:
-  -d TYPE, --type TYPE  Type of the container: see TYPE_TARGET_MAP
+  -d TYPE, --type TYPE  Type of the container: see SUPPORTED_TYPES
   -p PROJECT, --project PROJECT
                         GCP project ID
   -c CONTAINER, --container CONTAINER
                         Docker container name
   -t TAG, --tag TAG     Docker tag for the image
+  -v BAZEL_VERSION, --bazel_version BAZEL_VERSION
+                        The version of Bazel to build the image with, e.g. 0.15.1
 
 optional arguments:
   -a, --async           Asynchronous execute Cloud Container Builder
@@ -58,7 +60,7 @@ import sys
 
 LATEST_BAZEL_VERSION = "0.15.0"
 
-supported_types = [
+SUPPORTED_TYPES = [
                     "rbe-debian8", 
                     "rbe-debian9",
                     "rbe-ubuntu16_04",
@@ -99,14 +101,14 @@ TYPE_TARBALL_MAP = {
         "bazel_{}_docker-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
-assert set(supported_types) \
+assert set(SUPPORTED_TYPES) \
         == set(TYPE_PACKAGE_MAP.keys()) \
         == set(TYPE_TARGET_MAP.keys()) \
         == set(TYPE_TARBALL_MAP.keys()), \
             "TYPES ARE OUT OF SYNC"
 
 
-def main(type_, project, container, tag, async_, bucket, local):
+def main(type_, project, container, tag, async_, bucket, local, bazel_version):
   '''Runs the build. More info in module docstring at the top.
   '''
   project_root = subprocess.check_output(
@@ -121,10 +123,25 @@ def main(type_, project, container, tag, async_, bucket, local):
   # We need to run clean to make sure we don't mount local build outputs
   subprocess.call(["bazel", "clean"])
 
+  # Ensure all BUILD files under /third_party have the right permission.
+  # This is because in some systems the BUILD files under /third_party
+  # (after git clone) will be with permission 640 and the build will
+  # fail in Container Builder.
+  for dirpath, _, files in os.walk("third_party"):
+    for f in files:
+      full_path = os.path.join(dirpath, f)
+      os.chmod(full_path, 0o644)
+
   if local:
     local_build(type_, package, target)
   else:
-    cloud_build(project_root, project, container, tag, async_, bucket, package, target, tarball)
+    config_file = "{}/container/cloudbuild.yaml".format(project_root)
+    extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
+    if not bucket:
+      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(project_root)
+      extra_substitution = ""
+
+    cloud_build(project, container, tag, async_, package, target, bazel_version, config_file, bucket, tarball, extra_substitution)
 
 def local_build(type_, package, target):
   '''Runs the build locally. More info in module docstring at the top.
@@ -140,27 +157,20 @@ def local_build(type_, package, target):
   print(("\n{TYPE}:lastest container is now available to use.\n"
           "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_))
 
-def cloud_build(project_root, project, container, tag, async_, bucket, package, target, tarball):
+def cloud_build(project, container, tag, async_, package, target, 
+                bazel_version, config_file, bucket = None, tarball=None,
+                extra_substitutions = ''):
   '''Runs the build in the cloud. More info in module docstring at the top.
+
+    Args not defined at the top:
+      config_file: yaml file to use for gcloud build
+      extra_substitutions: any extra substitutions required for the given yaml file
+                            mainly used for _BUCKET and _TARBALL
   '''
   print("Building container in Google Cloud Container Builder.")
   # Setup GCP project id for the build
   subprocess.call(shlex.split("gcloud config set project {}".format(project)))
-  # Ensure all BUILD files under /third_party have the right permission.
-  # This is because in some systems the BUILD files under /third_party
-  # (after git clone) will be with permission 640 and the build will
-  # fail in Container Builder.
-  for dirpath, _, files in os.walk(project_root + "/third_party"):
-    for f in files:
-      full_path = os.path.join(dirpath, f)
-      os.chmod(full_path, 0o644)
 
-  config_file = "{}/container/cloudbuild.yaml".format(project_root)
-  extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
-  if not bucket:
-    config_file = "{}/container/cloudbuild_no_bucket.yaml".format(
-        project_root)
-    extra_substitution = ""
   async_arg = ""
   if async_:
     async_arg = "--async"
@@ -168,7 +178,8 @@ def cloud_build(project_root, project, container, tag, async_, bucket, package, 
       "gcloud container builds submit . "
       "--config={CONFIG} "
       "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
-      "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTION} "
+      "_BAZEL_VERSION={BAZEL_VERSION},"
+      "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTIONS} "
       "--machine-type=n1-highcpu-32 "
       "{ASYNC}").format(
           CONFIG=config_file,
@@ -177,8 +188,9 @@ def cloud_build(project_root, project, container, tag, async_, bucket, package, 
           TAG=tag,
           PACKAGE=package,
           TARGET=target,
-          EXTRA_SUBSTITUTION=extra_substitution,
-          ASYNC=async_arg)))
+          EXTRA_SUBSTITUTIONS=extra_substitutions,
+          ASYNC=async_arg,
+          BAZEL_VERSION=bazel_version)))
 
 
 def parse_arguments():
@@ -220,6 +232,13 @@ will produce docker locally as {container_type}:latest
       "-c", "--container", help="Docker container name", type=str)
   required.add_argument(
       "-t", "--tag", help="Docker tag for the image", type=str)
+
+  required.add_argument(
+    "-v",
+    "--bazel_version",
+    help="The version of Bazel to build the image with, e.g. 0.15.1",
+    type=str,
+    required=True)
 
   optional = parser.add_argument_group("optional arguments")
 
@@ -266,4 +285,4 @@ will produce docker locally as {container_type}:latest
 if __name__ == "__main__":
   args = parse_arguments()
   main(args.type, args.project, args.container, args.tag, args.async,
-       args.bucket, args.local)
+       args.bucket, args.local, args.bazel_version)

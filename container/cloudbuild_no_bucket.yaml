@@ -19,6 +19,20 @@
 timeout: 21600s
 
 steps:
+# Step: build a custom container with gcloud and bazel
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+    - 'build'
+    - '--file=Dockerfile.builder'
+    - '--build-arg'
+    - 'bazel_version=${_BAZEL_VERSION}'
+    - '--tag=gcloud-bazel-builder'
+    - '.'
+    id: builder
+    dir: 'src/containers/cloud_builders/gcloud_bazel/'
+    waitFor:
+    - "-" # wait for nothing - start immediately
+    
 # Step: build the fully loaded container using rules_docker
   - name: 'gcr.io/cloud-builders/bazel'
     # Set Bazel output_base to /workspace, which is a mounted directory on Google Cloud Builder.
