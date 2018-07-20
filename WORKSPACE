@@ -13,6 +13,7 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load(
     "//skylib:package_names.bzl",
     "jessie_package_names",
