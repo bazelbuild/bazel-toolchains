@@ -16,6 +16,9 @@
 
 """Builds a toolchain container, with Google Cloud Container Builder or locally.
 
+IF THIS SCRIPT IS CALLED FROM OUTSIDE OF THE BAZEL-TOOLCHAINS REPO, THE BAZEL-TOOLCHAINS REPO
+MUST BE A SUBDIRECTORY OF THE OUTER PROJECT
+
 To build with Google Cloud Container Builder:
 $ python build.py -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
 will produce docker images in Google Container Registry:
@@ -27,9 +30,8 @@ $ python build.py -d {container_type} -l
 will produce docker locally as {container_type}:latest
 
 usage:
-  build.py -d {rbe-debian8,rbe-debian9,rbe-ubuntu16_04,ubuntu16_04-bazel-docker,ubuntu16_04-bazel}
-      [-p PROJECT] [-c CONTAINER] [-t TAG] [-a] [-b BUCKET] [-h]
-      [-l]
+  build.py [-d TYPE] [-p PROJECT] [-c CONTAINER] [-t TAG] [-a] 
+           [-b BUCKET] [-h] [-m MAP] [-l]
 
 required arguments:
   -d TYPE, --type TYPE  Type of the container: see SUPPORTED_TYPES
@@ -46,6 +48,7 @@ optional arguments:
   -b BUCKET, --bucket BUCKET
                         GCS bucket to store the tarball of debian packages
   -h, --help            print this help text and exit
+  -m MAP, --map MAP     overrides target map file path
 
 standalone arguments:
   -l, --local           Build container locally
@@ -53,6 +56,7 @@ standalone arguments:
 
 from __future__ import print_function
 import argparse
+import imp
 import os
 import shlex
 import subprocess
@@ -108,14 +112,29 @@ assert set(SUPPORTED_TYPES) \
             "TYPES ARE OUT OF SYNC"
 
 
-def main(type_, project, container, tag, async_, bucket, local, bazel_version):
+def main(type_, project, container, tag, async_, bucket, local, bazel_version, map = None):
   '''Runs the build. More info in module docstring at the top.
   '''
+  
+  if map: # Override the map values
+    map_module = imp.load_source("map", map)
+    TYPE_PACKAGE_MAP = map_module.TYPE_PACKAGE_MAP
+    TYPE_TARGET_MAP = map_module.TYPE_TARGET_MAP
+    TYPE_TARBALL_MAP = map_module.TYPE_TARBALL_MAP
+
+  # Gets the project root (for calling bazel targets)
   project_root = subprocess.check_output(
       shlex.split("git rev-parse --show-toplevel")).strip()
   package = TYPE_PACKAGE_MAP[type_]
   target = TYPE_TARGET_MAP[type_]
-  tarball = TYPE_TARBALL_MAP[type_]
+  tarball = None
+  if bucket:
+    tarball = TYPE_TARBALL_MAP[type_]
+
+  # Gets the base directory of the bazel-toolchains repo relative to this 
+  # build.py. This is for referencing yaml files and mounting project to gcloud
+  # THIS NEEDS TO BE UPDATED IF THIS FILE IS MOVED 
+  bazel_toolchains_base_dir = os.path.relpath(os.path.join(__file__, "../.."))
 
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
@@ -135,13 +154,17 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version):
   if local:
     local_build(type_, package, target)
   else:
-    config_file = "{}/container/cloudbuild.yaml".format(project_root)
+    # Gets the yaml relative to this build.py, regardless of what directory it was called from
+    # MUST BE UPDATED IF THIS FILE OR THE YAML FILE MOVE
+    config_file = "{}/container/cloudbuild.yaml".format(bazel_toolchains_base_dir)
     extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
     if not bucket:
-      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(project_root)
+      # Gets the yaml relative to this build.py, regardless of what directory it was called from
+      # MUST BE UPDATED IF THIS FILE OR THE YAML FILE MOVE
+      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(bazel_toolchains_base_dir)
       extra_substitution = ""
 
-    cloud_build(project, container, tag, async_, package, target, bazel_version, config_file, bucket, tarball, extra_substitution)
+    cloud_build(project, container, tag, async_, package, target, bazel_version, config_file, bazel_toolchains_base_dir, bucket, tarball, extra_substitution)
 
 def local_build(type_, package, target):
   '''Runs the build locally. More info in module docstring at the top.
@@ -158,12 +181,11 @@ def local_build(type_, package, target):
           "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_))
 
 def cloud_build(project, container, tag, async_, package, target, 
-                bazel_version, config_file, bucket = None, tarball=None,
+                bazel_version, config_file, bazel_toolchains_base_dir, bucket = None, tarball=None,
                 extra_substitutions = ''):
   '''Runs the build in the cloud. More info in module docstring at the top.
 
     Args not defined at the top:
-      config_file: yaml file to use for gcloud build
       extra_substitutions: any extra substitutions required for the given yaml file
                             mainly used for _BUCKET and _TARBALL
   '''
@@ -179,6 +201,7 @@ def cloud_build(project, container, tag, async_, package, target,
       "--config={CONFIG} "
       "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
       "_BAZEL_VERSION={BAZEL_VERSION},"
+      "_BAZEL_TOOLCHAINS_BASE_DIR={BASE_DIR},"
       "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTIONS} "
       "--machine-type=n1-highcpu-32 "
       "{ASYNC}").format(
@@ -190,7 +213,8 @@ def cloud_build(project, container, tag, async_, package, target,
           TARGET=target,
           EXTRA_SUBSTITUTIONS=extra_substitutions,
           ASYNC=async_arg,
-          BAZEL_VERSION=bazel_version)))
+          BAZEL_VERSION=bazel_version,
+          BASE_DIR=bazel_toolchains_base_dir)))
 
 
 def parse_arguments():
@@ -204,6 +228,9 @@ def parse_arguments():
       formatter_class=argparse.RawDescriptionHelpFormatter,
       description="""
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
+
+IF THIS SCRIPT IS CALLED FROM OUTSIDE OF THE BAZEL-TOOLCHAINS REPO, THE BAZEL-TOOLCHAINS REPO
+MUST BE A SUBDIRECTORY OF THE OUTER PROJECT
 
 To build with Google Cloud Container Builder:
 $ python build.py -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
@@ -259,6 +286,8 @@ will produce docker locally as {container_type}:latest
 
   optional.add_argument(
       "-h", "--help", help="print this help text and exit", action="help")
+  optional.add_argument(
+      "-m", "--map", help = "overrides target map file path", type=str, default=None)
 
   standalone = parser.add_argument_group("standalone arguments")
 
@@ -285,4 +314,4 @@ will produce docker locally as {container_type}:latest
 if __name__ == "__main__":
   args = parse_arguments()
   main(args.type, args.project, args.container, args.tag, args.async,
-       args.bucket, args.local, args.bazel_version)
+       args.bucket, args.local, args.bazel_version, args.map)

@@ -28,13 +28,13 @@ steps:
     - 'bazel_version=${_BAZEL_VERSION}'
     - '--tag=gcloud-bazel-builder'
     - '.'
-    id: builder
-    dir: 'src/containers/cloud_builders/gcloud_bazel/'
+    id: 'builder'
+    dir: '${_BAZEL_TOOLCHAINS_BASE_DIR}/container/gcloud_bazel_container/'
     waitFor:
     - "-" # wait for nothing - start immediately
     
 # Step: build the fully loaded container using rules_docker
-  - name: 'gcr.io/cloud-builders/bazel'
+  - name: 'gcloud-bazel-builder'
     # Set Bazel output_base to /workspace, which is a mounted directory on Google Cloud Builder.
     # This is to make sure Bazel generated files can be accessed by multiple containers.
     args: [
@@ -47,7 +47,7 @@ steps:
     ]
     id: 'container-build'
     waitFor:
-    - "-" # wait for nothing - start immediately
+    - 'builder'
 
 # Step: re-tag the image
   - name: gcr.io/cloud-builders/docker
@@ -69,6 +69,9 @@ steps:
       '--genrule_strategy=standalone',
       '//${_PACKAGE}:${_TARGET}-test'
     ]
+    id: 'image-test'
+    waitFor:
+    - 'container-build'
 
 # Step: store the tarball of debian packages in GCS
   - name: gcr.io/cloud-builders/gsutil
@@ -76,6 +79,9 @@ steps:
            '/workspace/bazel-out/k8-fastbuild/bin/${_PACKAGE}/${_TARBALL}',
            'gs://${_BUCKET}/${_CONTAINER}-${_TAG}-${BUILD_ID}.tar'
     ]
+    id: 'upload-debs'
+    waitFor:
+    - 'container-build'
 
 # Build the release-container
 images:
