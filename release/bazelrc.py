@@ -19,15 +19,22 @@ from string import Template
 from util import get_git_root
 
 GIT_ROOT = get_git_root()
-WORK_DIR = os.path.join(GIT_ROOT, "release")
 BAZELRC_DIR = os.path.join(GIT_ROOT, "bazelrc")
 LATEST_BAZELRC_LINK = BAZELRC = os.path.join(BAZELRC_DIR, "latest.bazelrc")
-LICENCE_TPL = os.path.join(WORK_DIR, "license.tpl")
-BAZELRC_TPL = os.path.join(WORK_DIR, "bazelrc.tpl")
+LICENCE_TPL = os.path.join(GIT_ROOT, "release", "license.tpl")
+BAZELRC_TPL = os.path.join(GIT_ROOT, "release", "bazelrc.tpl")
 
 
 def create_bazelrc_and_update_link(bazel_version):
   """Create new sample .bazelrc file and update latest.bazelrc symlink.
+
+  Example bazelrc files can be found in directory bazelrc/.
+
+  There is one sample bazelrc file Bazel version. bazelrc/latest.bazelrc should
+  always be symlinked to the .bazelrc file for the latest version of Bazel.
+
+  If the file already exist in this repo, the script will delete it and
+  generate new one.
 
   Args:
     bazel_version: string, the version of Bazel used to generate the configs.

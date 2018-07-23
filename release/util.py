@@ -27,3 +27,24 @@ def get_date():
   """Returns the current date in YYYY.MM.DD format."""
   now = datetime.datetime.now()
   return "%s.%s.%s" % (now.year, now.month, now.day)
+
+
+def get_autoconfig_target_name(config_type, distro, config_version,
+                               bazel_version):
+  """Generate the docker_toolchain_autoconfig target name.
+
+  Args:
+    config_type: string, the type of the configs, e.g. default, msan.
+    distro: string, base distro of container used to generate configs.
+    config_version: string, the version of the configs.
+    bazel_version: string, the version of Bazel used to generate the configs.
+  Returns:
+    The docker_toolchain_autoconfig target to generate the configs.
+  """
+
+  return ("{type}-{distro}-clang-{config_version}-"
+          "bazel_{bazel_version}-autoconfig").format(
+              type=config_type,
+              distro=distro,
+              config_version=config_version,
+              bazel_version=bazel_version)
