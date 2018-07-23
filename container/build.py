@@ -261,11 +261,11 @@ will produce docker locally as {container_type}:latest
       "-t", "--tag", help="Docker tag for the image", type=str)
 
   required.add_argument(
-    "-v",
-    "--bazel_version",
-    help="The version of Bazel to build the image with, e.g. 0.15.1",
-    type=str,
-    required=True)
+      "-v",
+      "--bazel_version",
+      help="The version of Bazel to build the image with, e.g. 0.15.1",
+      type=str,
+      required=True)
 
   optional = parser.add_argument_group("optional arguments")
 
@@ -287,7 +287,7 @@ will produce docker locally as {container_type}:latest
   optional.add_argument(
       "-h", "--help", help="print this help text and exit", action="help")
   optional.add_argument(
-      "-m", "--map", help = "overrides target map file path", type=str, default=None)
+      "-m", "--map", help="overrides target map file path", type=str, default=None)
 
   standalone = parser.add_argument_group("standalone arguments")
 
