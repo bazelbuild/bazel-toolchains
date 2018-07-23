@@ -1,3 +1,6 @@
+# This file is auto-generated from release/bazelrc.tpl and should not be
+# modified directly.
+
 # This .bazelrc file contains all of the flags required for the toolchain,
 # Remote Build Execution, and the Bazel Build Results UI. Specific flags in
 # your Bazel command allow you to use only the remote build, to use only the
@@ -36,7 +39,6 @@ build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # "extra_toolchains" to be selected (given constraints defined in
 # "exec_compatible_with").
 # More about platforms: https://docs.bazel.build/versions/master/platforms.html
-build:remote --enabled_toolchain_types=@bazel_tools//tools/cpp:toolchain_type
 build:remote --extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/cpp:cc-toolchain-clang-x86_64-default
 build:remote --extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604
 build:remote --host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604

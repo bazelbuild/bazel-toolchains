@@ -1,4 +1,5 @@
-
+# This target is auto-generated from release/cpp.tpl and should not be
+# modified directly.
 toolchain(
     name = "cc-toolchain-clang-x86_64-${TYPE}",
     exec_compatible_with = [

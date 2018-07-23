@@ -1,4 +1,5 @@
-
+# This target is auto-generated from release/msan.tpl and should not be
+# modified directly.
 # Created on ${DATE}
 # Container: ${CONTAINER_NAME}@${CONTAINER_SHA}
 docker_toolchain_autoconfig(

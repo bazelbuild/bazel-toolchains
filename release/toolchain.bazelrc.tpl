@@ -1,3 +1,6 @@
+# This file is auto-generated from release/toolchain.bazelrc.tpl and should not
+# be modified directly.
+
 # Toolchain related flags to append at the end of your .bazelrc file.
 build:remote --host_javabase=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:jdk8
 build:remote --javabase=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:jdk8
@@ -13,14 +16,12 @@ build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # "extra_toolchains" to be selected (given constraints defined in
 # "exec_compatible_with").
 # More about platforms: https://docs.bazel.build/versions/master/platforms.html
-build:remote --enabled_toolchain_types=@bazel_tools//tools/cpp:toolchain_type
 build:remote --extra_toolchains=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}/bazel_${BAZEL_VERSION}/cpp:cc-toolchain-clang-x86_64-default
 build:remote --extra_execution_platforms=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:${PLATFORM}
 build:remote --host_platform=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:${PLATFORM}
 build:remote --platforms=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:${PLATFORM}
 
 # Experimental configs for sanitizers, use --config=remote,remote-xxsan,remote-<asan/tsan/msan> (in that order)
-# Sanitizer builds must not run with --enabled_toolchain_types=@bazel_tools//tools/cpp:toolchain_type.
 # See https://github.com/bazelbuild/bazel/issues/5291.
 build:remote-xxsan --copt=-gmlt
 build:remote-xxsan --strip=never
