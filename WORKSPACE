@@ -130,13 +130,13 @@ container_pull(
 http_file(
     name = "debian_docker_gpg",
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-    url = "https://download.docker.com/linux/debian/gpg",
+    urls = ["https://download.docker.com/linux/debian/gpg"],
 )
 
 http_file(
     name = "xenial_docker_gpg",
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-    url = "https://download.docker.com/linux/ubuntu/gpg",
+    urls = ["https://download.docker.com/linux/ubuntu/gpg"],
 )
 
 # The Debian snapshot datetime to use.

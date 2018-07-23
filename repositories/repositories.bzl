@@ -15,7 +15,7 @@
 # Once recursive workspace is implemented in Bazel, this file should cease
 # to exist.
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 def repositories():
     """Download dependencies of bazel-toolchains."""
@@ -55,8 +55,8 @@ def repositories():
 
     # Bazel gpg key necessary to install Bazel in the containers.
     if "bazel_gpg" not in excludes:
-        native.http_file(
+        http_file(
             name = "bazel_gpg",
             sha256 = "30af2ca7abfb65987cd61802ca6e352aadc6129dfb5bfc9c81f16617bc3a4416",
-            url = "https://bazel.build/bazel-release.pub.gpg",
+            urls = ["https://bazel.build/bazel-release.pub.gpg"],
         )
