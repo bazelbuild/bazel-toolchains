@@ -115,21 +115,24 @@ assert set(SUPPORTED_TYPES) \
 def main(type_, project, container, tag, async_, bucket, local, bazel_version, map = None):
   '''Runs the build. More info in module docstring at the top.
   '''
-  
+  type_package_map = TYPE_PACKAGE_MAP
+  type_target_map = TYPE_TARGET_MAP
+  type_tarball_map = TYPE_TARBALL_MAP
+
   if map: # Override the map values
     map_module = imp.load_source("map", map)
-    TYPE_PACKAGE_MAP = map_module.TYPE_PACKAGE_MAP
-    TYPE_TARGET_MAP = map_module.TYPE_TARGET_MAP
-    TYPE_TARBALL_MAP = map_module.TYPE_TARBALL_MAP
+    type_package_map = map_module.TYPE_PACKAGE_MAP
+    type_target_map = map_module.TYPE_TARGET_MAP
+    type_tarball_map = map_module.TYPE_TARBALL_MAP
 
   # Gets the project root (for calling bazel targets)
   project_root = subprocess.check_output(
       shlex.split("git rev-parse --show-toplevel")).strip()
-  package = TYPE_PACKAGE_MAP[type_]
-  target = TYPE_TARGET_MAP[type_]
+  package = type_package_map[type_]
+  target = type_target_map[type_]
   tarball = None
   if bucket:
-    tarball = TYPE_TARBALL_MAP[type_]
+    tarball = type_tarball_map[type_]
 
   # Gets the base directory of the bazel-toolchains repo relative to this 
   # build.py. This is for referencing yaml files and mounting project to gcloud
@@ -193,6 +196,13 @@ def cloud_build(project, container, tag, async_, package, target,
   # Setup GCP project id for the build
   subprocess.call(shlex.split("gcloud config set project {}".format(project)))
 
+  # If script is called within this repo, then we don't need @bazel_toolchains
+  # target names (causes infinite symlink chain). If script is called from outside,
+  # we do need it.
+  bazel_toolchains_ref = "@bazel_toolchains"
+  if os.path.samefile(bazel_toolchains_base_dir, "."):
+    bazel_toolchains_ref = ""
+
   async_arg = ""
   if async_:
     async_arg = "--async"
@@ -201,7 +211,7 @@ def cloud_build(project, container, tag, async_, package, target,
       "--config={CONFIG} "
       "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
       "_BAZEL_VERSION={BAZEL_VERSION},"
-      "_BAZEL_TOOLCHAINS_BASE_DIR={BASE_DIR},"
+      "_BAZEL_TOOLCHAINS_REF={BAZEL_TOOLCHAINS_REF},"
       "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTIONS} "
       "--machine-type=n1-highcpu-32 "
       "{ASYNC}").format(
@@ -209,12 +219,12 @@ def cloud_build(project, container, tag, async_, package, target,
           PROJECT=project,
           CONTAINER=container,
           TAG=tag,
+          BAZEL_TOOLCHAINS_REF=bazel_toolchains_ref,
           PACKAGE=package,
           TARGET=target,
           EXTRA_SUBSTITUTIONS=extra_substitutions,
           ASYNC=async_arg,
-          BAZEL_VERSION=bazel_version,
-          BASE_DIR=bazel_toolchains_base_dir)))
+          BAZEL_VERSION=bazel_version)))
 
 
 def parse_arguments():

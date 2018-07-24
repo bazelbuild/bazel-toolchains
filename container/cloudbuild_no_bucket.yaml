@@ -19,25 +19,31 @@
 timeout: 21600s
 
 steps:
-# Step: build a custom container with gcloud and bazel
-  - name: 'gcr.io/cloud-builders/docker'
+# Step: build a custom container with bazel
+  - name: 'gcr.io/cloud-builders/bazel'
     args:
-    - 'build'
-    - '--file=Dockerfile.builder'
-    - '--build-arg'
-    - 'bazel_version=${_BAZEL_VERSION}'
-    - '--tag=gcloud-bazel-builder'
-    - '.'
+    - '--output_base=/workspace'
+    - 'run'
+    - '${_BAZEL_TOOLCHAINS_REF}//container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
     id: 'builder'
-    dir: '${_BAZEL_TOOLCHAINS_BASE_DIR}/container/gcloud_bazel_container/'
     waitFor:
     - "-" # wait for nothing - start immediately
     
+# Step: print the bazel version for confirmation
+  - name: 'bazel/container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
+    args:
+    - 'bazel' 
+    - 'version'
+    id: 'version'
+    waitFor:
+    - "builder"
+
 # Step: build the fully loaded container using rules_docker
-  - name: 'gcloud-bazel-builder'
+  - name: 'bazel/container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
     # Set Bazel output_base to /workspace, which is a mounted directory on Google Cloud Builder.
     # This is to make sure Bazel generated files can be accessed by multiple containers.
     args: [
+      'bazel',
       '--output_base=/workspace',
       'run' ,
       '--verbose_failures',
@@ -47,7 +53,7 @@ steps:
     ]
     id: 'container-build'
     waitFor:
-    - 'builder'
+    - 'version'
 
 # Step: re-tag the image
   - name: gcr.io/cloud-builders/docker
