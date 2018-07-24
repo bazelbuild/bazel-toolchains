@@ -149,8 +149,6 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version, m
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
   os.chdir(project_root)
-  # We need to run clean to make sure we don't mount local build outputs
-  subprocess.call(["bazel", "clean"])
 
   # Ensure all BUILD files under /third_party have the right permission.
   # This is because in some systems the BUILD files under /third_party
@@ -199,6 +197,10 @@ def cloud_build(project, container, tag, async_, package, target,
       extra_substitutions: any extra substitutions required for the given yaml file
                             mainly used for _BUCKET and _TARBALL
   '''
+  
+  # We need to run clean to make sure we don't mount local build outputs
+  subprocess.call(["bazel", "clean"])
+
   print("Building container in Google Cloud Container Builder.")
   # Setup GCP project id for the build
   subprocess.call(shlex.split("gcloud config set project {}".format(project)))
