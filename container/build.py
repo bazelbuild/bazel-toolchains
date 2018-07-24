@@ -320,7 +320,8 @@ will produce docker locally as {container_type}:latest
   optional.add_argument(
       "-m", 
       "--map",
-      help="path to override target map file (can be absolute or relative)", 
+      help="path to override target map file (can be absolute or relative)."
+            " This allows the building of bazel targets other than the default ones", 
       type=str,
       default=None)
 
