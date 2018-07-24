@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module to execute cc toolchain targets and extract configs."""
+"""Module to exec cc toolchain targets and extract contents for all configs."""
 
 from __future__ import print_function
 
@@ -38,7 +38,7 @@ def _cleanup():
 
 
 def execute_and_extract_configs(container_configs_list, bazel_version):
-  """Execute the docker_toolchain_autoconfig target and extract configs.
+  """Execute the docker_toolchain_autoconfig targets and extract configs.
 
   If configs already exist in this repo, the script will delete them and
   generate new ones.
@@ -78,7 +78,7 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
 
       # Remove old config dir if exists.
       if os.path.isdir(config.get_config_dir()):
-        print("\nOld version of toolchain configs for {target} already exist. "
+        print("\nOld version of toolchain configs for {target} already exists. "
               "Deleting and generating again.".format(target=target))
         shutil.rmtree(config.get_config_dir())
 

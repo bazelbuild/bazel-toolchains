@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module to create cc toolchain artifacts including targets and METADATA."""
+"""Module to add METADATA and cc toolchain targets to BUILD for all configs."""
 
 import imp
 import os
@@ -44,7 +44,9 @@ def create_targets(container_configs_list, bazel_version):
 
   There is one target per container per Bazel version per config type.
 
-  The script only creates new targets in the BUILD file if they do not exist.
+  The script only creates new targets in the BUILD file if they do not exist,
+  i.e. if a target for the given version of Bazel, type and config version
+  already exists, then the script does not re-create it.
 
   Args:
     container_configs_list: list of ContainerConfigs, the list of
@@ -115,6 +117,8 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
 
     # Remove old cpp directory if exists.
     if os.path.isdir(cpp_dir):
+      print("\nOld version of cpp toolchain definition already exists. "
+            "Deleting and generating again.")
       shutil.rmtree(cpp_dir)
     os.makedirs(cpp_dir)
 

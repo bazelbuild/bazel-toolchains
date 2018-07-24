@@ -1,7 +1,7 @@
 # This target is auto-generated from release/msan.tpl and should not be
 # modified directly.
 # Created on ${DATE}
-# Container: ${CONTAINER_NAME}@${CONTAINER_SHA}
+# Container: ${NAME}@${SHA}
 docker_toolchain_autoconfig(
     name = "msan-${DISTRO}-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig",
     additional_repos = ${DISTRO}_clang_default_repos(),
