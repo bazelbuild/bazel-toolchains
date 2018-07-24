@@ -197,7 +197,7 @@ def cloud_build(project, container, tag, async_, package, target,
       extra_substitutions: any extra substitutions required for the given yaml file
                             mainly used for _BUCKET and _TARBALL
   '''
-  
+
   # We need to run clean to make sure we don't mount local build outputs
   subprocess.call(["bazel", "clean"])
 
@@ -306,7 +306,12 @@ will produce docker locally as {container_type}:latest
   optional.add_argument(
       "-h", "--help", help="print this help text and exit", action="help")
   optional.add_argument(
-      "-m", "--map", help="overrides target map file path", type=str, default=None)
+      "-m", 
+      "--map",
+      help="path to override target map file (can be absolute or relative)", 
+      type=str,
+      default=None)
+
 
   standalone = parser.add_argument_group("standalone arguments")
 
