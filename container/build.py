@@ -72,6 +72,9 @@ SUPPORTED_TYPES = [
                     "ubuntu16_04-bazel-docker"
                   ]
 
+# ALL FILES USED IN -m TO OVERRIDE TARGETS MUST BE IN THIS FORM
+# =========== STARTING HERE ===========
+
 # Map to store all supported container type and
 # the package of target to build it.
 TYPE_PACKAGE_MAP = {
@@ -105,6 +108,7 @@ TYPE_TARBALL_MAP = {
         "bazel_{}_docker-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
+# =========== ENDING HERE ===========
 assert set(SUPPORTED_TYPES) \
         == set(TYPE_PACKAGE_MAP.keys()) \
         == set(TYPE_TARGET_MAP.keys()) \
@@ -249,7 +253,15 @@ def parse_arguments():
 Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 IF THIS SCRIPT IS CALLED FROM OUTSIDE OF THE BAZEL-TOOLCHAINS REPO, THE BAZEL-TOOLCHAINS REPO
-MUST BE A SUBDIRECTORY OF THE OUTER PROJECT
+MUST BE A SUBDIRECTORY OF THE OUTER PROJECT. OUTER PROJECT MUST ALSO HAVE bazel_toolchains AS
+A DEPENDENCY
+Ex:
+cd <your project with your own build targets>
+git clone https://github.com/bazelbuild/bazel-toolchains.git
+python bazel-toolchains/container/build.py [args]
+
+Note: a file path passed to the -m param must point to a file in the form descibed above 
+(except TYPE_TARBALL_MAP is not required if the -b arg is not used)
 
 To build with Google Cloud Container Builder:
 $ python build.py -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
