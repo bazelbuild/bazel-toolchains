@@ -120,10 +120,17 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version, m
   type_tarball_map = TYPE_TARBALL_MAP
 
   if map: # Override the map values
-    map_module = imp.load_source("map", map)
-    type_package_map = map_module.TYPE_PACKAGE_MAP
-    type_target_map = map_module.TYPE_TARGET_MAP
-    type_tarball_map = map_module.TYPE_TARBALL_MAP
+    try:
+      map_module = imp.load_source("map", map)
+    except IOError as e:
+      print("Error reading map file.\n" ,e)
+    
+    try:
+      type_package_map = map_module.TYPE_PACKAGE_MAP
+      type_target_map = map_module.TYPE_TARGET_MAP
+      type_tarball_map = map_module.TYPE_TARBALL_MAP
+    except AttributeError as e:
+      print("Error getting attributes from map file.\n", e)
 
   # Gets the project root (for calling bazel targets)
   project_root = subprocess.check_output(
