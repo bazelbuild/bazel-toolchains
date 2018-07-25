@@ -89,7 +89,7 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
                      PACKAGE=container_configs.package,
                      TARGET=target)
       print("\nExecuting command: %s\n" % command)
-      subprocess.call(shlex.split(command))
+      subprocess.check_call(shlex.split(command))
 
       # Extract toolchain configs.
       tar_path = os.path.join(TMP_DIR, "%s.tar" % target)
