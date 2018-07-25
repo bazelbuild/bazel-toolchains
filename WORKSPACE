@@ -99,7 +99,7 @@ container_pull(
 # l.gcr.io/google/clang-debian8:r328903
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f",
+    digest = toolchain_container_sha256s()["debian8_clang"],
     registry = "l.gcr.io",
     repository = "google/clang-debian8",
 )
@@ -108,7 +108,7 @@ container_pull(
 # l.gcr.io/google/clang-ubuntu:r328903
 container_pull(
     name = "ubuntu16_04-clang",
-    digest = "sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7",
+    digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
     registry = "l.gcr.io",
     repository = "google/clang-ubuntu",
 )
