@@ -14,10 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Builds a toolchain container, with Google Cloud Container Builder or locally.
+"""usage: build.py -d TYPE [-p PROJECT] [-c CONTAINER] [-t TAG]
+                   -v BAZEL_VERSION [-a] [-b BUCKET] [-h] [-m MAP] [-l]
+
+Builds the fully-loaded container, with Google Cloud Container Builder or locally.
 
 IF THIS SCRIPT IS CALLED FROM OUTSIDE OF THE BAZEL-TOOLCHAINS REPO, THE BAZEL-TOOLCHAINS REPO
-MUST BE A SUBDIRECTORY OF THE OUTER PROJECT
+MUST BE A SUBDIRECTORY OF THE OUTER PROJECT. OUTER PROJECT MUST ALSO HAVE bazel_toolchains AS
+A DEPENDENCY
+Ex:
+cd <your project with your own build targets>
+git clone https://github.com/bazelbuild/bazel-toolchains.git
+python bazel-toolchains/container/build.py [args]
+
+Note: a file path passed to the -m param must point to a file in the form descibed below
+(except TYPE_TARBALL_MAP is not required if the -b arg is not used)
 
 To build with Google Cloud Container Builder:
 $ python build.py -p my-gcp-project -d {container_type} -c {container_name} -t latest -b my_bucket
@@ -29,26 +40,27 @@ To build locally:
 $ python build.py -d {container_type} -l
 will produce docker locally as {container_type}:latest
 
-usage:
-  build.py [-d TYPE] [-p PROJECT] [-c CONTAINER] [-t TAG] [-a] 
-           [-b BUCKET] [-h] [-m MAP] [-l]
-
 required arguments:
-  -d TYPE, --type TYPE  Type of the container: see SUPPORTED_TYPES
+  -d, --type            Type of the container: see SUPPORTED_TYPES
   -p PROJECT, --project PROJECT
                         GCP project ID
   -c CONTAINER, --container CONTAINER
                         Docker container name
   -t TAG, --tag TAG     Docker tag for the image
   -v BAZEL_VERSION, --bazel_version BAZEL_VERSION
-                        The version of Bazel to build the image with, e.g. 0.15.1
+                        The version of Bazel to build the image with, e.g.
+                        0.15.1
 
 optional arguments:
   -a, --async           Asynchronous execute Cloud Container Builder
   -b BUCKET, --bucket BUCKET
                         GCS bucket to store the tarball of debian packages
   -h, --help            print this help text and exit
-  -m MAP, --map MAP     overrides target map file path
+  -m MAP, --map MAP     path to override target map file (can be absolute or
+                        relative). This allows the building of bazel targets
+                        other than the default ones.(Overrides
+                        TYPE_PACKAGE_MAP, TYPE_TARGET_MAP, and
+                        TYPE_TARBALL_MAP)
 
 standalone arguments:
   -l, --local           Build container locally
@@ -132,7 +144,8 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version, m
     try:
       type_package_map = map_module.TYPE_PACKAGE_MAP
       type_target_map = map_module.TYPE_TARGET_MAP
-      type_tarball_map = map_module.TYPE_TARBALL_MAP
+      if bucket:
+        type_tarball_map = map_module.TYPE_TARBALL_MAP
     except AttributeError as e:
       print("Error getting attributes from map file.\n", e)
 
@@ -296,7 +309,7 @@ will produce docker locally as {container_type}:latest
   required.add_argument(
       "-d,",
       "--type",
-      help="Type of the container: see TYPE_TARGET_MAP",
+      help="Type of the container: see SUPPORTED_TYPES",
       type=str,
       choices=TYPE_PACKAGE_MAP.keys(),
       required=True)
@@ -336,7 +349,8 @@ will produce docker locally as {container_type}:latest
       "-m", 
       "--map",
       help="path to override target map file (can be absolute or relative)."
-            " This allows the building of bazel targets other than the default ones", 
+            " This allows the building of bazel targets other than the default ones."
+            "(Overrides TYPE_PACKAGE_MAP, TYPE_TARGET_MAP, and TYPE_TARBALL_MAP)", 
       type=str,
       default=None)
 
