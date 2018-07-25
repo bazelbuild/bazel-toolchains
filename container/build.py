@@ -44,20 +44,23 @@ will produce docker locally as {container_type}:latest
 
 required arguments:
   -d, --type            Type of the container: see SUPPORTED_TYPES
+required arguments (for cloud build):
   -p PROJECT, --project PROJECT
                         GCP project ID
   -c CONTAINER, --container CONTAINER
                         Docker container name
   -t TAG, --tag TAG     Docker tag for the image
   -v BAZEL_VERSION, --bazel_version BAZEL_VERSION
-                        The version of Bazel to build the image with, e.g.
-                        0.15.1
+                        The version of Bazel to build the image with on Google
+                        Cloud Container Builder, e.g. 0.15.1
 
 optional arguments:
+  -h, --help            print this help text and exit
+
+optional arguments (for cloud build):
   -a, --async           Asynchronous execute Cloud Container Builder
   -b BUCKET, --bucket BUCKET
                         GCS bucket to store the tarball of debian packages
-  -h, --help            print this help text and exit
   -m MAP, --map MAP     path to override target map file (can be absolute or
                         relative). This allows the building of bazel targets
                         other than the default ones.(Overrides
@@ -235,7 +238,8 @@ def cloud_build(project,
   # This is because in some systems the BUILD files under /third_party
   # (after git clone) will be with permission 640 and the build will
   # fail in Container Builder.
-  for dirpath, _, files in os.walk(os.path.join(bazel_toolchains_base_dir, "third_party")):
+  for dirpath, _, files in os.walk(
+      os.path.join(bazel_toolchains_base_dir, "third_party")):
     for f in files:
       full_path = os.path.join(dirpath, f)
       os.chmod(full_path, 0o644)
@@ -328,39 +332,45 @@ will produce docker locally as {container_type}:latest
       type=str,
       choices=TYPE_PACKAGE_MAP.keys(),
       required=True)
-  required.add_argument("-p", "--project", help="GCP project ID", type=str)
-  required.add_argument(
+
+  required_cloud = parser.add_argument_group(
+      "required arguments (for cloud build)")
+  required_cloud.add_argument(
+      "-p", "--project", help="GCP project ID", type=str)
+  required_cloud.add_argument(
       "-c", "--container", help="Docker container name", type=str)
-  required.add_argument(
+  required_cloud.add_argument(
       "-t", "--tag", help="Docker tag for the image", type=str)
 
-  required.add_argument(
+  required_cloud.add_argument(
       "-v",
       "--bazel_version",
-      help="The version of Bazel to build the image with, e.g. 0.15.1",
-      type=str,
-      required=True)
+      help=
+      "The version of Bazel to build the image with on Google Cloud Container Builder, e.g. 0.15.1",
+      type=str)
 
   optional = parser.add_argument_group("optional arguments")
-
   optional.add_argument(
+      "-h", "--help", help="print this help text and exit", action="help")
+
+  optional_cloud = parser.add_argument_group(
+      "optional arguments (for cloud build)")
+
+  optional_cloud.add_argument(
       "-a",
       "--async",
       help="Asynchronous execute Cloud Container Builder",
       required=False,
       default=False,
       action="store_true")
-  optional.add_argument(
+  optional_cloud.add_argument(
       "-b",
       "--bucket",
       help="GCS bucket to store the tarball of debian packages",
       type=str,
       required=False,
       default="")
-
-  optional.add_argument(
-      "-h", "--help", help="print this help text and exit", action="help")
-  optional.add_argument(
+  optional_cloud.add_argument(
       "-m",
       "--map",
       help="path to override target map file (can be absolute or relative)."
@@ -384,7 +394,15 @@ will produce docker locally as {container_type}:latest
   if not arguments.local and not \
     (arguments.tag and arguments.project and arguments.container):
     print(
-        "error: If build is not local (-l), then -p, -c, and -t are required",
+        "error: If build is not local (-l), then -p, -c, -t, and -v are required",
+        file=sys.stderr)
+    exit(1)
+
+  if arguments.local and (arguments.tag or arguments.map or arguments.project or
+                          arguments.bazel_version or arguments.container or
+                          arguments.bucket or arguments.async):
+    print(
+        "error: If build is local (-l), then only -d is allowed (and required)",
         file=sys.stderr)
     exit(1)
 
