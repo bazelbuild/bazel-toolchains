@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """usage: build.py -d TYPE [-p PROJECT] [-c CONTAINER] [-t TAG]
-
                    -v BAZEL_VERSION [-a] [-b BUCKET] [-h] [-m MAP] [-l]
 
 Builds the fully-loaded container, with Google Cloud Container Builder or
