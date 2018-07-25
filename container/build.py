@@ -209,6 +209,16 @@ def cloud_build(project, container, tag, async_, package, target,
       full_path = os.path.join(dirpath, f)
       os.chmod(full_path, 0o644)
 
+  # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
+  # MUST BE UPDATED IF THE YAML FILE IS MOVED
+  config_file = "{}/container/cloudbuild.yaml".format(bazel_toolchains_base_dir)
+  extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
+  if not bucket:
+    # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
+    # MUST BE UPDATED IF THE YAML FILE IS MOVED
+    config_file = "{}/container/cloudbuild_no_bucket.yaml".format(bazel_toolchains_base_dir)
+    extra_substitution = ""
+
 
   # If script is called within this repo, then we don't need @bazel_toolchains
   # target names (causes infinite symlink chain). If script is called from outside,
@@ -218,15 +228,7 @@ def cloud_build(project, container, tag, async_, package, target,
     bazel_toolchains_ref = ""
 
 
-   # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
-    # MUST BE UPDATED IF THE YAML FILE IS MOVED
-    config_file = "{}/container/cloudbuild.yaml".format(bazel_toolchains_base_dir)
-    extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
-    if not bucket:
-      # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
-      # MUST BE UPDATED IF THE YAML FILE IS MOVED
-      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(bazel_toolchains_base_dir)
-      extra_substitution = ""
+  
 
 
   async_arg = ""
