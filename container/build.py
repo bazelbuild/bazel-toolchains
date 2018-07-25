@@ -145,15 +145,9 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version, m
   if bucket:
     tarball = type_tarball_map[type_]
 
-  # Gets the base directory of the bazel-toolchains repo relative to this 
-  # build.py. This is for referencing yaml files and mounting project to gcloud
-  # THIS NEEDS TO BE UPDATED IF THIS FILE IS MOVED 
-  # __file__ is the relative path from the location the terminal is calling 
-  # the build.py to the location of build.py 
-  # When we apply the os.path.join to __file__ and ../.. it takes us back 2
-  # levels, first to the directory (back from the file name), and then to
-  # its parent directory, that being the base of bazel-toolchains.
-  # This allows the bazel-toolchains repo to be cloned in any subdirectory
+  # Gets the base directory of the bazel-toolchains repo (relative to project_root)
+  # This is for referencing yaml files and mounting the project to gcloud.
+  # Allows the bazel-toolchains repo to be cloned in any subdirectory
   # of another project and bazel_toolchains_base_dir will store the relative path
   # from the root of that git project to the root of the bazel-toolchains git project.
   # Ex. If we are in folder foo and the structure looks like this:
@@ -166,8 +160,10 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version, m
   # bazel_toolchains_base_dir == "subdir/bazel-toolchains"
   # (This also allows for renaming of the bazel-toolchains folder as the variable
   # will store the path regardless of the directory names) 
-  bazel_toolchains_base_dir = os.path.relpath(os.path.join(__file__, "../.."))
-
+  os.chdir(os.path.dirname(__file__))
+  bazel_toolchains_base_dir = os.path.relpath(subprocess.check_output(
+      shlex.split("git rev-parse --show-toplevel")).strip(), project_root)
+  
   # We need to start the build from the root of the project, so that we can
   # mount the full root directory (to use bazel builder properly).
   os.chdir(project_root)
@@ -184,13 +180,13 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version, m
   if local:
     local_build(type_, package, target)
   else:
-    # Gets the yaml relative to this build.py, regardless of what directory it was called from
-    # MUST BE UPDATED IF THIS FILE OR THE YAML FILE MOVE
+    # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
+    # MUST BE UPDATED IF THE YAML FILE IS MOVED
     config_file = "{}/container/cloudbuild.yaml".format(bazel_toolchains_base_dir)
     extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
     if not bucket:
-      # Gets the yaml relative to this build.py, regardless of what directory it was called from
-      # MUST BE UPDATED IF THIS FILE OR THE YAML FILE MOVE
+      # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
+      # MUST BE UPDATED IF THE YAML FILE IS MOVED
       config_file = "{}/container/cloudbuild_no_bucket.yaml".format(bazel_toolchains_base_dir)
       extra_substitution = ""
 
