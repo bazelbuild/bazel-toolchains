@@ -235,7 +235,7 @@ def cloud_build(project,
   # This is because in some systems the BUILD files under /third_party
   # (after git clone) will be with permission 640 and the build will
   # fail in Container Builder.
-  for dirpath, _, files in os.walk("third_party"):
+  for dirpath, _, files in os.walk(os.path.join(bazel_toolchains_base_dir, "third_party")):
     for f in files:
       full_path = os.path.join(dirpath, f)
       os.chmod(full_path, 0o644)
