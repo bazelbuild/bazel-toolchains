@@ -392,7 +392,7 @@ will produce docker locally as {container_type}:latest
 
   # Check arguments
   if not arguments.local and not \
-    (arguments.tag and arguments.project and arguments.container):
+    (arguments.tag and arguments.project and arguments.container and arguments.bazel_version):
     print(
         "error: If build is not local (-l), then -p, -c, -t, and -v are required",
         file=sys.stderr)
