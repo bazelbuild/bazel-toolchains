@@ -31,7 +31,7 @@ def get_date():
 
 def get_autoconfig_target_name(config_type, distro, config_version,
                                bazel_version):
-  """Generate the docker_toolchain_autoconfig target name.
+  """Generates the docker_toolchain_autoconfig target name.
 
   Args:
     config_type: string, the type of the configs, e.g. default, msan.

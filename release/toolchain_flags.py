@@ -22,14 +22,14 @@ TPL = os.path.join(get_git_root(), "release", "toolchain.bazelrc.tpl")
 
 
 def update_toolchain_bazelrc_file(container_configs_list, bazel_version):
-  """Create/update toolchain.bazelrc file.
+  """Creates/updates toolchain.bazelrc file.
 
   Example toolchain.bazelrc file can be found at
   configs/ubuntu16_04_clang/1.0/toolchain.bazelrc.
 
   There is one toolchain.bazelrc file per container per config version.
 
-  If the file already exist in this repo, the script will delete it and
+  If the file already exists in this repo, the script will delete it and
   generate new one.
 
   Args:
@@ -37,8 +37,6 @@ def update_toolchain_bazelrc_file(container_configs_list, bazel_version):
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
 
-  Returns:
-    None
   """
 
   for container_configs in container_configs_list:

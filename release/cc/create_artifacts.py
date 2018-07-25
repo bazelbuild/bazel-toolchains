@@ -37,7 +37,7 @@ SHA_MAP_FILE = os.path.join(GIT_ROOT, "rules/toolchain_containers.bzl")
 
 
 def create_targets(container_configs_list, bazel_version):
-  """Create the new docker_toolchain_autoconfig target if not exists.
+  """Creates the new docker_toolchain_autoconfig target if not exists.
 
   An example target located in configs/ubuntu16_04_clang/BUILD is:
   //configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.0-bazel_0.15.0-autoconfig
@@ -53,8 +53,6 @@ def create_targets(container_configs_list, bazel_version):
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
 
-  Returns:
-    None
   """
 
   container_sha_map = imp.load_source("toolchain_containers", SHA_MAP_FILE)
@@ -91,7 +89,7 @@ def create_targets(container_configs_list, bazel_version):
 
 
 def generate_toolchain_definition(container_configs_list, bazel_version):
-  """Generate new cpp toolchain definitions.
+  """Generates new cpp toolchain definitions.
 
   Example cpp toolchain definitions for clang-ubuntu container are located in
   configs/ubuntu16_04_clang/1.0/bazel_0.15.0/cpp/.
@@ -99,7 +97,7 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
   There is one BUILD file to contain all cpp toolchain definitions for each
   config type (e.g. default, msan) per container per Bazel version.
 
-  If the file already exist in this repo, the script will delete it and
+  If the file already exists in this repo, the script will delete it and
   generate new one.
 
   Args:
@@ -107,8 +105,6 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
 
-  Returns:
-    None
   """
 
   for container_configs in container_configs_list:
@@ -116,7 +112,7 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
     cpp_dir = os.path.dirname(container_configs.get_cpp_build_path())
 
     # Remove old cpp directory if exists.
-    if os.path.isdir(cpp_dir):
+    if os.path.exists(cpp_dir):
       print("\nOld version of cpp toolchain definition already exists. "
             "Deleting and generating again.")
       shutil.rmtree(cpp_dir)
@@ -156,22 +152,19 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
 
 
 def generate_metadata(container_configs_list):
-  """Create the METADATA file with the container register path.
+  """Creates the METADATA file with the container register path.
 
   Example METADATA file can be found at
   configs/ubuntu16_04_clang/1.0/bazel_0.15.0/default/METADATA.
 
   There is one METADATA file per container per Bazel version per config type.
 
-  If the file already exist in this repo, the script will delete it and
+  If the file already exists in this repo, the script will delete it and
   generate new one.
 
   Args:
     container_configs_list: list of ContainerConfigs, the list of
       ContainerConfigs to generate configs for.
-
-  Returns:
-    None
 
   """
 

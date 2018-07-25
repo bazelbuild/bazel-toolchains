@@ -33,12 +33,12 @@ TMP_DIR = os.path.join(GIT_ROOT, "release", "tmp")
 
 def _cleanup():
   """Cleanup generated files."""
-  if os.path.isdir(TMP_DIR):
+  if os.path.exists(TMP_DIR):
     shutil.rmtree(TMP_DIR)
 
 
 def execute_and_extract_configs(container_configs_list, bazel_version):
-  """Execute the docker_toolchain_autoconfig targets and extract configs.
+  """Executes the docker_toolchain_autoconfig targets and extract configs.
 
   If configs already exist in this repo, the script will delete them and
   generate new ones.
@@ -55,14 +55,12 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
 
-  Returns:
-    None
   """
 
   atexit.register(_cleanup)
 
   # Create temporary directory to store generated tarballs of configs.
-  if os.path.isdir(TMP_DIR):
+  if os.path.exists(TMP_DIR):
     shutil.rmtree(TMP_DIR)
   os.makedirs(TMP_DIR)
 
@@ -77,7 +75,7 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
           bazel_version=bazel_version)
 
       # Remove old config dir if exists.
-      if os.path.isdir(config.get_config_dir()):
+      if os.path.exists(config.get_config_dir()):
         print("\nOld version of toolchain configs for {target} already exists. "
               "Deleting and generating again.".format(target=target))
         shutil.rmtree(config.get_config_dir())

@@ -35,7 +35,7 @@ GIT_ROOT = get_git_root()
 
 
 def _get_container_configs_list(bazel_version):
-  """Get the list of container configs to generate.
+  """Gets the list of container configs to generate.
 
   Args:
     bazel_version: string, the version of Bazel used to generate configs.
@@ -90,8 +90,6 @@ def main(bazel_version):
   Args:
     bazel_version: string, the version of Bazel used to generate the configs.
 
-  Returns:
-    None
   """
 
   # Get current supported list of container configs to generate.
