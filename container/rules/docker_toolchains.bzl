@@ -177,8 +177,8 @@ def _language_tool_layer_impl(
     result = _container.image.implementation(ctx, base = new_base, symlinks = symlinks, env = env, tars = tars, files = files)
 
     return struct(
-        runfiles = result.runfiles,
-        files = result.files,
+        runfiles = result.providers[1].runfiles,
+        files = result.providers[1].files,
         container_parts = result.container_parts,
         tars = tars,
         input_files = files,
