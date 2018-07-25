@@ -168,29 +168,11 @@ def main(type_, project, container, tag, async_, bucket, local, bazel_version, m
   # mount the full root directory (to use bazel builder properly).
   os.chdir(project_root)
 
-  # Ensure all BUILD files under /third_party have the right permission.
-  # This is because in some systems the BUILD files under /third_party
-  # (after git clone) will be with permission 640 and the build will
-  # fail in Container Builder.
-  for dirpath, _, files in os.walk("third_party"):
-    for f in files:
-      full_path = os.path.join(dirpath, f)
-      os.chmod(full_path, 0o644)
-
   if local:
     local_build(type_, package, target)
   else:
-    # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
-    # MUST BE UPDATED IF THE YAML FILE IS MOVED
-    config_file = "{}/container/cloudbuild.yaml".format(bazel_toolchains_base_dir)
-    extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
-    if not bucket:
-      # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
-      # MUST BE UPDATED IF THE YAML FILE IS MOVED
-      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(bazel_toolchains_base_dir)
-      extra_substitution = ""
-
-    cloud_build(project, container, tag, async_, package, target, bazel_version, config_file, bazel_toolchains_base_dir, bucket, tarball, extra_substitution)
+   
+    cloud_build(project, container, tag, async_, package, target, bazel_version, bazel_toolchains_base_dir, bucket, tarball)
 
 def local_build(type_, package, target):
   '''Runs the build locally. More info in module docstring at the top.
@@ -207,21 +189,26 @@ def local_build(type_, package, target):
           "To try it: docker run -it {TYPE}:latest \n").format(TYPE=type_))
 
 def cloud_build(project, container, tag, async_, package, target, 
-                bazel_version, config_file, bazel_toolchains_base_dir, bucket = None, tarball=None,
-                extra_substitutions = ''):
+                bazel_version, bazel_toolchains_base_dir, bucket = None, tarball=None):
   '''Runs the build in the cloud. More info in module docstring at the top.
-
-    Args not defined at the top:
-      extra_substitutions: any extra substitutions required for the given yaml file
-                            mainly used for _BUCKET and _TARBALL
   '''
 
   # We need to run clean to make sure we don't mount local build outputs
   subprocess.call(["bazel", "clean"])
 
   print("Building container in Google Cloud Container Builder.")
+
   # Setup GCP project id for the build
   subprocess.call(shlex.split("gcloud config set project {}".format(project)))
+  # Ensure all BUILD files under /third_party have the right permission.
+  # This is because in some systems the BUILD files under /third_party
+  # (after git clone) will be with permission 640 and the build will
+  # fail in Container Builder.
+  for dirpath, _, files in os.walk("third_party"):
+    for f in files:
+      full_path = os.path.join(dirpath, f)
+      os.chmod(full_path, 0o644)
+
 
   # If script is called within this repo, then we don't need @bazel_toolchains
   # target names (causes infinite symlink chain). If script is called from outside,
@@ -229,6 +216,18 @@ def cloud_build(project, container, tag, async_, package, target,
   bazel_toolchains_ref = "@bazel_toolchains"
   if os.path.samefile(bazel_toolchains_base_dir, "."):
     bazel_toolchains_ref = ""
+
+
+   # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
+    # MUST BE UPDATED IF THE YAML FILE IS MOVED
+    config_file = "{}/container/cloudbuild.yaml".format(bazel_toolchains_base_dir)
+    extra_substitution = ",_BUCKET={},_TARBALL={}".format(bucket, tarball)
+    if not bucket:
+      # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
+      # MUST BE UPDATED IF THE YAML FILE IS MOVED
+      config_file = "{}/container/cloudbuild_no_bucket.yaml".format(bazel_toolchains_base_dir)
+      extra_substitution = ""
+
 
   async_arg = ""
   if async_:
@@ -239,7 +238,7 @@ def cloud_build(project, container, tag, async_, package, target,
       "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
       "_BAZEL_VERSION={BAZEL_VERSION},"
       "_BAZEL_TOOLCHAINS_REF={BAZEL_TOOLCHAINS_REF},"
-      "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTIONS} "
+      "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTION} "
       "--machine-type=n1-highcpu-32 "
       "{ASYNC}").format(
           CONFIG=config_file,
@@ -249,7 +248,7 @@ def cloud_build(project, container, tag, async_, package, target,
           BAZEL_TOOLCHAINS_REF=bazel_toolchains_ref,
           PACKAGE=package,
           TARGET=target,
-          EXTRA_SUBSTITUTIONS=extra_substitutions,
+          EXTRA_SUBSTITUTION=extra_substitution,
           ASYNC=async_arg,
           BAZEL_VERSION=bazel_version)))
 
