@@ -147,7 +147,7 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
 
           build_file.write(tpl)
 
-      subprocess.call(
+      subprocess.check_call(
           shlex.split("buildifier %s" % container_configs.get_cpp_build_path()))
 
 
