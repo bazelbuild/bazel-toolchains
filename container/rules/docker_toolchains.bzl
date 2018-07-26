@@ -176,8 +176,13 @@ def _language_tool_layer_impl(
     # Install tars and configure env, symlinks using the container_image rule.
     result = _container.image.implementation(ctx, base = new_base, symlinks = symlinks, env = env, tars = tars, files = files)
 
+    if hasattr(result.providers[1], "runfiles"):
+        result_runfiles = result.providers[1].runfiles
+    else:
+        result_runfiles = result.providers[1].default_runfiles
+
     return struct(
-        runfiles = result.providers[1].runfiles,
+        runfiles = result_runfiles,
         files = result.providers[1].files,
         container_parts = result.container_parts,
         tars = tars,
