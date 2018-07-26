@@ -312,7 +312,7 @@ cd <your project with your own build targets>
 git clone https://github.com/bazelbuild/bazel-toolchains.git
 python bazel-toolchains/container/build.py [args]
 
-Note: a file path passed to the -m param must point to a file in the form descibed above
+Note: a file path passed to the -m param must point to a file in the form descibed above 
 (except TYPE_TARBALL_MAP is not required if the -b arg is not used)
 
 To build with Google Cloud Container Builder:
