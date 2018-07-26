@@ -104,7 +104,7 @@ build:results-local --bes_results_url="https://source.cloud.google.com/results/i
 build:docker-sandbox --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
 build:docker-sandbox --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
 build:docker-sandbox --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/default:toolchain
-build:docker-sandbox --experimental_docker_image=gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f
+build:docker-sandbox --experimental_docker_image=marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f
 build:docker-sandbox --spawn_strategy=docker
 build:docker-sandbox --strategy=Javac=docker
 build:docker-sandbox --strategy=Closure=docker
