@@ -42,7 +42,7 @@ $ python build.py -d {container_type} -l
 will produce docker locally as {container_type}:latest
 
 required arguments:
-  -d, --type            Type of the container: see SUPPORTED_TYPES
+  -d TYPE, --type TYPE  Type of the container: see SUPPORTED_TYPES
 required arguments (for cloud build):
   -p PROJECT, --project PROJECT
                         GCP project ID
@@ -51,7 +51,9 @@ required arguments (for cloud build):
   -t TAG, --tag TAG     Docker tag for the image
   -v BAZEL_VERSION, --bazel_version BAZEL_VERSION
                         The version of Bazel to build the image with on Google
-                        Cloud Container Builder, e.g. 0.15.1
+                        Cloud Container Builder, e.g. 0.15.1 (supported
+                        versions can be seen at
+                        //container/ubuntu16_04/layers/bazel/version.bzl)
 
 optional arguments:
   -h, --help            print this help text and exit
@@ -60,11 +62,11 @@ optional arguments (for cloud build):
   -a, --async           Asynchronous execute Cloud Container Builder
   -b BUCKET, --bucket BUCKET
                         GCS bucket to store the tarball of debian packages
-  -m MAP, --map MAP     path to override target map file (can be absolute or
-                        relative). This allows the building of bazel targets
-                        other than the default ones.(Overrides
-                        TYPE_PACKAGE_MAP, TYPE_TARGET_MAP, and
+  -m MAP, --map MAP     path (can be absolute or relative) to file containing
+                        3 maps to override the default ones defined below
+                        (TYPE_PACKAGE_MAP, TYPE_TARGET_MAP, and
                         TYPE_TARBALL_MAP)
+
 
 standalone arguments:
   -l, --local           Build container locally
@@ -85,7 +87,8 @@ SUPPORTED_TYPES = [
     "ubuntu16_04-bazel-docker"
 ]
 
-# ALL FILES USED IN -m TO OVERRIDE TARGETS MUST BE IN THIS FORM
+# File passed in -m must include the following 3 maps
+# (all 3 with the same keys, and corresponding values):
 # =========== STARTING HERE ===========
 
 # Map to store all supported container type and
@@ -299,7 +302,7 @@ def parse_arguments():
       add_help=False,
       formatter_class=argparse.RawDescriptionHelpFormatter,
       description="""
-Builds the fully-loaded container, with Google Cloud Container Builder or locally.
+Builds a toolchain container, with Google Cloud Container Builder or locally.
 
 IF THIS SCRIPT IS CALLED FROM OUTSIDE OF THE BAZEL-TOOLCHAINS REPO, THE BAZEL-TOOLCHAINS REPO
 MUST BE A SUBDIRECTORY OF THE OUTER PROJECT. OUTER PROJECT MUST ALSO HAVE bazel_toolchains AS
@@ -348,7 +351,8 @@ will produce docker locally as {container_type}:latest
       "-v",
       "--bazel_version",
       help=
-      "The version of Bazel to build the image with on Google Cloud Container Builder, e.g. 0.15.1",
+      "The version of Bazel to build the image with on Google Cloud Container Builder, e.g. 0.15.1 "
+      "(supported versions can be seen at //container/ubuntu16_04/layers/bazel/version.bzl)",
       type=str)
 
   optional = parser.add_argument_group("optional arguments")
@@ -375,9 +379,10 @@ will produce docker locally as {container_type}:latest
   optional_cloud.add_argument(
       "-m",
       "--map",
-      help="path to override target map file (can be absolute or relative)."
-      " This allows the building of bazel targets other than the default ones."
-      "(Overrides TYPE_PACKAGE_MAP, TYPE_TARGET_MAP, and TYPE_TARBALL_MAP)",
+      help=
+      "path (can be absolute or relative) to file containing 3 maps to "
+      "override the default ones defined below "
+      "(TYPE_PACKAGE_MAP, TYPE_TARGET_MAP, and TYPE_TARBALL_MAP)",
       type=str,
       default=None)
 
