@@ -26,7 +26,7 @@ load(
 )
 
 # Created on 2018.02.13
-# Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
+# Container: marketplace.gcr.io/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
 # This config is still experimental
 # TODO(ngiraldo): remove experimental comment once this has been tested
 docker_toolchain_autoconfig(
