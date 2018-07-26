@@ -16,8 +16,7 @@
 """usage: build.py -d TYPE [-p PROJECT] [-c CONTAINER] [-t TAG]
                    -v BAZEL_VERSION [-a] [-b BUCKET] [-h] [-m MAP] [-l]
 
-Builds the fully-loaded container, with Google Cloud Container Builder or
-locally.
+Builds a toolchain container, with Google Cloud Container Builder or locally.
 
 IF THIS SCRIPT IS CALLED FROM OUTSIDE OF THE BAZEL-TOOLCHAINS REPO, THE
 BAZEL-TOOLCHAINS REPO MUST BE A SUBDIRECTORY OF THE OUTER PROJECT. OUTER PROJECT
@@ -79,7 +78,7 @@ import shlex
 import subprocess
 import sys
 
-LATEST_BAZEL_VERSION = "0.15.0"
+LATEST_BAZEL_VERSION = "0.15.2"
 
 SUPPORTED_TYPES = [
     "rbe-debian8", "rbe-debian9", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
@@ -192,7 +191,7 @@ def main(type_,
   # mount the full root directory (to use bazel builder properly).
   os.chdir(project_root)
   # We need to run clean to make sure we don't mount local build outputs
-  subprocess.call(["bazel", "clean"])
+  subprocess.check_call(["bazel", "clean"])
 
   if local:
     local_build(type_, package, target)
@@ -206,11 +205,13 @@ def local_build(type_, package, target):
   """Runs the build locally. More info in module docstring at the top.
   """
   print("Building container locally.")
-  subprocess.call(shlex.split("bazel run //{}:{}".format(package, target)))
+  subprocess.check_call(
+      shlex.split("bazel run //{}:{}".format(package, target)))
   print("Testing container locally.")
-  subprocess.call("bazel test //{}:{}-test".format(package, target).split())
+  subprocess.check_call("bazel test //{}:{}-test".format(package,
+                                                         target).split())
   print("Tagging container.")
-  subprocess.call(
+  subprocess.check_call(
       shlex.split("docker tag bazel/{}:{} {}:latest".format(
           package, target, type_)))
   print(("\n{TYPE}:lastest container is now available to use.\n"
@@ -233,7 +234,8 @@ def cloud_build(project,
   print("Building container in Google Cloud Container Builder.")
 
   # Setup GCP project id for the build
-  subprocess.call(shlex.split("gcloud config set project {}".format(project)))
+  subprocess.check_call(
+      shlex.split("gcloud config set project {}".format(project)))
   # Ensure all BUILD files under /third_party have the right permission.
   # This is because in some systems the BUILD files under /third_party
   # (after git clone) will be with permission 640 and the build will
@@ -265,7 +267,7 @@ def cloud_build(project,
   async_arg = ""
   if async_:
     async_arg = "--async"
-  subprocess.call(
+  subprocess.check_call(
       shlex.split(
           ("gcloud container builds submit . "
            "--config={CONFIG} "
