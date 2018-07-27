@@ -19,11 +19,31 @@
 timeout: 21600s
 
 steps:
-# Step: build the fully loaded container using rules_docker
+# Step: build a custom container with bazel
   - name: 'gcr.io/cloud-builders/bazel'
+    args:
+    - '--output_base=/workspace'
+    - 'run'
+    - '${_BAZEL_TOOLCHAINS_REF}//container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
+    id: 'builder'
+    waitFor:
+    - "-" # wait for nothing - start immediately
+    
+# Step: print the bazel version for confirmation
+  - name: 'bazel/container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
+    args:
+    - 'bazel' 
+    - 'version'
+    id: 'version'
+    waitFor:
+    - "builder"
+
+# Step: build the fully loaded container using rules_docker
+  - name: 'bazel/container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
     # Set Bazel output_base to /workspace, which is a mounted directory on Google Cloud Builder.
     # This is to make sure Bazel generated files can be accessed by multiple containers.
     args: [
+      'bazel',
       '--output_base=/workspace',
       'run' ,
       '--verbose_failures',
@@ -33,7 +53,7 @@ steps:
     ]
     id: 'container-build'
     waitFor:
-    - "-" # wait for nothing - start immediately
+    - 'version'
 
 # Step: re-tag the image
   - name: gcr.io/cloud-builders/docker
@@ -55,6 +75,9 @@ steps:
       '--genrule_strategy=standalone',
       '//${_PACKAGE}:${_TARGET}-test'
     ]
+    id: 'image-test'
+    waitFor:
+    - 'container-build'
 
 # Build the release-container
 images:

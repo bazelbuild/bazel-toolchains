@@ -50,41 +50,67 @@ package_manager_repositories()
 
 load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
 
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
 container_pull(
     name = "debian8",
     digest = toolchain_container_sha256s()["debian8"],
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/debian8",
+    registry = "l.gcr.io",
+    repository = "google/debian8",
 )
 
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
 container_pull(
     name = "debian9",
     digest = toolchain_container_sha256s()["debian9"],
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/debian9",
+    registry = "l.gcr.io",
+    repository = "google/debian9",
 )
 
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
 container_pull(
     name = "ubuntu16_04",
     digest = toolchain_container_sha256s()["ubuntu16_04"],
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/ubuntu16_04",
+    registry = "l.gcr.io",
+    repository = "google/ubuntu16_04",
 )
 
-# gcr.io/cloud-marketplace/google/clang-debian8:r328903
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
+# Get debian8-built python3 interpreter from l.gcr.io/google/python:latest.
+# Base image: gcr.io/google-appengine/debian8:latest
+# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
+container_pull(
+    name = "debian8_python3",
+    digest = toolchain_container_sha256s()["debian8_python3"],
+    registry = "l.gcr.io",
+    repository = "google/python",
+)
+
+# Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:latest.
+# Base image: gcr.io/gcp-runtimes/ubuntu_16_0_4:latest
+# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
+container_pull(
+    name = "ubuntu16_04_python3",
+    digest = toolchain_container_sha256s()["ubuntu16_04_python3"],
+    registry = "gcr.io",
+    repository = "google-appengine/python",
+)
+
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
+# l.gcr.io/google/clang-debian8:r328903
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f",
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/clang-debian8",
+    digest = toolchain_container_sha256s()["debian8_clang"],
+    registry = "l.gcr.io",
+    repository = "google/clang-debian8",
 )
 
-# gcr.io/cloud-marketplace/google/clang-ubuntu:r328903
+# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
+# l.gcr.io/google/clang-ubuntu:r328903
 container_pull(
     name = "ubuntu16_04-clang",
-    digest = "sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7",
-    registry = "gcr.io",
-    repository = "cloud-marketplace/google/clang-ubuntu",
+    digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
+    registry = "l.gcr.io",
+    repository = "google/clang-ubuntu",
 )
 
 container_pull(
@@ -104,13 +130,13 @@ container_pull(
 http_file(
     name = "debian_docker_gpg",
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-    url = "https://download.docker.com/linux/debian/gpg",
+    urls = ["https://download.docker.com/linux/debian/gpg"],
 )
 
 http_file(
     name = "xenial_docker_gpg",
     sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-    url = "https://download.docker.com/linux/ubuntu/gpg",
+    urls = ["https://download.docker.com/linux/ubuntu/gpg"],
 )
 
 # The Debian snapshot datetime to use.
@@ -238,3 +264,18 @@ http_file(
         "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
+
+load(
+    "//container/ubuntu16_04/layers/bazel:version.bzl",
+    "BAZEL_VERSION_SHA256S",
+)
+
+# Download the Bazel installer.sh for all supported versions.
+[http_file(
+    name = "bazel_%s_installer" % (bazel_version.replace(".", "")),
+    sha256 = bazel_sha256,
+    urls = [
+        "https://releases.bazel.build/" + bazel_version + "/release/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
+        "https://github.com/bazelbuild/bazel/releases/download/" + bazel_version + "/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
+    ],
+) for bazel_version, bazel_sha256 in BAZEL_VERSION_SHA256S.items()]

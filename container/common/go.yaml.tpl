@@ -4,11 +4,10 @@ commandTests:
 - name: 'go-version'
   command: 'go'
   args: ['version']
-  expectedOutput: ['go version go1.10 linux/amd64']
+  expectedOutput: ['go version go{_GOLANG_REVISION} linux/amd64']
 
 fileExistenceTests:
 - name: 'Golang'
-  isDirectory: false
   path: '/usr/local/go/bin/go'
   shouldExist: true
 

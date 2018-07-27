@@ -4,71 +4,55 @@ commandTests:
 - name: 'clang-version'
   command: 'clang'
   args: ['--version']
-  expectedOutput: ['clang version 7.0.0.*']
+  expectedOutput: ['clang version 7.0.0 [(]trunk {_CLANG_REVISION}[)]']
 
 fileExistenceTests:
 - name: 'Clang'
-  isDirectory: false
   path: '/usr/local/bin/clang'
   shouldExist: true
 - name: 'libcxx-header'
-  isDirectory: true
   path: '/usr/local/include/c++/v1'
   shouldExist: true
 - name: 'libcxx-lib'
-  isDirectory: false
   path: '/usr/local/lib/libc++.a'
   shouldExist: true
 - name: 'llvm-symbolizer'
-  isDirectory: false
   path: '/usr/local/bin/llvm-symbolizer'
   shouldExist: true
 - name: 'sanitizer'
-  isDirectory: true
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer'
   shouldExist: true
 - name: 'sanitizer-allocator'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/allocator_interface.h'
   shouldExist: true
 - name: 'sanitizer-asan'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/asan_interface.h'
   shouldExist: true
 - name: 'sanitizer-common_defs'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/common_interface_defs.h'
   shouldExist: true
 - name: 'sanitizer-coverage'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/coverage_interface.h'
   shouldExist: true
 - name: 'sanitizer-dfsan'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/dfsan_interface.h'
   shouldExist: true
 - name: 'sanitizer-esan'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/esan_interface.h'
   shouldExist: true
 - name: 'sanitizer-linux_syscall_hooks'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/linux_syscall_hooks.h'
   shouldExist: true
 - name: 'sanitizer-lsan'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/lsan_interface.h'
   shouldExist: true
 - name: 'sanitizer-msan'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/msan_interface.h'
   shouldExist: true
 - name: 'sanitizer-tsan_atomic'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/tsan_interface_atomic.h'
   shouldExist: true
 - name: 'sanitizer-tsan'
-  isDirectory: false
   path: '/usr/local/lib/clang/7.0.0/include/sanitizer/tsan_interface.h'
   shouldExist: true
 

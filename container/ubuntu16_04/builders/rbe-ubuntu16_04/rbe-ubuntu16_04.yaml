@@ -2,7 +2,6 @@ schemaVersion: "2.0.0"
 
 fileExistenceTests:
 - name: 'Python3'
-  isDirectory: false
   path: '/opt/python3.6/bin/python3'
   shouldExist: true
 

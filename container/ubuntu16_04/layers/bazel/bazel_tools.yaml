@@ -1,6 +1,11 @@
 schemaVersion: "2.0.0"
 
 commandTests:
+# 'check-ar' is used to test binutils.
+- name: 'check-ar'
+  command: 'ar'
+  args: ['--version']
+  expectedOutput: ['GNU ar .*']
 - name: 'check-patch'
   command: 'patch'
   args: ['--version']
