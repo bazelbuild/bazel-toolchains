@@ -27,7 +27,7 @@ java_runtime(
 
 # RBE Windows 1803 image that uses "default" pool.
 platform(
-    name = "rbe_windows",
+    name = "rbe_default",
     constraint_values = [
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//platforms:windows",
