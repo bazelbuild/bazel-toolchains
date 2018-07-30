@@ -84,7 +84,7 @@ LATEST_BAZEL_VERSION = "0.15.2"
 
 SUPPORTED_TYPES = [
     "rbe-debian8", "rbe-debian9", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
-    "ubuntu16_04-bazel-docker"
+    "ubuntu16_04-bazel-docker-gcloud"
 ]
 
 # File passed in -m must include the following 3 maps
@@ -98,7 +98,8 @@ TYPE_PACKAGE_MAP = {
     "rbe-debian9": "container/experimental/rbe-debian9",
     "rbe-ubuntu16_04": "container/ubuntu16_04/builders/rbe-ubuntu16_04",
     "ubuntu16_04-bazel": "container/ubuntu16_04/builders/bazel",
-    "ubuntu16_04-bazel-docker": "container/ubuntu16_04/builders/bazel",
+    "ubuntu16_04-bazel-docker-gcloud":
+        "container/ubuntu16_04/builders/bazel_docker_gcloud",
 }
 
 # Map to store all supported container type and the name of target to build it.
@@ -107,7 +108,8 @@ TYPE_TARGET_MAP = {
     "rbe-debian9": "toolchain",
     "rbe-ubuntu16_04": "toolchain",
     "ubuntu16_04-bazel": "bazel_{}".format(LATEST_BAZEL_VERSION),
-    "ubuntu16_04-bazel-docker": "bazel_{}_docker".format(LATEST_BAZEL_VERSION),
+    "ubuntu16_04-bazel-docker-gcloud":
+        "bazel_{}_docker_gcloud".format(LATEST_BAZEL_VERSION),
 }
 
 # Map to store all supported container type and the name of target to build it.
@@ -120,8 +122,8 @@ TYPE_TARBALL_MAP = {
         "toolchain-packages.tar",
     "ubuntu16_04-bazel":
         "bazel_{}-packages.tar".format(LATEST_BAZEL_VERSION),
-    "ubuntu16_04-bazel-docker":
-        "bazel_{}_docker-packages.tar".format(LATEST_BAZEL_VERSION),
+    "ubuntu16_04-bazel-docker-gcloud":
+        "bazel_{}_docker_gcloud-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
 # =========== ENDING HERE ===========
@@ -312,7 +314,7 @@ cd <your project with your own build targets>
 git clone https://github.com/bazelbuild/bazel-toolchains.git
 python bazel-toolchains/container/build.py [args]
 
-Note: a file path passed to the -m param must point to a file in the form descibed above 
+Note: a file path passed to the -m param must point to a file in the form descibed above
 (except TYPE_TARBALL_MAP is not required if the -b arg is not used)
 
 To build with Google Cloud Container Builder:

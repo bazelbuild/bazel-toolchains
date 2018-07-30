@@ -24,22 +24,22 @@ steps:
     args:
     - '--output_base=/workspace'
     - 'run'
-    - '${_BAZEL_TOOLCHAINS_REF}//container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
+    - '${_BAZEL_TOOLCHAINS_REF}//container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_${_BAZEL_VERSION}_docker_gcloud'
     id: 'builder'
     waitFor:
     - "-" # wait for nothing - start immediately
-    
+
 # Step: print the bazel version for confirmation
-  - name: 'bazel/container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
+  - name: 'bazel/container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_${_BAZEL_VERSION}_docker_gcloud'
     args:
-    - 'bazel' 
+    - 'bazel'
     - 'version'
     id: 'version'
     waitFor:
     - "builder"
 
 # Step: build the fully loaded container using rules_docker
-  - name: 'bazel/container/ubuntu16_04/builders/bazel:bazel_${_BAZEL_VERSION}_docker'
+  - name: 'bazel/container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_${_BAZEL_VERSION}_docker_gcloud'
     # Set Bazel output_base to /workspace, which is a mounted directory on Google Cloud Builder.
     # This is to make sure Bazel generated files can be accessed by multiple containers.
     args: [
@@ -56,8 +56,8 @@ steps:
     - 'version'
 
 # Step: re-tag the image
-  - name: gcr.io/cloud-builders/docker
-    args: ['tag', 'bazel/${_PACKAGE}:${_TARGET}', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}']
+  - name: 'bazel/container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_${_BAZEL_VERSION}_docker_gcloud'
+    args: ['docker', 'tag', 'bazel/${_PACKAGE}:${_TARGET}', 'gcr.io/${_PROJECT}/${_CONTAINER}:${_TAG}']
     id: 'container-tag'
     waitFor: # wait for all artifacts to be ready
     - 'container-build'
@@ -65,8 +65,9 @@ steps:
 # Step: test the image
 # We use container_test rule, which is a Bazel wrapper of container_structure_test.
 # https://github.com/bazelbuild/rules_docker/blob/master/contrib/test.bzl
-  - name: 'gcr.io/cloud-builders/bazel'
+  - name: 'bazel/container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_${_BAZEL_VERSION}_docker_gcloud'
     args: [
+      'bazel',
       '--output_base=/workspace',
       'test',
       '--test_output=all',
