@@ -20,6 +20,12 @@ java_runtime(
     java_home = "/usr/lib/jvm/java-8-openjdk-amd64",
 )
 
+java_runtime(
+    name = "jdk9",
+    srcs = [],
+    java_home = "/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64",
+)
+
 # Latest RBE Debian8 container.
 # Update every time when a new container is released.
 alias(
