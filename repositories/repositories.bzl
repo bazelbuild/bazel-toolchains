@@ -24,33 +24,33 @@ def repositories():
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
-            sha256 = "b1fb58b32f4bf26fc64313c6d1d5dc415579be0eb3411e8845df72c699958fc1",
-            strip_prefix = "rules_docker-090f1e6214dcfa34a48b1440c97df4e9721fb921",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/090f1e6214dcfa34a48b1440c97df4e9721fb921.tar.gz"],
+            sha256 = "b4775b7c4fc76e3113dab643ee35eefbabca0b44908d0d1c85dcf29cab7c0638",
+            strip_prefix = "rules_docker-c7a93454d27e09ef707dfca53887ed0ff4372f04",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/c7a93454d27e09ef707dfca53887ed0ff4372f04.tar.gz"],
         )
 
     # io_bazel_rules_go is the dependency of container_test rules.
     if "io_bazel_rules_go" not in excludes:
         http_archive(
             name = "io_bazel_rules_go",
-            sha256 = "4b14d8dd31c6dbaf3ff871adcd03f28c3274e42abc855cb8fb4d01233c0154dc",
-            urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz"],
+            sha256 = "ba79c532ac400cefd1859cbc8a9829346aa69e3b99482cd5a54432092cbc3933",
+            urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.13.0/rules_go-0.13.0.tar.gz"],
         )
 
     if "base_images_docker" not in excludes:
         http_archive(
             name = "base_images_docker",
-            sha256 = "182572f7a2c3a34879e8e3f66e5f9ad829cc620bf2c8e6e18c384aae3cd11863",
-            strip_prefix = "base-images-docker-5530512a9e27f4dd76848a6b40ce2b2b23a87ece",
-            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/5530512a9e27f4dd76848a6b40ce2b2b23a87ece.tar.gz"],
+            sha256 = "e2b1b7254270bb7605e814a9dbf6d1e4ae04a11136ff1714fbfdabe3f87f7cf9",
+            strip_prefix = "base-images-docker-12801524f867e657fbb5d1a74f31618aff181ac6",
+            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/12801524f867e657fbb5d1a74f31618aff181ac6.tar.gz"],
         )
 
     if "distroless" not in excludes:
         http_archive(
             name = "distroless",
-            sha256 = "44c5d3370df6983ef53cfc2347447c6595fea2d1951a1645660baf67657b8e23",
-            strip_prefix = "distroless-94b5126dbe06c2cb4dc74f7c9bfe6394b8e6e44c",
-            urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/94b5126dbe06c2cb4dc74f7c9bfe6394b8e6e44c.tar.gz"],
+            sha256 = "daf9b18ca2d4ae11501846a311011ef2fa2c8db95529c5b5f6069977967712e0",
+            strip_prefix = "distroless-10f0810b962145e4636282005226c4eb72519182",
+            urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/10f0810b962145e4636282005226c4eb72519182.tar.gz"],
         )
 
     # Bazel gpg key necessary to install Bazel in the containers.

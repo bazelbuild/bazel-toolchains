@@ -96,19 +96,19 @@ container_pull(
 )
 
 # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-# l.gcr.io/google/clang-debian8:r333878
+# l.gcr.io/google/clang-debian8:r328903
 container_pull(
     name = "debian8-clang",
-    digest = "sha256:7d204d8e2dff80c67e65c39096d3ef0671919d1a6170ab535db606aa550e2395",
+    digest = toolchain_container_sha256s()["debian8_clang"],
     registry = "l.gcr.io",
     repository = "google/clang-debian8",
 )
 
 # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-# l.gcr.io/google/clang-ubuntu:r333878
+# l.gcr.io/google/clang-ubuntu:r328903
 container_pull(
     name = "ubuntu16_04-clang",
-    digest = "sha256:38f658a36015f3091b8f0b808eca586aa45b97e1ec98f03656c1262f9591f63b",
+    digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
     registry = "l.gcr.io",
     repository = "google/clang-ubuntu",
 )

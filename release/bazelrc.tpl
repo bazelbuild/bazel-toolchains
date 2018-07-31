@@ -1,16 +1,5 @@
-# Copyright 2016 The Bazel Authors. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# This file is auto-generated from release/bazelrc.tpl and should not be
+# modified directly.
 
 # This .bazelrc file contains all of the flags required for the toolchain,
 # Remote Build Execution, and the Bazel Build Results UI. Specific flags in
@@ -40,7 +29,7 @@ build:remote --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jd
 build:remote --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
 build:remote --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
 build:remote --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-build:remote --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.15.0/default:toolchain
+build:remote --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/default:toolchain
 build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # Platform flags:
 # The toolchain container used for execution is defined in the target indicated
@@ -50,7 +39,7 @@ build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # "extra_toolchains" to be selected (given constraints defined in
 # "exec_compatible_with").
 # More about platforms: https://docs.bazel.build/versions/master/platforms.html
-build:remote --extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.15.0/cpp:cc-toolchain-clang-x86_64-default
+build:remote --extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/cpp:cc-toolchain-clang-x86_64-default
 build:remote --extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604
 build:remote --host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604
 build:remote --platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604
@@ -114,7 +103,7 @@ build:results-local --bes_results_url="https://source.cloud.google.com/results/i
 # with the rbe-ubuntu16-04 container. Use of these flags is still experimental.
 build:docker-sandbox --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
 build:docker-sandbox --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
-build:docker-sandbox --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.15.0/default:toolchain
+build:docker-sandbox --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/default:toolchain
 build:docker-sandbox --experimental_docker_image=gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f
 build:docker-sandbox --spawn_strategy=docker
 build:docker-sandbox --strategy=Javac=docker
