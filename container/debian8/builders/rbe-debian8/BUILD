@@ -64,6 +64,7 @@ toolchain_container(
         "//container/debian8/layers/clang:clang-ltl",
         "//container/debian8/layers/go:go-ltl",
         "//container/debian8/layers/java:java-ltl",
+        "//container/ubuntu16_04/layers/java:java9-ltl",
         "//container/debian8/layers/python:python-ltl",
     ],
 )

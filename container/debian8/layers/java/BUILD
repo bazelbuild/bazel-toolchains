@@ -47,3 +47,11 @@ language_tool_layer(
         "/usr/bin/java": "/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java",
     },
 )
+
+language_tool_layer(
+    name = "java9-ltl",
+    base = "@debian8//image",
+    tars = [
+        "//third_party/openjdk:open_jdk9_tar",
+    ],
+)

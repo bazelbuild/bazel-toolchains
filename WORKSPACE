@@ -254,6 +254,19 @@ http_file(
     urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
 )
 
+load(
+    "//third_party/openjdk:revision.bzl",
+    "JDK_VERSION",
+    "OPENJDK_SHA256",
+)
+
+# Axul JDK (from Bazel's OpenJDK Mirror)
+http_file(
+    name = "azul_open_jdk",
+    sha256 = OPENJDK_SHA256,
+    urls = ["https://mirror.bazel.build/openjdk/azul-zulu-" + JDK_VERSION + "/zulu" + JDK_VERSION + "-linux_x64.tar.gz"],
+)
+
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
 http_file(

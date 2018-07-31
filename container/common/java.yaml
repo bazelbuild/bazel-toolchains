@@ -6,6 +6,11 @@ commandTests:
   args: ['-version']
   # java outputs to stderr.
   expectedError: ["openjdk version \"1.8.*"]
+- name: 'java9-version'
+  command: '/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64/bin/java'
+  args: ['-version']
+  # java outputs to stderr.
+  expectedError: ["openjdk version \"9.*"]
 - name: 'check-openssl'
   command: 'openssl'
   args: ['version']
@@ -14,6 +19,9 @@ commandTests:
 fileExistenceTests:
 - name: 'OpenJDK'
   path: '/usr/lib/jvm/java-8-openjdk-amd64'
+  shouldExist: true
+- name: 'OpenJDK9'
+  path: '/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64'
   shouldExist: true
 
 metadataTest:

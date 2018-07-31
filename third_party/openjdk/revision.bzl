@@ -1,0 +1,3 @@
+JDK_VERSION = "9.0.7.1-jdk9.0.7"
+
+OPENJDK_SHA256 = "45f2dfbee93b91b1468cf81d843fc6d9a47fef1f831c0b7ceff4f1eb6e6851c8"
