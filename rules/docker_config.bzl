@@ -280,14 +280,19 @@ def _docker_toolchain_autoconfig_impl(ctx):
     )
 
     # add to the runfiles the script to load image and (if needed) the repo_pkg_tar file
-    runfiles = ctx.runfiles(files = result.runfiles.files.to_list() + [ctx.outputs.load_image])
+    if hasattr(result.providers[1], "runfiles"):
+        result_runfiles = result.providers[1].runfiles
+    else:
+        result_runfiles = result.providers[1].default_runfiles
+    runfiles_list = result_runfiles.files.to_list() + [ctx.outputs.load_image]
     if ctx.attr.repo_pkg_tar:
-        runfiles = ctx.runfiles(files = result.runfiles.files.to_list() +
-                                        [ctx.outputs.load_image] + ctx.files.repo_pkg_tar)
+        runfiles_list += ctx.files.repo_pkg_tar
+
+    runfiles = ctx.runfiles(files = runfiles_list)
 
     return struct(
         runfiles = runfiles,
-        files = result.files,
+        files = result.providers[1].files,
         container_parts = result.container_parts,
     )
 
