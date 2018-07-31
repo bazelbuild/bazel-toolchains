@@ -4,4 +4,4 @@ commandTests:
 - name: 'check-gcloud'
   command: 'gcloud'
   args: ['version']
-  expectedOutput: ['Google Cloud SDK.*']
+  expectedOutput: ['Google Cloud SDK {_GCLOUD_VERSION}.*']

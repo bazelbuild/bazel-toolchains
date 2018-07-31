@@ -18,7 +18,17 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 
-exports_files(["gcloud.yaml"])
+load(
+    "//container/ubuntu16_04/layers/gcloud:version.bzl",
+    "GCLOUD_VERSION",
+)
+
+genrule(
+    name = "generate_gcloud_yaml",
+    srcs = ["gcloud.yaml.tpl"],
+    outs = ["gcloud.yaml"],
+    cmd = "sed 's|{_GCLOUD_VERSION}|" + GCLOUD_VERSION.rpartition("-")[0] + "|' <$< >$@",
+)
 
 language_tool_layer(
     name = "gcloud-ltl",
@@ -30,6 +40,6 @@ language_tool_layer(
         "@gcloud_gpg//file",
     ],
     packages = [
-        "google-cloud-sdk",
+        "google-cloud-sdk=%s" % GCLOUD_VERSION,
     ],
 )
