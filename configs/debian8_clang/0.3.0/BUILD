@@ -14,6 +14,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
+configs/debian8_clang/0.3.0/BUILD
+
 java_runtime(
     name = "jdk8",
     srcs = [],
@@ -23,7 +25,7 @@ java_runtime(
 java_runtime(
     name = "jdk9",
     srcs = [],
-    java_home = "/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64",
+    java_home = "/usr/lib/jvm/zulu" + JDK_VERSION + "-linux_x64",
 )
 
 # Latest RBE Debian8 container.

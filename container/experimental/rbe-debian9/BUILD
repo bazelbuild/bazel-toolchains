@@ -132,6 +132,7 @@ language_tool_layer(
     base = "@debian9//image",
     tars = [
         "//third_party/openjdk:open_jdk9_tar",
+        "//third_party/openjdk:open_jdk9_src_tar",
     ],
 )
 

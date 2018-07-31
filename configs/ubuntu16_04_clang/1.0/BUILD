@@ -23,7 +23,7 @@ java_runtime(
 java_runtime(
     name = "jdk9",
     srcs = [],
-    java_home = "/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64",
+    java_home = "/usr/lib/jvm/zulu" + JDK_VERSION + "-linux_x64",
 )
 
 # Latest RBE Ubuntu16_04 container

@@ -258,6 +258,7 @@ load(
     "//third_party/openjdk:revision.bzl",
     "JDK_VERSION",
     "OPENJDK_SHA256",
+    "OPENJDK_SRC_SHA256"
 )
 
 # Axul JDK (from Bazel's OpenJDK Mirror)
@@ -265,6 +266,12 @@ http_file(
     name = "azul_open_jdk",
     sha256 = OPENJDK_SHA256,
     urls = ["https://mirror.bazel.build/openjdk/azul-zulu-" + JDK_VERSION + "/zulu" + JDK_VERSION + "-linux_x64.tar.gz"],
+)
+
+http_file(
+    name = "azul_open_jdk_src",
+    sha256 = OPENJDK_SRC_SHA256,
+    urls = ["https://mirror.bazel.build/openjdk/azul-zulu-" + JDK_VERSION + "/zsrc" + JDK_VERSION + ".zip"],
 )
 
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.

@@ -23,6 +23,9 @@ fileExistenceTests:
 - name: 'OpenJDK9'
   path: '/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64'
   shouldExist: true
+- name: 'OpenJDK9 srcs'
+  path: '/usr/src/azul_open_jdk_src/file/zsrc9.0.7.1-jdk9.0.7.zip'
+  shouldExist: true
 
 metadataTest:
   env:
