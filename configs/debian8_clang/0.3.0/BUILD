@@ -14,7 +14,10 @@
 
 package(default_visibility = ["//visibility:public"])
 
-configs/debian8_clang/0.3.0/BUILD
+load(
+    "//third_party/openjdk:revision.bzl",
+    "JDK_VERSION",
+)
 
 java_runtime(
     name = "jdk8",

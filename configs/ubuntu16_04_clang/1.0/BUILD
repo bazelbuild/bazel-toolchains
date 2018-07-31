@@ -14,6 +14,11 @@
 
 package(default_visibility = ["//visibility:public"])
 
+load(
+    "//third_party/openjdk:revision.bzl",
+    "JDK_VERSION",
+)
+
 java_runtime(
     name = "jdk8",
     srcs = [],

@@ -7,7 +7,7 @@ commandTests:
   # java outputs to stderr.
   expectedError: ["openjdk version \"1.8.*"]
 - name: 'java9-version'
-  command: '/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64/bin/java'
+  command: '/usr/lib/jvm/zulu{_JDK_VERSION}-linux_x64/bin/java'
   args: ['-version']
   # java outputs to stderr.
   expectedError: ["openjdk version \"9.*"]
@@ -24,7 +24,7 @@ fileExistenceTests:
   path: '/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64'
   shouldExist: true
 - name: 'OpenJDK9 srcs'
-  path: '/usr/src/azul_open_jdk_src/file/zsrc9.0.7.1-jdk9.0.7.zip'
+  path: '/usr/src/azul_open_jdk_src/file/zsrc{_JDK_VERSION}.zip'
   shouldExist: true
 
 metadataTest:

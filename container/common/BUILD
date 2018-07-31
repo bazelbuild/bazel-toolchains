@@ -26,6 +26,10 @@ load(
     "//third_party/golang:revision.bzl",
     "GOLANG_REVISION",
 )
+load(
+    "//third_party/openjdk:revision.bzl",
+    "JDK_VERSION",
+)
 
 genrule(
     name = "generate_clang_yaml",
@@ -39,4 +43,11 @@ genrule(
     srcs = ["go.yaml.tpl"],
     outs = ["go.yaml"],
     cmd = "sed 's|{_GOLANG_REVISION}|" + GOLANG_REVISION + "|' <$< >$@",
+)
+
+genrule(
+    name = "generate_java_yaml",
+    srcs = ["java.yaml.tpl"],
+    outs = ["java.yaml"],
+    cmd = "sed 's|{_JDK_VERSION}|" + JDK_VERSION + "|' <$< >$@",
 )
