@@ -1,4 +1,5 @@
 JDK_VERSION = "10.2%2B3-jdk10.0.1"
+
 # JDK version 10 includes a '+' sign, so we need to keep track of the
 # version with both encodings for the java.yaml test.
 # TODO: remove for future versions of Java that do not need it
