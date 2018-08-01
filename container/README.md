@@ -32,7 +32,7 @@ You can build a toolchain-container with
 the base container by running:
 
 ``` shell
-python container/build.py -p my-project-id -d rbe-ubuntu16_04 -c test-rbe-ubuntu16_04 -t latest -b my-gcs-bucket
+python container/build.py -p my-project-id -d rbe-ubuntu16_04 -c test-rbe-ubuntu16_04 -t latest -b my-gcs-bucket -v 0.15.2
 ```
 
 Congratulations! Your docker container is now available in [Container
