@@ -15,12 +15,36 @@
 # Once recursive workspace is implemented in Bazel, this file should cease
 # to exist.
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load(
+    "//third_party/golang:revision.bzl",
+    "GOLANG_REVISION",
+    "GOLANG_SHA256",
+)
+load(
+    "//third_party/clang:revision.bzl",
+    "CLANG_REVISION",
+    "DEBIAN8_CLANG_SHA256",
+    "DEBIAN9_CLANG_SHA256",
+    "UBUNTU16_04_CLANG_SHA256",
+)
+load(
+    "//third_party/libcxx:revision.bzl",
+    "DEBIAN8_LIBCXX_SHA256",
+    "DEBIAN9_LIBCXX_SHA256",
+    "LIBCXX_REVISION",
+    "UBUNTU16_04_LIBCXX_SHA256",
+)
+load(
+    "//container/ubuntu16_04/layers/bazel:version.bzl",
+    "BAZEL_VERSION_SHA256S",
+)
 
 def repositories():
     """Download dependencies of bazel-toolchains."""
     excludes = native.existing_rules().keys()
 
+    # ============================== Repositories ==============================
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
@@ -53,10 +77,102 @@ def repositories():
             urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/10f0810b962145e4636282005226c4eb72519182.tar.gz"],
         )
 
+    # ================================ GPG Keys ================================
     # Bazel gpg key necessary to install Bazel in the containers.
     if "bazel_gpg" not in excludes:
-        http_file(
+        native.http_file(
             name = "bazel_gpg",
             sha256 = "30af2ca7abfb65987cd61802ca6e352aadc6129dfb5bfc9c81f16617bc3a4416",
             urls = ["https://bazel.build/bazel-release.pub.gpg"],
         )
+
+    # Docker gpg key necessary to install Docker in the containers.
+    if "debian_docker_gpg" not in excludes:
+        native.http_file(
+            name = "debian_docker_gpg",
+            sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
+            urls = ["https://download.docker.com/linux/debian/gpg"],
+        )
+
+    # Docker gpg key necessary to install Docker in the containers.
+    if "xenial_docker_gpg" not in excludes:
+        native.http_file(
+            name = "xenial_docker_gpg",
+            sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
+            urls = ["https://download.docker.com/linux/ubuntu/gpg"],
+        )
+
+    # GCloud gpg key necessary to install GCloud in the containers.
+    if "gcloud_gpg" not in excludes:
+        native.http_file(
+            name = "gcloud_gpg",
+            sha256 = "226ba1072f20e4ff97ee4f94e87bf45538a900a6d9b25399a7ac3dc5a2f3af87",
+            urls = ["https://packages.cloud.google.com/apt/doc/apt-key.gpg"],
+        )
+
+    # =============================== Toolchains ===============================
+    # Golang
+    if "golang_release" not in excludes:
+        native.http_file(
+            name = "golang_release",
+            sha256 = GOLANG_SHA256,
+            urls = ["https://storage.googleapis.com/golang/go" + GOLANG_REVISION + ".linux-amd64.tar.gz"],
+        )
+
+    # Clang
+    if "debian8_clang_release" not in excludes:
+        native.http_file(
+            name = "debian8_clang_release",
+            sha256 = DEBIAN8_CLANG_SHA256,
+            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_" + CLANG_REVISION + ".tar.gz"],
+        )
+
+    if "debian9_clang_release" not in excludes:
+        native.http_file(
+            name = "debian9_clang_release",
+            sha256 = DEBIAN9_CLANG_SHA256,
+            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/clang_" + CLANG_REVISION + ".tar.gz"],
+        )
+
+    if "ubuntu16_04_clang_release" not in excludes:
+        native.http_file(
+            name = "ubuntu16_04_clang_release",
+            sha256 = UBUNTU16_04_CLANG_SHA256,
+            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/clang_" + CLANG_REVISION + ".tar.gz"],
+        )
+
+    # libcxx
+    if "debian8_libcxx_release" not in excludes:
+        native.http_file(
+            name = "debian8_libcxx_release",
+            sha256 = DEBIAN8_LIBCXX_SHA256,
+            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
+        )
+
+    if "debian9_libcxx_release" not in excludes:
+        native.http_file(
+            name = "debian9_libcxx_release",
+            sha256 = DEBIAN9_LIBCXX_SHA256,
+            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
+        )
+
+    if "ubuntu16_04_libcxx_release" not in excludes:
+        native.http_file(
+            name = "ubuntu16_04_libcxx_release",
+            sha256 = UBUNTU16_04_LIBCXX_SHA256,
+            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
+        )
+
+    # ============================ Bazel installers ============================
+    # Official Bazel installer.sh for all supported versions.
+    for bazel_version, bazel_sha256 in BAZEL_VERSION_SHA256S.items():
+        name = "bazel_%s_installer" % (bazel_version.replace(".", ""))
+        if name not in excludes:
+            native.http_file(
+                name = name,
+                sha256 = bazel_sha256,
+                urls = [
+                    "https://releases.bazel.build/" + bazel_version + "/release/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
+                    "https://github.com/bazelbuild/bazel/releases/download/" + bazel_version + "/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
+                ],
+            )

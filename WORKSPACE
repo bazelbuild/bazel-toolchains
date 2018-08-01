@@ -32,6 +32,13 @@ load(
 
 container_repositories()
 
+load(
+    "//repositories:images.bzl",
+    bazel_toolchains_images = "images",
+)
+
+bazel_toolchains_images()
+
 load("@io_bazel_rules_go//go:def.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
@@ -48,71 +55,6 @@ load(
 # This is only needed by the old package manager.
 package_manager_repositories()
 
-load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
-
-# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-container_pull(
-    name = "debian8",
-    digest = toolchain_container_sha256s()["debian8"],
-    registry = "l.gcr.io",
-    repository = "google/debian8",
-)
-
-# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-container_pull(
-    name = "debian9",
-    digest = toolchain_container_sha256s()["debian9"],
-    registry = "l.gcr.io",
-    repository = "google/debian9",
-)
-
-# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-container_pull(
-    name = "ubuntu16_04",
-    digest = toolchain_container_sha256s()["ubuntu16_04"],
-    registry = "l.gcr.io",
-    repository = "google/ubuntu16_04",
-)
-
-# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-# Get debian8-built python3 interpreter from l.gcr.io/google/python:latest.
-# Base image: gcr.io/google-appengine/debian8:latest
-# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
-container_pull(
-    name = "debian8_python3",
-    digest = toolchain_container_sha256s()["debian8_python3"],
-    registry = "l.gcr.io",
-    repository = "google/python",
-)
-
-# Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:latest.
-# Base image: gcr.io/gcp-runtimes/ubuntu_16_0_4:latest
-# Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
-container_pull(
-    name = "ubuntu16_04_python3",
-    digest = toolchain_container_sha256s()["ubuntu16_04_python3"],
-    registry = "gcr.io",
-    repository = "google-appengine/python",
-)
-
-# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-# l.gcr.io/google/clang-debian8:r328903
-container_pull(
-    name = "debian8-clang",
-    digest = toolchain_container_sha256s()["debian8_clang"],
-    registry = "l.gcr.io",
-    repository = "google/clang-debian8",
-)
-
-# TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-# l.gcr.io/google/clang-ubuntu:r328903
-container_pull(
-    name = "ubuntu16_04-clang",
-    digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
-    registry = "l.gcr.io",
-    repository = "google/clang-ubuntu",
-)
-
 container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
@@ -127,24 +69,6 @@ container_pull(
     tag = "16.04",
 )
 
-http_file(
-    name = "debian_docker_gpg",
-    sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-    urls = ["https://download.docker.com/linux/debian/gpg"],
-)
-
-http_file(
-    name = "xenial_docker_gpg",
-    sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-    urls = ["https://download.docker.com/linux/ubuntu/gpg"],
-)
-
-http_file(
-    name = "gcloud_gpg",
-    sha256 = "226ba1072f20e4ff97ee4f94e87bf45538a900a6d9b25399a7ac3dc5a2f3af87",
-    urls = ["https://packages.cloud.google.com/apt/doc/apt-key.gpg"],
-)
-
 # The Debian snapshot datetime to use.
 # This is kept up-to-date with https://github.com/GoogleCloudPlatform/base-images-docker/blob/master/WORKSPACE.
 DEB_SNAPSHOT = "20180312T052343Z"
@@ -156,7 +80,100 @@ dpkg_src(
     sha256 = "20720c9367e9454dee3d173e4d3fd85ab5530292f4ec6654feb5a810b6bb37ce",
     snapshot = DEB_SNAPSHOT,
     url = "http://snapshot.debian.org/archive",
+)<<<<<<< master
+121
+ 
+load(
+122
+ 
+    "//third_party/golang:revision.bzl",
+123
+ 
+    "GOLANG_REVISION",
+124
+ 
+    "GOLANG_SHA256",
+125
+ 
 )
+126
+ 
+​
+127
+ 
+# Golang
+128
+ 
+http_file(
+129
+ 
+    name = "golang_release",
+130
+ 
+    sha256 = GOLANG_SHA256,
+131
+ 
+    urls = ["https://storage.googleapis.com/golang/go" + GOLANG_REVISION + ".linux-amd64.tar.gz"],
+132
+ 
+)
+133
+ 
+​
+134
+ 
+load(
+135
+ 
+    "//third_party/clang:revision.bzl",
+136
+ 
+    "CLANG_REVISION",
+137
+ 
+    "DEBIAN8_CLANG_SHA256",
+138
+ 
+    "DEBIAN9_CLANG_SHA256",
+139
+ 
+    "UBUNTU16_04_CLANG_SHA256",
+140
+ 
+)
+141
+ 
+​
+142
+ 
+# Clang
+143
+ 
+http_file(
+144
+ 
+    name = "debian8_clang_release",
+145
+ 
+    sha256 = DEBIAN8_CLANG_SHA256,
+146
+ 
+    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_" + CLANG_REVISION + ".tar.gz"],
+147
+ 
+)
+148
+ 
+​
+149
+ 
+http_file(
+150
+ 
+    name = "debian9_clang_release",
+151
+ 
+    sha256 = DEBIAN9_CLANG_SHA256,
 
 dpkg_src(
     name = "debian_jessie_backports",
@@ -193,93 +210,6 @@ dpkg_list(
     ],
 )
 
-load(
-    "//third_party/golang:revision.bzl",
-    "GOLANG_REVISION",
-    "GOLANG_SHA256",
-)
-
-# Golang
-http_file(
-    name = "golang_release",
-    sha256 = GOLANG_SHA256,
-    urls = ["https://storage.googleapis.com/golang/go" + GOLANG_REVISION + ".linux-amd64.tar.gz"],
-)
-
-load(
-    "//third_party/clang:revision.bzl",
-    "CLANG_REVISION",
-    "DEBIAN8_CLANG_SHA256",
-    "DEBIAN9_CLANG_SHA256",
-    "UBUNTU16_04_CLANG_SHA256",
-)
-
-# Clang
-http_file(
-    name = "debian8_clang_release",
-    sha256 = DEBIAN8_CLANG_SHA256,
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_" + CLANG_REVISION + ".tar.gz"],
-)
-
-http_file(
-    name = "debian9_clang_release",
-    sha256 = DEBIAN9_CLANG_SHA256,
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/clang_" + CLANG_REVISION + ".tar.gz"],
-)
-
-http_file(
-    name = "ubuntu16_04_clang_release",
-    sha256 = UBUNTU16_04_CLANG_SHA256,
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/clang_" + CLANG_REVISION + ".tar.gz"],
-)
-
-load(
-    "//third_party/libcxx:revision.bzl",
-    "DEBIAN8_LIBCXX_SHA256",
-    "DEBIAN9_LIBCXX_SHA256",
-    "LIBCXX_REVISION",
-    "UBUNTU16_04_LIBCXX_SHA256",
-)
-
-# libcxx
-http_file(
-    name = "debian8_libcxx_release",
-    sha256 = DEBIAN8_LIBCXX_SHA256,
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
-)
-
-http_file(
-    name = "debian9_libcxx_release",
-    sha256 = DEBIAN9_LIBCXX_SHA256,
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
-)
-
-http_file(
-    name = "ubuntu16_04_libcxx_release",
-    sha256 = UBUNTU16_04_LIBCXX_SHA256,
-    urls = ["https://storage.googleapis.com/clang-builds-stable/clang-ubuntu16_04/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
-)
-
-load(
-    "//third_party/openjdk:revision.bzl",
-    "JDK_VERSION",
-    "OPENJDK_SHA256",
-    "OPENJDK_SRC_SHA256",
-)
-
-# Axul JDK (from Bazel's OpenJDK Mirror)
-http_file(
-    name = "azul_open_jdk",
-    sha256 = OPENJDK_SHA256,
-    urls = ["https://mirror.bazel.build/openjdk/azul-zulu" + JDK_VERSION + "/zulu" + JDK_VERSION + "-linux_x64-allmodules.tar.gz"],
-)
-
-http_file(
-    name = "azul_open_jdk_src",
-    sha256 = OPENJDK_SRC_SHA256,
-    urls = ["https://mirror.bazel.build/openjdk/azul-zulu" + JDK_VERSION + "/zsrc" + JDK_VERSION + ".zip"],
-)
-
 # Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
 http_file(
@@ -290,18 +220,3 @@ http_file(
         "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
-
-load(
-    "//container/ubuntu16_04/layers/bazel:version.bzl",
-    "BAZEL_VERSION_SHA256S",
-)
-
-# Download the Bazel installer.sh for all supported versions.
-[http_file(
-    name = "bazel_%s_installer" % (bazel_version.replace(".", "")),
-    sha256 = bazel_sha256,
-    urls = [
-        "https://releases.bazel.build/" + bazel_version + "/release/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
-        "https://github.com/bazelbuild/bazel/releases/download/" + bazel_version + "/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
-    ],
-) for bazel_version, bazel_sha256 in BAZEL_VERSION_SHA256S.items()]
