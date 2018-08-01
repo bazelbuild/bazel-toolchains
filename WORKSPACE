@@ -258,7 +258,7 @@ load(
     "//third_party/openjdk:revision.bzl",
     "JDK_VERSION",
     "OPENJDK_SHA256",
-    "OPENJDK_SRC_SHA256"
+    "OPENJDK_SRC_SHA256",
 )
 
 # Axul JDK (from Bazel's OpenJDK Mirror)

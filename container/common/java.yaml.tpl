@@ -21,10 +21,10 @@ fileExistenceTests:
   path: '/usr/lib/jvm/java-8-openjdk-amd64'
   shouldExist: true
 - name: 'OpenJDK9'
-  path: '/usr/lib/jvm/zulu9.0.7.1-jdk9.0.7-linux_x64'
+  path: '/usr/lib/jvm/zulu{_JDK_VERSION}-linux_x64'
   shouldExist: true
 - name: 'OpenJDK9 srcs'
-  path: '/usr/src/azul_open_jdk_src/file/zsrc{_JDK_VERSION}.zip'
+  path: '/usr/src/jdk/zsrc{_JDK_VERSION}.zip'
   shouldExist: true
 
 metadataTest:
