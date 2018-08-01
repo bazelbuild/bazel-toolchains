@@ -55,7 +55,7 @@ toolchain_container(
         "clang-ltl",
         "go-ltl",
         "java-ltl",
-        "java9-ltl",
+        "java10-ltl",
         "python-ltl",
     ],
 )
@@ -128,11 +128,11 @@ language_tool_layer(
 )
 
 language_tool_layer(
-    name = "java9-ltl",
+    name = "java10-ltl",
     base = "@debian9//image",
     tars = [
-        "//third_party/openjdk:open_jdk9_tar",
-        "//third_party/openjdk:open_jdk9_src_tar",
+        "//third_party/openjdk:open_jdk_tar",
+        "//third_party/openjdk:open_jdk_src_tar",
     ],
 )
 
