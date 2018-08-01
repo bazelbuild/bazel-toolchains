@@ -29,6 +29,7 @@ load(
 load(
     "//third_party/openjdk:revision.bzl",
     "JDK_VERSION",
+    "JDK_VERSION_DECODED",
 )
 
 genrule(
@@ -49,5 +50,8 @@ genrule(
     name = "generate_java_yaml",
     srcs = ["java.yaml.tpl"],
     outs = ["java.yaml"],
-    cmd = "sed 's|{_JDK_VERSION}|" + JDK_VERSION + "|' <$< >$@",
+    cmd = (
+        "sed 's|{_JDK_VERSION}|" + JDK_VERSION + "|g; s|{_JDK_VERSION_DECODED}|" + JDK_VERSION_DECODED + "|g' <$< >$@"
+    )
+ ,
 )

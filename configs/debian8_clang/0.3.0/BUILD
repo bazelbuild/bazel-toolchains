@@ -28,7 +28,7 @@ java_runtime(
 java_runtime(
     name = "jdk9",
     srcs = [],
-    java_home = "/usr/lib/jvm/zulu" + JDK_VERSION + "-linux_x64",
+    java_home = "/usr/lib/jvm/zulu" + JDK_VERSION + "-linux_x64-allmodules",
 )
 
 # Latest RBE Debian8 container.

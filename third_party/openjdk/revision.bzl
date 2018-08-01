@@ -1,5 +1,9 @@
-JDK_VERSION = "9.0.7.1-jdk9.0.7"
+JDK_VERSION = "10.2%2B3-jdk10.0.1"
+# JDK version 10 includes a '+' sign, so we need to keep track of the
+# version with both encodings for the java.yaml test.
+# TODO: remove for future versions of Java that do not need it
+JDK_VERSION_DECODED = "10.2+3-jdk10.0.1"
 
-OPENJDK_SHA256 = "45f2dfbee93b91b1468cf81d843fc6d9a47fef1f831c0b7ceff4f1eb6e6851c8"
+OPENJDK_SHA256 = "57fad3602e74c79587901d6966d3b54ef32cb811829a2552163185d5064fe9b5"
 
-OPENJDK_SRC_SHA256 = "a0fda609a9892af2b0aa8ce4c83706e654f73d11a1392123613bbe12e1c9c955"
+OPENJDK_SRC_SHA256 = "0ab6c7a1a8fc32992bcec4d7c77a587c02b8816f67bcb7d16154a60de2dce8a4"
