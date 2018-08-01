@@ -52,6 +52,5 @@ genrule(
     outs = ["java.yaml"],
     cmd = (
         "sed 's|{_JDK_VERSION}|" + JDK_VERSION + "|g; s|{_JDK_VERSION_DECODED}|" + JDK_VERSION_DECODED + "|g' <$< >$@"
-    )
- ,
+    ),
 )

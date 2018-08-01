@@ -36,9 +36,9 @@ pkg_tar(
 
 pkg_tar(
     name = "open_jdk_src_tar",
-    package_dir = "/usr/src/jdk/",
-    tags = ["manual"],
     srcs = [
         "@azul_open_jdk_src//file",
     ],
+    package_dir = "/usr/src/jdk/",
+    tags = ["manual"],
 )
