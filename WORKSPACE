@@ -139,6 +139,12 @@ http_file(
     urls = ["https://download.docker.com/linux/ubuntu/gpg"],
 )
 
+http_file(
+    name = "gcloud_gpg",
+    sha256 = "226ba1072f20e4ff97ee4f94e87bf45538a900a6d9b25399a7ac3dc5a2f3af87",
+    urls = ["https://packages.cloud.google.com/apt/doc/apt-key.gpg"],
+)
+
 # The Debian snapshot datetime to use.
 # This is kept up-to-date with https://github.com/GoogleCloudPlatform/base-images-docker/blob/master/WORKSPACE.
 DEB_SNAPSHOT = "20180312T052343Z"
