@@ -25,7 +25,7 @@ package(default_visibility = ["//visibility:public"])
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 pkg_tar(
-    name = "open_jdk9_tar",
+    name = "open_jdk_tar",
     package_dir = "/usr/lib/jvm/",
     strip_prefix = ".",
     tags = ["manual"],
@@ -35,7 +35,7 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "open_jdk9_src_tar",
+    name = "open_jdk_src_tar",
     package_dir = "/usr/src/jdk/",
     tags = ["manual"],
     srcs = [
