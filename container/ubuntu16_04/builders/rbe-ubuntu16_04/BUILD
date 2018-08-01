@@ -53,6 +53,7 @@ toolchain_container(
         "-c",
         "/bin/bash",
     ],
+    installables_tar="@ubuntu16_04_debian_pkgs//:ubuntu16-04-debian_pkgs.tar",
     env = {
         # PATH envvar is a special case, and currently only the one in the
         # topmost layer is set. So that we override it here to include all.

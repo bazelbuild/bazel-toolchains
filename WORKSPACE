@@ -127,3 +127,12 @@ http_file(
         "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
+
+load("//rules:gsutil.bzl", "gsutil_cp")
+
+gsutil_cp(
+    name = "ubuntu16_04_debian_pkgs",
+    file = "ubuntu16-04-debian_pkgs.tar",
+    gcs_bucket = "gs://rbe-toolchain-debs",
+    sha256 = "ef442b29630142062177527786c60d9bed9485d6dcc549ba71c095a956566620",
+)
