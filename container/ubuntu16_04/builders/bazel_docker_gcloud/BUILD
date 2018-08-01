@@ -37,6 +37,7 @@ load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION_SHA256S"
     language_layers = [
         "//container/ubuntu16_04/layers/clang:clang-ltl",
         "//container/ubuntu16_04/layers/java:java-ltl",
+        "//container/ubuntu16_04/layers/java:java10-ltl",
         "//container/ubuntu16_04/layers/python:python-ltl",
         "//container/ubuntu16_04/layers/bazel:bazel-tools",
         "//container/ubuntu16_04/layers/bazel:bazel_%s-ltl" % bazel_version,

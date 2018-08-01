@@ -66,6 +66,7 @@ toolchain_container(
         "//container/ubuntu16_04/layers/clang:clang-ltl",
         "//container/ubuntu16_04/layers/go:go-ltl",
         "//container/ubuntu16_04/layers/java:java-ltl",
+        "//container/ubuntu16_04/layers/java:java10-ltl",
         "//container/ubuntu16_04/layers/python:python-ltl",
     ],
 )

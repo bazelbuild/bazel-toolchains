@@ -36,6 +36,12 @@ load(
     "UBUNTU16_04_LIBCXX_SHA256",
 )
 load(
+    "//third_party/openjdk:revision.bzl",
+    "JDK_VERSION",
+    "OPENJDK_SHA256",
+    "OPENJDK_SRC_SHA256",
+)
+load(
     "//container/ubuntu16_04/layers/bazel:version.bzl",
     "BAZEL_VERSION_SHA256S",
 )
@@ -176,3 +182,18 @@ def repositories():
                     "https://github.com/bazelbuild/bazel/releases/download/" + bazel_version + "/bazel-" + bazel_version + "-installer-linux-x86_64.sh",
                 ],
             )
+
+    # ============================ Azul OpenJDK packages ============================
+    if "azul_open_jdk" not in excludes:
+        native.http_file(
+            name = "azul_open_jdk",
+            sha256 = OPENJDK_SHA256,
+            urls = ["https://mirror.bazel.build/openjdk/azul-zulu" + JDK_VERSION + "/zulu" + JDK_VERSION + "-linux_x64-allmodules.tar.gz"],
+        )
+
+    if "azul_open_jdk_src" not in excludes:
+        native.http_file(
+            name = "azul_open_jdk_src",
+            sha256 = OPENJDK_SRC_SHA256,
+            urls = ["https://mirror.bazel.build/openjdk/azul-zulu" + JDK_VERSION + "/zsrc" + JDK_VERSION + ".zip"],
+        )

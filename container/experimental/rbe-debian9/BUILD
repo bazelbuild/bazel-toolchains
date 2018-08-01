@@ -55,6 +55,7 @@ toolchain_container(
         "clang-ltl",
         "go-ltl",
         "java-ltl",
+        "java10-ltl",
         "python-ltl",
     ],
 )
@@ -124,6 +125,15 @@ language_tool_layer(
     symlinks = {
         "/usr/bin/java": "/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java",
     },
+)
+
+language_tool_layer(
+    name = "java10-ltl",
+    base = "@debian9//image",
+    tars = [
+        "//third_party/openjdk:open_jdk_tar",
+        "//third_party/openjdk:open_jdk_src_tar",
+    ],
 )
 
 language_tool_layer(
