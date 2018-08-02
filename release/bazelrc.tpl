@@ -81,20 +81,15 @@ build:remote --auth_enabled=true
 build:results --bes_backend="buildeventservice.googleapis.com"
 build:results --bes_timeout=60s
 
-# If the upload to BES fails, the build will fail.
-build:results --bes_best_effort=false
-
 # Output BES results url
 build:results --bes_results_url="https://source.cloud.google.com/results/invocations/"
 
 # Set flags for uploading to BES without Remote Build Execution.
 build:results-local --bes_backend="buildeventservice.googleapis.com"
 build:results-local --bes_timeout=60s
-build:results-local --bes_best_effort=false
 build:results-local --tls_enabled=true
 build:results-local --auth_enabled=true
 build:results-local --spawn_strategy=local
-build:results-local --experimental_remote_spawn_cache
 build:results-local --remote_cache=remotebuildexecution.googleapis.com
 build:results-local --remote_timeout=3600
 build:results-local --bes_results_url="https://source.cloud.google.com/results/invocations/"
