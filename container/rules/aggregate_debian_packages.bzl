@@ -14,7 +14,6 @@
 
 load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
-load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
 
 debian_pkgs_attrs = _container.image.attrs + _key.attrs + _download.attrs + {
@@ -31,7 +30,6 @@ debian_pkgs_attrs = _container.image.attrs + _key.attrs + _download.attrs + {
     "keys": attr.label_list(
         allow_files = True,
     ),
-    "output_image_name": attr.string(),
 }
 
 def _aggregate_debian_packages_impl(ctx):
@@ -42,37 +40,21 @@ def _aggregate_debian_packages_impl(ctx):
       ctx: ctx for list of language_tool_layer(s)
     """
 
-    tars = []
-    files = []
-    env = {}
-    symlinks = {}
     packages = []
     additional_repos = []
     keys = []
-    installables_tars = []
 
     for layer in ctx.attr.language_layers:
-        tars.extend(layer.tars)
-        files.extend(layer.input_files)
-        env.update(layer.env)
-        symlinks.update(layer.symlinks)
         packages.extend(layer.packages)
         additional_repos.extend(layer.additional_repos)
         keys.extend(layer.keys)
-        if layer.installables_tar:
-            installables_tars.append(layer.installables_tar)
-    tars.extend(ctx.files.tars)
-    env.update(ctx.attr.env)
-    symlinks.update(ctx.attr.symlinks)
     packages.extend(ctx.attr.packages)
     additional_repos.extend(ctx.attr.additional_repos)
     keys.extend(ctx.files.keys)
 
-    files = depset(files).to_list()
     packages = depset(packages).to_list()
     additional_repos = depset(additional_repos).to_list()
     keys = depset(keys).to_list()
-    installables_tars = depset(installables_tars).to_list()
 
     download_base = ctx.files.base[0]
 
