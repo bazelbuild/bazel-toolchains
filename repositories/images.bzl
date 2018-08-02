@@ -121,7 +121,6 @@ def images():
 
     if "debian8-clang" not in excludes:
         # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-        # l.gcr.io/google/clang-debian8:r328903
         container_pull(
             name = "debian8-clang",
             digest = toolchain_container_sha256s()["debian8_clang"],
@@ -131,7 +130,6 @@ def images():
 
     if "ubuntu16_04-clang" not in excludes:
         # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-        # l.gcr.io/google/clang-ubuntu:r328903
         container_pull(
             name = "ubuntu16_04-clang",
             digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
