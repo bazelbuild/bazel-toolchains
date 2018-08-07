@@ -16,7 +16,7 @@ package(default_visibility = ["//visibility:public"])
 
 load(
     "//third_party/openjdk:revision.bzl",
-    "JDK_VERSION",
+    JDK_VERSION = "JDK_VERSION_DECODED",
 )
 
 java_runtime(
