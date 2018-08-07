@@ -18,11 +18,11 @@ package(default_visibility = ["//visibility:public"])
 
 
 load(
-    "//container/rules:aggregate_debian_packages.bzl",
-    "aggregate_debian_packages",
+    "//container/rules:docker_toolchains.bzl",
+    "debian_pkg_tar",
 )
 
-aggregate_debian_packages(
+debian_pkg_tar(
     name = "ubuntu16-04-debian_pkgs",
     base = "@ubuntu16_04//image",
     language_layers = [
