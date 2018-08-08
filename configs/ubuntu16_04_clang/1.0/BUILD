@@ -55,3 +55,21 @@ platform(
          }
          """,
 )
+
+# Experimental ubuntu1604 based container with Docker.
+platform(
+    name = "nosla_xenial_docker",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/asci-toolchain/nosla-xenial-docker@sha256:780a96ba94b7666e31ba9a184e5a1742c3398250d47f5b87b1b4a60f8c41f164"
+         }
+         """,
+)
