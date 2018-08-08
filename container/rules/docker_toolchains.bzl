@@ -18,7 +18,6 @@ load("@io_bazel_rules_docker//container:container.bzl", _container = "container"
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
 load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
-
 load(":debian_pkg_tar.bzl", _aggregate_debian_pkgs = "aggregate")
 
 def _input_validation(kwargs):
@@ -274,13 +273,13 @@ def _toolchain_container_impl(ctx):
         download_pkgs_output_script = ctx.attr.name + "-download_pkgs_output_script.sh"
 
         output_tar = _aggregate_debian_pkgs.implementation(
-                    ctx,
-                    packages = packages,
-                    additional_repos = additional_repos,
-                    keys = keys,
-                    download_pkgs_output_tar = download_pkgs_output_tar,
-                    download_pkgs_output_script = download_pkgs_output_script,
-                )
+            ctx,
+            packages = packages,
+            additional_repos = additional_repos,
+            keys = keys,
+            download_pkgs_output_tar = download_pkgs_output_tar,
+            download_pkgs_output_script = download_pkgs_output_script,
+        )
 
         installables_tars.append(output_tar.providers[0].installables_tar)
 
