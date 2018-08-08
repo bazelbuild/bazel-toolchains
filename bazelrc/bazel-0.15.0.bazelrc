@@ -91,6 +91,7 @@ build:remote --auth_enabled=true
 # Results UI.
 build:results --bes_backend="buildeventservice.googleapis.com"
 build:results --bes_timeout=60s
+build:results --tls_enabled
 
 # If the upload to BES fails, the build will fail.
 build:results --bes_best_effort=false
