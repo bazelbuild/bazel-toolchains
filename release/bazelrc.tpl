@@ -80,6 +80,7 @@ build:remote --auth_enabled=true
 # Results UI.
 build:results --bes_backend="buildeventservice.googleapis.com"
 build:results --bes_timeout=60s
+build:results --tls_enabled
 
 # Output BES results url
 build:results --bes_results_url="https://source.cloud.google.com/results/invocations/"
