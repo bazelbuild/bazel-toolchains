@@ -18,6 +18,7 @@ load("@io_bazel_rules_docker//container:container.bzl", _container = "container"
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
 load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
+
 load(":debian_pkg_tar.bzl", _aggregate_debian_pkgs = "aggregate")
 
 def _input_validation(kwargs):
@@ -84,6 +85,27 @@ def _language_tool_layer_impl(
     keys = keys or ctx.files.keys
     installables_tars = installables_tars or []
     installation_cleanup_commands = installation_cleanup_commands or ctx.attr.installation_cleanup_commands
+
+    # If ctx.file.installables_tar is specified, ignore 'packages' and other tars in installables_tars.
+    if ctx.file.installables_tar:
+        installables_tars = [ctx.file.installables_tar]
+        # Otherwise, download packages if packages list is not empty, and add the tar of downloaded
+        # debs to installables_tars.
+
+    elif packages != []:
+        download_pkgs_output_tar = ctx.attr.name + "-download_pkgs_output_tar.tar"
+        download_pkgs_output_script = ctx.attr.name + "-download_pkgs_output_script.sh"
+
+        aggregated_debian_tar = _aggregate_debian_pkgs.implementation(
+            ctx,
+            packages = packages,
+            additional_repos = additional_repos,
+            keys = keys,
+            download_pkgs_output_tar = download_pkgs_output_tar,
+            download_pkgs_output_script = download_pkgs_output_script,
+        )
+
+        installables_tars.append(aggregated_debian_tar.providers[0].installables_tar)
 
     # Prepare new base image for the container_image rule.
     new_base = ctx.files.base[0]
@@ -179,9 +201,9 @@ language_tool_layer_ = rule(
 )
 
 def language_tool_layer(**kwargs):
-    """A wrapper around attrs in container_image and install_pkgs rules.
+    """A wrapper around attrs in container_image, download_pkgs and install_pkgs rules.
 
-    Installs debian packages using
+    Downloads and installs debian packages using
     https://github.com/GoogleCloudPlatform/base-images-docker/tree/master/package_managers,
     and configures the rest using https://github.com/bazelbuild/rules_docker#container_image-1.
 
@@ -261,27 +283,6 @@ def _toolchain_container_impl(ctx):
     additional_repos = depset(additional_repos).to_list()
     keys = depset(keys).to_list()
     installables_tars = depset(installables_tars).to_list()
-
-    # If ctx.file.installables_tar is specified, ignore 'packages' and other tars in installables_tars.
-    if ctx.file.installables_tar:
-        installables_tars = [ctx.file.installables_tar]
-        # Otherwise, download packages if packages list is not empty, and add the tar of downloaded
-        # debs to installables_tars.
-
-    elif packages != []:
-        download_pkgs_output_tar = ctx.attr.name + "-download_pkgs_output_tar.tar"
-        download_pkgs_output_script = ctx.attr.name + "-download_pkgs_output_script.sh"
-
-        output_tar = _aggregate_debian_pkgs.implementation(
-            ctx,
-            packages = packages,
-            additional_repos = additional_repos,
-            keys = keys,
-            download_pkgs_output_tar = download_pkgs_output_tar,
-            download_pkgs_output_script = download_pkgs_output_script,
-        )
-
-        installables_tars.append(output_tar.providers[0].installables_tar)
 
     return _language_tool_layer_impl(
         ctx,

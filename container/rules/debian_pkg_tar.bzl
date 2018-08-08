@@ -36,21 +36,16 @@ InstallableTarInfo = provider(fields = [
     "installables_tar",
 ])
 
-def _debian_pkg_tar_impl(
+def _generate_deb_tar(
         ctx,
         packages = None,
         additional_repos = None,
         keys = None,
         download_pkgs_output_tar = None,
         download_pkgs_output_script = None):
-    """Implementation for the aggregate_debian_pkgs rule.
+    """A function for producing a tarball.
 
-    aggregate_debian_pkgs rule produces a tarball with all debian packages declared
-    in the language_tool_layer(s) this rule depends on.
-
-    the implementation can also be used by toolchain_container rule implementation to
-    produce a tarball with all debian packages declared in the language_tool_layer(s)
-    toolchain_container rule depends on.
+    _generate_deb_tar function produces a tarball with all debian packages, additional_repos, and keys.
 
     Args:
       ctx: ctx as the same as for container_image + list of language_tool_layer(s)
@@ -65,25 +60,9 @@ def _debian_pkg_tar_impl(
       override default output_script name
     """
 
-    # If the rule is used directly, aggregate packages, additional_repos, keys
-    # from each language_tool_layer
-    if not packages and not additional_repos and not keys:
-        packages = []
-        additional_repos = []
-        keys = []
-
-        for layer in ctx.attr.language_layers:
-            packages.extend(layer.packages)
-            additional_repos.extend(layer.additional_repos)
-            keys.extend(layer.keys)
-
-        packages.extend(ctx.attr.packages)
-        additional_repos.extend(ctx.attr.additional_repos)
-        keys.extend(ctx.files.keys)
-
-        packages = depset(packages).to_list()
-        additional_repos = depset(additional_repos).to_list()
-        keys = depset(keys).to_list()
+    packages = packages or ctx.attr.packages
+    additional_repos =  additional_repos or ctx.attr.additional_repos
+    keys = keys or ctx.attr.keys
 
     # Prepare base image for the download_pkgs rule.
     download_base = ctx.files.base[0]
@@ -138,13 +117,49 @@ def _debian_pkg_tar_impl(
         ],
     )
 
-# Export aggregate_debian_pkgs rule for other bazel rules to depend on.
+def _aggregate_debian_pkgs_impl(ctx):
+    """Implementation for the aggregate_debian_pkgs rule.
+
+    aggregate_debian_pkgs rule produces a tarball with all debian packages declared
+    in the language_tool_layer(s) this rule depends on.
+
+    Args:
+      ctx: ctx as the same as for container_image + list of language_tool_layer(s)
+      https://github.com/bazelbuild/rules_docker#container_image
+    """
+
+    # If the rule is used directly, aggregate packages, additional_repos, keys
+    # from each language_tool_layer
+
+    packages = []
+    additional_repos = []
+    keys = []
+
+    for layer in ctx.attr.language_layers:
+        packages.extend(layer.packages)
+        additional_repos.extend(layer.additional_repos)
+        keys.extend(layer.keys)
+
+    packages.extend(ctx.attr.packages)
+    additional_repos.extend(ctx.attr.additional_repos)
+    keys.extend(ctx.files.keys)
+
+    packages = depset(packages).to_list()
+    additional_repos = depset(additional_repos).to_list()
+    keys = depset(keys).to_list()
+
+    return _generate_deb_tar(
+        ctx,
+        packages = packages,
+        additional_repos = additional_repos,
+        keys = keys,
+    )
+
+# Export _generate_deb_tar function for other bazel rules use.
 aggregate = struct(
-    attrs = debian_pkgs_attrs + {
-        "language_layers": attr.label_list(),
-    },
+    attrs = debian_pkgs_attrs,
     outputs = _download_deb_pkgs.outputs,
-    implementation = _debian_pkg_tar_impl,
+    implementation = _generate_deb_tar,
 )
 
 aggregate_debian_pkgs = rule(
@@ -152,7 +167,7 @@ aggregate_debian_pkgs = rule(
         "language_layers": attr.label_list(),
     },
     outputs = _download_deb_pkgs.outputs,
-    implementation = _debian_pkg_tar_impl,
+    implementation = _aggregate_debian_pkgs_impl,
 )
 """Aggregate debian packages from multiple language_tool_layers into a tarball.
 
