@@ -61,7 +61,7 @@ def _generate_deb_tar(
     """
 
     packages = packages or ctx.attr.packages
-    additional_repos =  additional_repos or ctx.attr.additional_repos
+    additional_repos = additional_repos or ctx.attr.additional_repos
     keys = keys or ctx.attr.keys
 
     # Prepare base image for the download_pkgs rule.

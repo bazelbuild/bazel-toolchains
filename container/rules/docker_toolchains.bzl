@@ -18,7 +18,6 @@ load("@io_bazel_rules_docker//container:container.bzl", _container = "container"
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
 load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
-
 load(":debian_pkg_tar.bzl", _aggregate_debian_pkgs = "aggregate")
 
 def _input_validation(kwargs):
