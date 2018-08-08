@@ -17,11 +17,11 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load(
-    "//container/rules:docker_toolchains.bzl",
-    "debian_pkg_tar",
+    "//container/rules:debian_pkg_tar.bzl",
+    "aggregate_debian_pkgs",
 )
 
-debian_pkg_tar(
+aggregate_debian_pkgs(
     name = "ubuntu16-04-debian_pkgs",
     base = "@ubuntu16_04//image",
     language_layers = [
