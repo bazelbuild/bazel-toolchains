@@ -18,7 +18,7 @@ load("@io_bazel_rules_docker//container:container.bzl", _container = "container"
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
 load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
-load(":debian_pkg_tar.bzl", _aggregate_debian_pkgs = "aggregate")
+load(":debian_pkg_tar.bzl", _generate_deb_tar = "generate")
 
 def _input_validation(kwargs):
     if "debs" in kwargs:
@@ -95,7 +95,7 @@ def _language_tool_layer_impl(
         download_pkgs_output_tar = ctx.attr.name + "-download_pkgs_output_tar.tar"
         download_pkgs_output_script = ctx.attr.name + "-download_pkgs_output_script.sh"
 
-        aggregated_debian_tar = _aggregate_debian_pkgs.implementation(
+        aggregated_debian_tar = _generate_deb_tar.implementation(
             ctx,
             packages = packages,
             additional_repos = additional_repos,
