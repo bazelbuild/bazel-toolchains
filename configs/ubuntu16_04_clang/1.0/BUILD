@@ -35,7 +35,25 @@ java_runtime(
 # Update every time when a new container is released.
 alias(
     name = "rbe_ubuntu1604",
-    actual = ":rbe_ubuntu1604_r328903",
+    actual = ":rbe_ubuntu1604_r337145",
+)
+
+# RBE Ubuntu16_04 r337145
+platform(
+    name = "rbe_ubuntu1604_r337145",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+         }
+         """,
 )
 
 # RBE Ubuntu16_04 r328903

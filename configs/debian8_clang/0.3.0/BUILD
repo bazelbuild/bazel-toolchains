@@ -35,7 +35,25 @@ java_runtime(
 # Update every time when a new container is released.
 alias(
     name = "rbe_debian8",
-    actual = ":rbe_debian8_r328903",
+    actual = ":rbe_debian8_r337145",
+)
+
+# RBE Debian8 r337145
+platform(
+    name = "rbe_debian8_r337145",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints/sanitizers:support_msan",
+        "//constraints:jessie",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+         }
+         """,
 )
 
 # RBE Debian8 r328903
