@@ -65,8 +65,8 @@ def _generate_deb_tar(
     """A function for producing a tarball for a set of debian packages.
 
     Args:
-      ctx: ctx as the same as for container_image + list of language_tool_layer(s)
-      https://github.com/bazelbuild/rules_docker#container_image
+      ctx: ctx has either generate_deb_tar_attrs or aggregate_debian_pkgs_attrs
+      ctx depends on the rule that uses this function
       packages: packages aggregated from each language_tool_layer by toolchain_container rule
       additional_repos: additional_repos aggregated from each language_tool_layer by
       toolchain_container rule
