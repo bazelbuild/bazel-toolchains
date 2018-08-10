@@ -29,20 +29,25 @@ container = [
     ".tar.xz",
 ]
 
-debian_pkgs_attrs = _apt_key.attrs + _download_deb_pkgs.attrs + {
+generate_deb_tar_attrs = _download_deb_pkgs.attrs + {
     "base": attr.label(allow_files = container),
-    # Redeclare following attributes as non-mandatory.
-    "image_tar": attr.label(
-        allow_files = True,
-        single_file = True,
-    ),
-    "image": attr.label(
-        allow_files = True,
-        single_file = True,
-    ),
     "packages": attr.string_list(),
     "keys": attr.label_list(
         allow_files = True,
+    ),
+}
+
+aggregate_debian_pkgs_attrs = {
+    "base": attr.label(allow_files = container),
+    "language_layers": attr.label_list(),
+
+    # Declare the following attributes since _download_deb_pkgs.implementation
+    # need access those attribute if their overrides are None
+    "additional_repos": attr.string_list(),
+    "_image_id_extractor": attr.label(
+        default = "@io_bazel_rules_docker//contrib:extract_image_id.py",
+        allow_files = True,
+        single_file = True,
     ),
 }
 
@@ -128,12 +133,8 @@ def _aggregate_debian_pkgs_impl(ctx):
     in the language_tool_layer(s) this rule depends on.
 
     Args:
-      ctx: ctx as the same as for container_image + list of language_tool_layer(s)
-      https://github.com/bazelbuild/rules_docker#container_image
+      ctx: ctx only has name, base, and language_layers attributes
     """
-
-    # If the rule is used directly, aggregate packages, additional_repos, keys
-    # from each language_tool_layer
 
     packages = []
     additional_repos = []
@@ -155,17 +156,15 @@ def _aggregate_debian_pkgs_impl(ctx):
         keys = keys,
     )
 
-# Export _generate_deb_tar function for other bazel rules use.
+# Export _generate_deb_tar function for other bazel rules to use.
 generate = struct(
-    attrs = debian_pkgs_attrs,
+    attrs = generate_deb_tar_attrs,
     outputs = _download_deb_pkgs.outputs,
     implementation = _generate_deb_tar,
 )
 
 aggregate_debian_pkgs_ = rule(
-    attrs = debian_pkgs_attrs + {
-        "language_layers": attr.label_list(),
-    },
+    attrs = aggregate_debian_pkgs_attrs,
     outputs = _download_deb_pkgs.outputs,
     implementation = _aggregate_debian_pkgs_impl,
 )
@@ -174,11 +173,11 @@ def aggregate_debian_pkgs(**kwargs):
     """Aggregate debian packages from multiple language_tool_layers into a tarball.
 
     Args:
-    name: a unique name for this rule.
-    base: base os image used for this rule.
-    language_layers: a list of language_tool_layer.
+      name: a unique name for this rule.
+      base: base os image used for this rule.
+      language_layers: a list of language_tool_layer.
 
-    Only name, base, and language_layers arguments are used in this rule.
+    Only name, base, and language_layers attributes are used in this rule.
 
     Experimental rule.
     """
