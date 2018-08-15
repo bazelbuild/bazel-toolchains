@@ -47,10 +47,10 @@ def _gcs_file_impl(ctx):
         "gsutil_cp_and_validate.sh",
         Label("//rules:gsutil_cp_and_validate.sh.tpl"),
         {
-          "%{BUCKET}": ctx.attr.bucket,
-          "%{FILE}": ctx.attr.file,
-          "%{DOWNLOAD_PATH}": str(download_path),
-          "%{SHA256}": ctx.attr.sha256,
+            "%{BUCKET}": ctx.attr.bucket,
+            "%{FILE}": ctx.attr.file,
+            "%{DOWNLOAD_PATH}": str(download_path),
+            "%{SHA256}": ctx.attr.sha256,
         },
     )
 
