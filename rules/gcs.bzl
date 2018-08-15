@@ -41,29 +41,26 @@ def _gcs_file_impl(ctx):
 
     # Add a top-level BUILD file to export all the downloaded files.
     ctx.file("file/BUILD", _GCS_FILE_BUILD.format(downloaded_file_path))
-    gsutil_cp_cmd = ["gsutil"]
-    gsutil_cp_cmd += [
-        "cp",
-        "{bucket}/{file}".format(
-            bucket = ctx.attr.bucket,
-            file = ctx.attr.file,
-        ),
-        download_path,
-    ]
-    gsutil_cp_result = ctx.execute(gsutil_cp_cmd)
-    if gsutil_cp_result.return_code:
-        fail("gsutil cp command failed: %s (%s)" % (gsutil_cp_result.stderr, " ".join(gsutil_cp_cmd)))
-    ctx.file("validation.sh", """
-#!/bin/bash
-if [ $(sha256sum {file} | head -c 64) != {sha256} ]; then
-  exit -1
-else
-  exit 0
-fi""".format(file = download_path, sha256 = ctx.attr.sha256))
-    validate_result = ctx.execute(["bash", "validation.sh"])
-    if validate_result.return_code:
-        fail("SHA256 of downloaded file does not match given SHA256: %s" % validate_result.stderr)
-    rm_result = ctx.execute(["rm", "validation.sh"])
+
+    # Create a bash script from a template.
+    ctx.template(
+        "gsutil_cp_and_validate.sh",
+        Label("//rules:gsutil_cp_and_validate.sh.tpl"),
+        {
+          "%{BUCKET}": ctx.attr.bucket,
+          "%{FILE}": ctx.attr.file,
+          "%{DOWNLOAD_PATH}": str(download_path),
+          "%{SHA256}": ctx.attr.sha256,
+        },
+    )
+
+    gsutil_cp_and_validate_result = ctx.execute(["bash", "gsutil_cp_and_validate.sh"])
+    if gsutil_cp_and_validate_result.return_code == 255:
+        fail("SHA256 of downloaded file does not match given SHA256: %s" % gsutil_cp_and_validate_result.stderr)
+    elif gsutil_cp_and_validate_result.return_code != 0:
+        fail("gsutil cp command failed: %s" % (gsutil_cp_and_validate_result.stderr))
+
+    rm_result = ctx.execute(["rm", "gsutil_cp_and_validate.sh"])
     if rm_result.return_code:
         fail("Failed to remove temporary file: %s" % rm_result.stderr)
 
