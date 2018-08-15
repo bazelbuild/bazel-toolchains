@@ -114,3 +114,37 @@ docker_toolchain_autoconfig(
     tags = ["manual"],
     test = True,
 )
+
+# This target is auto-generated from release/default.tpl and should not be
+# modified directly.
+# Created on 2018.8.13
+# Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:fbf123ca7c7696f53864da4f7d1d9470f9ef4ebfabc4344f44173d1951faee6f
+docker_toolchain_autoconfig(
+    name = "default-ubuntu16_04-clang-1.0-bazel_0.16.1-autoconfig",
+    additional_repos = ubuntu16_04_clang_default_repos(),
+    base = "@ubuntu16_04-clang//image",
+    bazel_version = "0.16.1",
+    env = clang_env(),
+    keys = ubuntu16_04_clang_default_keys(),
+    packages = ubuntu16_04_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
+
+# This target is auto-generated from release/msan.tpl and should not be
+# modified directly.
+# Created on 2018.8.13
+# Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:fbf123ca7c7696f53864da4f7d1d9470f9ef4ebfabc4344f44173d1951faee6f
+docker_toolchain_autoconfig(
+    name = "msan-ubuntu16_04-clang-1.0-bazel_0.16.1-autoconfig",
+    additional_repos = ubuntu16_04_clang_default_repos(),
+    base = "@ubuntu16_04-clang//image",
+    bazel_version = "0.16.1",
+    env = clang_env() + {
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+    },
+    keys = ubuntu16_04_clang_default_keys(),
+    packages = ubuntu16_04_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
