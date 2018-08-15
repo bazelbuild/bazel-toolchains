@@ -21,7 +21,7 @@ build:remote --extra_execution_platforms=@bazel_toolchains//configs/debian8_clan
 build:remote --host_platform=@bazel_toolchains//configs/debian8_clang/0.3.0:rbe_debian8
 build:remote --platforms=@bazel_toolchains//configs/debian8_clang/0.3.0:rbe_debian8
 
-# Experimental configs for sanitizers, use --config=remote,remote-xxsan,remote-<asan/tsan/msan> (in that order)
+# Experimental configs for sanitizers, use --config=remote --config=remote-xxsan --config=remote-<asan/tsan/msan> (in that order)
 # See https://github.com/bazelbuild/bazel/issues/5291.
 build:remote-xxsan --copt=-gmlt
 build:remote-xxsan --strip=never
