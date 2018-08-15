@@ -21,7 +21,7 @@ build:remote --extra_execution_platforms=@bazel_toolchains//${PACKAGE}/${CONFIG_
 build:remote --host_platform=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:${PLATFORM}
 build:remote --platforms=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:${PLATFORM}
 
-# Experimental configs for sanitizers, use --config=remote,remote-xxsan,remote-<asan/tsan/msan> (in that order)
+# Experimental configs for sanitizers, use --config=remote --config=remote-xxsan --config=remote-<asan/tsan/msan> (in that order)
 # See https://github.com/bazelbuild/bazel/issues/5291.
 build:remote-xxsan --copt=-gmlt
 build:remote-xxsan --strip=never
