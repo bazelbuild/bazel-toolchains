@@ -22,7 +22,7 @@ load("@base_images_docker//util:run.bzl", "container_run_and_extract")
 load(
     "//container/ubuntu16_04/layers/bazel:version.bzl",
     "BAZEL_VERSION_SHA256S",
-    "BAZEL_VERSION_TO_CONFIG_BAZEL_VERSION",
+    "BAZEL_VERSION_TO_CONFIG_VERSION",
 )
 
 exports_files(glob(["*.yaml"]))
@@ -46,7 +46,7 @@ language_tool_layer(
     name = "generate_bazel_%s_bazelrc" % bazel_version,
     srcs = ["bazel.bazelrc.tpl"],
     outs = ["bazel-%s.bazelrc" % bazel_version],
-    cmd = "sed 's|{_BAZEL_VERSION}|" + BAZEL_VERSION_TO_CONFIG_BAZEL_VERSION.get(bazel_version) + "|' <$< >$@",
+    cmd = "sed 's|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|' <$< >$@",
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
 # Create image with Bazel installer for all supported versions.
@@ -88,5 +88,5 @@ language_tool_layer(
     srcs = ["bazel.yaml.tpl"],
     outs = ["bazel_%s.yaml" % bazel_version],
     cmd = "sed 's|{_BAZEL_VERSION}|" + bazel_version + "|; " +
-          "s|{_CONFIG_BAZEL_VERSION}|" + BAZEL_VERSION_TO_CONFIG_BAZEL_VERSION.get(bazel_version) + "|' <$< >$@",
+          "s|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|' <$< >$@",
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]

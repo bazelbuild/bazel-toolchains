@@ -11,7 +11,7 @@ BAZEL_VERSION_SHA256S = {
 # changes in toolchain configs, so we do not publish duplicated toolchain
 # configs. So, for example, Bazel 0.15.2 should still use published toolchain
 # configs generated with Bazel 0.15.0.
-BAZEL_VERSION_TO_CONFIG_BAZEL_VERSION = {
+BAZEL_VERSION_TO_CONFIG_VERSION = {
     "0.14.1": "0.14.1",
     "0.15.0": "0.15.0",
     "0.15.2": "0.15.0",
