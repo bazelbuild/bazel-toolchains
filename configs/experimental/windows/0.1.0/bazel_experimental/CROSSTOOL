@@ -242,7 +242,7 @@ cxx_builtin_include_directory: "C:\\Program Files (x86)\\Windows Kits\\8.1\\incl
 # This is a workaround for https://github.com/bazelbuild/bazel/issues/5087.
 cxx_builtin_include_directory: "C:\\tmp\\lre"
 cxx_builtin_include_directory: "C:\\botcode\\w\\ir\\run"
-cxx_builtin_include_directory: "C:\\botcode\\w\\run"
+cxx_builtin_include_directory: "C:\\botcode\\w"
 
   tool_path {
     name: "ar"
