@@ -18,7 +18,7 @@ package(default_visibility = ["//visibility:public"])
 
 load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
-load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
+load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 # Generate the container with Bazel and Docker for all supported versions of
 # Bazel.
@@ -58,9 +58,9 @@ load("//container/ubuntu16_04/layers/bazel:version.bzl", "BAZEL_VERSION_SHA256S"
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:wget.yaml",
+        "//container/common/bazel:bazel_tools.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel_%s.yaml" % bazel_version,
-        "//container/ubuntu16_04/layers/bazel:bazel_tools.yaml",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
         "//container/ubuntu16_04/layers/gcloud:gcloud.yaml",
     ],

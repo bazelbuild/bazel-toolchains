@@ -20,10 +20,11 @@ load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@base_images_docker//util:run.bzl", "container_run_and_extract")
 load(
-    "//container/ubuntu16_04/layers/bazel:version.bzl",
+    "//container/common/bazel:version.bzl",
     "BAZEL_VERSION_SHA256S",
     "BAZEL_VERSION_TO_CONFIG_VERSION",
 )
+load("//container/ubuntu16_04:ubuntu16_04.bzl", "CONFIG_BASE")
 
 exports_files(glob(["*.yaml"]))
 
@@ -44,9 +45,10 @@ language_tool_layer(
 # Generate bazel.bazelrc files for all supported versions.
 [genrule(
     name = "generate_bazel_%s_bazelrc" % bazel_version,
-    srcs = ["bazel.bazelrc.tpl"],
+    srcs = ["//container/common/bazel:bazel.bazelrc.tpl"],
     outs = ["bazel-%s.bazelrc" % bazel_version],
-    cmd = "sed 's|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|' <$< >$@",
+    cmd = "sed 's|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|; " +
+          "s|{_CONFIG_BASE}|" + CONFIG_BASE + "|' <$< >$@",
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
 # Create image with Bazel installer for all supported versions.
@@ -85,8 +87,9 @@ language_tool_layer(
 # Generate Bazel container testing yaml files with all supported Bazel versions.
 [genrule(
     name = "generate_bazel_%s_yaml" % bazel_version,
-    srcs = ["bazel.yaml.tpl"],
+    srcs = ["//container/common/bazel:bazel.yaml.tpl"],
     outs = ["bazel_%s.yaml" % bazel_version],
     cmd = "sed 's|{_BAZEL_VERSION}|" + bazel_version + "|; " +
-          "s|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|' <$< >$@",
+          "s|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|; " +
+          "s|{_CONFIG_BASE}|" + CONFIG_BASE + "|' <$< >$@",
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
