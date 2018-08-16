@@ -25,6 +25,10 @@ load(
     "java_layer_packages",
     "python_layer_packages",
 )
+load(
+    "//container/common/layers/clang:clang.bzl",
+    "clang_env",
+)
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load(
     "@io_bazel_rules_docker//container:container.bzl",

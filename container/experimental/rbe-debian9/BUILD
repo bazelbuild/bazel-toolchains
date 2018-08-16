@@ -21,6 +21,10 @@ load(
     "language_tool_layer",
     "toolchain_container",
 )
+load(
+    "//container/common/layers/clang:clang.bzl",
+    "clang_env",
+)
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
 JAVA_CLEANUP_COMMANDS = (

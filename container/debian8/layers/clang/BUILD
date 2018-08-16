@@ -20,6 +20,10 @@ load(
     "//container/rules:docker_toolchains.bzl",
     "language_tool_layer",
 )
+load(
+    "//container/common/layers/clang:clang.bzl",
+    "clang_env",
+)
 
 language_tool_layer(
     name = "clang-ltl",
