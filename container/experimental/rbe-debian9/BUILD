@@ -83,11 +83,7 @@ language_tool_layer(
 language_tool_layer(
     name = "clang-ltl",
     base = "@debian9//image",
-    env = {
-        "CC": "/usr/local/bin/clang",
-        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-        "MSAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-    },
+    env = clang_env,
     packages = [
         "libstdc++-6-dev",
     ],

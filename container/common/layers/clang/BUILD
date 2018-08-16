@@ -1,4 +1,4 @@
-# Copyright 2017 The Bazel Authors. All rights reserved.
+# Copyright 2016 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,21 +15,3 @@
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
-
-load(
-    "//container/rules:docker_toolchains.bzl",
-    "language_tool_layer",
-)
-
-language_tool_layer(
-    name = "clang-ltl",
-    base = "@debian8//image",
-    env = clang_env,
-    packages = [
-        "libstdc++-4.9-dev",
-    ],
-    tars = [
-        "//third_party/clang:debian8_tar",
-        "//third_party/libcxx:debian8_tar",
-    ],
-)
