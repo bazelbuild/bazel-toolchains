@@ -84,7 +84,7 @@ LATEST_BAZEL_VERSION = "0.16.1"
 
 SUPPORTED_TYPES = [
     "rbe-debian8", "rbe-debian9", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
-    "ubuntu16_04-bazel-docker-gcloud"
+    "ubuntu16_04-bazel-docker-gcloud", "debian8-bazel"
 ]
 
 # File passed in -m must include the following 3 maps
@@ -100,6 +100,7 @@ TYPE_PACKAGE_MAP = {
     "ubuntu16_04-bazel": "container/ubuntu16_04/builders/bazel",
     "ubuntu16_04-bazel-docker-gcloud":
         "container/ubuntu16_04/builders/bazel_docker_gcloud",
+    "debian8-bazel": "container/debian8/builders/bazel",
 }
 
 # Map to store all supported container type and the name of target to build it.
@@ -110,6 +111,7 @@ TYPE_TARGET_MAP = {
     "ubuntu16_04-bazel": "bazel_{}".format(LATEST_BAZEL_VERSION),
     "ubuntu16_04-bazel-docker-gcloud":
         "bazel_{}_docker_gcloud".format(LATEST_BAZEL_VERSION),
+    "debian8-bazel": "bazel_{}".format(LATEST_BAZEL_VERSION),
 }
 
 # Map to store all supported container type and the name of target to build it.
@@ -124,6 +126,8 @@ TYPE_TARBALL_MAP = {
         "bazel_{}-packages.tar".format(LATEST_BAZEL_VERSION),
     "ubuntu16_04-bazel-docker-gcloud":
         "bazel_{}_docker_gcloud-packages.tar".format(LATEST_BAZEL_VERSION),
+    "debian8-bazel":
+         "bazel_{}-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
 # =========== ENDING HERE ===========

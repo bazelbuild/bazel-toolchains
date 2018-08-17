@@ -42,7 +42,7 @@ load(
     "OPENJDK_SRC_SHA256",
 )
 load(
-    "//container/ubuntu16_04/layers/bazel:version.bzl",
+    "//container/common/bazel:version.bzl",
     "BAZEL_VERSION_SHA256S",
 )
 

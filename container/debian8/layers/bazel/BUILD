@@ -24,7 +24,7 @@ load(
     "BAZEL_VERSION_SHA256S",
     "BAZEL_VERSION_TO_CONFIG_VERSION",
 )
-load("//container/ubuntu16_04:ubuntu16_04.bzl", "CONFIG_BASE")
+load("//container/debian8:debian8.bzl", "CONFIG_BASE")
 
 exports_files(glob(["*.yaml"]))
 
@@ -32,7 +32,7 @@ exports_files(glob(["*.yaml"]))
 # will include that in the final container.
 language_tool_layer(
     name = "bazel-tools",
-    base = "@ubuntu16_04//image",
+    base = "@debian8//image",
     packages = [
         "bash-completion",
         "binutils",
@@ -54,7 +54,7 @@ language_tool_layer(
 # Create image with Bazel installer for all supported versions.
 [toolchain_container(
     name = "bazel_%s_installer_image" % bazel_version,
-    base = "@ubuntu16_04//image",
+    base = "@debian8//image",
     files = [
         "@bazel_%s_installer//file" % bazel_version.replace(".", ""),
         ":bazel-%s.bazelrc" % bazel_version,
@@ -80,7 +80,7 @@ language_tool_layer(
 # Language_tool_layer targets for all supported Bazel versions.
 [language_tool_layer(
     name = "bazel_%s-ltl" % bazel_version,
-    base = "@ubuntu16_04//image",
+    base = "@debian8//image",
     tars = [":bazel_%s_tar" % bazel_version],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 

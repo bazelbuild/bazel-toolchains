@@ -27,5 +27,5 @@ build:msan --copt=-fsanitize=memory
 build:msan --linkopt=-fsanitize=memory
 build:msan --cxxopt=--stdlib=libc++
 build:msan --copt=-fsanitize-memory-track-origins
-build:msan --host_crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_{_BAZEL_CONFIG_VERSION}/default:toolchain
-build:msan --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_{_BAZEL_CONFIG_VERSION}/msan:toolchain
+build:msan --host_crosstool_top=@bazel_toolchains//configs/{_CONFIG_BASE}/bazel_{_BAZEL_CONFIG_VERSION}/default:toolchain
+build:msan --crosstool_top=@bazel_toolchains//configs/{_CONFIG_BASE}/bazel_{_BAZEL_CONFIG_VERSION}/msan:toolchain
