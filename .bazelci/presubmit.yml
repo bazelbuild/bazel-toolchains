@@ -31,6 +31,7 @@ platforms:
     - "//container/ubuntu16_04/builders/bazel:bazel_0.16.1-test"
     - "//container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_0.16.1_docker_gcloud-test"
     - "//container/debian8/builders/bazel:bazel_0.16.1-test"
+    - "//container/ubuntu14_04/builders/bazel:bazel_0.16.1-test"
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"

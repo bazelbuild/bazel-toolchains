@@ -1,0 +1,7 @@
+schemaVersion: "2.0.0"
+
+commandTests:
+- name: 'check-g++'
+  command: 'g++'
+  args: ['--version']
+  expectedOutput: ['g[+][+] [(]Ubuntu .*']

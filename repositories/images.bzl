@@ -136,3 +136,13 @@ def images():
             registry = "l.gcr.io",
             repository = "google/clang-ubuntu",
         )
+
+    # Note that we pull trusty base from "index.docker.io" registry and not from
+    # "marketplace.gcr.io" as we do for other base images.
+    if "trusty" not in excludes:
+        container_pull(
+            name = "trusty",
+            registry = "index.docker.io",
+            repository = "library/ubuntu",
+            tag = "14.04",
+        )
