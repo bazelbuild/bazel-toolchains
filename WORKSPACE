@@ -127,3 +127,17 @@ http_file(
         "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
+
+container_pull(
+    name = "trusty",
+    registry = "index.docker.io",
+    repository = "library/ubuntu",
+    tag = "14.04",
+)
+
+# Used to install java in trusty.
+http_file(
+    name = "launchpad_openjdk_gpg",
+    sha256 = "54b6274820df34a936ccc6f5cb725a9b7bb46075db7faf0ef7e2d86452fa09fd",
+    url = "http://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0xEB9B1D8886F44E2A",
+)
