@@ -25,8 +25,8 @@ Bazel](https://github.com/bazelbuild/bazel/tree/master/src/main/java/com/google/
 
 ### Build with [Google Cloud Container Builder](https://cloud.google.com/container-builder/)
 
-**Note: currently, this process can currently only be executed by users who have
-read access to asci-toolchains's GCR, but we publish it here to make the build
+**Note: currently, this process can only be executed by users who have
+read access to asci-toolchains's GCR. We publish it here to make the build
 process for our containers publicly available. You can still build the
 containers locally. See instructions in the next section.**
 
