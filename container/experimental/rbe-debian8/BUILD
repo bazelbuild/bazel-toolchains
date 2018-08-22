@@ -25,6 +25,10 @@ load(
     "java_layer_packages",
     "python_layer_packages",
 )
+load(
+    "//container/common/layers/clang:clang.bzl",
+    "clang_env",
+)
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load(
     "@io_bazel_rules_docker//container:container.bzl",
@@ -72,11 +76,7 @@ container_layer(
 container_layer(
     name = "clang-ltl",
     debs = clang_layer_packages(),
-    env = {
-        "CC": "/usr/local/bin/clang",
-        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-        "MSAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-    },
+    env = clang_env,
     tags = ["manual"],
     tars = [
         "//third_party/clang:debian8_tar",

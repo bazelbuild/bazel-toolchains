@@ -20,15 +20,15 @@ load(
     "//container/rules:docker_toolchains.bzl",
     "language_tool_layer",
 )
+load(
+    "//container/common/layers/clang:clang.bzl",
+    "clang_env",
+)
 
 language_tool_layer(
     name = "clang-ltl",
     base = "@ubuntu16_04//image",
-    env = {
-        "CC": "/usr/local/bin/clang",
-        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-        "MSAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-    },
+    env = clang_env,
     packages = [
         "libstdc++-4.9-dev",
     ],
