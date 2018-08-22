@@ -270,13 +270,6 @@ def cloud_build(project,
         bazel_toolchains_base_dir)
     extra_substitution = ""
 
-  # If script is called within this repo, then we don't need @bazel_toolchains
-  # target names (causes infinite symlink chain). If script is called from outside,
-  # we do need it.
-  bazel_toolchains_ref = "@bazel_toolchains"
-  if os.path.samefile(bazel_toolchains_base_dir, "."):
-    bazel_toolchains_ref = ""
-
   async_arg = ""
   if async_:
     async_arg = "--async"
@@ -286,7 +279,6 @@ def cloud_build(project,
            "--config={CONFIG} "
            "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
            "_BAZEL_VERSION={BAZEL_VERSION},"
-           "_BAZEL_TOOLCHAINS_REF={BAZEL_TOOLCHAINS_REF},"
            "_TAG={TAG},_PACKAGE={PACKAGE},_TARGET={TARGET}{EXTRA_SUBSTITUTION} "
            "--machine-type=n1-highcpu-32 "
            "{ASYNC}").format(
@@ -294,7 +286,6 @@ def cloud_build(project,
                PROJECT=project,
                CONTAINER=container,
                TAG=tag,
-               BAZEL_TOOLCHAINS_REF=bazel_toolchains_ref,
                PACKAGE=package,
                TARGET=target,
                EXTRA_SUBSTITUTION=extra_substitution,
