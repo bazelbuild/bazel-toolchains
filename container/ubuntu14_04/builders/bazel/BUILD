@@ -16,12 +16,16 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//container/rules:docker_toolchains.bzl", "toolchain_container")
+load(
+    "//container/rules:docker_toolchains.bzl",
+    "language_tool_layer",
+    "toolchain_container",
+)
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 language_tool_layer(
-    name = "other-tools-ltl",
+    name = "extra-tools-ltl",
     base = "@trusty//image",
     packages = [
         "git",
@@ -44,7 +48,7 @@ language_tool_layer(
     # reproduction.
     installation_cleanup_commands = "update-ca-certificates -f",
     language_layers = [
-        ":other-tools-ltl",
+        ":extra-tools-ltl",
         "//container/ubuntu14_04/layers/gcc:gcc-ltl",
         "//container/ubuntu14_04/layers/java:java-ltl",
         "//container/ubuntu14_04/layers/java:java10-ltl",
@@ -62,7 +66,7 @@ language_tool_layer(
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common/bazel:bazel_tools.yaml",
-        "//container/common/bazel:other_tools.yaml",
+        "//container/common/bazel:extra_tools.yaml",
         "//container/ubuntu14_04:ubuntu14_04.yaml",
         "//container/ubuntu14_04/layers/bazel:bazel_%s.yaml" % bazel_version,
         "//container/ubuntu14_04/layers/gcc:gcc.yaml",
