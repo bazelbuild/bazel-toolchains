@@ -24,6 +24,7 @@ load(
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
+# Tools that are needed in most builds, but not strictly required by bazel.
 language_tool_layer(
     name = "extra-tools-ltl",
     base = "@trusty//image",
