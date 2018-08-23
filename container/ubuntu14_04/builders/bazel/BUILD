@@ -20,6 +20,15 @@ load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
+language_tool_layer(
+    name = "other-tools-ltl",
+    base = "@trusty//image",
+    packages = [
+        "git",
+        "wget",
+    ],
+)
+
 # Generate the Bazel container for all supported versions using the
 # corresponding Bazel language_tool_layer targets.
 [toolchain_container(
@@ -35,14 +44,13 @@ load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
     # reproduction.
     installation_cleanup_commands = "update-ca-certificates -f",
     language_layers = [
+        ":other-tools-ltl",
         "//container/ubuntu14_04/layers/gcc:gcc-ltl",
         "//container/ubuntu14_04/layers/java:java-ltl",
         "//container/ubuntu14_04/layers/java:java10-ltl",
         "//container/ubuntu14_04/layers/python:python-ltl",
         "//container/ubuntu14_04/layers/bazel:bazel-tools",
         "//container/ubuntu14_04/layers/bazel:bazel_%s-ltl" % bazel_version,
-        "//container/ubuntu14_04/layers/git:git-ltl",
-        "//container/ubuntu14_04/layers/wget:wget-ltl",
     ],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
@@ -51,11 +59,10 @@ load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
     name = "bazel_%s-test" % bazel_version,
     configs = [
         ":container.yaml",
-        "//container/common:git.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
-        "//container/common:wget.yaml",
         "//container/common/bazel:bazel_tools.yaml",
+        "//container/common/bazel:other_tools.yaml",
         "//container/ubuntu14_04:ubuntu14_04.yaml",
         "//container/ubuntu14_04/layers/bazel:bazel_%s.yaml" % bazel_version,
         "//container/ubuntu14_04/layers/gcc:gcc.yaml",

@@ -20,6 +20,15 @@ load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
+language_tool_layer(
+    name = "other-tools-ltl",
+    base = "@ubuntu16_04//image",
+    packages = [
+        "git",
+        "wget",
+    ],
+)
+
 # Generate the container with Bazel and Docker for all supported versions of
 # Bazel.
 [toolchain_container(
@@ -35,14 +44,13 @@ load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
     # reproduction.
     installation_cleanup_commands = "update-ca-certificates -f",
     language_layers = [
+        ":other-tools-ltl",
         "//container/ubuntu16_04/layers/clang:clang-ltl",
         "//container/ubuntu16_04/layers/java:java-ltl",
         "//container/ubuntu16_04/layers/java:java10-ltl",
         "//container/ubuntu16_04/layers/python:python-ltl",
         "//container/ubuntu16_04/layers/bazel:bazel-tools",
         "//container/ubuntu16_04/layers/bazel:bazel_%s-ltl" % bazel_version,
-        "//container/ubuntu16_04/layers/git:git-ltl",
-        "//container/ubuntu16_04/layers/wget:wget-ltl",
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-ltl",
         "//container/ubuntu16_04/layers/gcloud:gcloud-ltl",
     ],
@@ -54,11 +62,10 @@ load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
     configs = [
         ":container.yaml",
         "//container/common:clang.yaml",
-        "//container/common:git.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
-        "//container/common:wget.yaml",
         "//container/common/bazel:bazel_tools.yaml",
+        "//container/common/bazel:other_tools.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
         "//container/ubuntu16_04/layers/bazel:bazel_%s.yaml" % bazel_version,
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
