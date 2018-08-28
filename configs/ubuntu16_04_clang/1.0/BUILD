@@ -31,11 +31,76 @@ java_runtime(
     java_home = "/usr/lib/jvm/zulu" + JDK_VERSION + "-linux_x64-allmodules",
 )
 
-# Latest RBE Ubuntu16_04 container
-# Update every time when a new container is released.
+# Update every time when a new container is available publically.
+LATEST_CLANG_VERSION = "r337145"
+
+# Latest RBE Ubuntu16_04 container with JDK 10
+alias(
+    name = "rbe_ubuntu1604_jdk10",
+    actual = ":rbe_ubuntu1604_" + LATEST_CLANG_VERSION + "_jdk10",
+)
+
+# Latest RBE Ubuntu16_04 container with JDK 8 (deprecated)
+alias(
+    name = "rbe_ubuntu1604_jdk8",
+    actual = ":rbe_ubuntu1604_" + LATEST_CLANG_VERSION + "_jdk8",
+    deprecation = "This target has been deprecated, please switch to use rbe_ubuntu1604_jdk10 if you are using Bazel with version >= 0.17.1",
+)
+
+# Latest RBE Ubuntu16_04 container (deprecated)
 alias(
     name = "rbe_ubuntu1604",
-    actual = ":rbe_ubuntu1604_r337145",
+    actual = ":rbe_ubuntu1604_" + LATEST_CLANG_VERSION,
+    deprecation = "This target has been deprecated, please switch to use rbe_ubuntu1604_jdk10 if you are using Bazel with version >= 0.17.1",
+)
+
+# We use an additional remote_execution_propertie called "jdk-version" to
+# to collect usage of JDK8 and JDK10.
+
+# ====================== RBE Ubuntu16_04 r337145 targets ======================
+
+# RBE Ubuntu16_04 r337145 with JDK 10
+platform(
+    name = "rbe_ubuntu1604_r337145_jdk10",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+         }
+         properties: {
+            name: "jdk-version"
+            value:"10"
+         }
+         """,
+)
+
+# RBE Ubuntu16_04 r337145 with JDK 8
+platform(
+    name = "rbe_ubuntu1604_r337145_jdk8",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+         }
+         properties: {
+            name: "jdk-version"
+            value:"8"
+         }
+         """,
 )
 
 # RBE Ubuntu16_04 r337145
@@ -55,6 +120,8 @@ platform(
          }
          """,
 )
+
+# ====================== RBE Ubuntu16_04 r328903 targets ======================
 
 # RBE Ubuntu16_04 r328903
 platform(

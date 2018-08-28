@@ -31,11 +31,76 @@ java_runtime(
     java_home = "/usr/lib/jvm/zulu" + JDK_VERSION + "-linux_x64-allmodules",
 )
 
-# Latest RBE Debian8 container.
-# Update every time when a new container is released.
+# Update every time when a new container is available publically.
+LATEST_CLANG_VERSION = "r337145"
+
+# Latest RBE Debian8 container with JDK10
+alias(
+    name = "rbe_debian8_jdk10",
+    actual = ":rbe_debian8_" + LATEST_CLANG_VERSION + "_jdk10",
+)
+
+# Latest RBE Debian8 container with JDK8 (deprecated)
+alias(
+    name = "rbe_debian8_jdk8",
+    actual = ":rbe_debian8_" + LATEST_CLANG_VERSION + "_jdk8",
+    deprecation = "This target has been deprecated, please switch to use rbe_debian8_jdk10 if you are using Bazel with version >= 0.17.1",
+)
+
+# Latest RBE Debian8 container (deprecated)
 alias(
     name = "rbe_debian8",
-    actual = ":rbe_debian8_r337145",
+    actual = ":rbe_debian8_" + LATEST_CLANG_VERSION,
+    deprecation = "This target has been deprecated, please switch to use rbe_debian8_jdk10 if you are using Bazel with version >= 0.17.1",
+)
+
+# We use an additional remote_execution_propertie called "jdk-version" to
+# to collect usage of JDK8 and JDK10.
+
+# ======================== RBE Debian8 r337145 targets ========================
+
+# RBE Debian8 r337145 with JDK 10
+platform(
+    name = "rbe_debian8_r337145_jdk10",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints/sanitizers:support_msan",
+        "//constraints:jessie",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+         }
+         properties: {
+            name: "jdk-version"
+            value:"10"
+         }
+         """,
+)
+
+# RBE Debian8 r337145 with JDK 8
+platform(
+    name = "rbe_debian8_r337145_jdk8",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints/sanitizers:support_msan",
+        "//constraints:jessie",
+    ],
+    remote_execution_properties = """
+          properties: {
+            name: "container-image"
+            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+         }
+         properties: {
+            name: "jdk-version"
+            value:"8"
+         }
+         """,
 )
 
 # RBE Debian8 r337145
@@ -55,6 +120,8 @@ platform(
          }
          """,
 )
+
+# ======================== RBE Debian8 r328903 targets ========================
 
 # RBE Debian8 r328903
 platform(
