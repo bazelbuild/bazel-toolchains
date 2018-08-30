@@ -70,15 +70,15 @@ platform(
         "//constraints/sanitizers:support_msan",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
-         }
-         properties: {
-            name: "jdk-version"
-            value:"10"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"10"
+        }
+        """,
 )
 
 # RBE Ubuntu16_04 r337145 with JDK 8
@@ -92,15 +92,15 @@ platform(
         "//constraints/sanitizers:support_msan",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
-         }
-         properties: {
-            name: "jdk-version"
-            value:"8"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"8"
+        }
+        """,
 )
 
 # RBE Ubuntu16_04 r337145
@@ -114,11 +114,11 @@ platform(
         "//constraints/sanitizers:support_msan",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+        }
+        """,
 )
 
 # ====================== RBE Ubuntu16_04 r328903 targets ======================
@@ -134,11 +134,11 @@ platform(
         "//constraints/sanitizers:support_msan",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f"
+        }
+        """,
 )
 
 # Experimental ubuntu1604 based container with Docker.
@@ -152,9 +152,9 @@ platform(
         "//constraints/sanitizers:support_msan",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/asci-toolchain/nosla-xenial-docker@sha256:780a96ba94b7666e31ba9a184e5a1742c3398250d47f5b87b1b4a60f8c41f164"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/asci-toolchain/nosla-xenial-docker@sha256:780a96ba94b7666e31ba9a184e5a1742c3398250d47f5b87b1b4a60f8c41f164"
+        }
+        """,
 )

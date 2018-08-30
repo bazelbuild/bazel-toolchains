@@ -70,15 +70,15 @@ platform(
         "//constraints:jessie",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
-         }
-         properties: {
-            name: "jdk-version"
-            value:"10"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"10"
+        }
+        """,
 )
 
 # RBE Debian8 r337145 with JDK 8
@@ -92,15 +92,15 @@ platform(
         "//constraints:jessie",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
-         }
-         properties: {
-            name: "jdk-version"
-            value:"8"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"8"
+        }
+        """,
 )
 
 # RBE Debian8 r337145
@@ -114,11 +114,11 @@ platform(
         "//constraints:jessie",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+        }
+        """,
 )
 
 # ======================== RBE Debian8 r328903 targets ========================
@@ -134,9 +134,9 @@ platform(
         "//constraints:jessie",
     ],
     remote_execution_properties = """
-          properties: {
-            name: "container-image"
-            value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:0d5db936f8fa04638ca31e4fc117415068dca43dc343d605c0db2a15f433a327"
-         }
-         """,
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:0d5db936f8fa04638ca31e4fc117415068dca43dc343d605c0db2a15f433a327"
+        }
+        """,
 )
