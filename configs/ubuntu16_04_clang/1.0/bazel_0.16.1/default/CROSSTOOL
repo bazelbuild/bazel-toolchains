@@ -152,7 +152,7 @@ toolchain {
   linker_flag: "-lstdc++"
   linker_flag: "-lm"
   cxx_builtin_include_directory: "/usr/local/include"
-  cxx_builtin_include_directory: "/usr/local/lib/clang/7.0.0/include"
+  cxx_builtin_include_directory: "/usr/local/lib/clang/8.0.0/include"
   cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu"
   cxx_builtin_include_directory: "/usr/include"
   cxx_builtin_include_directory: "/usr/include/c++/5.4.0"
