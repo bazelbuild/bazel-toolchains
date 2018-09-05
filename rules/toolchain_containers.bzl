@@ -6,9 +6,9 @@ def toolchain_container_sha256s():
         # gcr.io/cloud-marketplace/google/debian8:latest
         "debian8": "sha256:a6df7738c401aef6bf9c113eb1eea7f3921417fd4711ea28100681f2fe483ea2",
         # gcr.io/cloud-marketplace/google/debian9:latest
-        "debian9": "sha256:1d6a9a6d106bd795098f60f4abb7083626354fa6735e81743c7f8cfca11259f0",
+        "debian9": "sha256:741d18b41622814ae6eab29b0679dd45318437998213a5cb5532003846b435e1",
         # gcr.io/cloud-marketplace/google/ubuntu16_04:latest
-        "ubuntu16_04": "sha256:8a12cc26c62e2f9824aada8d13c1f0c2d2847d18191560e1500d651a709d6550",
+        "ubuntu16_04": "sha256:df51b5c52d71c9867cd9c1c88c81f67a85ff87f1defe7e9b7ac5fb7d652596bf",
 
         ###########################################################
         # Python3 images                                          #
@@ -18,7 +18,7 @@ def toolchain_container_sha256s():
         # latest *debian8* based python3 image. Newer ones are ubuntu16_04 based.
         "debian8_python3": "sha256:ace668f0f01e5e562ad09c3f128488ec33fa9126313f16505a86ae77865d1696",
         # gcr.io/google-appengine/python:latest
-        "ubuntu16_04_python3": "sha256:67fd35064a812fd0ba0a6e9485410f9f2710ebf7b0787a7b350ce6a20f166bfe",
+        "ubuntu16_04_python3": "sha256:f6955b2492f3ea481a50a9a9f0995b5f84a02d8dab357d2c9dae6b366988f074",
 
         ###########################################################
         # Clang images                                            #
