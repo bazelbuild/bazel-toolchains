@@ -20,6 +20,7 @@ load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load(
     "@bazel_toolchains//rules:environments.bzl",
+    "clang_env",
     "debian8_clang_default_keys",
     "debian8_clang_default_packages",
     "debian8_clang_default_repos",
@@ -136,13 +137,26 @@ docker_toolchain_autoconfig(
     test = True,
 )
 
+# Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
+docker_toolchain_autoconfig(
+    name = "debian8-clang-0.3.0-bazel_0.10.0-autoconfig",
+    additional_repos = debian8_clang_default_repos(),
+    base = "@debian8-clang-test//image",
+    bazel_version = "0.10.0",
+    env = clang_env(),
+    keys = debian8_clang_default_keys(),
+    packages = debian8_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
+
 sh_test(
     name = "debian8_clang_autoconfig_test",
     size = "medium",
     timeout = "long",
     srcs = ["debian8_clang_autoconfig_test.sh"],
     data = [
-        "//configs/debian8_clang:debian8-clang-0.3.0-bazel_0.10.0-autoconfig",
+        ":debian8-clang-0.3.0-bazel_0.10.0-autoconfig",
         "@bazel_toolchains_test//file",
     ],
 )
