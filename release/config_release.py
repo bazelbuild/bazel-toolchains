@@ -45,7 +45,7 @@ def _get_container_configs_list(bazel_version):
   """
   debian8_clang_configs = ContainerConfigs(
       distro="debian8",
-      version="0.3.0",
+      version="0.4.0",
       image="gcr.io/cloud-marketplace/google/clang-debian8",
       package="configs/debian8_clang",
       config_types=CONFIG_TYPES,
@@ -55,7 +55,7 @@ def _get_container_configs_list(bazel_version):
 
   ubuntu16_04_clang_configs = ContainerConfigs(
       distro="ubuntu16_04",
-      version="1.0",
+      version="1.1",
       image="gcr.io/cloud-marketplace/google/clang-ubuntu",
       package="configs/ubuntu16_04_clang",
       config_types=CONFIG_TYPES,
