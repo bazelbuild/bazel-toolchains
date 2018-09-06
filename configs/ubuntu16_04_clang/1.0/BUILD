@@ -40,18 +40,16 @@ alias(
     actual = ":rbe_ubuntu1604_" + LATEST_CLANG_VERSION + "_jdk10",
 )
 
-# Latest RBE Ubuntu16_04 container with JDK 8 (deprecated)
+# Latest RBE Ubuntu16_04 container with JDK 8
 alias(
     name = "rbe_ubuntu1604_jdk8",
     actual = ":rbe_ubuntu1604_" + LATEST_CLANG_VERSION + "_jdk8",
-    deprecation = "This target has been deprecated, please switch to use rbe_ubuntu1604_jdk10 if you are using Bazel with version >= 0.17.1",
 )
 
-# Latest RBE Ubuntu16_04 container (deprecated)
+# Latest RBE Ubuntu16_04 container
 alias(
     name = "rbe_ubuntu1604",
     actual = ":rbe_ubuntu1604_" + LATEST_CLANG_VERSION,
-    deprecation = "This target has been deprecated, please switch to use rbe_ubuntu1604_jdk10 if you are using Bazel with version >= 0.17.1",
 )
 
 # We use an additional remote_execution_propertie called "jdk-version" to
