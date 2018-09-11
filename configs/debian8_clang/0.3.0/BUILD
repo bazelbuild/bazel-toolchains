@@ -40,18 +40,16 @@ alias(
     actual = ":rbe_debian8_" + LATEST_CLANG_VERSION + "_jdk10",
 )
 
-# Latest RBE Debian8 container with JDK8 (deprecated)
+# Latest RBE Debian8 container with JDK8
 alias(
     name = "rbe_debian8_jdk8",
     actual = ":rbe_debian8_" + LATEST_CLANG_VERSION + "_jdk8",
-    deprecation = "This target has been deprecated, please switch to use rbe_debian8_jdk10 if you are using Bazel with version >= 0.17.1",
 )
 
-# Latest RBE Debian8 container (deprecated)
+# Latest RBE Debian8 container
 alias(
     name = "rbe_debian8",
     actual = ":rbe_debian8_" + LATEST_CLANG_VERSION,
-    deprecation = "This target has been deprecated, please switch to use rbe_debian8_jdk10 if you are using Bazel with version >= 0.17.1",
 )
 
 # We use an additional remote_execution_propertie called "jdk-version" to

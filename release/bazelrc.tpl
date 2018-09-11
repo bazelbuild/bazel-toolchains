@@ -21,15 +21,15 @@ build:remote --jobs=50
 # Set several flags related to specifying the platform, toolchain and java
 # properties.
 # These flags are duplicated rather than imported from (for example)
-# %workspace%/configs/ubuntu16_04_clang/1.0/toolchain.bazelrc to make this
+# %workspace%/configs/ubuntu16_04_clang/1.1/toolchain.bazelrc to make this
 # bazelrc a standalone file that can be copied more easily.
 # These flags should only be used as is for the rbe-ubuntu16-04 container
 # and need to be adapted to work with other toolchain containers.
-build:remote --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
-build:remote --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
+build:remote --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:jdk8
+build:remote --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:jdk8
 build:remote --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
 build:remote --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-build:remote --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/default:toolchain
+build:remote --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.1/bazel_${BAZEL_VERSION}/default:toolchain
 build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # Platform flags:
 # The toolchain container used for execution is defined in the target indicated
@@ -39,10 +39,10 @@ build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # "extra_toolchains" to be selected (given constraints defined in
 # "exec_compatible_with").
 # More about platforms: https://docs.bazel.build/versions/master/platforms.html
-build:remote --extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/cpp:cc-toolchain-clang-x86_64-default
-build:remote --extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604
-build:remote --host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604
-build:remote --platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:rbe_ubuntu1604
+build:remote --extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/1.1/bazel_${BAZEL_VERSION}/cpp:cc-toolchain-clang-x86_64-default
+build:remote --extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:rbe_ubuntu1604
+build:remote --host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:rbe_ubuntu1604
+build:remote --platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:rbe_ubuntu1604
 
 # Set various strategies so that all actions execute remotely. Mixing remote
 # and local execution will lead to errors unless the toolchain and remote
@@ -97,10 +97,10 @@ build:results-local --bes_results_url="https://source.cloud.google.com/results/i
 
 # The following flags are only necessary for local docker sandboxing
 # with the rbe-ubuntu16-04 container. Use of these flags is still experimental.
-build:docker-sandbox --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
-build:docker-sandbox --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
-build:docker-sandbox --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_${BAZEL_VERSION}/default:toolchain
-build:docker-sandbox --experimental_docker_image=gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2
+build:docker-sandbox --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:jdk8
+build:docker-sandbox --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:jdk8
+build:docker-sandbox --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.1/bazel_${BAZEL_VERSION}/default:toolchain
+build:docker-sandbox --experimental_docker_image=gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928
 build:docker-sandbox --spawn_strategy=docker
 build:docker-sandbox --strategy=Javac=docker
 build:docker-sandbox --strategy=Closure=docker
