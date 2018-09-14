@@ -4,5 +4,5 @@ metadataTest:
   env:
     - key: 'PATH'
       value: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/python3.6/bin'
-  entrypoint: ["bazel"]
+  entrypoint: ["/usr/local/bin/bazel"]
   cmd: []

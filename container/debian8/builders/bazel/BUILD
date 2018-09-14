@@ -63,8 +63,8 @@ language_tool_layer(
 [container_image(
     name = "bazel_%s" % bazel_version,
     base = ":bazel_%s_intermediate" % bazel_version,
-    entrypoint = ["bazel"],
     cmd = None,
+    entrypoint = ["/usr/local/bin/bazel"],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
 # container_test targets for all supported Bazel versions.
