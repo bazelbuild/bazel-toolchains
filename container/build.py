@@ -275,7 +275,7 @@ def cloud_build(project,
     async_arg = "--async"
   subprocess.check_call(
       shlex.split(
-          ("gcloud container builds submit . "
+          ("gcloud builds submit . "
            "--config={CONFIG} "
            "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
            "_BAZEL_VERSION={BAZEL_VERSION},"
