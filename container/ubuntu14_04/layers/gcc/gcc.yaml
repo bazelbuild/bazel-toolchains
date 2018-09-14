@@ -5,3 +5,7 @@ commandTests:
   command: 'g++'
   args: ['--version']
   expectedOutput: ['g[+][+] [(]Ubuntu .*']
+- name: 'check-gcov'
+  command: 'gcov'
+  args: ['--version']
+  expectedOutput: ['gcov [(]Ubuntu .*']
