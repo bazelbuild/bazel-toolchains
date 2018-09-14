@@ -21,6 +21,7 @@ load(
     "language_tool_layer",
     "toolchain_container",
 )
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
@@ -37,13 +38,8 @@ language_tool_layer(
 # Generate the Bazel container for all supported versions using the
 # corresponding Bazel language_tool_layer targets.
 [toolchain_container(
-    name = "bazel_%s" % bazel_version,
+    name = "bazel_%s_intermediate" % bazel_version,
     base = "@debian8//image",
-    cmd = [
-        "/bin/sh",
-        "-c",
-        "/bin/bash",
-    ],
     # TODO(xingao) Fix this. We should not remove /etc/ssl/certs/java/cacerts
     # file in the java-ltl, but instead, archive it for future container
     # reproduction.
@@ -57,6 +53,18 @@ language_tool_layer(
         "//container/debian8/layers/bazel:bazel-tools",
         "//container/debian8/layers/bazel:bazel_%s-ltl" % bazel_version,
     ],
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
+
+# Set up `entrypoint` and cmd in the container. These cannot be down in the
+# `toolchain_container` rule as they would be consumed by intermediate
+# `container_image` rule in its implementation.
+# TODO(xingao): enable setting things like `entrypoint` and `cmd` in
+# `toolchain_container`.
+[container_image(
+    name = "bazel_%s" % bazel_version,
+    base = ":bazel_%s_intermediate" % bazel_version,
+    cmd = None,
+    entrypoint = ["/usr/local/bin/bazel"],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
 # container_test targets for all supported Bazel versions.
