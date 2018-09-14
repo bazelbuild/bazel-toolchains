@@ -22,6 +22,7 @@ load(
     "toolchain_container",
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+load("//container/common/clang:clang.bzl", "clang_env")
 
 JAVA_CLEANUP_COMMANDS = (
     "rm -rf " +
@@ -83,11 +84,7 @@ language_tool_layer(
 language_tool_layer(
     name = "clang-ltl",
     base = "@debian9//image",
-    env = {
-        "CC": "/usr/local/bin/clang",
-        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-        "MSAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-    },
+    env = clang_env,
     packages = [
         "libstdc++-6-dev",
     ],
@@ -163,11 +160,11 @@ container_test(
     name = "toolchain-test",
     configs = [
         ":rbe-debian9.yaml",
-        "//container/common:clang.yaml",
         "//container/common:go.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:rbe-base.yaml",
+        "//container/common/clang:clang.yaml",
     ],
     image = ":toolchain",
     verbose = True,

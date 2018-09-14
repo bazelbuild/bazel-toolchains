@@ -72,9 +72,9 @@ language_tool_layer(
     name = "bazel_%s-test" % bazel_version,
     configs = [
         ":container.yaml",
-        "//container/common:clang.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
+        "//container/common/clang:clang.yaml",
         "//container/common/bazel:bazel_%s.yaml" % bazel_version,
         "//container/common/bazel:bazel_tools.yaml",
         "//container/common/bazel:extra_tools.yaml",

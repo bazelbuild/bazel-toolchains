@@ -26,6 +26,9 @@ exports_files(glob(["*.yaml"]))
 language_tool_layer(
     name = "gcc-ltl",
     base = "@trusty//image",
+    env = {
+        "GCOV": "/dev/null",
+    },
     packages = [
         "g++",
     ],
