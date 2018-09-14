@@ -5,8 +5,7 @@ commandTests:
   command: 'g++'
   args: ['--version']
   expectedOutput: ['g[+][+] [(]Ubuntu .*']
-
-metadataTest:
-  env:
-    - key: 'GCOV'
-      value: '/dev/null'
+- name: 'check-gcov'
+  command: 'gcov'
+  args: ['--version']
+  expectedOutput: ['gcov [(]Ubuntu .*']
