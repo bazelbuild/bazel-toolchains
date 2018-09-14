@@ -54,9 +54,9 @@ def repositories():
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
-            sha256 = "b4775b7c4fc76e3113dab643ee35eefbabca0b44908d0d1c85dcf29cab7c0638",
-            strip_prefix = "rules_docker-c7a93454d27e09ef707dfca53887ed0ff4372f04",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/c7a93454d27e09ef707dfca53887ed0ff4372f04.tar.gz"],
+            sha256 = "78083b4664b56b23ae1baccd69cb66de8f185a8b627c22ca415e0708cf0bf7b6",
+            strip_prefix = "rules_docker-0faaa7180810ad04d41e931488c7794c18c8d7a4",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/0faaa7180810ad04d41e931488c7794c18c8d7a4.tar.gz"],
         )
 
     # io_bazel_rules_go is the dependency of container_test rules.

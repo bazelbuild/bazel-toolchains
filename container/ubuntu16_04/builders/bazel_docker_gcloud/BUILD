@@ -21,6 +21,7 @@ load(
     "language_tool_layer",
     "toolchain_container",
 )
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
@@ -37,13 +38,8 @@ language_tool_layer(
 # Generate the container with Bazel and Docker for all supported versions of
 # Bazel.
 [toolchain_container(
-    name = "bazel_%s_docker_gcloud" % bazel_version,
+    name = "bazel_%s_docker_gcloud_intermediate" % bazel_version,
     base = "@ubuntu16_04//image",
-    cmd = [
-        "/bin/sh",
-        "-c",
-        "/bin/bash",
-    ],
     # TODO(xingao) Fix this. We should not remove /etc/ssl/certs/java/cacerts
     # file in the java-ltl, but instead, archive it for future container
     # reproduction.
@@ -59,6 +55,18 @@ language_tool_layer(
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-ltl",
         "//container/ubuntu16_04/layers/gcloud:gcloud-ltl",
     ],
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
+
+# Set up `entrypoint` and cmd in the container. These cannot be down in the
+# `toolchain_container` rule as they would be consumed by intermediate
+# `container_image` rule in its implementation.
+# TODO(xingao): enable setting things like `entrypoint` and `cmd` in
+# `toolchain_container`.
+[container_image(
+    name = "bazel_%s_docker_gcloud" % bazel_version,
+    base = ":bazel_%s_docker_gcloud_intermediate" % bazel_version,
+    cmd = None,
+    entrypoint = ["/usr/local/bin/bazel"],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
 # container_test targets for all supported bazel_docker containers..
