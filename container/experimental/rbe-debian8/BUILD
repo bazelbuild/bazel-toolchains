@@ -31,6 +31,7 @@ load(
     "container_image",
     "container_layer",
 )
+load("//container/common/clang:clang.bzl", "clang_env")
 
 cacerts(
     name = "cacerts",
@@ -72,11 +73,7 @@ container_layer(
 container_layer(
     name = "clang-ltl",
     debs = clang_layer_packages(),
-    env = {
-        "CC": "/usr/local/bin/clang",
-        "ASAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-        "MSAN_SYMBOLIZER_PATH": "/usr/local/bin/llvm-symbolizer",
-    },
+    env = clang_env,
     tags = ["manual"],
     tars = [
         "//third_party/clang:debian8_tar",
@@ -126,11 +123,11 @@ container_layer(
 container_test(
     name = "toolchain-test",
     configs = [
-        "//container/common:clang.yaml",
         "//container/common:go.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:rbe-base.yaml",
+        "//container/common/clang:clang.yaml",
         "//container/debian8:debian8.yaml",
         "//container/debian8/builders/rbe-debian8:rbe-debian8.yaml",
     ],

@@ -38,8 +38,13 @@ language_tool_layer(
 # Generate the container with Bazel and Docker for all supported versions of
 # Bazel.
 [toolchain_container(
-    name = "bazel_%s_docker_gcloud_intermediate" % bazel_version,
+    name = "bazel_%s_docker_gcloud" % bazel_version,
     base = "@ubuntu16_04//image",
+    cmd = [
+        "/bin/sh",
+        "-c",
+        "/bin/bash",
+    ],
     # TODO(xingao) Fix this. We should not remove /etc/ssl/certs/java/cacerts
     # file in the java-ltl, but instead, archive it for future container
     # reproduction.
@@ -57,30 +62,18 @@ language_tool_layer(
     ],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
-# Set up `entrypoint` and cmd in the container. These cannot be down in the
-# `toolchain_container` rule as they would be consumed by intermediate
-# `container_image` rule in its implementation.
-# TODO(xingao): enable setting things like `entrypoint` and `cmd` in
-# `toolchain_container`.
-[container_image(
-    name = "bazel_%s_docker_gcloud" % bazel_version,
-    base = ":bazel_%s_docker_gcloud_intermediate" % bazel_version,
-    cmd = None,
-    entrypoint = ["/usr/local/bin/bazel"],
-) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
-
 # container_test targets for all supported bazel_docker containers..
 [container_test(
     name = "bazel_%s_docker_gcloud-test" % bazel_version,
     configs = [
         ":container.yaml",
-        "//container/common:clang.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
+        "//container/common/clang:clang.yaml",
+        "//container/common/bazel:bazel_%s.yaml" % bazel_version,
         "//container/common/bazel:bazel_tools.yaml",
         "//container/common/bazel:extra_tools.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
-        "//container/ubuntu16_04/layers/bazel:bazel_%s.yaml" % bazel_version,
         "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
         "//container/ubuntu16_04/layers/gcloud:gcloud.yaml",
     ],

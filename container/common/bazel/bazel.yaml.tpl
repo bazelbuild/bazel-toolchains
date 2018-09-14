@@ -10,8 +10,3 @@ fileExistenceTests:
 - name: 'bazelrc'
   path: '/etc/bazel.bazelrc'
   shouldExist: true
-
-fileContentTests:
-- name: 'bazelrc-content'
-  path: '/etc/bazel.bazelrc'
-  expectedContents: ['.*--host_crosstool_top=@bazel_toolchains//configs/{_CONFIG_BASE}/bazel_{_BAZEL_CONFIG_VERSION}/default:toolchain.*']

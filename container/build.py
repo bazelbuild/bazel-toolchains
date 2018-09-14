@@ -80,7 +80,7 @@ import shlex
 import subprocess
 import sys
 
-LATEST_BAZEL_VERSION = "0.16.1"
+LATEST_BAZEL_VERSION = "0.17.1"
 
 SUPPORTED_TYPES = [
     "rbe-debian8", "rbe-debian9", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
@@ -275,7 +275,7 @@ def cloud_build(project,
     async_arg = "--async"
   subprocess.check_call(
       shlex.split(
-          ("gcloud container builds submit . "
+          ("gcloud builds submit . "
            "--config={CONFIG} "
            "--substitutions _PROJECT={PROJECT},_CONTAINER={CONTAINER},"
            "_BAZEL_VERSION={BAZEL_VERSION},"

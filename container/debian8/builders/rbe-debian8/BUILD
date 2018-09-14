@@ -73,11 +73,11 @@ container_test(
     name = "toolchain-test",
     configs = [
         ":rbe-debian8.yaml",
-        "//container/common:clang.yaml",
         "//container/common:go.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:rbe-base.yaml",
+        "//container/common/clang:clang.yaml",
         "//container/debian8:debian8.yaml",
     ],
     image = ":toolchain",

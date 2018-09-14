@@ -19,12 +19,7 @@ package(default_visibility = ["//visibility:public"])
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@base_images_docker//util:run.bzl", "container_run_and_extract")
-load(
-    "//container/common/bazel:version.bzl",
-    "BAZEL_VERSION_SHA256S",
-)
-
-exports_files(glob(["*.yaml"]))
+load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 # Tools required by Bazel. Note that we do not add a CC complier here as we
 # will include that in the final container.
@@ -46,6 +41,7 @@ language_tool_layer(
     base = "@trusty//image",
     files = [
         "@bazel_%s_installer//file" % bazel_version.replace(".", ""),
+        "//container/common/bazel:bazel.bazelrc",
     ],
     packages = [
         "unzip",
@@ -56,9 +52,10 @@ language_tool_layer(
 [container_run_and_extract(
     name = "bazel_%s_tar" % bazel_version,
     commands = [
+        "mv /bazel.bazelrc /etc/bazel.bazelrc",
         "chmod +x /bazel-%s-installer-linux-x86_64.sh" % bazel_version,
         "/bazel-%s-installer-linux-x86_64.sh" % bazel_version,
-        "tar cvf /bazel.tar --mtime='1970-01-01' /usr/local/bin/bazel /usr/local/lib/bazel/*",
+        "tar cvf /bazel.tar --mtime='1970-01-01' /usr/local/bin/bazel /usr/local/lib/bazel/* /etc/bazel.bazelrc",
     ],
     extract_file = "/bazel.tar",
     image = ":bazel_%s_installer_image.tar" % bazel_version,
@@ -69,12 +66,4 @@ language_tool_layer(
     name = "bazel_%s-ltl" % bazel_version,
     base = "@trusty//image",
     tars = [":bazel_%s_tar" % bazel_version],
-) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
-
-# Generate Bazel container testing yaml files with all supported Bazel versions.
-[genrule(
-    name = "generate_bazel_%s_yaml" % bazel_version,
-    srcs = [":bazel.yaml.tpl"],
-    outs = ["bazel_%s.yaml" % bazel_version],
-    cmd = "sed 's|{_BAZEL_VERSION}|" + bazel_version + "|' <$< >$@ ",
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
