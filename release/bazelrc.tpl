@@ -9,9 +9,6 @@
 # This .bazelrc file also contains all of the flags required for the local
 # docker sandboxing.
 
-# Remote Build Execution requires a strong hash function, such as SHA256.
-startup --host_jvm_args=-Dbazel.DigestFunction=SHA256
-
 # Depending on how many machines are in the remote execution instance, setting
 # this higher can make builds faster by allowing more jobs to run in parallel.
 # Setting it too high can result in jobs that timeout, however, while waiting
