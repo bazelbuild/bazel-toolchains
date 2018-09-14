@@ -19,14 +19,7 @@ package(default_visibility = ["//visibility:public"])
 load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
 load("//container/rules:docker_toolchains.bzl", "toolchain_container")
 load("@base_images_docker//util:run.bzl", "container_run_and_extract")
-load(
-    "//container/common/bazel:version.bzl",
-    "BAZEL_VERSION_SHA256S",
-    "BAZEL_VERSION_TO_CONFIG_VERSION",
-)
-load("//container/debian8:debian8.bzl", "CONFIG_BASE")
-
-exports_files(glob(["*.yaml"]))
+load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 # Tools required by Bazel. Note that we do not add a CC complier here as we
 # will include that in the final container.
@@ -42,22 +35,13 @@ language_tool_layer(
     ],
 )
 
-# Generate bazel.bazelrc files for all supported versions.
-[genrule(
-    name = "generate_bazel_%s_bazelrc" % bazel_version,
-    srcs = ["//container/common/bazel:bazel.bazelrc.tpl"],
-    outs = ["bazel-%s.bazelrc" % bazel_version],
-    cmd = "sed 's|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|; " +
-          "s|{_CONFIG_BASE}|" + CONFIG_BASE + "|' <$< >$@",
-) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
-
 # Create image with Bazel installer for all supported versions.
 [toolchain_container(
     name = "bazel_%s_installer_image" % bazel_version,
     base = "@debian8//image",
     files = [
         "@bazel_%s_installer//file" % bazel_version.replace(".", ""),
-        ":bazel-%s.bazelrc" % bazel_version,
+        "//container/common/bazel:bazel.bazelrc",
     ],
     packages = [
         "unzip",
@@ -68,7 +52,7 @@ language_tool_layer(
 [container_run_and_extract(
     name = "bazel_%s_tar" % bazel_version,
     commands = [
-        "mv /bazel-%s.bazelrc /etc/bazel.bazelrc" % bazel_version,
+        "mv /bazel.bazelrc /etc/bazel.bazelrc",
         "chmod +x /bazel-%s-installer-linux-x86_64.sh" % bazel_version,
         "/bazel-%s-installer-linux-x86_64.sh" % bazel_version,
         "tar cvf /bazel.tar --mtime='1970-01-01' /usr/local/bin/bazel /usr/local/lib/bazel/* /etc/bazel.bazelrc",
@@ -82,14 +66,4 @@ language_tool_layer(
     name = "bazel_%s-ltl" % bazel_version,
     base = "@debian8//image",
     tars = [":bazel_%s_tar" % bazel_version],
-) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
-
-# Generate Bazel container testing yaml files with all supported Bazel versions.
-[genrule(
-    name = "generate_bazel_%s_yaml" % bazel_version,
-    srcs = ["//container/common/bazel:bazel.yaml.tpl"],
-    outs = ["bazel_%s.yaml" % bazel_version],
-    cmd = "sed 's|{_BAZEL_VERSION}|" + bazel_version + "|; " +
-          "s|{_BAZEL_CONFIG_VERSION}|" + BAZEL_VERSION_TO_CONFIG_VERSION.get(bazel_version) + "|; " +
-          "s|{_CONFIG_BASE}|" + CONFIG_BASE + "|' <$< >$@",
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]

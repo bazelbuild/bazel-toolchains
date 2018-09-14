@@ -16,4 +16,14 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
+
 exports_files(glob(["**"]))
+
+# Generate Bazel container testing yaml files with all supported Bazel versions.
+[genrule(
+    name = "generate_bazel_%s_yaml" % bazel_version,
+    srcs = [":bazel.yaml.tpl"],
+    outs = ["bazel_%s.yaml" % bazel_version],
+    cmd = "sed 's|{_BAZEL_VERSION}|" + bazel_version + "|' <$< >$@",
+) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]

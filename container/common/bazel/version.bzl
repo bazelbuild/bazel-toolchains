@@ -5,17 +5,3 @@ BAZEL_VERSION_SHA256S = {
     "0.16.1": "17ab70344645359fd4178002f367885e9019ae7507c9c1ade8220f3628383444",
     "0.17.1": "feedbe02c81142ed95ef8d380472f0a0d88e1b9a4b1fb6e21728701032b68e02",
 }
-
-# This is the map from supported Bazel versions to the Bazel version used to
-# generate the published toolchain configs that the former should be used with.
-# This is needed because, in most cases, patch updates in Bazel do not result in
-# changes in toolchain configs, so we do not publish duplicated toolchain
-# configs. So, for example, Bazel 0.15.2 should still use published toolchain
-# configs generated with Bazel 0.15.0.
-BAZEL_VERSION_TO_CONFIG_VERSION = {
-    "0.14.1": "0.14.1",
-    "0.15.0": "0.15.0",
-    "0.15.2": "0.15.0",
-    "0.16.1": "0.16.1",
-    "0.17.1": "0.17.1",
-}
