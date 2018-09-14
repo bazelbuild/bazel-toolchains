@@ -5,3 +5,8 @@ commandTests:
   command: 'g++'
   args: ['--version']
   expectedOutput: ['g[+][+] [(]Ubuntu .*']
+
+metadataTest:
+  env:
+    - key: 'GCOV'
+      value: '/dev/null'

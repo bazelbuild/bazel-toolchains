@@ -60,3 +60,5 @@ metadataTest:
   env:
     - key: 'CC'
       value: '/usr/local/bin/clang'
+    - key: 'GCOV'
+      value: '/dev/null'
