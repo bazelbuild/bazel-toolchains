@@ -3,6 +3,7 @@ BAZEL_VERSION_SHA256S = {
     "0.15.0": "7f6748b48a7ea6bdf00b0e1967909ce2181ebe6f377638aa454a7d09a0e3ea7b",
     "0.15.2": "13eae0f09565cf17fc1c9ce1053b9eac14c11e726a2215a79ebaf5bdbf435241",
     "0.16.1": "17ab70344645359fd4178002f367885e9019ae7507c9c1ade8220f3628383444",
+    "0.17.1": "feedbe02c81142ed95ef8d380472f0a0d88e1b9a4b1fb6e21728701032b68e02",
 }
 
 # This is the map from supported Bazel versions to the Bazel version used to
@@ -16,4 +17,5 @@ BAZEL_VERSION_TO_CONFIG_VERSION = {
     "0.15.0": "0.15.0",
     "0.15.2": "0.15.0",
     "0.16.1": "0.16.1",
+    "0.17.1": "0.17.1",
 }
