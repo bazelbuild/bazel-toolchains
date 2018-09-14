@@ -39,4 +39,5 @@ build:remote-msan --copt=-fsanitize=memory
 build:remote-msan --linkopt=-fsanitize=memory
 build:remote-msan --cxxopt=--stdlib=libc++
 build:remote-msan --copt=-fsanitize-memory-track-origins
-build:remote-msan --action_env=BAZEL_LINKOPTS=-lc++:-lc++abi:-lm
+build:remote-msan --host_crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.1/bazel_0.16.1/default:toolchain
+build:remote-msan --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.1/bazel_0.16.1/msan:toolchain
