@@ -21,17 +21,20 @@ build:remote --extra_execution_platforms=@bazel_toolchains//${PACKAGE}/${CONFIG_
 build:remote --host_platform=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:${PLATFORM}
 build:remote --platforms=@bazel_toolchains//${PACKAGE}/${CONFIG_VERSION}:${PLATFORM}
 
-# Experimental configs for sanitizers, use --config=remote --config=remote-xxsan --config=remote-<asan/tsan/msan> (in that order)
+# Experimental configs for sanitizers, use --config=remote --config=remote-<asan/tsan/msan> (in that order)
 # See https://github.com/bazelbuild/bazel/issues/5291.
 build:remote-xxsan --copt=-gmlt
 build:remote-xxsan --strip=never
 
+build:remote-asan --config=remote-xxsan
 build:remote-asan --copt=-fsanitize=address
 build:remote-asan --linkopt=-fsanitize=address
 
+build:remote-tsan --config=remote-xxsan
 build:remote-tsan --copt=-fsanitize=thread
 build:remote-tsan --linkopt=-fsanitize=thread
 
+build:remote-msan --config=remote-xxsan
 build:remote-msan --copt=-fsanitize=memory
 build:remote-msan --linkopt=-fsanitize=memory
 build:remote-msan --cxxopt=--stdlib=libc++

@@ -12,17 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Experimental configs for sanitizers, use --config=xxsan --config=<asan/tsan/msan> (in that order)
+# Experimental configs for sanitizers, use --config=<asan/tsan/msan> (in that order)
 # See https://github.com/bazelbuild/bazel/issues/5291.
 build:xxsan --copt=-gmlt
 build:xxsan --strip=never
 
+build:asan --config=xxsan
 build:asan --copt=-fsanitize=address
 build:asan --linkopt=-fsanitize=address
 
+build:tsan --config=xxsan
 build:tsan --copt=-fsanitize=thread
 build:tsan --linkopt=-fsanitize=thread
 
+build:msan --config=xxsan
 build:msan --copt=-fsanitize=memory
 build:msan --linkopt=-fsanitize=memory
 build:msan --cxxopt=--stdlib=libc++
