@@ -107,4 +107,3 @@ toolchain(
     toolchain = ":cc-compiler-armabi-v7a",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
-
