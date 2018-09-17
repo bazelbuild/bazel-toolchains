@@ -125,13 +125,13 @@ TYPE_TARBALL_MAP = {
     "rbe-ubuntu16_04":
         "toolchain-packages.tar",
     "ubuntu16_04-bazel":
-        "bazel_{}-packages.tar".format(LATEST_BAZEL_VERSION),
+        "bazel_{}_intermediate-packages.tar".format(LATEST_BAZEL_VERSION),
     "ubuntu16_04-bazel-docker-gcloud":
         "bazel_{}_docker_gcloud-packages.tar".format(LATEST_BAZEL_VERSION),
     "debian8-bazel":
-         "bazel_{}-packages.tar".format(LATEST_BAZEL_VERSION),
+         "bazel_{}_intermediate-packages.tar".format(LATEST_BAZEL_VERSION),
     "ubuntu14_04-bazel":
-        "bazel_{}-packages.tar".format(LATEST_BAZEL_VERSION),
+        "bazel_{}_intermediate-packages.tar".format(LATEST_BAZEL_VERSION),
 }
 
 # =========== ENDING HERE ===========
