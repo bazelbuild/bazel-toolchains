@@ -250,7 +250,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     remove_repo_cmd = "cd ."
     if ctx.attr.repo_pkg_tar:
         repo_pkg_tar = str(ctx.attr.repo_pkg_tar.label.name)
-        package_name = str(ctx.attr.repo_pkg_tar.label.package)
+        package_name = _EXTERNAL_FOLDER_PREFIX + _WORKSPACE_NAME + "/" + str(ctx.attr.repo_pkg_tar.label.package)
 
         # Expand the tar file pointed by repo_pkg_tar
         expand_repo_cmd = ("mkdir ./%s ; tar -xf %s/%s.tar -C ./%s" %
