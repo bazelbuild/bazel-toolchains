@@ -70,41 +70,37 @@ def images():
     excludes = native.existing_rules().keys()
 
     if "debian8" not in excludes:
-        # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
         container_pull(
             name = "debian8",
             digest = toolchain_container_sha256s()["debian8"],
-            registry = "l.gcr.io",
+            registry = "marketplace.gcr.io",
             repository = "google/debian8",
         )
 
     if "debian9" not in excludes:
-        # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
         container_pull(
             name = "debian9",
             digest = toolchain_container_sha256s()["debian9"],
-            registry = "l.gcr.io",
+            registry = "marketplace.gcr.io",
             repository = "google/debian9",
         )
 
     if "ubuntu16_04" not in excludes:
-        # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
         container_pull(
             name = "ubuntu16_04",
             digest = toolchain_container_sha256s()["ubuntu16_04"],
-            registry = "l.gcr.io",
+            registry = "marketplace.gcr.io",
             repository = "google/ubuntu16_04",
         )
 
     if "debian8_python3" not in excludes:
-        # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
-        # Get debian8-built python3 interpreter from l.gcr.io/google/python:latest.
+        # Get debian8-built python3 interpreter from marketplace.gcr.io/google/python:latest.
         # Base image: gcr.io/google-appengine/debian8:latest
         # Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
         container_pull(
             name = "debian8_python3",
             digest = toolchain_container_sha256s()["debian8_python3"],
-            registry = "l.gcr.io",
+            registry = "marketplace.gcr.io",
             repository = "google/python",
         )
 
@@ -120,20 +116,18 @@ def images():
         )
 
     if "debian8-clang" not in excludes:
-        # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
         container_pull(
             name = "debian8-clang",
             digest = toolchain_container_sha256s()["debian8_clang"],
-            registry = "l.gcr.io",
+            registry = "marketplace.gcr.io",
             repository = "google/clang-debian8",
         )
 
     if "ubuntu16_04-clang" not in excludes:
-        # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
         container_pull(
             name = "ubuntu16_04-clang",
             digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
-            registry = "l.gcr.io",
+            registry = "marketplace.gcr.io",
             repository = "google/clang-ubuntu",
         )
 
