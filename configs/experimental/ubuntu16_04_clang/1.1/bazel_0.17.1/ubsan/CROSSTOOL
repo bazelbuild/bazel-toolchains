@@ -904,7 +904,7 @@ toolchain {
     config_name: "c++-link-executable"
     action_name: "c++-link-executable"
     tool {
-      tool_path: "/usr/local/bin/clang"
+      tool_path: "/usr/local/bin/clang++"
     }
     implies: "symbol_counts"
     implies: "strip_debug_symbols"
@@ -924,7 +924,7 @@ toolchain {
     config_name: "c++-link-nodeps-dynamic-library"
     action_name: "c++-link-nodeps-dynamic-library"
     tool {
-      tool_path: "/usr/local/bin/clang"
+      tool_path: "/usr/local/bin/clang++"
     }
     implies: "symbol_counts"
     implies: "strip_debug_symbols"
@@ -944,7 +944,7 @@ toolchain {
     config_name: "c++-link-dynamic-library"
     action_name: "c++-link-dynamic-library"
     tool {
-      tool_path: "/usr/local/bin/clang"
+      tool_path: "/usr/local/bin/clang++"
     }
     implies: "symbol_counts"
     implies: "strip_debug_symbols"
