@@ -30,6 +30,6 @@ skylark_library(
     ],
     deps = [
         ":debian_pkg_tar",
-        "@io_bazel_rules_docker//container:container",
+        "@io_bazel_rules_docker//container",
     ],
 )

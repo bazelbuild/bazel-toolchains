@@ -23,7 +23,6 @@ exports_files([
 ])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-
 load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
 
 pkg_tar(
@@ -61,7 +60,7 @@ skylark_library(
         "docker_config.bzl",
     ],
     deps = [
-        "@io_bazel_rules_docker//container:container",
         "@bazel_toolchains//rules/container:docker_toolchains",
+        "@io_bazel_rules_docker//container",
     ],
 )

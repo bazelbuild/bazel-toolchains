@@ -24,8 +24,8 @@ skylark_library(
         "images.bzl",
     ],
     deps = [
-        "//rules:toolchain_containers"
-    ]
+        "//rules:toolchain_containers",
+    ],
 )
 
 skylark_library(
