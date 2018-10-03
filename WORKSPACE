@@ -14,7 +14,7 @@
 workspace(name = "bazel_toolchains")
 
 load(
-    "//skylib:package_names.bzl",
+    "//rules/skylib:package_names.bzl",
     "jessie_package_names",
 )
 load(

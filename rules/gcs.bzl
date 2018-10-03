@@ -45,7 +45,7 @@ def _gcs_file_impl(ctx):
     # Create a bash script from a template.
     ctx.template(
         "gsutil_cp_and_validate.sh",
-        Label("//rules:gsutil_cp_and_validate.sh.tpl"),
+        Label("@bazel_toolchains//rules:gsutil_cp_and_validate.sh.tpl"),
         {
             "%{BUCKET}": ctx.attr.bucket,
             "%{FILE}": ctx.attr.file,

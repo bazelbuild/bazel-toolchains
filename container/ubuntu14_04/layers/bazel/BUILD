@@ -16,8 +16,8 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//container/rules:docker_toolchains.bzl", "language_tool_layer")
-load("//container/rules:docker_toolchains.bzl", "toolchain_container")
+load("//rules/container:docker_toolchains.bzl", "language_tool_layer")
+load("//rules/container:docker_toolchains.bzl", "toolchain_container")
 load("@base_images_docker//util:run.bzl", "container_run_and_extract")
 load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 

@@ -17,7 +17,7 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load(
-    "//container/rules:docker_toolchains.bzl",
+    "//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
 )
 load("//container/common/clang:clang.bzl", "clang_env")

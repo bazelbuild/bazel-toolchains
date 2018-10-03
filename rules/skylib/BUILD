@@ -13,3 +13,15 @@
 # limitations under the License.
 
 licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
+
+load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
+
+skylark_library(
+    name = "packages",
+    srcs = [
+        "packages.bzl",
+        "package_names.bzl",
+    ],
+)
