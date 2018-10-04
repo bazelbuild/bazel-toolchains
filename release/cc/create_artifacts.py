@@ -34,6 +34,7 @@ GIT_ROOT = get_git_root()
 LICENCE_TPL = os.path.join(GIT_ROOT, "release", "license.tpl")
 CPP_TPL = os.path.join(GIT_ROOT, "release", "cc", "cpp.tpl")
 SHA_MAP_FILE = os.path.join(GIT_ROOT, "rules/toolchain_containers.bzl")
+CLANG_REVISION_FILE = os.path.join(GIT_ROOT, "third_party/clang/revision.bzl")
 
 
 def create_targets(container_configs_list, bazel_version):
@@ -56,6 +57,8 @@ def create_targets(container_configs_list, bazel_version):
   """
 
   container_sha_map = imp.load_source("toolchain_containers", SHA_MAP_FILE)
+  clang_revision_map = imp.load_source("clang_revision", CLANG_REVISION_FILE)
+  clang_revision = clang_revision_map.CLANG_REVISION
 
   for container_configs in container_configs_list:
 
@@ -83,7 +86,8 @@ def create_targets(container_configs_list, bazel_version):
                 CONFIG_VERSION=container_configs.version,
                 BAZEL_VERSION=bazel_version,
                 NAME=container_configs.image,
-                SHA=sha)
+                SHA=sha,
+                CLANG_REVISION=clang_revision)
 
             build_file.write(tpl)
 
