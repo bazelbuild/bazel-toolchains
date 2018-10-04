@@ -27,6 +27,7 @@ load(
 
 # Created on 2018.05.09
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "ubuntu16_04-clang-1.0-bazel_0.13.0-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -41,6 +42,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.05.09
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "msan-ubuntu16_04-clang-1.0-bazel_0.13.0-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -57,6 +59,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.08
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "ubuntu16_04-clang-1.0-bazel_0.14.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -71,6 +74,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.08
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "msan-ubuntu16_04-clang-1.0-bazel_0.14.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -87,6 +91,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.27
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "ubuntu16_04-clang-1.0-bazel_0.15.0-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -101,6 +106,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.27
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "msan-ubuntu16_04-clang-1.0-bazel_0.15.0-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -119,6 +125,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.8.13
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:fbf123ca7c7696f53864da4f7d1d9470f9ef4ebfabc4344f44173d1951faee6f
+# Clang revision: r337145
 docker_toolchain_autoconfig(
     name = "default-ubuntu16_04-clang-1.0-bazel_0.16.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -135,6 +142,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.8.13
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:fbf123ca7c7696f53864da4f7d1d9470f9ef4ebfabc4344f44173d1951faee6f
+# Clang revision: r337145
 docker_toolchain_autoconfig(
     name = "msan-ubuntu16_04-clang-1.0-bazel_0.16.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -153,6 +161,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.6
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:79a24c15949bd5770acac41b444c5c0b7f9723dcbc708c67d87ecf71e32c9126
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "default-ubuntu16_04-clang-1.1-bazel_0.16.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -169,6 +178,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.6
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:79a24c15949bd5770acac41b444c5c0b7f9723dcbc708c67d87ecf71e32c9126
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "msan-ubuntu16_04-clang-1.1-bazel_0.16.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -187,6 +197,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.17
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:79a24c15949bd5770acac41b444c5c0b7f9723dcbc708c67d87ecf71e32c9126
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "default-ubuntu16_04-clang-1.1-bazel_0.17.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
@@ -203,6 +214,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.17
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:79a24c15949bd5770acac41b444c5c0b7f9723dcbc708c67d87ecf71e32c9126
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "msan-ubuntu16_04-clang-1.1-bazel_0.17.1-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
