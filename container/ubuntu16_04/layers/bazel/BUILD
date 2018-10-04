@@ -16,9 +16,9 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//rules/container:docker_toolchains.bzl", "language_tool_layer", "toolchain_container")
+load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "language_tool_layer", "toolchain_container")
 load("@base_images_docker//util:run.bzl", "container_run_and_extract")
-load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
+load("@bazel_toolchains//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 # Tools required by Bazel. Note that we do not add a CC complier here as we
 # will include that in the final container.

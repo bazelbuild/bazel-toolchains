@@ -16,9 +16,9 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//rules/container:docker_toolchains.bzl", "language_tool_layer")
+load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "language_tool_layer")
 load(
-    "//container/ubuntu16_04/layers/gcloud:version.bzl",
+    "@bazel_toolchains//container/ubuntu16_04/layers/gcloud:version.bzl",
     "GCLOUD_VERSION",
 )
 

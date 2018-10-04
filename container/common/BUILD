@@ -19,11 +19,11 @@ package(default_visibility = ["//visibility:public"])
 exports_files(glob(["*.yaml"]))
 
 load(
-    "//third_party/golang:revision.bzl",
+    "@bazel_toolchains//third_party/golang:revision.bzl",
     "GOLANG_REVISION",
 )
 load(
-    "//third_party/openjdk:revision.bzl",
+    "@bazel_toolchains//third_party/openjdk:revision.bzl",
     "JDK_VERSION",
     "JDK_VERSION_DECODED",
 )
