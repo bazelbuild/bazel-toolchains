@@ -19,7 +19,7 @@ package(default_visibility = ["//visibility:public"])
 load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
 load("@base_images_docker//package_managers:install_pkgs.bzl", "install_pkgs")
 load("@base_images_docker//package_managers:apt_key.bzl", "add_apt_key")
-load("//rules/container:docker_toolchains.bzl", "toolchain_container")
+load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
 
 # This file contains some sample targets that excersise the container rules
 # We just keep these as examples that should not break (unless indicated)
