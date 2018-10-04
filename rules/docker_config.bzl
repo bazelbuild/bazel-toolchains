@@ -118,7 +118,7 @@ load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
-load("//container/rules:docker_toolchains.bzl", "toolchain_container")
+load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -487,7 +487,7 @@ def docker_toolchain_autoconfig(**kwargs):
             name = kwargs["name"] + "_test",
             size = "medium",
             timeout = "long",
-            srcs = ["//test/configs:autoconfig_test.sh"],
+            srcs = ["@bazel_toolchains//test/configs:autoconfig_test.sh"],
             data = [":" + kwargs["name"]],
         )
 

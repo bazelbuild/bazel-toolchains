@@ -19,7 +19,7 @@ package(default_visibility = ["//visibility:public"])
 load("@distroless//cacerts:cacerts.bzl", "cacerts")
 load("@jessie_package_bundle//file:packages.bzl", "packages")
 load(
-    "//skylib:packages.bzl",
+    "@bazel_toolchains//skylib:packages.bzl",
     "base_layer_packages",
     "clang_layer_packages",
     "java_layer_packages",

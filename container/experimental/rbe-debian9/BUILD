@@ -17,12 +17,12 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load(
-    "//container/rules:docker_toolchains.bzl",
+    "@bazel_toolchains//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
     "toolchain_container",
 )
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
-load("//container/common/clang:clang.bzl", "clang_env")
+load("@bazel_toolchains//container/common/clang:clang.bzl", "clang_env")
 
 JAVA_CLEANUP_COMMANDS = (
     "rm -rf " +

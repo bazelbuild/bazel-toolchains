@@ -13,3 +13,23 @@
 # limitations under the License.
 
 licenses(["notice"])  # Apache 2.0
+
+load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
+
+skylark_library(
+    name = "debian_pkg_tar",
+    srcs = [
+        "debian_pkg_tar.bzl",
+    ],
+)
+
+skylark_library(
+    name = "docker_toolchains",
+    srcs = [
+        "docker_toolchains.bzl",
+    ],
+    deps = [
+        ":debian_pkg_tar",
+        "@io_bazel_rules_docker//container",
+    ],
+)

@@ -17,7 +17,7 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load(
-    "//container/rules:debian_pkg_tar.bzl",
+    "@bazel_toolchains//rules/container:debian_pkg_tar.bzl",
     "aggregate_debian_pkgs",
 )
 

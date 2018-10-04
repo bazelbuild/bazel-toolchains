@@ -15,3 +15,22 @@
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
+
+load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
+
+skylark_library(
+    name = "images",
+    srcs = [
+        "images.bzl",
+    ],
+    deps = [
+        "//rules:toolchain_containers",
+    ],
+)
+
+skylark_library(
+    name = "repositories",
+    srcs = [
+        "images.bzl",
+    ],
+)

@@ -17,13 +17,13 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load(
-    "//container/rules:docker_toolchains.bzl",
+    "@bazel_toolchains//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
     "toolchain_container",
 )
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
-load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
+load("@bazel_toolchains//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 # Tools that are needed in most builds, but not strictly required by bazel.
 language_tool_layer(
