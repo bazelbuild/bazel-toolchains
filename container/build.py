@@ -80,13 +80,9 @@ import shlex
 import subprocess
 import sys
 
-<<<<<<< Updated upstream
-LATEST_BAZEL_VERSION = "0.17.2"
-=======
 from gcb_yaml_gen_utils import create_step, create_gcb_yaml_dict, gen_gcb_yaml_file
 
-LATEST_BAZEL_VERSION = "0.17.1"
->>>>>>> Stashed changes
+LATEST_BAZEL_VERSION = "0.17.2"
 
 SUPPORTED_TYPES = [
     "rbe-debian8", "rbe-debian9", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
