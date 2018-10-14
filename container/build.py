@@ -263,22 +263,29 @@ def cloud_build(type_,
       os.chmod(full_path, 0o644)
 
   # create the required steps for the GCB yaml file as a list of dicts
-  gcb_steps = get_gcb_steps(project, container, tag, package, target,
-    bazel_version, bucket, tarball, version_step=True, build_step=True,
-    retag_step=True, test_step=True)
+  gcb_steps = [
+      get_version_step(bazel_version),
+      get_build_step(package, target, bazel_version),
+      get_retag_step(project, container, tag, package, target, bazel_version),
+      get_test_step(package, target, bazel_version)
+  ]
 
   # add a step to upload a tarball of debian packages if bucket was specified
   if bucket:
-    gcb_steps.append(get_upload_debs_step(container, tag, package,
-                                          bazel_version, bucket, tarball))
+    gcb_steps.append(
+        get_upload_debs_step(container, tag, package, bazel_version, bucket,
+                             tarball))
 
   # generate the whole GCB yaml file as a python dict
-  gcb_yaml_dict = create_gcb_yaml_dict(steps=gcb_steps, timeout='21600s',
-    images=['gcr.io/{}/{}:{}'.format(project, container, tag)])
+  gcb_yaml_dict = create_gcb_yaml_dict(
+      steps=gcb_steps,
+      timeout="21600s",
+      images=["gcr.io/{}/{}:{}".format(project, container, tag)])
 
   # Gets the yaml relative to the bazel-toolchains root, regardless of what directory it was called from
   # MUST BE UPDATED IF THE YAML FILE IS GENERATED ELSEWHERE
-  config_file = "{}/container/cloudbuild-{}.yaml".format(bazel_toolchains_base_dir, type_)
+  config_file = "{}/container/cloudbuild-{}.yaml".format(
+      bazel_toolchains_base_dir, type_)
 
   # create the GCB yaml file
   gen_gcb_yaml_file(gcb_yaml_dict, config_file)
@@ -287,36 +294,17 @@ def cloud_build(type_,
   if async_:
     async_arg = "--async"
   subprocess.check_call(
-      shlex.split(
-          ("gcloud builds submit . "
-           "--config={CONFIG} "
-           "--machine-type=n1-highcpu-32 "
-           "{ASYNC}").format(
-               CONFIG=config_file,
-               ASYNC=async_arg,)))
+      shlex.split(("gcloud builds submit . "
+                   "--config={CONFIG} "
+                   "--machine-type=n1-highcpu-32 "
+                   "{ASYNC}").format(
+                       CONFIG=config_file,
+                       ASYNC=async_arg,
+                   )))
 
   # remove previously generated cloudbuild.yaml
   subprocess.check_call(shlex.split("rm -f {}".format(config_file)))
 
-def get_gcb_steps(project, container, tag, package, target, bazel_version,
-  bucket, tarball, version_step=False, build_step=False, retag_step=False,
-  test_step=False, upload_debs_step=False,):
-  """ Creates and returns the list of specified steps.
-  """
-  steps = []
-
-  if version_step:
-    steps.append(get_version_step(bazel_version))
-  if build_step:
-    steps.append(get_build_step(package, target, bazel_version))
-  if retag_step:
-    steps.append(get_retag_step(project, container, tag, package, target, bazel_version))
-  if test_step:
-    steps.append(get_test_step(package, target, bazel_version))
-  if upload_debs_step:
-    steps.append(get_upload_debs_step(container, tag, package, bazel_version, bucket, tarball))
-
-  return steps
 
 def get_version_step(bazel_version):
   """ Creates a GCB yaml step that checks for Bazel version for confirmation.
@@ -324,91 +312,107 @@ def get_version_step(bazel_version):
   Returns:
     dict representing the GCB yaml version step.
   """
-  version_step_name = 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:' + bazel_version
-  version_step_args = ['bazel', 'version']
-  version_step = create_step(name=version_step_name, args=version_step_args,
-    step_id='version', waitFor=['-'])
+  version_step_name = "gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:" + bazel_version
+  version_step_args = ["bazel", "version"]
+  version_step = create_step(
+      name=version_step_name,
+      args=version_step_args,
+      step_id="version",
+      waitFor=["-"])
 
   return version_step
 
+
 def get_build_step(package, target, bazel_version):
-  """ Creates a GCB yaml step that builds a fully loaded container
-  using rules_docker.
+  """ Creates a GCB yaml step to build a fully loaded container.
+
+  The container is built using rules_docker.
 
   Returns:
     dict representing the GCB yaml build step.
   """
-  build_step_name = 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:' + bazel_version
+  build_step_name = "gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:" + bazel_version
   # Set Bazel output_base to /workspace, which is a mounted directory on Google Cloud Builder.
   # This is to make sure Bazel generated files can be accessed by multiple containers.
   build_step_args = [
-      'bazel',
-      '--output_base=/workspace',
-      'run',
-      '--verbose_failures',
-      '--spawn_strategy=standalone',
-      '--genrule_strategy=standalone',
-      '//{}:{}'.format(package, target)
-    ]
-  build_step = create_step(name=build_step_name, args=build_step_args,
-    step_id='container-build', waitFor=['version'])
+      "bazel", "--output_base=/workspace", "run", "--verbose_failures",
+      "--spawn_strategy=standalone", "--genrule_strategy=standalone",
+      "//{}:{}".format(package, target)
+  ]
+  build_step = create_step(
+      name=build_step_name,
+      args=build_step_args,
+      step_id="container-build",
+      waitFor=["version"])
 
   return build_step
 
+
 def get_retag_step(project, container, tag, package, target, bazel_version):
-  """ Creates a GCB yaml step that re-tags the container built by
-  the 'container-build' step.
+  """ Creates a GCB yaml step that re-tags the container.
+
+  The container being re-taged is built by the 'container-build' step.
 
   Returns:
     dict representing the GCB yaml re-tag step.
   """
-  retag_step_name = 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:' + bazel_version
-  retag_step_args = ['docker', 'tag', 'bazel/{}:{}'.format(package, target),
-      'gcr.io/{}/{}:{}'.format(project, container, tag)]
-  retag_step = create_step(name=retag_step_name, args=retag_step_args,
-    step_id='container-tag', waitFor=['container-build'])
+  retag_step_name = "gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:" + bazel_version
+  retag_step_args = [
+      "docker", "tag", "bazel/{}:{}".format(package, target),
+      "gcr.io/{}/{}:{}".format(project, container, tag)
+  ]
+  retag_step = create_step(
+      name=retag_step_name,
+      args=retag_step_args,
+      step_id="container-tag",
+      waitFor=["container-build"])
   return retag_step
+
 
 def get_test_step(package, target, bazel_version):
   """ Creates a GCB yaml step that tests the image built by the build step.
 
-  We use container_test rule, which is a Bazel wrapper of container_structure_test.
+  We use container_test rule, which is a Bazel wrapper of
+  container_structure_test.
   https://github.com/bazelbuild/rules_docker/blob/master/contrib/test.bzl
 
   Returns:
     dict representing the GCB yaml test step.
   """
-  test_step_name = 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:' + bazel_version
+  test_step_name = "gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:" + bazel_version
   test_step_args = [
-      'bazel',
-      '--output_base=/workspace',
-      'test',
-      '--test_output=all',
-      '--verbose_failures',
-      '--spawn_strategy=standalone',
-      '--genrule_strategy=standalone',
-      '//{}:{}-test'.format(package, target)
-    ]
-  test_step = create_step(name=test_step_name, args=test_step_args,
-    step_id='image-test', waitFor=['container-build'])
+      "bazel", "--output_base=/workspace", "test", "--test_output=all",
+      "--verbose_failures", "--spawn_strategy=standalone",
+      "--genrule_strategy=standalone", "//{}:{}-test".format(package, target)
+  ]
+  test_step = create_step(
+      name=test_step_name,
+      args=test_step_args,
+      step_id="image-test",
+      waitFor=["container-build"])
   return test_step
 
-def get_upload_debs_step(container, tag, package, bazel_version, bucket, tarball):
+
+def get_upload_debs_step(container, tag, package, bazel_version, bucket,
+                         tarball):
   """ Creates a GCB yaml step that stores a tarball of debian packages in GCS.
 
   Returns:
     dict representing the GCB yaml upload debs step.
   """
-  upload_debs_step_name = 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:' + bazel_version
+  upload_debs_step_name = "gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:" + bazel_version
   upload_debs_step_args = [
-      'gsutil',
-      'cp',
-      '/workspace/bazel-out/k8-fastbuild/bin/{}/{}'.format(package, tarball),
-      'gs://{}/{}-{}-${{BUILD_ID}}.tar'.format(bucket, container, tag)
-    ]
-  upload_debs_step = create_step(name=upload_debs_step_name,
-    args=upload_debs_step_args, step_id='upload-debs', waitFor=['image-test'])
+      "gsutil", "cp", "/workspace/bazel-out/k8-fastbuild/bin/{}/{}".format(
+          package, tarball), "gs://{}/{}-{}-${{BUILD_ID}}.tar".format(
+              bucket, container, tag)
+  ]
+  upload_debs_step = create_step(
+      name=upload_debs_step_name,
+      args=upload_debs_step_args,
+      step_id="upload-debs",
+      waitFor=["image-test"])
   return upload_debs_step
+
 
 def parse_arguments():
   """Parses command line arguments for the script.
