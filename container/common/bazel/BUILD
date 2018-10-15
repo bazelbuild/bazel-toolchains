@@ -16,7 +16,7 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("@bazel_toolchains//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
+load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 exports_files(glob(["**"]))
 
