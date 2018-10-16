@@ -160,7 +160,6 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.repo_pkg_tar:
         # if package tar was used then the command should expand it
         clone_repo_cmd = ("mkdir %s/%s && tar -xf /%s -C %s/%s " % (bazel_config_dir, project_repo_dir, ctx.file.repo_pkg_tar.basename, bazel_config_dir, project_repo_dir))
-    print(clone_repo_cmd)
 
     # Command to install custom Bazel version (if requested)
     install_bazel_cmd = "cd ."
@@ -189,16 +188,14 @@ def _docker_toolchain_autoconfig_impl(ctx):
         deref_symlinks_cmd.append(symlinks_cmd)
     deref_symlinks_cmd = " && ".join(deref_symlinks_cmd)
 
-    # Command to copy produced toolchain configs to outside of
-    # the containter (to the mount_point).
+    # Command to copy produced toolchain configs to a tar at the root
+    # of the container.
     copy_cmd = []
     for config_repo in ctx.attr.config_repos:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + "/")
-
-        # We need to change the owner of the files we copied, so that they can
-        # be manipulated from outside the container.
-        copy_cmd.append("tar -cf /outputs.tar " + " /".join(ctx.attr.config_repos))
+    copy_cmd.append("tar -cf /outputs.tar /" + " ".join(ctx.attr.config_repos))
+    print(copy_cmd)
     output_copy_cmd = " && ".join(copy_cmd)
 
     # Command to run autoconfigure targets.
