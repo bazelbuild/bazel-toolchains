@@ -253,12 +253,15 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
     image_tar = ctx.new_file(ctx.attr.name + ".tar")
     load_image_sh_file = ctx.new_file("load.sh")
-    result = _container.image.implementation(ctx,
+    _container.image.implementation(
+        ctx,
         cmd = docker_cmd,
-        output_executable=load_image_sh_file,
-        output_tarball = image_tar)
+        output_executable = load_image_sh_file,
+        output_tarball = image_tar,
+    )
 
     run_script_file = ctx.new_file("run_script.sh")
+
     # Create the script to load image and run it
     ctx.actions.expand_template(
         template = ctx.files.run_tpl[0],
@@ -274,7 +277,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
         is_executable = True,
     )
 
-    # add to the runfiles the tar to load the image, the script, and 
+    # add to the runfiles the tar to load the image, the script, and
     # (if needed) the repo_pkg_tar file
     runfiles_list = [image_tar, run_script_file]
     if ctx.attr.repo_pkg_tar:
@@ -284,6 +287,9 @@ def _docker_toolchain_autoconfig_impl(ctx):
         outputs = [ctx.outputs.output_tar],
         inputs = runfiles_list,
         command = run_script_file.path,
+        mnemonic = "DockerAutoconf",
+        progress_message = ("loading image, running container, installing " +
+                            "Bazel, running autoconf command and extracting output tar"),
     )
 
 docker_toolchain_autoconfig_ = rule(
@@ -291,7 +297,7 @@ docker_toolchain_autoconfig_ = rule(
         "config_repos": attr.string_list(default = ["local_config_cc"]),
         "use_default_project": attr.bool(default = False),
         "git_repo": attr.string(),
-        "repo_pkg_tar": attr.label(allow_files = tar_filetype, single_file=True),
+        "repo_pkg_tar": attr.label(allow_files = tar_filetype, single_file = True),
         "bazel_version": attr.string(),
         "bazel_rc_version": attr.string(),
         "use_bazel_head": attr.bool(default = False),
@@ -475,7 +481,7 @@ def docker_toolchain_autoconfig(**kwargs):
             size = "medium",
             timeout = "long",
             srcs = ["@bazel_toolchains//test/configs:autoconfig_test.sh"],
-            data = [":" + kwargs["name"]],
+            data = [":" + kwargs["name"] + "_output.tar"],
         )
 
     docker_toolchain_autoconfig_(**kwargs)

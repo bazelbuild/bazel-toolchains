@@ -26,6 +26,11 @@ main() {
   docker load -i %{INPUT_IMAGE_TAR}
   # Run the container image to build the config repos
   docker run --rm -e USER_ID="$(id -u)" -v $(pwd):/bazel-config -i %{IMAGE_NAME}
+  # Delete the loaded image
+  if [[ -z $(docker ps -q -f ancestor=%{IMAGE_NAME}) ]]; then
+      docker rmi -f %{IMAGE_NAME} | true
+      echo "%{IMAGE_NAME} deleted..."
+  fi
   # Create a tar file with all the config repos that were built
   tar -cf outputs.tar %{CONFIG_REPOS}
   # Copy the tar file to its desired output location
