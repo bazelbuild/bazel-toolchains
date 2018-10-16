@@ -273,7 +273,6 @@ docker_toolchain_autoconfig_ = rule(
         "bazel_version": attr.string(),
         "bazel_rc_version": attr.string(),
         "use_bazel_head": attr.bool(default = False),
-        "run_tpl": attr.label(allow_files = True),
         "setup_cmd": attr.string(default = "cd ."),
         "packages": attr.string_list(),
         "additional_repos": attr.string_list(),
@@ -305,7 +304,6 @@ reserved_attrs = [
     "files",
     "debs",
     "repo_pkg_tar",
-    "run_tpl",
     # all the attrs from docker_build we dont want users to set
     "directory",
     "tars",
@@ -428,10 +426,6 @@ def docker_toolchain_autoconfig(**kwargs):
         _WORKSPACE_PREFIX + "rules:install_bazel_head.sh",
         _WORKSPACE_PREFIX + "rules:install_bazel_version.sh",
     ]
-
-    # The template for the main script to execute for this rule, which produces
-    # the toolchain configs
-    kwargs["run_tpl"] = _WORKSPACE_PREFIX + "rules:docker_config.sh.tpl"
 
     # Do not install packags if 'packages' is not specified or is an ampty list.
     if not packages_is_empty:
