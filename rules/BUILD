@@ -19,11 +19,18 @@ package(default_visibility = ["//visibility:public"])
 exports_files([
     "install_bazel_head.sh",
     "install_bazel_version.sh",
-    "docker_config.sh.tpl",
 ])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
+
+filegroup(
+    name = "bazel_installers",
+    srcs = [
+        "install_bazel_head.sh",
+        "install_bazel_version.sh",
+    ],
+)
 
 pkg_tar(
     name = "cc-sample-project-tar",

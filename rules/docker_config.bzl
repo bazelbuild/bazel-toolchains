@@ -116,6 +116,9 @@ load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
+
+load("@base_images_docker//util:run.bzl", _extract = "extract")
+
 load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
 
 # External folder is set to be deprecated, lets keep it here for easy
@@ -154,6 +157,10 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.git_repo:
         clone_repo_cmd = ("cd " + bazel_config_dir + " && git clone " +
                           ctx.attr.git_repo + " " + project_repo_dir)
+    if ctx.attr.repo_pkg_tar:
+        # if package tar was used then the command should expand it
+        clone_repo_cmd = ("mkdir %s/%s && tar -xf /%s -C %s/%s " % (bazel_config_dir, project_repo_dir, ctx.file.repo_pkg_tar.basename, bazel_config_dir, project_repo_dir))
+    print(clone_repo_cmd)
 
     # Command to install custom Bazel version (if requested)
     install_bazel_cmd = "cd ."
@@ -187,11 +194,11 @@ def _docker_toolchain_autoconfig_impl(ctx):
     copy_cmd = []
     for config_repo in ctx.attr.config_repos:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
-        copy_cmd.append("cp -dr " + src_dir + " " + bazel_config_dir + "/")
+        copy_cmd.append("cp -dr " + src_dir + " " + "/")
 
         # We need to change the owner of the files we copied, so that they can
         # be manipulated from outside the container.
-        copy_cmd.append("chown -R $USER_ID " + bazel_config_dir + "/" + config_repo)
+        copy_cmd.append("tar -cf /outputs.tar " + " /".join(ctx.attr.config_repos))
     output_copy_cmd = " && ".join(copy_cmd)
 
     # Command to run autoconfigure targets.
@@ -215,17 +222,14 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.git_repo:
         clean_cmd += " && cd " + bazel_config_dir + " && rm -drf " + project_repo_dir
 
-    # Full command to use for docker container
-    # TODO(xingao): Make sure the command exits with error right away if a sub
-    # command fails.
-    docker_cmd = [
-        "/bin/sh",
-        "-c",
-        " && ".join([
+    install_sh = ctx.new_file(ctx.attr.name + "_install.sh")
+    ctx.actions.write(
+        output = install_sh,
+        content = "\n ".join([
             "set -ex",
             ctx.attr.setup_cmd,
             install_bazel_cmd,
-            "echo === Cloning project repo ===",
+            "echo === Cloning / expand project repo ===",
             clone_repo_cmd,
             "echo === Running Bazel autoconfigure command ===",
             bazel_cmd,
@@ -235,61 +239,29 @@ def _docker_toolchain_autoconfig_impl(ctx):
             "echo === Cleaning up ===",
             clean_cmd,
         ]),
-    ]
-
-    # Expand contents of repo_pkg_tar
-    # (and remove them after we're done running the docker command).
-    # A dummy command that does nothing in case git_repo was used
-    expand_repo_cmd = "cd ."
-    remove_repo_cmd = "cd ."
+    )
+    # Include the repo_pkg_tar if needed
+    files = [install_sh] + ctx.files._installers
     if ctx.attr.repo_pkg_tar:
-        repo_pkg_tar = str(ctx.attr.repo_pkg_tar.label.name)
-        package_name = _EXTERNAL_FOLDER_PREFIX + _WORKSPACE_NAME + "/" + str(ctx.attr.repo_pkg_tar.label.package)
-
-        # Expand the tar file pointed by repo_pkg_tar
-        expand_repo_cmd = ("mkdir ./%s ; tar -xf %s -C ./%s" %
-                           (project_repo_dir, ctx.file.repo_pkg_tar.path, project_repo_dir))
-        remove_repo_cmd = ("rm -drf ./%s" % project_repo_dir)
+        files += [ctx.file.repo_pkg_tar]
 
     image_tar = ctx.new_file(ctx.attr.name + ".tar")
     load_image_sh_file = ctx.new_file("load.sh")
     _container.image.implementation(
         ctx,
-        cmd = docker_cmd,
+        files = files,
         output_executable = load_image_sh_file,
         output_tarball = image_tar,
+        workdir = bazel_config_dir,
     )
 
-    run_script_file = ctx.new_file("run_script.sh")
-
-    # Create the script to load image and run it
-    ctx.actions.expand_template(
-        template = ctx.files.run_tpl[0],
-        substitutions = {
-            "%{EXPAND_REPO_CMD}": expand_repo_cmd,
-            "%{INPUT_IMAGE_TAR}": image_tar.path,
-            "%{IMAGE_NAME}": "bazel/" + ctx.label.package + ":" + ctx.label.name,
-            "%{RM_REPO_CMD}": remove_repo_cmd,
-            "%{CONFIG_REPOS}": " ".join(ctx.attr.config_repos),
-            "%{OUTPUT}": ctx.outputs.output_tar.path,
-        },
-        output = run_script_file,
-        is_executable = True,
-    )
-
-    # add to the runfiles the tar to load the image, the script, and
-    # (if needed) the repo_pkg_tar file
-    runfiles_list = [image_tar, run_script_file]
-    if ctx.attr.repo_pkg_tar:
-        runfiles_list += ctx.files.repo_pkg_tar
-
-    ctx.actions.run_shell(
-        outputs = [ctx.outputs.output_tar],
-        inputs = runfiles_list,
-        command = run_script_file.path,
-        mnemonic = "DockerAutoconf",
-        progress_message = ("loading image, running container, installing " +
-                            "Bazel, running autoconf command and extracting output tar"),
+    _extract.implementation(
+        ctx,
+        name = ctx.attr.name + "_extract",
+        image = image_tar,
+        commands = ["/" + ctx.attr.name + "_install.sh"],
+        extract_file = "/output.tar",
+        output_file = ctx.outputs.output_tar,
     )
 
 docker_toolchain_autoconfig_ = rule(
@@ -308,6 +280,17 @@ docker_toolchain_autoconfig_ = rule(
         "keys": attr.string_list(),
         "incompatible_changes_off": attr.bool(default = False),
         "test": attr.bool(default = True),
+        "_installers": attr.label(default = ":bazel_installers", allow_files = True),
+        "_extract_tpl": attr.label(
+            default = Label("@base_images_docker//util:extract.sh.tpl"),
+            allow_files = True,
+            single_file = True,
+        ),
+        "_image_id_extractor": attr.label(
+            default = "@io_bazel_rules_docker//contrib:extract_image_id.py",
+            allow_files = True,
+            single_file = True,
+        ),
     },
     outputs = _container.image.outputs + {
         "output_tar": "%{name}_output.tar",
