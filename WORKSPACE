@@ -71,7 +71,7 @@ container_pull(
 
 # TODO(xingao) Switch to use "marketplace.gcr.io" registry once Buildkite support proper auth.
 # Pinned to gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
-# solely for testing purpose used by //test/configs:debian8_clang_autoconfig_test.
+# solely for testing purpose used by //tests/config:debian8_clang_autoconfig_test.
 container_pull(
     name = "debian8-clang-test",
     digest = "sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f",
