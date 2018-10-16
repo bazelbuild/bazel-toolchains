@@ -14,22 +14,22 @@
 
 licenses(["notice"])  # Apache 2.0
 
-package(default_visibility = ["//visibility:public"])
+load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
 
-load(
-    "//rules/container:debian_pkg_tar.bzl",
-    "aggregate_debian_pkgs",
+skylark_library(
+    name = "debian_pkg_tar",
+    srcs = [
+        "debian_pkg_tar.bzl",
+    ],
 )
 
-aggregate_debian_pkgs(
-    name = "ubuntu16-04-debian_pkgs",
-    base = "@ubuntu16_04//image",
-    language_layers = [
-        "//container/ubuntu16_04/builders/rbe-ubuntu16_04:base-ltl",
-        "//container/ubuntu16_04/layers/clang:clang-ltl",
-        "//container/ubuntu16_04/layers/go:go-ltl",
-        "//container/ubuntu16_04/layers/java:java-ltl",
-        "//container/ubuntu16_04/layers/java:java10-ltl",
-        "//container/ubuntu16_04/layers/python:python-ltl",
+skylark_library(
+    name = "docker_toolchains",
+    srcs = [
+        "docker_toolchains.bzl",
+    ],
+    deps = [
+        ":debian_pkg_tar",
+        "@io_bazel_rules_docker//container",
     ],
 )

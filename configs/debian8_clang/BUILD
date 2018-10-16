@@ -53,6 +53,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.01.10
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:62ad7c44890792fdb2c2593fc24cfab7132e3a112d55bd453e09387906ae5e2f
+# Clang revision: r319946
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.2.0-bazel_0.9.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -67,6 +68,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.02.05
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:e57978199c9eb156bd7f63773387f3a238adf61acd71c4942ad91da50b4f241f
+# Clang revision: r319946
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.2.0-bazel_0.10.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -81,6 +83,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.02.13
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
+# Clang revision: r322167
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.3.0-bazel_0.10.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -95,6 +98,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.04.06
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
+# Clang revision: r322167
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.3.0-bazel_0.11.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -111,6 +115,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.04.23
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:213da2494bb763f55363213db45d9bfa5eb906039fc02e6cb2e6637dc4917caf
+# Clang revision: r327695
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.3.0-bazel_0.12.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -125,6 +130,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.04.23
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:213da2494bb763f55363213db45d9bfa5eb906039fc02e6cb2e6637dc4917caf
+# Clang revision: r327695
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.3.0-bazel_0.12.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -141,6 +147,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.04.30
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:213da2494bb763f55363213db45d9bfa5eb906039fc02e6cb2e6637dc4917caf
+# Clang revision: r327695
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.3.0-bazel_0.13.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -155,6 +162,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.04.30
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:213da2494bb763f55363213db45d9bfa5eb906039fc02e6cb2e6637dc4917caf
+# Clang revision: r327695
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.3.0-bazel_0.13.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -171,6 +179,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.08
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.3.0-bazel_0.14.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -185,6 +194,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.08
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.3.0-bazel_0.14.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -201,6 +211,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.27
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.3.0-bazel_0.15.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -215,6 +226,7 @@ docker_toolchain_autoconfig(
 
 # Created on 2018.06.27
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:8bb65bf0a0da8be48bbac07ebe743805f3dc5259203e19517098162bd23a768f
+# Clang revision: r328903
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.3.0-bazel_0.15.0-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -233,6 +245,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.8.13
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:de1116d36eafe16890afd64b6bc6809a3ed5b3597ed7bc857980749270894677
+# Clang revision: r337145
 docker_toolchain_autoconfig(
     name = "default-debian8-clang-0.3.0-bazel_0.16.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -249,6 +262,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.8.13
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:de1116d36eafe16890afd64b6bc6809a3ed5b3597ed7bc857980749270894677
+# Clang revision: r337145
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.3.0-bazel_0.16.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -267,6 +281,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.6
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:0946899544c00537b2af06790e72ba86aa39b16e0e05aef8f53ed79d1f89f2a0
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "default-debian8-clang-0.4.0-bazel_0.16.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -283,6 +298,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.6
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:0946899544c00537b2af06790e72ba86aa39b16e0e05aef8f53ed79d1f89f2a0
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.4.0-bazel_0.16.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -301,6 +317,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.17
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:0946899544c00537b2af06790e72ba86aa39b16e0e05aef8f53ed79d1f89f2a0
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "default-debian8-clang-0.4.0-bazel_0.17.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),
@@ -317,6 +334,7 @@ docker_toolchain_autoconfig(
 # modified directly.
 # Created on 2018.9.17
 # Container: gcr.io/cloud-marketplace/google/clang-debian8@sha256:0946899544c00537b2af06790e72ba86aa39b16e0e05aef8f53ed79d1f89f2a0
+# Clang revision: r340178
 docker_toolchain_autoconfig(
     name = "msan-debian8-clang-0.4.0-bazel_0.17.1-autoconfig",
     additional_repos = debian8_clang_default_repos(),

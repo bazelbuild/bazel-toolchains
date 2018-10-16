@@ -1,19 +1,5 @@
 ---
 platforms:
-  ubuntu1404:
-    test_targets:
-    - "//test/configs:debian-jessie-bazel-head-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-bazel-head-autoconfig_test"
-    test_flags:
-    - "--test_output=errors"
-    - "--verbose_failures"
-  ubuntu1604:
-    test_targets:
-    - "//test/configs:debian-jessie-bazel-head-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-bazel-head-autoconfig_test"
-    test_flags:
-    - "--test_output=errors"
-    - "--verbose_failures"
   rbe_ubuntu1604:
     test_targets:
     - "//test/configs:debian-jessie-autoconfig_test"
@@ -28,10 +14,10 @@ platforms:
     - "//container/debian8/builders/rbe-debian8:toolchain-test"
     - "//container/ubuntu16_04/builders/rbe-ubuntu16_04:toolchain-test"
     - "//container/experimental/rbe-debian9:toolchain-test"
-    - "//container/ubuntu16_04/builders/bazel:bazel_0.17.1-test"
-    - "//container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_0.17.1_docker_gcloud-test"
-    - "//container/debian8/builders/bazel:bazel_0.17.1-test"
-    - "//container/ubuntu14_04/builders/bazel:bazel_0.17.1-test"
+    - "//container/ubuntu16_04/builders/bazel:bazel_0.17.2-test"
+    - "//container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_0.17.2_docker_gcloud-test"
+    - "//container/debian8/builders/bazel:bazel_0.17.2-test"
+    - "//container/ubuntu14_04/builders/bazel:bazel_0.17.2-test"
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"

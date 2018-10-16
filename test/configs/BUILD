@@ -16,10 +16,10 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//container/rules:docker_toolchains.bzl", "toolchain_container")
-load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
+load("//rules/container:docker_toolchains.bzl", "toolchain_container")
+load("//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load(
-    "@bazel_toolchains//rules:environments.bzl",
+    "//rules:environments.bzl",
     "clang_env",
     "debian8_clang_default_keys",
     "debian8_clang_default_packages",

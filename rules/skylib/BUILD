@@ -16,4 +16,12 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["container_file_export.sh"])
+load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
+
+skylark_library(
+    name = "packages",
+    srcs = [
+        "package_names.bzl",
+        "packages.bzl",
+    ],
+)

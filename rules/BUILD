@@ -23,11 +23,44 @@ exports_files([
 ])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
 
 pkg_tar(
     name = "cc-sample-project-tar",
     srcs = [
         "cc-sample-project/BUILD.sample",
         "cc-sample-project/test.cc",
+    ],
+)
+
+skylark_library(
+    name = "environments",
+    srcs = [
+        "environments.bzl",
+    ],
+)
+
+skylark_library(
+    name = "toolchain_containers",
+    srcs = [
+        "toolchain_containers.bzl",
+    ],
+)
+
+skylark_library(
+    name = "gcs",
+    srcs = [
+        "gcs.bzl",
+    ],
+)
+
+skylark_library(
+    name = "docker_config",
+    srcs = [
+        "docker_config.bzl",
+    ],
+    deps = [
+        "@bazel_toolchains//rules/container:docker_toolchains",
+        "@io_bazel_rules_docker//container",
     ],
 )

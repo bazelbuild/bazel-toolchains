@@ -1,3 +1,4 @@
+# pylint: disable=g-bad-file-header
 # Copyright 2017 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
+"""Skylark rule that stubs a toolchain."""
 
-package(default_visibility = ["//visibility:public"])
+def _dummy_toolchain_impl(ctx):
+    ctx = ctx  # unused argument
+    toolchain = platform_common.ToolchainInfo()
+    return [toolchain]
 
-load(
-    "//rules/container:docker_toolchains.bzl",
-    "language_tool_layer",
-)
-load("//container/common/clang:clang.bzl", "clang_env")
-
-language_tool_layer(
-    name = "clang-ltl",
-    base = "@debian8//image",
-    env = clang_env,
-    packages = [
-        "libstdc++-4.9-dev",
-    ],
-    tars = [
-        "//third_party/clang:debian8_tar",
-        "//third_party/libcxx:debian8_tar",
-    ],
-)
+dummy_toolchain = rule(_dummy_toolchain_impl, attrs = {})
