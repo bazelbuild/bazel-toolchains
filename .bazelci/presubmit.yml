@@ -1,19 +1,5 @@
 ---
 platforms:
-  ubuntu1404:
-    test_targets:
-    - "//tests/config:debian-jessie-bazel-head-autoconfig_test"
-    - "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
-    test_flags:
-    - "--test_output=errors"
-    - "--verbose_failures"
-  ubuntu1604:
-    test_targets:
-    - "//tests/config:debian-jessie-bazel-head-autoconfig_test"
-    - "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
-    test_flags:
-    - "--test_output=errors"
-    - "--verbose_failures"
   rbe_ubuntu1604:
     test_targets:
     - "//tests/config:debian-jessie-autoconfig_test"
