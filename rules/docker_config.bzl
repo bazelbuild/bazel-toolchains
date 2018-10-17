@@ -158,8 +158,8 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.repo_pkg_tar:
         # if package tar was used then the command should expand it
         repo_dir = bazel_config_dir + "/" + project_repo_dir
-        clone_repo_cmd = ("mkdir %s && tar -xf /%s -C %s "
-                          % (repo_dir, ctx.file.repo_pkg_tar.basename, repo_dir))
+        clone_repo_cmd = ("mkdir %s && tar -xf /%s -C %s " %
+                          (repo_dir, ctx.file.repo_pkg_tar.basename, repo_dir))
 
     # Command to install custom Bazel version (if requested)
     install_bazel_cmd = "cd ."
@@ -243,6 +243,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
         files += [ctx.file.repo_pkg_tar]
 
     image_tar = ctx.new_file(ctx.attr.name + ".tar")
+
     # TODO(nlopezgi): fix upsream issue that output_executable is required
     load_image_sh_file = ctx.new_file("load.sh")
     _container.image.implementation(
