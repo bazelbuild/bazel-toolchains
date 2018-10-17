@@ -20,7 +20,7 @@
 # toolchain configs for Bazel 0.10.0 release, and compares newly generated
 # configs with published ones.
 
-set -e
+set -ex
 
 # Define constants.
 WORKSPACE_ROOT=$(pwd)
@@ -30,34 +30,10 @@ CONFIG_VERSION=0.3.0
 TEST_CONFIGS_DIR=${TEST_TMPDIR}/bazel-toolchains-${COMMIT}/configs/debian8_clang/${CONFIG_VERSION}/bazel_${BAZEL_VERSION}/
 AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/tests/config/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig
 
-# Helper function for always delete the containers / temporary files on exit
-function cleanup_on_finish {
-  echo "=== Deleting images  ==="
-  images=($(docker images -a | grep "debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig" | awk '{print $3}'))
-  for image in "${images[@]}"
-  do
-    echo "Attempting to delete ${image}..."
-    # Only delete the image if it is not used by any running container.
-    # Do not return error code if unable to delete.
-    if [[ -z $(docker ps -q -f ancestor=${image}) ]]; then
-      docker rmi -f ${image} | true
-      echo "${image} deleted..."
-    else
-      echo "${image} is used by another container, not deleted..."
-    fi
-  done
-  echo "Deleting all dangling images..."
-  docker images -f "dangling=true" -q | xargs -r docker rmi -f | true
-}
-
-trap cleanup_on_finish EXIT # always delete the containers
-
-# Change the output location to a tmp location inside the current Bazel workspace.
-sed -i "s|/tmp|${TEST_TMPDIR}|g" ${AUTOCONFIG_SCRIPT}
-
 # Execute the autoconfig script and unpack toolchain config tarball.
-${AUTOCONFIG_SCRIPT}
-tar -xf ${TEST_TMPDIR}/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig.tar -C ${TEST_TMPDIR}
+#tar -xf ${WORKSPACE_ROOT}/${TARGET}_outputs.tar -C ${TEST_TMPDIR}
+find .
+tar -xf ${WORKSPACE_ROOT}/tests/config/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig_outputs.tar -C ${TEST_TMPDIR}
 
 # Remove generated files that are not part of toolchain configs
 rm -rf ${TEST_TMPDIR}/local_config_cc/tools ${TEST_TMPDIR}/local_config_cc/WORKSPACE

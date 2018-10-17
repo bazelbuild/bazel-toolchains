@@ -457,7 +457,7 @@ def docker_toolchain_autoconfig(**kwargs):
             size = "medium",
             timeout = "long",
             srcs = ["@bazel_toolchains//tests/config:autoconfig_test.sh"],
-            data = [":" + kwargs["name"] + "_output.tar"],
+            data = [":" + kwargs["name"] + "_outputs.tar"],
         )
 
     docker_toolchain_autoconfig_(**kwargs)

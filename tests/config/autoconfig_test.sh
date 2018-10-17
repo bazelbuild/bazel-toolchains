@@ -22,7 +22,7 @@
 # where {docker_toolchain_autoconfig_name} is the docker_toolchain_autoconfig
 # rule you would like to build and run.
 
-set -e
+set -ex
 
 # Define constants.
 WORKSPACE_ROOT=$(pwd)
@@ -30,7 +30,8 @@ WORKSPACE_ROOT=$(pwd)
 TARGET=${TEST_BINARY%_test}
 
 # Unpack toolchain config tarball.
-tar -xf ${WORKSPACE_ROOT}/${TARGET}_output.tar -C ${TEST_TMPDIR}
+find .
+tar -xf ${WORKSPACE_ROOT}/${TARGET}_outputs.tar -C ${TEST_TMPDIR}
 
 # Check existence of generated file.
 file ${TEST_TMPDIR}/local_config_cc/CROSSTOOL
