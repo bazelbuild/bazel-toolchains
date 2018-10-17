@@ -109,6 +109,19 @@ docker_toolchain_autoconfig(
 )
 
 docker_toolchain_autoconfig(
+    name = "external-repo-autoconfig",
+    base = ":rbe-test-xenial-with-pkgs.tar",
+    config_repos = [
+        "local_config_sh",
+        "local_config_cc",
+    ],
+    env = gcc_env(),
+    git_repo = "https://github.com/bazelbuild/bazel",
+    tags = ["manual"],
+    test = True,
+)
+
+docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),

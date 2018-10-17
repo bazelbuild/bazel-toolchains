@@ -83,8 +83,14 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
       # Generate config directory.
       os.makedirs(config.get_config_dir())
 
-      command = ("bazel run --define=DOCKER_AUTOCONF_OUTPUT={OUTPUT_DIR} "
-                 "//{PACKAGE}:{TARGET}").format(
+      command = ("bazel build //{PACKAGE}:{TARGET}").format(
+                     PACKAGE=container_configs.package,
+                     TARGET=target)
+      print("\nExecuting command: %s\n" % command)
+      subprocess.check_call(shlex.split(command))
+
+      command = ("cp ./bazel-out/k8-fastbuild/bin/{PACKAGE}/{TARGET}_outputs.tar "
+                 "{OUTPUT_DIR}/").format(
                      OUTPUT_DIR=TMP_DIR,
                      PACKAGE=container_configs.package,
                      TARGET=target)
@@ -92,7 +98,7 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
       subprocess.check_call(shlex.split(command))
 
       # Extract toolchain configs.
-      tar_path = os.path.join(TMP_DIR, "%s.tar" % target)
+      tar_path = os.path.join(TMP_DIR, "%s_outputs.tar" % target)
       tar = tarfile.open(tar_path)
 
       for config_file in CONFIG_FILES:
