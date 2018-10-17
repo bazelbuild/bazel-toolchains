@@ -116,9 +116,7 @@ load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
-
 load("@base_images_docker//util:run.bzl", _extract = "extract")
-
 load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
 
 # External folder is set to be deprecated, lets keep it here for easy
@@ -159,7 +157,9 @@ def _docker_toolchain_autoconfig_impl(ctx):
                           ctx.attr.git_repo + " " + project_repo_dir)
     if ctx.attr.repo_pkg_tar:
         # if package tar was used then the command should expand it
-        clone_repo_cmd = ("mkdir %s/%s && tar -xf /%s -C %s/%s " % (bazel_config_dir, project_repo_dir, ctx.file.repo_pkg_tar.basename, bazel_config_dir, project_repo_dir))
+        repo_dir = bazel_config_dir + "/" + project_repo_dir
+        clone_repo_cmd = ("mkdir %s && tar -xf /%s -C %s "
+                          % (repo_dir, ctx.file.repo_pkg_tar.basename, repo_dir))
 
     # Command to install custom Bazel version (if requested)
     install_bazel_cmd = "cd ."
@@ -236,12 +236,14 @@ def _docker_toolchain_autoconfig_impl(ctx):
             clean_cmd,
         ]),
     )
+
     # Include the repo_pkg_tar if needed
     files = [install_sh] + ctx.files._installers
     if ctx.attr.repo_pkg_tar:
         files += [ctx.file.repo_pkg_tar]
 
     image_tar = ctx.new_file(ctx.attr.name + ".tar")
+    # TODO(nlopezgi): fix upsream issue that output_executable is required
     load_image_sh_file = ctx.new_file("load.sh")
     _container.image.implementation(
         ctx,
@@ -256,7 +258,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
         name = ctx.attr.name + "_extract",
         image = image_tar,
         commands = ["/" + ctx.attr.name + "_install.sh"],
-        extract_file = "/output.tar",
+        extract_file = "/outputs.tar",
         output_file = ctx.outputs.output_tar,
     )
 
@@ -276,6 +278,7 @@ docker_toolchain_autoconfig_ = rule(
         "incompatible_changes_off": attr.bool(default = False),
         "test": attr.bool(default = True),
         "_installers": attr.label(default = ":bazel_installers", allow_files = True),
+        # TODO(nlopezgi): fix upstream attr declaration that is missing repo name
         "_extract_tpl": attr.label(
             default = Label("@base_images_docker//util:extract.sh.tpl"),
             allow_files = True,
@@ -288,7 +291,7 @@ docker_toolchain_autoconfig_ = rule(
         ),
     },
     outputs = _container.image.outputs + {
-        "output_tar": "%{name}_output.tar",
+        "output_tar": "%{name}_outputs.tar",
     },
     implementation = _docker_toolchain_autoconfig_impl,
 )
