@@ -109,6 +109,19 @@ docker_toolchain_autoconfig(
 )
 
 docker_toolchain_autoconfig(
+    name = "external-repo-autoconfig",
+    base = ":rbe-test-xenial-with-pkgs.tar",
+    config_repos = ["local_config_python","local_config_cc"],
+    env = clang_env() + {"PYTHON_BIN_PATH": "/usr/bin/python2.7"},
+    git_repo = "https://github.com/tensorflow/tensorflow",
+    incompatible_changes_off = True,
+    setup_cmd = "update-ca-certificates -f",
+    tags = ["manual"],
+    test = True,
+)
+
+
+docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
