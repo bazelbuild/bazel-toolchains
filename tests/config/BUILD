@@ -118,7 +118,6 @@ docker_toolchain_autoconfig(
     test = True,
 )
 
-
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
