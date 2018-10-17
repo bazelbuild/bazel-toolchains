@@ -31,8 +31,6 @@ TEST_CONFIGS_DIR=${TEST_TMPDIR}/bazel-toolchains-${COMMIT}/configs/debian8_clang
 AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/tests/config/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig
 
 # Execute the autoconfig script and unpack toolchain config tarball.
-#tar -xf ${WORKSPACE_ROOT}/${TARGET}_outputs.tar -C ${TEST_TMPDIR}
-find .
 tar -xf ${WORKSPACE_ROOT}/tests/config/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig_outputs.tar -C ${TEST_TMPDIR}
 
 # Remove generated files that are not part of toolchain configs
