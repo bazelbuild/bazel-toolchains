@@ -149,6 +149,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     """
     bazel_config_dir = "/bazel-config"
     project_repo_dir = "project_src"
+    name = ctx.attr.name
 
     # Command to retrieve the project from github if requested.
     clone_repo_cmd = "cd ."
@@ -218,7 +219,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.git_repo:
         clean_cmd += " && cd " + bazel_config_dir + " && rm -drf " + project_repo_dir
 
-    install_sh = ctx.new_file(ctx.attr.name + "_install.sh")
+    install_sh = ctx.new_file(name + "_install.sh")
     ctx.actions.write(
         output = install_sh,
         content = "\n ".join([
@@ -242,10 +243,10 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.repo_pkg_tar:
         files += [ctx.file.repo_pkg_tar]
 
-    image_tar = ctx.new_file(ctx.attr.name + ".tar")
+    image_tar = ctx.new_file(name + ".tar")
 
     # TODO(nlopezgi): fix upsream issue that output_executable is required
-    load_image_sh_file = ctx.new_file("load.sh")
+    load_image_sh_file = ctx.new_file(name + "load.sh")
     _container.image.implementation(
         ctx,
         files = files,
