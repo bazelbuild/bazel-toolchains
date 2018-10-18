@@ -22,7 +22,10 @@ load(
 )
 
 PYTHON_CLEANUP_COMMANDS = (
-    "find /usr/lib/python* -name __pycache__ -exec rm -rf {} +"
+    "find /usr/lib/python* -name __pycache__ -exec rm -rf {} + && " +
+    # /usr/bin/add-apt-repository does not work with Python 3.6.
+    # Change the shebang of if to use python 3.4 instead.
+    "sed -i -e 's/python3/python3.4/g' /usr/bin/add-apt-repository"
 )
 
 language_tool_layer(

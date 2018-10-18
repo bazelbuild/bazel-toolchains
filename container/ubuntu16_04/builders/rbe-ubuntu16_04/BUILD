@@ -78,6 +78,7 @@ container_test(
         "//container/common:go.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
+        "//container/common:python3.yaml",
         "//container/common:rbe-base.yaml",
         "//container/common/clang:clang.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",

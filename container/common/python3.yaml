@@ -1,0 +1,19 @@
+schemaVersion: "2.0.0"
+
+fileExistenceTests:
+- name: 'Python3'
+  path: '/opt/python3.6/bin/python3'
+  shouldExist: true
+
+# /usr/bin/add-apt-repository does not work with Python 3.6.
+# We changed the shebang of if to use python 3.4 instead.
+fileContentTests:
+- name: 'add_apt_repository_python_version'
+  path: '/usr/bin/add-apt-repository'
+  expectedContents: ['#! /usr/bin/python3.4']
+
+commandTests:
+- name: 'python3-version'
+  command: 'python3'
+  args: ['-V']
+  expectedOutput: ['Python 3.6.*']
