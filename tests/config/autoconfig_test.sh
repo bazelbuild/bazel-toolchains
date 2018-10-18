@@ -22,45 +22,16 @@
 # where {docker_toolchain_autoconfig_name} is the docker_toolchain_autoconfig
 # rule you would like to build and run.
 
-set -e
+set -ex
 
 # Define constants.
 WORKSPACE_ROOT=$(pwd)
 # The test name is hardcoded as {docker_toolchain_autoconfig_name}_test.
 TARGET=${TEST_BINARY%_test}
-NAME=${TARGET##*/}
-DIR=${TARGET%${NAME}}
-autoconfig_script=${WORKSPACE_ROOT}/${DIR}${NAME}
 
-# Helper function for always delete the containers / temporary files on exit
-function cleanup_on_finish {
-  echo "=== Deleting images  ==="
-  # Images to be removed are expected to have "rbe-test-" as name prefix.
-  images=($(docker images -a | grep "rbe-test-" | awk '{print $3}'))
-  for image in "${images[@]}"
-  do
-    echo "Attempting to delete ${image}..."
-    # Only delete the image if it is not used by any running container.
-    # Do not return error code if unable to delete.
-    if [[ -z $(docker ps -q -f ancestor=${image}) ]]; then
-      docker rmi -f ${image} | true
-      echo "${image} deleted..."
-    else
-      echo "${image} is used by another container, not deleted..."
-    fi
-  done
-  echo "Deleting all dangling images..."
-  docker images -f "dangling=true" -q | xargs -r docker rmi -f | true
-}
-
-trap cleanup_on_finish EXIT # always delete the containers
-
-# Change the output location to a tmp location inside the current Bazel workspace.
-sed -i "s|/tmp|${TEST_TMPDIR}|g" ${autoconfig_script}
-
-# Execute the autoconfig script and unpack toolchain config tarball.
-${autoconfig_script}
-tar -xf ${TEST_TMPDIR}/${NAME}.tar -C ${TEST_TMPDIR}
+# Unpack toolchain config tarball.
+find .
+tar -xf ${WORKSPACE_ROOT}/${TARGET}_outputs.tar -C ${TEST_TMPDIR}
 
 # Check existence of generated file.
 file ${TEST_TMPDIR}/local_config_cc/CROSSTOOL

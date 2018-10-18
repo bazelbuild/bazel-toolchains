@@ -17,7 +17,7 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load(
-    "@bazel_toolchains//third_party/clang:revision.bzl",
+    "//third_party/clang:revision.bzl",
     "CLANG_REVISION",
 )
 

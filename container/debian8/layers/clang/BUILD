@@ -17,10 +17,10 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load(
-    "@bazel_toolchains//rules/container:docker_toolchains.bzl",
+    "//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
 )
-load("@bazel_toolchains//container/common/clang:clang.bzl", "clang_env")
+load("//container/common/clang:clang.bzl", "clang_env")
 
 language_tool_layer(
     name = "clang-ltl",
