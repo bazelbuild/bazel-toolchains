@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This BUILD file is used for installing golang into /usr/local/go/
-# of debian8-clang-fully-loaded container. It uses the official golang
-# release tarball downloaded by new_http_archive rule in WORKSPACE file:
-# https://storage.googleapis.com/golang/go1.9.1.linux-amd64.tar.gz
-
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
