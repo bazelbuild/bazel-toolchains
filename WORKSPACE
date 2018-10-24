@@ -13,6 +13,7 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load(
     "//rules/skylib:package_names.bzl",
     "jessie_package_names",
@@ -131,6 +132,7 @@ dpkg_list(
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
 http_file(
     name = "bazel_toolchains_test",
+    downloaded_file_path = "44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     sha256 = "699b55a6916c687f4b7dc092dbbf5f64672cde0dc965f79717735ec4e5416556",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
