@@ -25,41 +25,6 @@ load(
     "debian8_clang_default_repos",
 )
 
-PACKAGE = "//configs/debian8_clang/"
-
-# Update the following (if needed) in new config releases.
-LATEST_CONFIG_VERSION = "0.4.0"
-
-LATEST_BAZEL_VERSION = "0.18.0"
-
-CONFIG_TYPES = [
-    "default",
-    "msan",
-]
-
-# DO NOT depend on the following latest alias in your production jobs.
-# These are for internal and our CI use only. We DO NOT guarantee that they
-# will always work.
-[alias(
-    name = "latest_crosstool_top_" + config_type,
-    actual = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/" + config_type + ":toolchain",
-) for config_type in CONFIG_TYPES]
-
-[alias(
-    name = "latest_toolchain_" + config_type,
-    actual = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/cpp:cc-toolchain-clang-x86_64-" + config_type,
-) for config_type in CONFIG_TYPES]
-
-alias(
-    name = "latest_platform",
-    actual = PACKAGE + LATEST_CONFIG_VERSION + ":rbe_debian8_jdk8",
-)
-
-alias(
-    name = "latest_javabase",
-    actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
-)
-
 # Created on 2017.10.18
 docker_toolchain_autoconfig(
     name = "debian8-clang-0.2.0-bazel_0.7.0-autoconfig",
