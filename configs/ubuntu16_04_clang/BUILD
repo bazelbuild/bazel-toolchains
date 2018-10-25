@@ -25,41 +25,6 @@ load(
     "ubuntu16_04_clang_default_repos",
 )
 
-PACKAGE = "//configs/ubuntu16_04_clang/"
-
-# Update the following (if needed) in new config releases.
-LATEST_CONFIG_VERSION = "1.1"
-
-LATEST_BAZEL_VERSION = "0.18.0"
-
-CONFIG_TYPES = [
-    "default",
-    "msan",
-]
-
-# DO NOT depend on the following latest alias in your production jobs.
-# These are for internal and our CI use only. We DO NOT guarantee that they
-# will always work.
-[alias(
-    name = "latest_crosstool_top_" + config_type,
-    actual = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/" + config_type + ":toolchain",
-) for config_type in CONFIG_TYPES]
-
-[alias(
-    name = "latest_toolchain_" + config_type,
-    actual = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/cpp:cc-toolchain-clang-x86_64-" + config_type,
-) for config_type in CONFIG_TYPES]
-
-alias(
-    name = "latest_platform",
-    actual = PACKAGE + LATEST_CONFIG_VERSION + ":rbe_ubuntu1604_jdk8",
-)
-
-alias(
-    name = "latest_javabase",
-    actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
-)
-
 # Created on 2018.05.09
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
 # Clang revision: r328903
