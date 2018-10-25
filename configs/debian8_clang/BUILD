@@ -25,6 +25,8 @@ load(
     "debian8_clang_default_repos",
 )
 
+PACKAGE = "//configs/debian8_clang/"
+
 # Update the following (if needed) in new config releases.
 LATEST_CONFIG_VERSION = "0.4.0"
 
@@ -40,22 +42,22 @@ CONFIG_TYPES = [
 # will always work.
 [alias(
     name = "latest_crosstool_top_" + config_type,
-    actual = LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/" + config_type + ":toolchain",
+    actual = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/" + config_type + ":toolchain",
 ) for config_type in CONFIG_TYPES]
 
 [alias(
     name = "latest_toolchain_" + config_type,
-    actual = LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/cpp:cc-toolchain-clang-x86_64-" + config_type,
+    actual = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/cpp:cc-toolchain-clang-x86_64-" + config_type,
 ) for config_type in CONFIG_TYPES]
 
 alias(
     name = "latest_platform",
-    actual = LATEST_CONFIG_VERSION + ":rbe_debian8_jdk8",
+    actual = PACKAGE + LATEST_CONFIG_VERSION + ":rbe_debian8_jdk8",
 )
 
 alias(
     name = "latest_javabase",
-    actual = LATEST_CONFIG_VERSION + ":jdk8",
+    actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
 )
 
 # Created on 2017.10.18
