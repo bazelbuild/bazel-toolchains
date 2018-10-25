@@ -67,7 +67,7 @@ toolchain_container(
         "//container/ubuntu16_04/layers/go:go-ltl",
         "//container/ubuntu16_04/layers/java:java-ltl",
         "//container/ubuntu16_04/layers/java:java10-ltl",
-        "//container/ubuntu16_04/layers/python:python-ltl",
+        "//container/ubuntu16_04/layers/python:python-rbe-ltl",
     ],
 )
 
@@ -78,7 +78,7 @@ container_test(
         "//container/common:go.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
-        "//container/common:python3.yaml",
+        "//container/common:python3_rbe.yaml",
         "//container/common:rbe-base.yaml",
         "//container/common/clang:clang.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",

@@ -2,7 +2,7 @@ schemaVersion: "2.0.0"
 
 fileExistenceTests:
 - name: 'python3'
-  path: '/usr/bin/python3'
+  path: '/opt/python3.6/bin/python3'
   shouldExist: true
 - name: 'pycache3.5'
   path: '/usr/lib/python3.5/__pycache__'
@@ -15,4 +15,4 @@ commandTests:
 - name: 'python3-version'
   command: 'python3'
   args: ['-V']
-  expectedOutput: ['Python 3.*.*']
+  expectedOutput: ['Python 3.6.*']

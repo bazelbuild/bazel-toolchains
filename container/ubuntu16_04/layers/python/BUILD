@@ -26,7 +26,7 @@ PYTHON_CLEANUP_COMMANDS = (
 )
 
 language_tool_layer(
-    name = "python-ltl",
+    name = "python-rbe-ltl",
     base = "@ubuntu16_04//image",
     env = {
         "PATH": "$PATH:/opt/python3.6/bin",
@@ -45,4 +45,19 @@ language_tool_layer(
         "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
     },
     tars = ["//third_party/python:ubuntu16_04_tar"],
+)
+
+language_tool_layer(
+    name = "python-ltl",
+    base = "@ubuntu16_04//image",
+    installation_cleanup_commands = PYTHON_CLEANUP_COMMANDS,
+    packages = [
+        "python-dev",
+        "python-setuptools",
+        "python3-dev",
+        "software-properties-common",
+    ],
+    symlinks = {
+        "/usr/bin/python": "/usr/bin/python2.7",
+    },
 )
