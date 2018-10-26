@@ -197,7 +197,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     for config_repo in ctx.attr.config_repos:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + "/")
-    copy_cmd.append("tar -cf /outputs.tar /" + " /".join(ctx.attr.config_repos))
+    copy_cmd.append("tar -cf /" + ctx.attr.name + "_outputs.tar /" + " /".join(ctx.attr.config_repos))
     output_copy_cmd = " && ".join(copy_cmd)
 
     # Command to run autoconfigure targets.
@@ -256,14 +256,29 @@ def _docker_toolchain_autoconfig_impl(ctx):
         output_tarball = image_tar,
         workdir = bazel_config_dir,
     )
-
+    
+    # Commands to run script to create autoconf results, output stderr to log file
+    # add the log file to a tar file and append the output.tar to that same tar file
+    commands = []
+    commands+= ["/" + ctx.attr.name + "_install.sh 2> /" + ctx.attr.name + "_log.log"]
+    commands+= ["tar -cf /extract.tar /" + ctx.attr.name + "_log.log"]
+    commands+= ["tar -rf /extract.tar /" + ctx.attr.name + "_outputs.tar"]
+    extract_tar_file = ctx.new_file(name + "_extract.tar")
     _extract.implementation(
         ctx,
         name = ctx.attr.name + "_extract",
         image = image_tar,
-        commands = ["/" + ctx.attr.name + "_install.sh"],
-        extract_file = "/outputs.tar",
-        output_file = ctx.outputs.output_tar,
+        commands = commands,
+        extract_file = "/extract.tar",
+        output_file = extract_tar_file,
+    )
+
+    # Extracts the two outputs produced by this rule (outputs.tar + log file)
+    # from the tar file extracted from the container in the rule above
+    ctx.actions.run_shell(
+        inputs = [extract_tar_file],
+        outputs = [ctx.outputs.output_tar, ctx.outputs.log],
+        command = ('tar -C %s -xf %s' % (ctx.outputs.output_tar.dirname, extract_tar_file.path)),
     )
 
 docker_toolchain_autoconfig_ = rule(
@@ -295,6 +310,7 @@ docker_toolchain_autoconfig_ = rule(
         ),
     },
     outputs = _container.image.outputs + {
+        "log": "%{name}_log.log",
         "output_tar": "%{name}_outputs.tar",
     },
     implementation = _docker_toolchain_autoconfig_impl,
