@@ -16,3 +16,7 @@ commandTests:
   command: 'python3'
   args: ['-V']
   expectedOutput: ['Python 3.*.*']
+- name: 'apt-add-repo-check'
+  command: 'apt-add-repository'
+  args: ['multiverse']
+  expectedOutput: ['.* distribution component is already enabled for all sources.']
