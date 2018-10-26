@@ -55,7 +55,7 @@ language_tool_layer(
         "python-dev",
         "python-setuptools",
         "python3-dev",
-        "software-properties-common"
+        "software-properties-common",
     ],
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",
