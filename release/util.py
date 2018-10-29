@@ -38,6 +38,7 @@ def get_autoconfig_target_name(config_type, distro, config_version,
     distro: string, base distro of container used to generate configs.
     config_version: string, the version of the configs.
     bazel_version: string, the version of Bazel used to generate the configs.
+
   Returns:
     The docker_toolchain_autoconfig target to generate the configs.
   """

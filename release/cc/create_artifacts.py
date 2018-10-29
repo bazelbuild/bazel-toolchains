@@ -33,6 +33,7 @@ package(default_visibility = ["//visibility:public"])
 GIT_ROOT = get_git_root()
 LICENCE_TPL = os.path.join(GIT_ROOT, "release", "license.tpl")
 CPP_TPL = os.path.join(GIT_ROOT, "release", "cc", "cpp.tpl")
+LATEST_TPL = os.path.join(GIT_ROOT, "release", "cc", "latest.tpl")
 SHA_MAP_FILE = os.path.join(GIT_ROOT, "rules/toolchain_containers.bzl")
 CLANG_REVISION_FILE = os.path.join(GIT_ROOT, "third_party/clang/revision.bzl")
 
@@ -53,7 +54,6 @@ def create_targets(container_configs_list, bazel_version):
     container_configs_list: list of ContainerConfigs, the list of
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
-
   """
 
   container_sha_map = imp.load_source("toolchain_containers", SHA_MAP_FILE)
@@ -92,6 +92,38 @@ def create_targets(container_configs_list, bazel_version):
             build_file.write(tpl)
 
 
+def update_latest_target_aliases(container_configs_list, bazel_version):
+  """Updates the alias targets pointing to latest toolchain targets.
+
+  Example latest aliases clang-ubuntu container are located in
+  configs/ubuntu16_04_clang/latest/BUILD.
+
+  There is one BUILD file to contain all aliases for a container_config.
+
+  Args:
+    container_configs_list: list of ContainerConfigs, the list of
+      ContainerConfigs to generate configs for.
+    bazel_version: string, the version of Bazel used to generate the configs.
+  """
+
+  for container_configs in container_configs_list:
+    with open(container_configs.get_latest_aliases_build_path(),
+              "w") as build_file:
+      # Update the BUILD file with aliases for latest toolchain targets.
+      with open(LATEST_TPL, "r") as tpl_file:
+        tpl = Template(tpl_file.read()).substitute(
+            CONFIG_VERSION=container_configs.version,
+            BAZEL_VERSION=bazel_version,
+            PACKAGE=container_configs.package,
+            PLATFORM=container_configs.platform_target,
+            CONFIG_TYPES=", ".join(
+                [("\"%s\"" % config_type)
+                 for config_type in container_configs.config_types]),
+        )
+
+        build_file.write(tpl)
+
+
 def generate_toolchain_definition(container_configs_list, bazel_version):
   """Generates new cpp toolchain definitions.
 
@@ -108,7 +140,6 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
     container_configs_list: list of ContainerConfigs, the list of
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
-
   """
 
   for container_configs in container_configs_list:
@@ -169,7 +200,6 @@ def generate_metadata(container_configs_list):
   Args:
     container_configs_list: list of ContainerConfigs, the list of
       ContainerConfigs to generate configs for.
-
   """
 
   container_sha_map = imp.load_source("toolchain_containers", SHA_MAP_FILE)

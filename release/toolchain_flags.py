@@ -36,7 +36,6 @@ def update_toolchain_bazelrc_file(container_configs_list, bazel_version):
     container_configs_list: list of ContainerConfigs, the list of
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
-
   """
 
   for container_configs in container_configs_list:
