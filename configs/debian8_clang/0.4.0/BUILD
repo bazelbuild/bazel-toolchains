@@ -32,7 +32,7 @@ java_runtime(
 )
 
 # Update every time when a new container is available publically.
-LATEST_CLANG_VERSION = "r340178"
+LATEST_CLANG_VERSION = "r342117"
 
 # Latest RBE Debian8 container with JDK10
 alias(
@@ -115,6 +115,70 @@ platform(
         properties: {
           name: "container-image"
           value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d"
+        }
+        """,
+)
+
+# ======================== RBE Debian8 r342117 targets ========================
+
+# RBE Debian8 r342117 with JDK 10
+platform(
+    name = "rbe_debian8_r342117_jdk10",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints/sanitizers:support_msan",
+        "//constraints:jessie",
+    ],
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"10"
+        }
+        """,
+)
+
+# RBE Debian8 r342117 with JDK 8
+platform(
+    name = "rbe_debian8_r342117_jdk8",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints/sanitizers:support_msan",
+        "//constraints:jessie",
+    ],
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"8"
+        }
+        """,
+)
+
+# RBE Debian8 r342117
+platform(
+    name = "rbe_debian8_r342117",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints/sanitizers:support_msan",
+        "//constraints:jessie",
+    ],
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
         }
         """,
 )
