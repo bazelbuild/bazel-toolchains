@@ -38,7 +38,6 @@ def create_bazelrc_and_update_link(bazel_version):
 
   Args:
     bazel_version: string, the version of Bazel used to generate the configs.
-
   """
   bazelrc_path = os.path.join(
       BAZELRC_DIR, "bazel-{version}.bazelrc".format(version=bazel_version))
