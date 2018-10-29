@@ -152,6 +152,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     bazel_config_dir = "/bazel-config"
     project_repo_dir = "project_src"
     name = ctx.attr.name
+    outputs_tar = ctx.outputs.output_tar.basename
 
     # Command to retrieve the project from github if requested.
     clone_repo_cmd = "cd ."
@@ -197,7 +198,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     for config_repo in ctx.attr.config_repos:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + "/")
-    copy_cmd.append("tar -cf /" + ctx.attr.name + "_outputs.tar /" + " /".join(ctx.attr.config_repos))
+    copy_cmd.append("tar -cf /" + outputs_tar + " /" + " /".join(ctx.attr.config_repos))
     output_copy_cmd = " && ".join(copy_cmd)
 
     # Command to run autoconfigure targets.
@@ -226,6 +227,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
         output = install_sh,
         content = "\n ".join([
             "set -ex",
+            "echo === Starting docker autoconfig ===",
             ctx.attr.setup_cmd,
             install_bazel_cmd,
             "echo === Cloning / expand project repo ===",
@@ -256,13 +258,23 @@ def _docker_toolchain_autoconfig_impl(ctx):
         output_tarball = image_tar,
         workdir = bazel_config_dir,
     )
-    
+
     # Commands to run script to create autoconf results, output stderr to log file
     # add the log file to a tar file and append the output.tar to that same tar file
     commands = []
-    commands+= ["/" + ctx.attr.name + "_install.sh 2> /" + ctx.attr.name + "_log.log"]
-    commands+= ["tar -cf /extract.tar /" + ctx.attr.name + "_log.log"]
-    commands+= ["tar -rf /extract.tar /" + ctx.attr.name + "_outputs.tar"]
+    commands += ["/" + ctx.attr.name + "_install.sh 2> /" + ctx.attr.name + ".log"]
+    commands += ["tar -cf /extract.tar /" + ctx.attr.name + ".log"]
+    commands += [
+        ("if [ -f /" + outputs_tar + " ]; " +
+         "then tar -rf /extract.tar /" + outputs_tar + "; fi"),
+    ]
+    print("\n== Docker autoconfig will run. ==\n" +
+          "To debug any errors run:\n" +
+          "> docker run -d <image_id> bash\n" +
+          "Where <image_id> is the image id printed out by the " +
+          ctx.attr.name + "_extract" + ".tar rule.\n" +
+          "Then run:\n>/" + install_sh.basename +
+          "\nfrom inside the container.")
     extract_tar_file = ctx.new_file(name + "_extract.tar")
     _extract.implementation(
         ctx,
@@ -278,7 +290,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     ctx.actions.run_shell(
         inputs = [extract_tar_file],
         outputs = [ctx.outputs.output_tar, ctx.outputs.log],
-        command = ('tar -C %s -xf %s' % (ctx.outputs.output_tar.dirname, extract_tar_file.path)),
+        command = ("tar -C %s -xf %s" % (ctx.outputs.output_tar.dirname, extract_tar_file.path)),
     )
 
 docker_toolchain_autoconfig_ = rule(
@@ -310,7 +322,7 @@ docker_toolchain_autoconfig_ = rule(
         ),
     },
     outputs = _container.image.outputs + {
-        "log": "%{name}_log.log",
+        "log": "%{name}.log",
         "output_tar": "%{name}_outputs.tar",
     },
     implementation = _docker_toolchain_autoconfig_impl,
