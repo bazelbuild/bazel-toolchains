@@ -89,7 +89,6 @@ def main(bazel_version):
 
   Args:
     bazel_version: string, the version of Bazel used to generate the configs.
-
   """
 
   # Get current supported list of container configs to generate.
@@ -106,6 +105,9 @@ def main(bazel_version):
 
   # Generate new cpp toolchain definition targets.
   cc_create.generate_toolchain_definition(container_configs_list, bazel_version)
+
+  # Update aliases to latest toolchain configs.
+  cc_create.update_latest_target_aliases(container_configs_list, bazel_version)
 
   # Update toolchain.bazelrc file.
   toolchain_flags.update_toolchain_bazelrc_file(container_configs_list,
