@@ -93,10 +93,10 @@ def create_targets(container_configs_list, bazel_version):
 
 
 def update_latest_target_aliases(container_configs_list, bazel_version):
-  """Updates the alias targets pointint to latest toolchain targets.
+  """Updates the alias targets pointing to latest toolchain targets.
 
   Example latest aliases clang-ubuntu container are located in
-  configs/ubuntu16_04_clang/BUILD.
+  configs/ubuntu16_04_clang/latest/BUILD.
 
   There is one BUILD file to contain all aliases for a container_config.
 

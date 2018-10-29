@@ -17,8 +17,7 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 # This file is auto-generated from release/cc/latest.tpl and should not
-# be modified in common cases unless there are new toolchain targets supported
-# or other necessary changes.
+# be modified directly.
 
 PACKAGE = "//${PACKAGE}/"
 
