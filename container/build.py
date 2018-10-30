@@ -80,7 +80,7 @@ import shlex
 import subprocess
 import sys
 
-LATEST_BAZEL_VERSION = "0.18.0"
+LATEST_BAZEL_VERSION = "0.19.0"
 
 SUPPORTED_TYPES = [
     "rbe-debian8", "rbe-debian9", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
