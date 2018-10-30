@@ -32,7 +32,7 @@ java_runtime(
 )
 
 # Update every time when a new container is available publically.
-LATEST_CLANG_VERSION = "r340178"
+LATEST_CLANG_VERSION = "r342117"
 
 # Latest RBE Ubuntu16_04 container with JDK 10
 alias(
@@ -115,6 +115,89 @@ platform(
         properties: {
           name: "container-image"
           value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928"
+        }
+        """,
+)
+
+# Experimental ubuntu1604 based container with Docker.
+# Based on l.gcr.io/google/rbe-ubuntu16-04:r340178
+platform(
+    name = "nosla_xenial_docker",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/asci-toolchain/nosla-xenial-docker@sha256:b4f34255823ae7f95f38712b85013ec26926c8c5b565b0d3f1d32e1295394e9d"
+        }
+        """,
+)
+
+# ====================== RBE Ubuntu16_04 r342117 targets ======================
+
+# RBE Ubuntu16_04 r342117 with JDK 10
+platform(
+    name = "rbe_ubuntu1604_r342117_jdk10",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"10"
+        }
+        """,
+)
+
+# RBE Ubuntu16_04 r342117 with JDK 8
+platform(
+    name = "rbe_ubuntu1604_r342117_jdk8",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
+        }
+        properties: {
+          name: "jdk-version"
+          value:"8"
+        }
+        """,
+)
+
+# RBE Ubuntu16_04 r342117
+platform(
+    name = "rbe_ubuntu1604_r342117",
+    constraint_values = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:xenial",
+        "//constraints/sanitizers:support_msan",
+    ],
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
         }
         """,
 )

@@ -65,7 +65,7 @@ toolchain_container(
         "//container/debian8/layers/go:go-ltl",
         "//container/debian8/layers/java:java-ltl",
         "//container/debian8/layers/java:java10-ltl",
-        "//container/debian8/layers/python:python-ltl",
+        "//container/debian8/layers/python:python-rbe-ltl",
     ],
 )
 
@@ -76,6 +76,7 @@ container_test(
         "//container/common:go.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
+        "//container/common:python3_rbe.yaml",
         "//container/common:rbe-base.yaml",
         "//container/common/clang:clang.yaml",
         "//container/debian8:debian8.yaml",

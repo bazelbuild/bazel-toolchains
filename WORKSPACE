@@ -13,6 +13,7 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load(
     "//rules/skylib:package_names.bzl",
     "jessie_package_names",
@@ -70,7 +71,7 @@ container_pull(
 )
 
 # Pinned to gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
-# solely for testing purpose used by //test/configs:debian8_clang_autoconfig_test.
+# solely for testing purpose used by //tests/config:debian8_clang_autoconfig_test.
 container_pull(
     name = "debian8-clang-test",
     digest = "sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f",
@@ -130,6 +131,7 @@ dpkg_list(
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
 http_file(
     name = "bazel_toolchains_test",
+    downloaded_file_path = "44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     sha256 = "699b55a6916c687f4b7dc092dbbf5f64672cde0dc965f79717735ec4e5416556",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",

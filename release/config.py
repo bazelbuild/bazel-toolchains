@@ -22,18 +22,18 @@ class ContainerConfigs(object):
   Attributes:
     distro: string, base distro of container used to generate configs.
     version: string, version of the configs.
-    image: string, the container registry entry of the image used to
-      generated the configs, e.g. gcr.io/cloud-marketplace/google/clang-ubuntu.
+    image: string, the container registry entry of the image used to generated
+      the configs, e.g. gcr.io/cloud-marketplace/google/clang-ubuntu.
     package: string, the Bazel package in which we will generate the target to
       build configs.
     platform_target: string, the platform target name of the corresponding RBE
       container these configs will be used together with, e.g. rbe_ubuntu1604.
-      This is required to set value for flags:
-         --extra_execution_platforms, --host_platform and --platforms.
+      This is required to set value for flags: --extra_execution_platforms,
+        --host_platform and --platforms.
         (Platform: https://docs.bazel.build/versions/master/platforms.html)
     constraints: string, additional toolchain constraints needed for the cpp
-      toolchain definition.
-      These must be valid targets in this repo or @bazel_tools.
+      toolchain definition. These must be valid targets in this repo or
+      @bazel_tools.
       (Toolchain: https://docs.bazel.build/versions/master/toolchains.html)
     configs: list of Config object, a list of configs for each supported types
       generated using the container specified in the current ContainerConfig.
@@ -56,17 +56,16 @@ class ContainerConfigs(object):
     Args:
       distro: string, base distro of container used to generate configs.
       version: string, version of the configs.
-      image: string, the container registry entry of the image used to
-        generated the configs, e.g.
-        gcr.io/cloud-marketplace/google/clang-ubuntu.
+      image: string, the container registry entry of the image used to generated
+        the configs, e.g. gcr.io/cloud-marketplace/google/clang-ubuntu.
       package: string, the Bazel package in which we will generate the target to
-      build configs.
+        build configs.
       config_types: types of config to generated with this container, e.g.
         default, msan.
       platform_target: string, the platform target name of the corresponding RBE
         container these configs will be used together with  e.g. rbe_ubuntu1604.
-        This is required to set value for flags:
-          --extra_execution_platforms, --host_platform and --platforms.
+        This is required to set value for flags: --extra_execution_platforms,
+          --host_platform and --platforms.
           (Platform: https://docs.bazel.build/versions/master/platforms.html)
       git_root: the absolute path of the root directory of the current
         repository.
@@ -93,6 +92,7 @@ class ContainerConfigs(object):
     self.package = package
     self.platform_target = platform_target
     self.constraints = ContainerConfigs._DISTRO_CONSTRAINTS_MAP[distro]
+    self.config_types = config_types
 
     self.configs = [
         Config(root=self._get_config_base_dir(), config_type=config_type)
@@ -102,6 +102,10 @@ class ContainerConfigs(object):
   def get_target_build_path(self):
     """Returns the absolute path of the target BUILD file."""
     return os.path.join(self._git_root, self.package, "BUILD")
+
+  def get_latest_aliases_build_path(self):
+    """Returns the absolute path of BUILD file with latest target aliases."""
+    return os.path.join(self._git_root, self.package, "latest", "BUILD")
 
   def get_toolchain_bazelrc_path(self):
     """Returns the absolute path of the toolchain.bazelrc file."""
@@ -138,8 +142,8 @@ class Config(object):
   Attributes:
     config_type: string, type of the configs, e.g. default, msan.
     constraints: string, additional toolchain constraints needed for the cpp
-      toolchain definition.
-      These must be valid targets in this repo or @bazel_tools.
+      toolchain definition. These must be valid targets in this repo or
+      @bazel_tools.
       (Toolchain: https://docs.bazel.build/versions/master/toolchains.html)
   """
 

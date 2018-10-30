@@ -31,6 +31,9 @@ language_tool_layer(
     installation_cleanup_commands = PYTHON_CLEANUP_COMMANDS,
     packages = [
         "python-dev",
+        "python-setuptools",
+        "python3-dev",
+        "software-properties-common",
     ],
     symlinks = {
         "/usr/bin/python": "/usr/bin/python2.7",

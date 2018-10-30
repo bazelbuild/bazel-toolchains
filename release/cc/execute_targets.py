@@ -54,7 +54,6 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
     container_configs_list: list of ContainerConfigs, the list of
       ContainerConfigs to generate configs for.
     bazel_version: string, the version of Bazel used to generate the configs.
-
   """
 
   atexit.register(_cleanup)
@@ -83,16 +82,24 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
       # Generate config directory.
       os.makedirs(config.get_config_dir())
 
-      command = ("bazel run --define=DOCKER_AUTOCONF_OUTPUT={OUTPUT_DIR} "
-                 "//{PACKAGE}:{TARGET}").format(
-                     OUTPUT_DIR=TMP_DIR,
-                     PACKAGE=container_configs.package,
-                     TARGET=target)
+      command = ("bazel build //{PACKAGE}:{TARGET}").format(
+          PACKAGE=container_configs.package, TARGET=target)
+      print("\nExecuting command: %s\n" % command)
+      subprocess.check_call(shlex.split(command))
+
+      command = (
+          "cp "
+          "{GIT_ROOT}/bazel-out/k8-fastbuild/bin/{PACKAGE}/{TARGET}_outputs.tar"
+          " {OUTPUT_DIR}/").format(
+              GIT_ROOT=GIT_ROOT,
+              OUTPUT_DIR=TMP_DIR,
+              PACKAGE=container_configs.package,
+              TARGET=target)
       print("\nExecuting command: %s\n" % command)
       subprocess.check_call(shlex.split(command))
 
       # Extract toolchain configs.
-      tar_path = os.path.join(TMP_DIR, "%s.tar" % target)
+      tar_path = os.path.join(TMP_DIR, "%s_outputs.tar" % target)
       tar = tarfile.open(tar_path)
 
       for config_file in CONFIG_FILES:
