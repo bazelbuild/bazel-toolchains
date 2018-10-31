@@ -325,6 +325,7 @@ docker_toolchain_autoconfig_ = rule(
         "log": "%{name}.log",
         "output_tar": "%{name}_outputs.tar",
     },
+    toolchains = ["@io_bazel_rules_docker//toolchains/docker:toolchain_type"],
     implementation = _docker_toolchain_autoconfig_impl,
 )
 
