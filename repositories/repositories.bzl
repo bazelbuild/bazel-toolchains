@@ -58,9 +58,18 @@ def repositories():
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
-            sha256 = "d9ee70d2f763ce197e2691f12d69ee8e32b2245a48d53b4365fa239b66405c0c",
-            strip_prefix = "rules_docker-7391b39ccad788524262e106d54adfdbfc3e44d5",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/7391b39ccad788524262e106d54adfdbfc3e44d5.tar.gz"],
+            sha256 = "f3e5c0500533d58be079db1a24ac909f2e0cd98c9d760f5e506e4d05b56c42dd",
+            strip_prefix = "rules_docker-a9bb1dab84cdf46e34d1b34b53a17bda129b5eba",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/a9bb1dab84cdf46e34d1b34b53a17bda129b5eba.tar.gz"],
+        )
+
+        # Register the docker toolchain type
+        native.register_toolchains(
+            # Register the default docker toolchain that expects the 'docker'
+            # executable to be in the PATH
+            "@io_bazel_rules_docker//toolchains/docker:default_linux_toolchain",
+            "@io_bazel_rules_docker//toolchains/docker:default_windows_toolchain",
+            "@io_bazel_rules_docker//toolchains/docker:default_osx_toolchain",
         )
 
     # io_bazel_rules_go is the dependency of container_test rules.
@@ -74,9 +83,9 @@ def repositories():
     if "base_images_docker" not in excludes:
         http_archive(
             name = "base_images_docker",
-            sha256 = "1355ba2f4509409f3f57a4a4a03200b9431f0e37924950b02cc6955b691aee23",
-            strip_prefix = "base-images-docker-c4c3ff85458ce5dd3d93298559605d97fe948d17",
-            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/c4c3ff85458ce5dd3d93298559605d97fe948d17.tar.gz"],
+            sha256 = "1bbc88e842c36d91074949b5f0eb49b55f7f71d81f2991e806f82342bfa01096",
+            strip_prefix = "base-images-docker-e0210a7d9dcff81f8c87019105bd6eb66e3df390",
+            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/e0210a7d9dcff81f8c87019105bd6eb66e3df390.tar.gz"],
         )
 
     if "distroless" not in excludes:
