@@ -62,6 +62,7 @@ def repositories():
             strip_prefix = "rules_docker-a9bb1dab84cdf46e34d1b34b53a17bda129b5eba",
             urls = ["https://github.com/bazelbuild/rules_docker/archive/a9bb1dab84cdf46e34d1b34b53a17bda129b5eba.tar.gz"],
         )
+
         # Register the docker toolchain type
         native.register_toolchains(
             # Register the default docker toolchain that expects the 'docker'
@@ -82,9 +83,9 @@ def repositories():
     if "base_images_docker" not in excludes:
         http_archive(
             name = "base_images_docker",
-            sha256 = "1355ba2f4509409f3f57a4a4a03200b9431f0e37924950b02cc6955b691aee23",
-            strip_prefix = "base-images-docker-c4c3ff85458ce5dd3d93298559605d97fe948d17",
-            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/c4c3ff85458ce5dd3d93298559605d97fe948d17.tar.gz"],
+            sha256 = "1bbc88e842c36d91074949b5f0eb49b55f7f71d81f2991e806f82342bfa01096",
+            strip_prefix = "base-images-docker-e0210a7d9dcff81f8c87019105bd6eb66e3df390",
+            urls = ["https://github.com/GoogleCloudPlatform/base-images-docker/archive/e0210a7d9dcff81f8c87019105bd6eb66e3df390.tar.gz"],
         )
 
     if "distroless" not in excludes:
