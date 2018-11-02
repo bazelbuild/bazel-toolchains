@@ -16,12 +16,14 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+# This file is auto-generated from release/cc/latest.tpl and should not
+# be modified directly.
+
 PACKAGE = "//configs/ubuntu16_04_clang/"
 
-# Update the following (if needed) in new config releases.
 LATEST_CONFIG_VERSION = "1.1"
 
-LATEST_BAZEL_VERSION = "0.18.0"
+LATEST_BAZEL_VERSION = "0.19.0"
 
 CONFIG_TYPES = [
     "default",
