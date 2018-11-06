@@ -196,6 +196,7 @@ language_tool_layer_ = rule(
     attrs = language_tool_layer_attrs,
     executable = True,
     outputs = _container.image.outputs,
+    toolchains = ["@io_bazel_rules_docker//toolchains/docker:toolchain_type"],
     implementation = _language_tool_layer_impl,
 )
 
@@ -302,6 +303,7 @@ toolchain_container_ = rule(
     },
     executable = True,
     outputs = _container.image.outputs,
+    toolchains = ["@io_bazel_rules_docker//toolchains/docker:toolchain_type"],
     implementation = _toolchain_container_impl,
 )
 
