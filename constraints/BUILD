@@ -28,3 +28,12 @@ constraint_value(
     name = "xenial",
     constraint_setting = ":linux_distribution",
 )
+
+# Constraints used to configure docker.
+
+constraint_setting(name = "docker")
+
+constraint_value(
+    name = "support_docker",
+    constraint_setting = ":docker",
+)

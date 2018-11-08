@@ -127,6 +127,7 @@ platform(
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//platforms:linux",
         "@bazel_tools//tools/cpp:clang",
+        "//constraints:support_docker",
         "//constraints:xenial",
         "//constraints/sanitizers:support_msan",
     ],
