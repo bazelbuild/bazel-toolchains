@@ -52,3 +52,21 @@ alias(
     name = "javabase",
     actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
 )
+
+# For internal testing purpose only.
+toolchain(
+    name = "toolchain_docker",
+    exec_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//tools/cpp:clang",
+        "//constraints:support_docker",
+        "//constraints:xenial",
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+    ],
+    toolchain = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/default:cc-compiler-k8",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)

@@ -107,6 +107,9 @@ def update_latest_target_aliases(container_configs_list, bazel_version):
   """
 
   for container_configs in container_configs_list:
+
+    constraints = container_configs.constraints
+
     with open(container_configs.get_latest_aliases_build_path(),
               "w") as build_file:
       # Update the BUILD file with aliases for latest toolchain targets.
@@ -119,6 +122,8 @@ def update_latest_target_aliases(container_configs_list, bazel_version):
             CONFIG_TYPES=", ".join(
                 [("\"%s\"" % config_type)
                  for config_type in container_configs.config_types]),
+            EXTRA_CONSTRAINTS="\n".join(
+                [("\"%s\"," % constraint) for constraint in constraints])
         )
 
         build_file.write(tpl)
