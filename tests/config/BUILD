@@ -133,7 +133,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-version-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
-    bazel_version = "0.16.1",
+    bazel_version = "0.19.0",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -144,7 +144,7 @@ docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
     bazel_rc_version = "1",
-    bazel_version = "0.16.1",
+    bazel_version = "0.19.0",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
