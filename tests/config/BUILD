@@ -121,21 +121,6 @@ docker_toolchain_autoconfig(
     test = True,
 )
 
-# To test this target run:
-# bazel build //tests/config:this-project-repo-autoconfig --define mount_project=$(realpath .)
-docker_toolchain_autoconfig(
-    name = "this-project-repo-autoconfig",
-    base = ":rbe-test-xenial-with-pkgs.tar",
-    config_repos = [
-        "local_config_sh",
-        "local_config_cc",
-    ],
-    env = gcc_env(),
-    mount_project = "$(mount_project)",
-    tags = ["manual"],
-    test = True,
-)
-
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
@@ -158,8 +143,8 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
-    bazel_rc_version = "2",
-    bazel_version = "0.19.2",
+    bazel_rc_version = "1",
+    bazel_version = "0.19.0",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
