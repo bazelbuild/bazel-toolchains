@@ -27,6 +27,9 @@ load(
     "gcc_env",
 )
 
+bazel_latest = "0.19.0"
+bazel_latest_rc = "1"
+
 # Use "rbe-test-" prefix for easy identification of images to remove after the tests.
 toolchain_container(
     name = "rbe-test-jessie-with-pkgs",
@@ -60,7 +63,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "debian-jessie-custom-bazel-version-autoconfig",
     base = ":rbe-test-jessie-with-pkgs.tar",
-    bazel_version = "0.16.1",
+    bazel_version = bazel_latest,
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -71,7 +74,7 @@ docker_toolchain_autoconfig(
     name = "debian-jessie-custom-bazel-rc-version-autoconfig",
     base = ":rbe-test-jessie-with-pkgs.tar",
     bazel_rc_version = "1",
-    bazel_version = "0.16.1",
+    bazel_version = bazel_latest,
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -121,6 +124,25 @@ docker_toolchain_autoconfig(
     test = True,
 )
 
+# To build this target run:
+# bazel build //tests/config:this-project-repo-autoconfig --define mount_project=$(realpath .)
+# To test it run:
+# bazel test //tests/config:this-project-repo-autoconfig_test --define mount_project=$(realpath .)
+docker_toolchain_autoconfig(
+    name = "this-project-repo-autoconfig",
+    base = ":rbe-test-xenial-with-pkgs.tar",
+    bazel_version = bazel_latest,
+    config_repos = [
+        "local_config_sh",
+        "local_config_cc",
+    ],
+    env = gcc_env(),
+    mount_project = "$(mount_project)",
+    incompatible_changes_off = True,
+    tags = ["manual"],
+    test = True,
+)
+
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
@@ -133,7 +155,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-version-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
-    bazel_version = "0.19.0",
+    bazel_version = bazel_latest,
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -143,8 +165,8 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
-    bazel_rc_version = "1",
-    bazel_version = "0.19.0",
+    bazel_rc_version = bazel_latest_rc,
+    bazel_version = bazel_latest,
     env = gcc_env(),
     tags = ["manual"],
     test = True,
