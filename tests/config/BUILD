@@ -43,6 +43,8 @@ toolchain_container(
 docker_toolchain_autoconfig(
     name = "debian-jessie-autoconfig",
     base = ":rbe-test-jessie-with-pkgs.tar",
+    # TODO(nlopezgi): remove after bazel 0.19.2 is out
+    bazel_version = bazel_latest,
     env = gcc_env(),
     tags = ["manual"],
     test = True,
