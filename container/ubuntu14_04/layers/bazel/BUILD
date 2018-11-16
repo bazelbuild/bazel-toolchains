@@ -65,5 +65,5 @@ language_tool_layer(
 [language_tool_layer(
     name = "bazel_%s-ltl" % bazel_version,
     base = "@trusty//image",
-    tars = [":bazel_%s_tar" % bazel_version],
+    tars = [":bazel_%s_tar/bazel.tar" % bazel_version],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
