@@ -271,7 +271,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     ]
 
     # if mount_project was selected, lets mount it
-    docker_run_flags = []
+    docker_run_flags = [""]
     if ctx.attr.mount_project:
         mount_project = ctx.attr.mount_project
         mount_project = ctx.expand_make_variables("mount_project", mount_project, {})
