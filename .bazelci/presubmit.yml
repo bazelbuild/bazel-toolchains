@@ -3,10 +3,11 @@ platforms:
   rbe_ubuntu1604:
     test_targets:
     - "//tests/config:debian-jessie-autoconfig_test"
-    - "//tests/config:debian-jessie-bazel-head-autoconfig_test"
+    # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
+    #- "//tests/config:debian-jessie-bazel-head-autoconfig_test"
     - "//tests/config:debian-jessie-custom-bazel-rc-version-autoconfig_test"
     - "//tests/config:ubuntu-xenial-autoconfig_test"
-    - "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
+    #- "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
     - "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
     - "//tests/config:debian8_clang_autoconfig_test"
     - "//tests/config:external-repo-autoconfig_test"
