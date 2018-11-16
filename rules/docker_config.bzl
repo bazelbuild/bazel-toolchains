@@ -166,6 +166,14 @@ def _docker_toolchain_autoconfig_impl(ctx):
         clone_repo_cmd = ("mkdir %s && tar -xf /%s -C %s " %
                           (repo_dir, ctx.file.repo_pkg_tar.basename, repo_dir))
 
+    # if mount_project was selected, we'll mount it using docker_run_flags
+    docker_run_flags = [""]
+    if ctx.attr.mount_project:
+        mount_project = ctx.attr.mount_project
+        mount_project = ctx.expand_make_variables("mount_project", mount_project, {})
+        target = mount_project + ":" + repo_dir
+        docker_run_flags = ["-v", target]
+
     # Command to install custom Bazel version (if requested)
     install_bazel_cmd = "cd ."
     if ctx.attr.use_bazel_head:
@@ -270,14 +278,6 @@ def _docker_toolchain_autoconfig_impl(ctx):
          "then tar -rf /extract.tar /" + outputs_tar + "; fi"),
     ]
 
-    # if mount_project was selected, lets mount it
-    docker_run_flags = [""]
-    if ctx.attr.mount_project:
-        mount_project = ctx.attr.mount_project
-        mount_project = ctx.expand_make_variables("mount_project", mount_project, {})
-        target = mount_project + ":" + repo_dir
-        docker_run_flags = ["-v", target]
-
     print(("\n== Docker autoconfig will run. ==\n" +
            "To debug any errors run:\n" +
            "> docker run -it {mount_flags} <image_id> bash\n" +
@@ -298,6 +298,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
         docker_run_flags = docker_run_flags,
         commands = commands,
         extract_file = "/extract.tar",
+        script_file = ctx.actions.declare_file(ctx.attr.name + ".build"),
         output_file = extract_tar_file,
     )
 
@@ -341,7 +342,6 @@ docker_toolchain_autoconfig_ = rule(
     outputs = _container.image.outputs + {
         "log": "%{name}.log",
         "output_tar": "%{name}_outputs.tar",
-        "script": "%{name}.build",
     },
     toolchains = ["@io_bazel_rules_docker//toolchains/docker:toolchain_type"],
     implementation = _docker_toolchain_autoconfig_impl,
