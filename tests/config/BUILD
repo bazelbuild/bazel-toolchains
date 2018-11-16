@@ -140,7 +140,7 @@ docker_toolchain_autoconfig(
 docker_toolchain_autoconfig(
     name = "this-project-repo-autoconfig",
     base = ":rbe-test-xenial-with-pkgs.tar",
-    bazel_version = bazel_latest,
+    bazel_version = bazel_latest_release,
     config_repos = [
         "local_config_sh",
         "local_config_cc",
