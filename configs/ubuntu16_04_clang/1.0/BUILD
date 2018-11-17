@@ -70,7 +70,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+          value:"docker://launcher.gcr.io/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
         }
         properties: {
           name: "jdk-version"
@@ -92,7 +92,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+          value:"docker://launcher.gcr.io/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
         }
         properties: {
           name: "jdk-version"
@@ -114,7 +114,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
+          value:"docker://launcher.gcr.io/google/rbe-ubuntu16-04@sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2"
         }
         """,
 )
@@ -134,7 +134,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f"
+          value:"docker://launcher.gcr.io/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f"
         }
         """,
 )

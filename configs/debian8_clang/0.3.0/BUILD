@@ -70,7 +70,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+          value:"docker://launcher.gcr.io/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
         }
         properties: {
           name: "jdk-version"
@@ -92,7 +92,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+          value:"docker://launcher.gcr.io/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
         }
         properties: {
           name: "jdk-version"
@@ -114,7 +114,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
+          value:"docker://launcher.gcr.io/google/rbe-debian8@sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3"
         }
         """,
 )
@@ -134,7 +134,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:0d5db936f8fa04638ca31e4fc117415068dca43dc343d605c0db2a15f433a327"
+          value:"docker://launcher.gcr.io/google/rbe-debian8@sha256:0d5db936f8fa04638ca31e4fc117415068dca43dc343d605c0db2a15f433a327"
         }
         """,
 )

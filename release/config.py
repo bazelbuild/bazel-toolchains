@@ -23,7 +23,7 @@ class ContainerConfigs(object):
     distro: string, base distro of container used to generate configs.
     version: string, version of the configs.
     image: string, the container registry entry of the image used to generated
-      the configs, e.g. gcr.io/cloud-marketplace/google/clang-ubuntu.
+      the configs, e.g. launcher.gcr.io/google/clang-ubuntu.
     package: string, the Bazel package in which we will generate the target to
       build configs.
     platform_target: string, the platform target name of the corresponding RBE
@@ -57,7 +57,7 @@ class ContainerConfigs(object):
       distro: string, base distro of container used to generate configs.
       version: string, version of the configs.
       image: string, the container registry entry of the image used to generated
-        the configs, e.g. gcr.io/cloud-marketplace/google/clang-ubuntu.
+        the configs, e.g. launcher.gcr.io/google/clang-ubuntu.
       package: string, the Bazel package in which we will generate the target to
         build configs.
       config_types: types of config to generated with this container, e.g.
