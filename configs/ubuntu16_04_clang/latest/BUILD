@@ -23,12 +23,9 @@ PACKAGE = "//configs/ubuntu16_04_clang/"
 
 LATEST_CONFIG_VERSION = "1.1"
 
-LATEST_BAZEL_VERSION = "0.19.0"
+LATEST_BAZEL_VERSION = "0.19.2"
 
-CONFIG_TYPES = [
-    "default",
-    "msan",
-]
+CONFIG_TYPES = ["default", "msan"]
 
 # DO NOT depend on the following latest alias in your production jobs.
 # These are for internal and our CI use only. We DO NOT guarantee that they
@@ -62,6 +59,7 @@ toolchain(
         "@bazel_tools//tools/cpp:clang",
         "//constraints:support_docker",
         "//constraints:xenial",
+"//constraints/sanitizers:support_msan",
     ],
     target_compatible_with = [
         "@bazel_tools//platforms:linux",
