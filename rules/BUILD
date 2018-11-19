@@ -57,7 +57,8 @@ skylark_library(
 skylark_library(
     name = "gcs",
     srcs = [
-        "gcs.bzl",
+        "gcs_pull.bzl",
+        "gcs_push.bzl",
     ],
 )
 

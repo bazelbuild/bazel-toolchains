@@ -15,7 +15,7 @@
 """Skylark rule for pulling a file from GCS bucket.
 """
 
-_GCS_FILE_BUILD = """
+_GCS_PULL_BUILD = """
 package(default_visibility = ["//visibility:public"])
 filegroup(
     name = "file",
@@ -23,8 +23,8 @@ filegroup(
 )
 """
 
-def _gcs_file_impl(ctx):
-    """Implementation of the gcs_file rule."""
+def _gcs_pull_impl(ctx):
+    """Implementation of the gcs_pull rule."""
     repo_root = ctx.path(".")
     forbidden_files = [
         repo_root,
@@ -37,10 +37,10 @@ def _gcs_file_impl(ctx):
     downloaded_file_path = ctx.attr.downloaded_file_path or ctx.attr.file
     download_path = ctx.path("file/" + downloaded_file_path)
     if download_path in forbidden_files or not str(download_path).startswith(str(repo_root)):
-        fail("'%s' cannot be used as downloaded_file_path in gcs_file" % ctx.attr.downloaded_file_path)
+        fail("'%s' cannot be used as downloaded_file_path in gcs_pull" % ctx.attr.downloaded_file_path)
 
     # Add a top-level BUILD file to export all the downloaded files.
-    ctx.file("file/BUILD", _GCS_FILE_BUILD.format(downloaded_file_path))
+    ctx.file("file/BUILD", _GCS_PULL_BUILD.format(downloaded_file_path))
 
     # Create a bash script from a template.
     ctx.template(
@@ -64,14 +64,14 @@ def _gcs_file_impl(ctx):
     if rm_result.return_code:
         fail("Failed to remove temporary file: %s" % rm_result.stderr)
 
-gcs_file = repository_rule(
+gcs_pull = repository_rule(
     attrs = {
         "bucket": attr.string(mandatory = True),
         "file": attr.string(mandatory = True),
         "downloaded_file_path": attr.string(),
         "sha256": attr.string(mandatory = True),
     },
-    implementation = _gcs_file_impl,
+    implementation = _gcs_pull_impl,
 )
 """Downloads a file from GCS bucket.
 The rule uses gsutil tool installed in the system to download a file from a GCS bucket,
