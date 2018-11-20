@@ -62,7 +62,6 @@ toolchain(
         "@bazel_tools//tools/cpp:clang",
         "//constraints:support_docker",
         "//constraints:xenial",
-        "//constraints/sanitizers:support_msan",
     ],
     target_compatible_with = [
         "@bazel_tools//platforms:linux",
