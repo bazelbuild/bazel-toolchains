@@ -27,9 +27,9 @@ load(
     "gcc_env",
 )
 
-bazel_next_release = "0.19.2"
+bazel_next_release = "0.20.0"
 
-bazel_next_release_rc = "2"
+bazel_next_release_rc = "3"
 
 # Use "rbe-test-" prefix for easy identification of images to remove after the tests.
 toolchain_container(
