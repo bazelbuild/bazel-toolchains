@@ -108,7 +108,7 @@ def update_latest_target_aliases(container_configs_list, bazel_version):
 
   for container_configs in container_configs_list:
 
-    constraints = container_configs.constraints
+    constraints = list(container_configs.constraints)
 
     with open(container_configs.get_latest_aliases_build_path(),
               "w") as build_file:
@@ -172,7 +172,7 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
         with open(CPP_TPL, "r") as tpl_file:
 
           # Merge constraint lists. Remove duplicates while perserving order.
-          constraints = container_configs.constraints
+          constraints = list(container_configs.constraints)
           for constraint in config.constraints:
             if constraint not in constraints:
               constraints.append(constraint)
