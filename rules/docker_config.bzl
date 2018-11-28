@@ -159,11 +159,20 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.git_repo:
         clone_repo_cmd = ("cd " + bazel_config_dir + " && git clone " +
                           ctx.attr.git_repo + " " + project_repo_dir)
+
+    repo_dir = bazel_config_dir + "/" + project_repo_dir
     if ctx.attr.repo_pkg_tar:
         # if package tar was used then the command should expand it
-        repo_dir = bazel_config_dir + "/" + project_repo_dir
         clone_repo_cmd = ("mkdir %s && tar -xf /%s -C %s " %
                           (repo_dir, ctx.file.repo_pkg_tar.basename, repo_dir))
+
+    # if mount_project was selected, we'll mount it using docker_run_flags
+    docker_run_flags = [""]
+    if ctx.attr.mount_project:
+        mount_project = ctx.attr.mount_project
+        mount_project = ctx.expand_make_variables("mount_project", mount_project, {})
+        target = mount_project + ":" + repo_dir
+        docker_run_flags = ["-v", target]
 
     # Command to install custom Bazel version (if requested)
     install_bazel_cmd = "cd ."
@@ -249,7 +258,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
     image_tar = ctx.new_file(name + ".tar")
 
-    # TODO(nlopezgi): fix upsream issue that output_executable is required
+    # TODO(nlopezgi): fix upstream issue that output_executable is required
     load_image_sh_file = ctx.new_file(name + "load.sh")
     _container.image.implementation(
         ctx,
@@ -268,20 +277,28 @@ def _docker_toolchain_autoconfig_impl(ctx):
         ("if [ -f /" + outputs_tar + " ]; " +
          "then tar -rf /extract.tar /" + outputs_tar + "; fi"),
     ]
-    print("\n== Docker autoconfig will run. ==\n" +
-          "To debug any errors run:\n" +
-          "> docker run -d <image_id> bash\n" +
-          "Where <image_id> is the image id printed out by the " +
-          ctx.attr.name + "_extract" + ".tar rule.\n" +
-          "Then run:\n>/" + install_sh.basename +
-          "\nfrom inside the container.")
+
+    print(("\n== Docker autoconfig will run. ==\n" +
+           "To debug any errors run:\n" +
+           "> docker run -it {mount_flags} <image_id> bash\n" +
+           "Where <image_id> is the image id printed out by the " +
+           "{name}_extract.tar rule.\n" +
+           "Then run:\n>/ {run_cmd}\n" +
+           "from inside the container.").format(
+        mount_flags = " ".join(docker_run_flags),
+        name = ctx.attr.name,
+        run_cmd = install_sh.basename,
+    ))
+
     extract_tar_file = ctx.new_file(name + "_extract.tar")
     _extract.implementation(
         ctx,
         name = ctx.attr.name + "_extract",
         image = image_tar,
+        docker_run_flags = docker_run_flags,
         commands = commands,
         extract_file = "/extract.tar",
+        script_file = ctx.actions.declare_file(ctx.attr.name + ".build"),
         output_file = extract_tar_file,
     )
 
@@ -296,6 +313,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
 docker_toolchain_autoconfig_ = rule(
     attrs = _container.image.attrs + {
         "config_repos": attr.string_list(default = ["local_config_cc"]),
+        "mount_project": attr.string(),
         "use_default_project": attr.bool(default = False),
         "git_repo": attr.string(),
         "repo_pkg_tar": attr.label(allow_files = tar_filetype, single_file = True),
@@ -409,6 +427,14 @@ def docker_toolchain_autoconfig(**kwargs):
       git_repo: A git repo with the sources for the project to be used for
           autoconfigure. If no git_repo is passed, autoconfig will run with a
           sample c++ project.
+      mount_project: mounts a directory passed in an absolute path as the project
+          to use for autoconfig. Cannot be used if git_repo is passed.
+          Make variable substitution is enabled, so use:
+            mount_project = "$(mount_project)",
+          and then run:
+            bazel build <autoconf target> --define mount_project=$(realpath .)
+          from the root of the project to mount it as the project to use for
+          autoconfig.
       bazel_version: a specific version of Bazel used to generate toolchain
           configs. Format: x.x.x
       bazel_rc_version: a specific version of Bazel release candidate used to
@@ -450,8 +476,12 @@ def docker_toolchain_autoconfig(**kwargs):
     if packages_is_empty and "keys" in kwargs:
         fail("'keys' can only be specified when 'packages' is not empty.")
 
-    # If the git_repo was not provided, use the default autoconfig project
-    if "git_repo" not in kwargs:
+    if "git_repo" in kwargs and "mount_project" in kwargs:
+        fail("'git_repo' cannot be used with 'mount_project'.")
+
+    # If a git_repo or mount_project was not provided
+    # use the default autoconfig project
+    if "git_repo" not in kwargs and "mount_project" not in kwargs:
         kwargs["repo_pkg_tar"] = _DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR
         kwargs["use_default_project"] = True
     kwargs["files"] = [
@@ -459,7 +489,7 @@ def docker_toolchain_autoconfig(**kwargs):
         _WORKSPACE_PREFIX + "rules:install_bazel_version.sh",
     ]
 
-    # Do not install packags if 'packages' is not specified or is an ampty list.
+    # Do not install packags if 'packages' is not specified or is an empty list.
     if not packages_is_empty:
         # "additional_repos" and "keys" are optional for docker_toolchain_autoconfig,
         # but required for toolchain_container". Use empty lists as placeholder.

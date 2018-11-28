@@ -44,7 +44,7 @@ language_tool_layer(
         "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
         "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
     },
-    tars = ["//third_party/python:debian8_tar"],
+    tars = ["//third_party/python:debian8_tar/python.tar"],
 )
 
 language_tool_layer(

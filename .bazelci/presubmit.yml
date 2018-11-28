@@ -11,6 +11,7 @@ platforms:
     - "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
     - "//tests/config:debian8_clang_autoconfig_test"
     - "//tests/config:external-repo-autoconfig_test"
+    - "//tests/config:this-project-repo-autoconfig"
     - "//configs/debian8_clang:default-debian8-clang-0.4.0-bazel_0.18.0-autoconfig_test"
     - "//configs/debian8_clang:msan-debian8-clang-0.4.0-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
