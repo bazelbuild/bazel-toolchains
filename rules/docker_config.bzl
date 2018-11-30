@@ -151,7 +151,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     """
     bazel_config_dir = "/bazel-config"
     project_repo_dir = "project_src"
-    output_dir = bazel_config_dir + "/autoconf_out/"
+    output_dir = bazel_config_dir + "/autoconf_out"
     name = ctx.attr.name
     outputs_tar = ctx.outputs.output_tar.basename
 
@@ -208,7 +208,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     for config_repo in ctx.attr.config_repos:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + output_dir)
-    copy_cmd.append("tar -cf /" + outputs_tar + " -C " + output_dir + " . ")
+    copy_cmd.append("tar -cf /" + outputs_tar + " -C " + output_dir + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
 
     # Command to run autoconfigure targets.
