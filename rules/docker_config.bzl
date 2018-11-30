@@ -151,6 +151,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     """
     bazel_config_dir = "/bazel-config"
     project_repo_dir = "project_src"
+    output_dir = bazel_config_dir + "/autoconf_out"
     name = ctx.attr.name
     outputs_tar = ctx.outputs.output_tar.basename
 
@@ -171,7 +172,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.mount_project:
         mount_project = ctx.attr.mount_project
         mount_project = ctx.expand_make_variables("mount_project", mount_project, {})
-        target = mount_project + ":" + repo_dir
+        target = mount_project + ":" + repo_dir + ":ro"
         docker_run_flags = ["-v", target]
 
     # Command to install custom Bazel version (if requested)
@@ -203,11 +204,11 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
     # Command to copy produced toolchain configs to a tar at the root
     # of the container.
-    copy_cmd = []
+    copy_cmd = ["mkdir " + output_dir]
     for config_repo in ctx.attr.config_repos:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
-        copy_cmd.append("cp -dr " + src_dir + " " + "/")
-    copy_cmd.append("tar -cf /" + outputs_tar + " /" + " /".join(ctx.attr.config_repos))
+        copy_cmd.append("cp -dr " + src_dir + " " + output_dir)
+    copy_cmd.append("tar -cf /" + outputs_tar + " -C " + output_dir + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
 
     # Command to run autoconfigure targets.
