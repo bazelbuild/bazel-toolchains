@@ -5,8 +5,6 @@ def toolchain_container_sha256s():
         ###########################################################
         # gcr.io/cloud-marketplace/google/debian8:latest
         "debian8": "sha256:a6df7738c401aef6bf9c113eb1eea7f3921417fd4711ea28100681f2fe483ea2",
-        # gcr.io/cloud-marketplace/google/debian9:latest
-        "debian9": "sha256:741d18b41622814ae6eab29b0679dd45318437998213a5cb5532003846b435e1",
         # gcr.io/cloud-marketplace/google/ubuntu16_04:latest
         "ubuntu16_04": "sha256:df51b5c52d71c9867cd9c1c88c81f67a85ff87f1defe7e9b7ac5fb7d652596bf",
 

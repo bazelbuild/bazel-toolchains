@@ -1,13 +1,5 @@
 schemaVersion: "2.0.0"
 
-# This is failing in Debian9 base. Once resolved, move this test to
-# container/common/rbe-base.yaml.
-commandTests:
-- name: 'check-curl'
-  command: 'curl'
-  args: ['--version']
-  expectedOutput: ['curl .* \(x86_64-pc-linux-gnu\).*']
-
 metadataTest:
   env:
     - key: 'PATH'

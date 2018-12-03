@@ -29,13 +29,11 @@ load(
     "//third_party/clang:revision.bzl",
     "CLANG_REVISION",
     "DEBIAN8_CLANG_SHA256",
-    "DEBIAN9_CLANG_SHA256",
     "UBUNTU16_04_CLANG_SHA256",
 )
 load(
     "//third_party/libcxx:revision.bzl",
     "DEBIAN8_LIBCXX_SHA256",
-    "DEBIAN9_LIBCXX_SHA256",
     "LIBCXX_REVISION",
     "UBUNTU16_04_LIBCXX_SHA256",
 )
@@ -86,14 +84,6 @@ def repositories():
             sha256 = "a97768efdba8ecfa4c2e71499b1ef8fbe95a22044cb26ed5ca062f91a2afcfb1",
             strip_prefix = "base-images-docker-4f13bab1c063aa7d7388f62a6807317e252bcae0",
             urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/4f13bab1c063aa7d7388f62a6807317e252bcae0.tar.gz"],
-        )
-
-    if "distroless" not in excludes:
-        http_archive(
-            name = "distroless",
-            sha256 = "daf9b18ca2d4ae11501846a311011ef2fa2c8db95529c5b5f6069977967712e0",
-            strip_prefix = "distroless-10f0810b962145e4636282005226c4eb72519182",
-            urls = ["https://github.com/GoogleCloudPlatform/distroless/archive/10f0810b962145e4636282005226c4eb72519182.tar.gz"],
         )
 
     # ================================ GPG Keys ================================
@@ -156,14 +146,6 @@ def repositories():
             urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/clang_" + CLANG_REVISION + ".tar.gz"],
         )
 
-    if "debian9_clang_release" not in excludes:
-        http_file(
-            name = "debian9_clang_release",
-            downloaded_file_path = "clang_" + CLANG_REVISION + ".tar.gz",
-            sha256 = DEBIAN9_CLANG_SHA256,
-            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/clang_" + CLANG_REVISION + ".tar.gz"],
-        )
-
     if "ubuntu16_04_clang_release" not in excludes:
         http_file(
             name = "ubuntu16_04_clang_release",
@@ -179,14 +161,6 @@ def repositories():
             downloaded_file_path = "libcxx-msan_" + LIBCXX_REVISION + ".tar.gz",
             sha256 = DEBIAN8_LIBCXX_SHA256,
             urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian8/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
-        )
-
-    if "debian9_libcxx_release" not in excludes:
-        http_file(
-            name = "debian9_libcxx_release",
-            downloaded_file_path = "libcxx-msan_" + LIBCXX_REVISION + ".tar.gz",
-            sha256 = DEBIAN9_LIBCXX_SHA256,
-            urls = ["https://storage.googleapis.com/clang-builds-stable/clang-debian9/libcxx-msan_" + LIBCXX_REVISION + ".tar.gz"],
         )
 
     if "ubuntu16_04_libcxx_release" not in excludes:

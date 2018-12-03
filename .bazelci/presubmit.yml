@@ -18,7 +18,6 @@ platforms:
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     - "//container/debian8/builders/rbe-debian8:toolchain-test"
     - "//container/ubuntu16_04/builders/rbe-ubuntu16_04:toolchain-test"
-    - "//container/experimental/rbe-debian9:toolchain-test"
     - "//container/ubuntu16_04/builders/bazel:bazel_0.18.0-test"
     - "//container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_0.18.0_docker_gcloud-test"
     - "//container/debian8/builders/bazel:bazel_0.18.0-test"
