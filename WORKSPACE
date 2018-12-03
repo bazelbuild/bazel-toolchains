@@ -15,10 +15,6 @@ workspace(name = "bazel_toolchains")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load(
-    "//rules/skylib:package_names.bzl",
-    "jessie_package_names",
-)
-load(
     "//repositories:repositories.bzl",
     bazel_toolchains_repositories = "repositories",
 )
