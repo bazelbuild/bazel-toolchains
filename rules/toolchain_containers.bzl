@@ -24,7 +24,7 @@ def toolchain_container_sha256s():
         # Clang images                                            #
         ###########################################################
         # gcr.io/cloud-marketplace/google/clang-debian8
-        "debian8_clang": "sha256:0946899544c00537b2af06790e72ba86aa39b16e0e05aef8f53ed79d1f89f2a0",
+        "debian8_clang": "sha256:e076c87e670f9a3c95e250268f160397d1cee482ec195d51e40b992b34198395",
         # gcr.io/cloud-marketplace/google/clang-ubuntu
-        "ubuntu16_04_clang": "sha256:79a24c15949bd5770acac41b444c5c0b7f9723dcbc708c67d87ecf71e32c9126",
+        "ubuntu16_04_clang": "sha256:9fe84f7c726419ab77a9680887ec4a518d1910a28284c2955620258db01c7aae",
     }
