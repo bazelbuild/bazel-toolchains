@@ -77,14 +77,6 @@ def images():
             repository = "google/debian8",
         )
 
-    if "debian9" not in excludes:
-        container_pull(
-            name = "debian9",
-            digest = toolchain_container_sha256s()["debian9"],
-            registry = "marketplace.gcr.io",
-            repository = "google/debian9",
-        )
-
     if "ubuntu16_04" not in excludes:
         container_pull(
             name = "ubuntu16_04",

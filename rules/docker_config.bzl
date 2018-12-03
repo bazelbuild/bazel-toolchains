@@ -408,7 +408,7 @@ def docker_toolchain_autoconfig(**kwargs):
     This rule is implemented by extending the container_image rule in
     https://github.com/bazelbuild/rules_docker. The rule installs debs packages
     to run bazel (using the package manager rules offered by
-    https://github.com/GoogleCloudPlatform/distroless/tree/master/package_manager).
+    https://github.com/GoogleContainerTools/base-images-docker).
     The rule creates the container with a command that pulls a repo from github,
     and runs bazel build for a series of remote repos. Files generated in these
     repos are copied to a mount point inside the Bazel output tree.

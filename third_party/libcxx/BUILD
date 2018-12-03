@@ -35,16 +35,6 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "debian9_tar",
-    package_dir = "/usr/local/",
-    strip_prefix = ".",
-    tags = ["manual"],
-    deps = [
-        "@debian9_libcxx_release//file",
-    ],
-)
-
-pkg_tar(
     name = "ubuntu16_04_tar",
     package_dir = "/usr/local/",
     strip_prefix = ".",
