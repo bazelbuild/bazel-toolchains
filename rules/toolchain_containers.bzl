@@ -18,7 +18,7 @@ def toolchain_container_sha256s():
         # latest *debian8* based python3 image. Newer ones are ubuntu16_04 based.
         "debian8_python3": "sha256:ace668f0f01e5e562ad09c3f128488ec33fa9126313f16505a86ae77865d1696",
         # gcr.io/google-appengine/python:latest
-        "ubuntu16_04_python3": "sha256:f6955b2492f3ea481a50a9a9f0995b5f84a02d8dab357d2c9dae6b366988f074",
+        "ubuntu16_04_python3": "sha256:1bbed7b5511bb582a2a8adf6a111defce8d184987c20d6281ce2bacaf2d4f71d",
 
         ###########################################################
         # Clang images                                            #
