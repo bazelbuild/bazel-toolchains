@@ -83,7 +83,7 @@ import sys
 LATEST_BAZEL_VERSION = "0.19.2"
 
 SUPPORTED_TYPES = [
-    "rbe-debian8", "rbe-debian9", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
+    "rbe-debian8", "rbe-ubuntu16_04", "ubuntu16_04-bazel",
     "ubuntu16_04-bazel-docker-gcloud", "debian8-bazel", "ubuntu14_04-bazel"
 ]
 
@@ -95,7 +95,6 @@ SUPPORTED_TYPES = [
 # the package of target to build it.
 TYPE_PACKAGE_MAP = {
     "rbe-debian8": "container/debian8/builders/rbe-debian8",
-    "rbe-debian9": "container/experimental/rbe-debian9",
     "rbe-ubuntu16_04": "container/ubuntu16_04/builders/rbe-ubuntu16_04",
     "ubuntu16_04-bazel": "container/ubuntu16_04/builders/bazel",
     "ubuntu16_04-bazel-docker-gcloud":
@@ -107,7 +106,6 @@ TYPE_PACKAGE_MAP = {
 # Map to store all supported container type and the name of target to build it.
 TYPE_TARGET_MAP = {
     "rbe-debian8": "toolchain",
-    "rbe-debian9": "toolchain",
     "rbe-ubuntu16_04": "toolchain",
     "ubuntu16_04-bazel": "bazel_{}".format(LATEST_BAZEL_VERSION),
     "ubuntu16_04-bazel-docker-gcloud":
@@ -119,8 +117,6 @@ TYPE_TARGET_MAP = {
 # Map to store all supported container type and the name of target to build it.
 TYPE_TARBALL_MAP = {
     "rbe-debian8":
-        "toolchain-packages.tar",
-    "rbe-debian9":
         "toolchain-packages.tar",
     "rbe-ubuntu16_04":
         "toolchain-packages.tar",

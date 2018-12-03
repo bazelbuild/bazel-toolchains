@@ -6,6 +6,10 @@ commandTests:
   command: 'ar'
   args: ['--version']
   expectedOutput: ['GNU ar .*']
+- name: 'check-curl'
+  command: 'curl'
+  args: ['--version']
+  expectedOutput: ['curl .* \(x86_64-pc-linux-gnu\).*']
 - name: 'check-ed'
   command: 'ed'
   args: ['--version']
