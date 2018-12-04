@@ -56,7 +56,12 @@ def _gcs_file_impl(ctx):
 
     gsutil_cp_and_validate_result = ctx.execute(["bash", "gsutil_cp_and_validate.sh"])
     if gsutil_cp_and_validate_result.return_code == 255:
-        fail("SHA256 of downloaded file does not match given SHA256: %s" % gsutil_cp_and_validate_result.stderr)
+        fail("SHA256 of file {} from bucket {} does not match given SHA256: {} {}".format(
+            ctx.attr.file,
+            ctx.attr.bucket,
+            gsutil_cp_and_validate_result.stdout,
+            gsutil_cp_and_validate_result.stderr
+        ))
     elif gsutil_cp_and_validate_result.return_code != 0:
         fail("gsutil cp command failed: %s" % (gsutil_cp_and_validate_result.stderr))
 

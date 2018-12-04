@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright 2017 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#!/bin/bash
-# Template script to download GCS file and validate its digest
+# Script to run the executable generated from a docker_toolchain_autoconfig rule
+# and then check the toolchain configs for the c++ auto generated config exist.
+#
+# This script should be passed in 'srcs' of a sh_test test rule. The sh_test
+# rule is expected to have the name {docker_toolchain_autoconfig_name}_test,
+# where {docker_toolchain_autoconfig_name} is the docker_toolchain_autoconfig
+# rule you would like to build and run.
+
 set -e
 
-echo "Downloading %{BUCKET}/%{FILE} to %{DOWNLOAD_PATH}"
-gsutil cp %{BUCKET}/%{FILE} %{DOWNLOAD_PATH}
-digest=$(sha256sum %{DOWNLOAD_PATH} | head -c 64)
-if [ $digest != %{SHA256} ]; then
-  echo "actual digest: $digest, expected: %{SHA256}"
-  exit -1
+if [ -e $1 ]; then
+  echo "Verified $1 exists"
 else
-  exit 0
+  echo "$1 did not exist" && false
 fi
