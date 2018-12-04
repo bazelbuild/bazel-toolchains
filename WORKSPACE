@@ -76,3 +76,14 @@ http_file(
         "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
     ],
 )
+
+# Download test file to test gcs_file rule
+load("@bazel_toolchains//rules:gcs.bzl", "gcs_file")
+
+gcs_file(
+    name = "download_test_gcs_file",
+    bucket = "gs://bazel-toolchains-test",
+    downloaded_file_path = "test.txt",
+    file = "test.txt",
+    sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+)
