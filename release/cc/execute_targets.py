@@ -26,7 +26,7 @@ from util import get_autoconfig_target_name
 from util import get_git_root
 
 GIT_ROOT = get_git_root()
-CONFIG_REPO = "local_config_cc"
+CONFIG_REPO = "./local_config_cc"
 CONFIG_FILES = ["CROSSTOOL", "BUILD", "cc_wrapper.sh", "dummy_toolchain.bzl"]
 TMP_DIR = os.path.join(GIT_ROOT, "release", "tmp")
 
