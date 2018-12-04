@@ -23,7 +23,7 @@ PACKAGE = "//configs/debian8_clang/"
 
 LATEST_CONFIG_VERSION = "0.4.0"
 
-LATEST_BAZEL_VERSION = "0.19.2"
+LATEST_BAZEL_VERSION = "0.20.0"
 
 CONFIG_TYPES = [
     "default",
