@@ -60,7 +60,7 @@ def _gcs_file_impl(ctx):
             ctx.attr.file,
             ctx.attr.bucket,
             gsutil_cp_and_validate_result.stdout,
-            gsutil_cp_and_validate_result.stderr
+            gsutil_cp_and_validate_result.stderr,
         ))
     elif gsutil_cp_and_validate_result.return_code != 0:
         fail("gsutil cp command failed: %s" % (gsutil_cp_and_validate_result.stderr))

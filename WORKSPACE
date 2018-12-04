@@ -79,10 +79,11 @@ http_file(
 
 # Download test file to test gcs_file rule
 load("@bazel_toolchains//rules:gcs.bzl", "gcs_file")
+
 gcs_file(
-  name = "download_test_gcs_file",
-  bucket = "gs://bazel-toolchains-test",
-  file = "test.txt",
-  downloaded_file_path = "test.txt",
-  sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    name = "download_test_gcs_file",
+    bucket = "gs://bazel-toolchains-test",
+    downloaded_file_path = "test.txt",
+    file = "test.txt",
+    sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
 )
