@@ -1,8 +1,13 @@
+load(
+    "@bazel_tools//tools/build_rules:test_rules.bzl",
+    "file_test",
+)
+
 # Simply ensures the file supposed to be downloaded by the gce_file
-# test rule was actually downloaded
-sh_test(
+# test rule was actually downloaded and the contents of the file was
+# "0"
+file_test(
     name = "gcs_file_test",
-    srcs = [":file_existence_test.sh"],
-    args = ["$(location @download_test_gcs_file//file:test.txt)"],
-    data = ["@download_test_gcs_file//file:test.txt"],
+    content = "0",
+    file = "@download_test_gcs_file//file:test.txt",
 )
