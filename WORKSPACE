@@ -78,7 +78,7 @@ http_file(
 )
 
 # Download test file to test gcs_file rule
-load("@bazel_toolchains//rules:gcs.bzl", "gcs_file")
+load("//rules:gcs.bzl", "gcs_file")
 
 gcs_file(
     name = "download_test_gcs_file",
