@@ -87,3 +87,28 @@ gcs_file(
     file = "test.txt",
     sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
 )
+
+load("//rules:rbe_repo.bzl", "rbe_autoconfig")
+
+rbe_autoconfig(
+    name="rbe_default",
+    project_root = "~/work/src/bazel-toolchains-fork/bazel-toolchains",
+    output_base = "configs/ubuntu16_04_clang/1.1",
+    config_dir = "default",
+    # TODO(nlopezgi): allow picking revision of rbe-ubuntu container
+    # revision = "r346485",
+)
+
+rbe_autoconfig(
+    name="rbe_msan",
+    project_root = "~/work/src/bazel-toolchains-fork/bazel-toolchains",
+    output_base = "configs/ubuntu16_04_clang/1.1",
+    config_dir = "msan",
+    # TODO(nlopezgi): allow setting env variables
+    # env = {
+    #    "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+    #},
+    # TODO(nlopezgi): allow picking revision of rbe-ubuntu container
+    # revision = "r346485",
+)
+

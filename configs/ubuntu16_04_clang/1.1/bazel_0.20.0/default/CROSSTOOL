@@ -50,12 +50,12 @@ toolchain {
 }
 
 toolchain {
-  toolchain_identifier: "linux_gnu_x86"
-  abi_version: "clang"
-  abi_libc_version: "glibc_2.19"
+  toolchain_identifier: "local"
+  abi_version: "local"
+  abi_libc_version: "local"
   builtin_sysroot: ""
-  compiler: "clang"
-  host_system_name: "i686-unknown-linux-gnu"
+  compiler: "compiler"
+  host_system_name: "local"
   needsPic: true
   supports_gold_linker: true
   supports_incremental_linker: false
@@ -63,9 +63,9 @@ toolchain {
   supports_interface_shared_objects: false
   supports_normalizing_ar: false
   supports_start_end_lib: true
-  target_libc: "glibc_2.19"
+  target_libc: "local"
   target_cpu: "k8"
-  target_system_name: "x86_64-unknown-linux-gnu"
+  target_system_name: "local"
   cxx_flag: "-std=c++0x"
   linker_flag: "-fuse-ld=gold"
   linker_flag: "-Wl,-no-as-needed"
@@ -77,9 +77,9 @@ toolchain {
   cxx_builtin_include_directory: "/usr/local/lib/clang/8.0.0/include"
   cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu"
   cxx_builtin_include_directory: "/usr/include"
-  cxx_builtin_include_directory: "/usr/include/c++/5.4.0"
-  cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu/c++/5.4.0"
-  cxx_builtin_include_directory: "/usr/include/c++/5.4.0/backward"
+  cxx_builtin_include_directory: "/usr/include/c++/4.9"
+  cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu/c++/4.9"
+  cxx_builtin_include_directory: "/usr/include/c++/4.9/backward"
   objcopy_embed_flag: "-I"
   objcopy_embed_flag: "binary"
   unfiltered_cxx_flag: "-no-canonical-prefixes"
@@ -99,7 +99,7 @@ toolchain {
   tool_path {name: "cpp" path: "/usr/bin/cpp" }
   tool_path {name: "gcc" path: "/usr/local/bin/clang" }
   tool_path {name: "dwp" path: "/usr/bin/dwp" }
-  tool_path {name: "gcov" path: "/usr/bin/gcov" }
+  tool_path {name: "gcov" path: "/dev/null" }
   tool_path {name: "nm" path: "/usr/bin/nm" }
   tool_path {name: "objcopy" path: "/usr/bin/objcopy" }
   tool_path {name: "objdump" path: "/usr/bin/objdump" }
