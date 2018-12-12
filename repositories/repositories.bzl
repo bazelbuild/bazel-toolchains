@@ -86,7 +86,7 @@ def repositories():
             urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/4f13bab1c063aa7d7388f62a6807317e252bcae0.tar.gz"],
         )
 
-    # ================================ Repo rule utils ================================
+    # =============================== Repo rule utils =========================
     if "puller" not in excludes:
         # The release of the github.com/google/containerregistry to consume.
         CONTAINERREGISTRY_RELEASE = "v0.0.34"
