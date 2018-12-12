@@ -72,7 +72,7 @@ There are two modes of using this repo rules:
     After that, you can run an RBE build pointing your crosstool_top flag to the
     produced files. If output_base is set to "rbe-configs" (recommended):
 
-      bazel build ... \ 
+      bazel build ... \
                 --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain \
                 --host_javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
                 --javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
@@ -94,7 +94,7 @@ There are two modes of using this repo rules:
     remote repository (e.g., rbe_default) which can be used to point your
     flags to:
 
-      bazel build ... \ 
+      bazel build ... \
                 --crosstool_top=@rbe_default//rbe_config_cc:toolchain \
                 --host_javabase=@rbe_default//platforms:jdk8 \
                 --javabase=@rbe_default//platforms:jdk8 \
@@ -115,7 +115,7 @@ The {bazel_version} above corresponds to the version of bazel installed locally.
 Note you can override this version and pass an optional rc# if desired.
 Running this rule with a non release version (e.g., built from source) will not work.
 If running with bazel built from source you must pass a bazel_version and bazel_rc
-to rbe_autoconfig. Also, note the bazel_version bazel_rc must be published in 
+to rbe_autoconfig. Also, note the bazel_version bazel_rc must be published in
 https://releases.bazel.build/...
 
 Note this is a very not hermetic repository rule that can actually change the
@@ -153,24 +153,24 @@ load(
 # refactoring
 # https://github.com/bazelbuild/bazel/issues/1262
 _EXTERNAL_FOLDER_PREFIX = "external/"
-RBE_CONFIG_DIR = "rbe_config_cc"
-PLATFORM_DIR = "platforms"
-BAZEL_CONFIG_DIR = "/bazel-config"
-PROJECT_REPO_DIR = "project_src"
-OUTPUT_DIR = BAZEL_CONFIG_DIR + "/autoconf_out"
-REPO_DIR = BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR
-VERBOSE = False
-RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
-CONFIG_REPOS = ["local_config_cc"]
+_RBE_CONFIG_DIR = "rbe_config_cc"
+_PLATFORM_DIR = "platforms"
+_BAZEL_CONFIG_DIR = "/bazel-config"
+_PROJECT_REPO_DIR = "project_src"
+_OUTPUT_DIR = _BAZEL_CONFIG_DIR + "/autoconf_out"
+_REPO_DIR = _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
+_VERBOSE = False
+_RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
+_CONFIG_REPOS = ["local_config_cc"]
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
-    project_root = ctx.os.environ.get(RBE_AUTOCONF_ROOT, None)
+    project_root = ctx.os.environ.get(_RBE_AUTOCONF_ROOT, None)
     use_default_project = False
     if not project_root:
         if ctx.attr.output_base != "":
             fail(("%s env variable must be set for rbe_autoconfig" +
-                  " to function properly when output_base is set") % RBE_AUTOCONF_ROOT)
+                  " to function properly when output_base is set") % _RBE_AUTOCONF_ROOT)
 
         # Try to use the default project
         # This is Bazel black magic, we're traversing the directories in the output_base,
@@ -238,12 +238,12 @@ def _gunzip(ctx, layer):
 # Convenience method to print results of execute (and fail on errors if needed).
 # Verbose logging is enabled via a global var in this bzl file.
 def _print_exec_results(prefix, exec_result, fail = False, args = None):
-    if VERBOSE and exec_result.return_code != 0:
+    if _VERBOSE and exec_result.return_code != 0:
         print(prefix + "::error::" + exec_result.stderr)
-    elif VERBOSE:
+    elif _VERBOSE:
         print(prefix + "::success::" + exec_result.stdout)
     if fail and exec_result.return_code != 0:
-        if VERBOSE and args:
+        if _VERBOSE and args:
             print("failed to run execute with the following args:" + str(args))
         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
 
@@ -328,7 +328,7 @@ def _create_docker_cmd(
 
     # Command to recursively convert soft links to hard links in the config_repos
     deref_symlinks_cmd = []
-    for config_repo in CONFIG_REPOS:
+    for config_repo in _CONFIG_REPOS:
         symlinks_cmd = ("find $(bazel info output_base)/" +
                         _EXTERNAL_FOLDER_PREFIX + config_repo +
                         " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \;")
@@ -337,24 +337,24 @@ def _create_docker_cmd(
 
     # Command to copy produced toolchain configs to a tar at the root
     # of the container.
-    copy_cmd = ["mkdir " + OUTPUT_DIR]
-    for config_repo in CONFIG_REPOS:
+    copy_cmd = ["mkdir " + _OUTPUT_DIR]
+    for config_repo in _CONFIG_REPOS:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
-        copy_cmd.append("cp -dr " + src_dir + " " + OUTPUT_DIR)
-    copy_cmd.append("tar -cf /" + outputs_tar + " -C " + OUTPUT_DIR + "/ . ")
+        copy_cmd.append("cp -dr " + src_dir + " " + _OUTPUT_DIR)
+    copy_cmd.append("tar -cf /" + outputs_tar + " -C " + _OUTPUT_DIR + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
 
     # if use_default_project was selected, we need to modify the WORKSPACE and BUILD file
     setup_default_project_cmd = ["cd ."]
     if use_default_project:
-        setup_default_project_cmd += ["cd " + BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR]
+        setup_default_project_cmd += ["cd " + _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR]
         setup_default_project_cmd += ["mv BUILD.sample BUILD"]
         setup_default_project_cmd += ["touch WORKSPACE"]
 
-    bazel_cmd = "cd " + BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR
+    bazel_cmd = "cd " + _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
 
     # For each config repo we run the target @<config_repo>//...
-    bazel_targets = "@" + "//... @".join(CONFIG_REPOS) + "//..."
+    bazel_targets = "@" + "//... @".join(_CONFIG_REPOS) + "//..."
     bazel_flags = ""
     if not ctx.attr.incompatible_changes_off:
         bazel_flags += " --all_incompatible_changes"
@@ -411,7 +411,7 @@ def _run_and_extract(
         # If we use the default project, we need to modify the WORKSPACE
         # and BUILD files, so dont mount read-only
         mount_read_only_flag = ""
-    target = project_root + ":" + REPO_DIR + mount_read_only_flag
+    target = project_root + ":" + _REPO_DIR + mount_read_only_flag
     docker_run_flags += ["-v", target]
     docker_run_flags += ["-v", str(ctx.path("container")) + ":/container"]
 
@@ -438,16 +438,16 @@ def _run_and_extract(
     # Expand outputs inside this remote repo
     result = ctx.execute(["tar", "-xf", "output.tar"])
     _print_exec_results("expand_tar", result)
-    result = ctx.execute(["mv", "./local_config_cc", ("./%s" % RBE_CONFIG_DIR)])
+    result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _RBE_CONFIG_DIR)])
     _print_exec_results("expand_tar", result)
-    result = ctx.execute(["rm", ("./%s/WORKSPACE" % RBE_CONFIG_DIR)])
+    result = ctx.execute(["rm", ("./%s/WORKSPACE" % _RBE_CONFIG_DIR)])
     _print_exec_results("clean WORKSPACE", result)
-    result = ctx.execute(["rm", ("./%s/tools" % RBE_CONFIG_DIR), "-drf"])
+    result = ctx.execute(["rm", ("./%s/tools" % _RBE_CONFIG_DIR), "-drf"])
     _print_exec_results("clean tools", result)
 
 # Creates a BUILD file with the java and cc toolchain + platform targets
 def _create_platform(ctx, bazel_version, name):
-    toolchain_target = "@" + name + "//" + RBE_CONFIG_DIR
+    toolchain_target = "@" + name + "//" + _RBE_CONFIG_DIR
     if ctx.attr.output_base != "":
         toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + bazel_version
         if ctx.attr.config_dir != "":
@@ -472,14 +472,14 @@ def _expand_outputs(ctx, bazel_version, project_root):
         dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
         if ctx.attr.config_dir != "":
             dest += ctx.attr.config_dir + "/"
-        platform_dest = dest + PLATFORM_DIR + "/"
+        platform_dest = dest + _PLATFORM_DIR + "/"
 
         # Create the directories
         result = ctx.execute(["mkdir", "-p", "platform_dest"])
         _print_exec_results("create output dir", result)
 
-        # Get the files that were created in the RBE_CONFIG_DIR
-        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % RBE_CONFIG_DIR), True)
+        # Get the files that were created in the _RBE_CONFIG_DIR
+        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % _RBE_CONFIG_DIR), True)
         result = ctx.execute(["./local_config_files.sh"])
         _print_exec_results("resolve autoconf files", result)
         autoconf_files = result.stdout.splitlines()[0].split(" ")
@@ -540,7 +540,7 @@ _rbe_autoconfig = repository_rule(
         ),
     },
     environ = [
-        RBE_AUTOCONF_ROOT,
+        _RBE_AUTOCONF_ROOT,
     ],
     implementation = _impl,
 )
