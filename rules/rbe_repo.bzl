@@ -82,7 +82,6 @@ There are two modes of using this repo rules:
                 --extra_toolchains=/rbe-configs/bazel_{bazel_version}/platforms:cc-toolchain \
                 ... <other rbe flags> <build targets>
 
-    Where {bazel_version} corresponds to the version of bazel installed locally.
     We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
     so that users typically do not need to run this repo rule in order to do a
     remote build (i.e., once files are checked in, you do not need to run this
@@ -109,6 +108,13 @@ There are two modes of using this repo rules:
     repo rule takes some time as it needs to pull a container, run it, and then
     run some commands inside. We recommend you use output_base and check in the produced
     files so you dont need to run this rule with every clean build.
+
+The {bazel_version} above corresponds to the version of bazel installed locally.
+Note you can override this version and pass an optional rc# if desired.
+Running this rule with a non release version (e.g., built from source) will not work.
+If running with bazel built from source you must pass a bazel_version and bazel_rc
+to rbe_autoconfig. Also, note the bazel_version bazel_rc must be published in 
+https://releases.bazel.build/...
 
 Note this is a very not hermetic repository rule that can actually change the
 contents of your project sources. While this is generally not recommended by
