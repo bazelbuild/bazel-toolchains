@@ -66,7 +66,7 @@ There are two modes of using this repo rules:
   - When output_base set (recommended), running the repo rule target will copy
     the toolchain config files to the output_base folder in the project sources.
     After that, you can run an RBE build pointing your crosstool_top flag to the
-    produced files. If output_base is ste to "rbe-configs" (recommended):
+    produced files. If output_base is set to "rbe-configs" (recommended):
 
       bazel build ... --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain ...
 
@@ -88,10 +88,11 @@ There are two modes of using this repo rules:
     commands inside. We recommend you use output_base and check in the produced
     files so you dont need to run this rule with every clean build.
 
-Note this is a very not hermetic repository rule that can actually change the contents
-of your project sources. While this is generally not recommended by Bazel, its the
-only reasonable way to get a rule that can produce valid toolchains / platforms
-that need to be made available to Bazel before execution of any build actions.
+Note this is a very not hermetic repository rule that can actually change the
+contents of your project sources. While this is generally not recommended by
+Bazel, its the only reasonable way to get a rule that can produce valid
+toolchains / platforms that need to be made available to Bazel before execution
+of any build actions.
 
 Note: this rule expects the following utilities to be installed and available on
 the PATH:
