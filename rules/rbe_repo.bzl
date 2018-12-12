@@ -173,6 +173,9 @@ def _impl(ctx):
                   " to function properly when output_base is set") % RBE_AUTOCONF_ROOT)
 
         # Try to use the default project
+        # This is Bazel black magic, we're traversing the directories in the output_base,
+        # assuming that the bazel_toolchains external repo will exist in the
+        # expected path.
         project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
         if not project_root.exists:
             fail("Could not find default autoconf project in %s, please make sure " +

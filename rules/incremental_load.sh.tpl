@@ -19,7 +19,10 @@ set -ex
 # This is a generated file that loads all docker layers built by "docker_build".
 # This template is a variation of
 # https://github.com/bazelbuild/rules_docker/blob/master/container/incremental_load.sh.tpl
-# that can be used in repository rules (as opposed to regular Starlark rules)
+# that can be used in repository rules (as opposed to regular Starlark rules).
+# The notable difference in this version of incremental_load is that it does
+# not rely on RUNFILES to resolve paths to resources, instead, it expects all
+# paths to be absolute.
 
 DOCKER="/usr/bin/docker"
 
