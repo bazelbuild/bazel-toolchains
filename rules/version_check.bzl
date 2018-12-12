@@ -31,4 +31,5 @@ def check_bazel_version():
     if "bazel_version" not in dir(native):
         fail("\nCurrent Bazel version is lower than 0.2.1 and is not supported with rbe_autoconfig.")
     elif not native.bazel_version:
-        fail("\nCurrent Bazel is not a release version and one was not in rbe_autoconfig target.")
+        fail("\nCurrent running Bazel is not a release version and one " +
+             " was not defined explicitly in rbe_autoconfig target.")
