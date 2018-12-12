@@ -60,11 +60,6 @@ build:remote --remote_executor=remotebuildexecution.googleapis.com
 # Enable encryption.
 build:remote --tls_enabled=true
 
-# Enforce stricter environment rules, which eliminates some non-hermetic
-# behavior and therefore improves both the remote cache hit rate and the
-# correctness and repeatability of the build.
-build:remote --experimental_strict_action_env=true
-
 # Set a higher timeout value, just in case.
 build:remote --remote_timeout=3600
 
@@ -110,7 +105,6 @@ build:docker-sandbox --experimental_enable_docker_sandbox
 # across machines, developers, and workspaces.
 build:remote-cache --remote_cache=remotebuildexecution.googleapis.com
 build:remote-cache --tls_enabled=true
-build:remote-cache --experimental_strict_action_env=true
 build:remote-cache --remote_timeout=3600
 build:remote-cache --auth_enabled=true
 build:remote-cache --spawn_strategy=standalone
