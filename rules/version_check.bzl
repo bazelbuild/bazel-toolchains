@@ -1,4 +1,4 @@
-""" Helpers to check minimum version of bazel."""
+""" Helpers to parse and check version of bazel."""
 
 def extract_version_number(bazel_version):
     """Extracts the semantic version number from a version string
