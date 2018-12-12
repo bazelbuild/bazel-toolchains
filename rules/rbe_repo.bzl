@@ -337,10 +337,11 @@ def _run_and_extract(
     # + set env vars
     docker_run_flags = [""]
     for env in ctx.attr.env:
-        docker_run_flags += ["--env", env +"="+ctx.attr.env[env]]
+        docker_run_flags += ["--env", env + "=" + ctx.attr.env[env]]
     target = project_root + ":" + REPO_DIR + ":ro"
     docker_run_flags += ["-v", target]
     docker_run_flags += ["-v", str(ctx.path("container")) + ":/container"]
+
     # Create the template to run
     template = ctx.path(Label("@bazel_toolchains//rules:extract.sh.tpl"))
     ctx.template(
@@ -420,29 +421,30 @@ _rbe_autoconfig = repository_rule(
     implementation = _impl,
 )
 
-def rbe_autoconfig(name,
-                   bazel_version = None,
-                   output_base = "",
-                   config_dir = "",
-                   revision = "latest",
-                   env = None):
-  """ Creates a repository with toolchain configs generated for an rbe-ubuntu container.
+def rbe_autoconfig(
+        name,
+        bazel_version = None,
+        output_base = "",
+        config_dir = "",
+        revision = "latest",
+        env = None):
+    """ Creates a repository with toolchain configs generated for an rbe-ubuntu container.
 
-  This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
-  Use this macro in your WORKSPACE.
+    This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
+    Use this macro in your WORKSPACE.
 
-  Args:
-    bazel_version: The version of Bazel to use to generate toolchain configs.
-        `Use only (major, minor, patch), e.g., '0.20.0'.
-    output_base: Optional. The directory (under the project root) where the
-        produced toolchain configs will be copied to.
-    config_dir: Optional. Subdirectory where configs will be copied to.
-        Use only if output_base is defined.
-    revision: a revision of an rbe-ubuntu16-04 container.
-        See gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
-    env: dict. Additional env variables that will be set when running the
-        Bazel command to generate the toolchain configs.
-  """
+    Args:
+      bazel_version: The version of Bazel to use to generate toolchain configs.
+          `Use only (major, minor, patch), e.g., '0.20.0'.
+      output_base: Optional. The directory (under the project root) where the
+          produced toolchain configs will be copied to.
+      config_dir: Optional. Subdirectory where configs will be copied to.
+          Use only if output_base is defined.
+      revision: a revision of an rbe-ubuntu16-04 container.
+          See gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
+      env: dict. Additional env variables that will be set when running the
+          Bazel command to generate the toolchain configs.
+    """
     if output_base == "" and config_dir != "":
         fail("config_dir can only be used when output_base is set.")
     digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
