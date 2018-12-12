@@ -56,9 +56,9 @@ def repositories():
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
-            sha256 = "1ac4cec13a763e0d094514926fc42935f0deb2397ba5b0010c3e9d987f68bd28",
-            strip_prefix = "rules_docker-594f4bff25303ea1d1ead7e515a3ece6baabffbe",
-            urls = ["https://github.com/nlopezgi/rules_docker/archive/594f4bff25303ea1d1ead7e515a3ece6baabffbe.tar.gz"],
+            sha256 = "bcbd52777e60dbb4d06e334453592a1de5cb2831989dfafd31c4c901447088cd",
+            strip_prefix = "rules_docker-dab1b15a7b8ae2b8088064420f2b73a6e1e712a8",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/dab1b15a7b8ae2b8088064420f2b73a6e1e712a8.tar.gz"],
         )
 
         # Register the docker toolchain type

@@ -48,6 +48,8 @@ Add to your WORKSPACE file the following:
 
   bazel_toolchains_repositories()
 
+  load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
+
   rbe_autoconfig(
     name = "rbe_default",
     # Optional. See below.
