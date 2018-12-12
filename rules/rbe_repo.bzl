@@ -589,6 +589,7 @@ def rbe_autoconfig(
         env = env,
         output_base = output_base,
         revision = revision,
-        registry = "marketplace.gcr.io",
+        # We use 'l.gcr.io' to not require users to do gcloud login
+        registry = "l.gcr.io",
         repository = "google/rbe-ubuntu16-04",
     )
