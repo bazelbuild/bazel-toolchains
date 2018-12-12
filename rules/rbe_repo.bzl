@@ -49,27 +49,44 @@ Add to your WORKSPACE file the following:
   bazel_toolchains_repositories()
 
   rbe_autoconfig(
-    name="rbe_default",
-    # Use the full absolute path to the project root (i.e., no '~', '../', or other special chars)
-    project_root = "<project root>",
-    # Optional: use output_base to indicate a directory (under project_root) where the produced
-    # configs will be stored. The rule will copy all outputs to directory
-    # {project_root}/{output_base}/{bazel_version}/
-    output_base = "configs/ubuntu16_04_clang/1.1",
-    # Optional: use config_dir only when output_base is declared. Optionally create a sub-directory
-    # with the given name to store the produced configs.
-    config_dir = "default",
-    # Optional: pick a specific revision of rbe-ubuntu container
-    # (see //rules/toolchain_containers.bzl for supported values)
-    revision = "r328903",
+    name = "rbe_default",
+    # Optional. See below.
+    output_base = "rbe-configs"
   )
 
 For values of <latest_release> and other placeholders above, please see
 the WORKSPACE file in this repo.
 
-You can then add the following flag to any bazel build:
-bazel build ... --crosstool_top=@rbe_default//rbe_config_cc:toolchain
+This rule depends on the value of the environment variable "RBE_AUTOCONF_ROOT".
+This env var should be set to point to the absolute path root of your project.
+Use the full absolute path to the project root (i.e., no '~', '../', or
+other special chars).
 
+There are two modes of using this repo rules:
+  - When output_base set (recommended), running the repo rule target will copy
+    the toolchain config files to the output_base folder in the project sources.
+    After that, you can run an RBE build pointing your crosstool_top flag to the
+    produced files. If output_base is ste to "rbe-configs" (recommended):
+
+      bazel build ... --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain ...
+
+    Where {bazel_version} corresponds to the version of bazel installed locally.
+    We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
+    so that users typically do not need to run this repo rule in order to do a
+    remote build (i.e., once files are checked in, you do not need to run this
+    rule until there is a new version of Bazel you want to support running with).
+
+  - When output_base is not set, running this rule will create targets in the
+    remote repository (e.g., rbe_default) which can be used to point your
+    flags to:
+
+      bazel build ... --crosstool_top=@rbe_default//rbe_config_cc:toolchain ...
+
+    Note running bazel clean --expunge_async, or otherwise modifying attrs or
+    env variables used by this rule will trigger it to re-execute. Running this
+    repo rule is slow as it needs to pull a container, run it, and then run some
+    commands inside. We recommend you use output_base and check in the produced
+    files so you dont need to run this rule with every clean build.
 
 """
 
@@ -384,8 +401,29 @@ _rbe_autoconfig = repository_rule(
     implementation = _impl,
 )
 
-def rbe_autoconfig(name, bazel_version = None, output_base = "", config_dir = "", revision = "latest", env = None):
-    # TODO(ngiraldo): Provide support for passing additional env variables
+def rbe_autoconfig(name,
+                   bazel_version = None,
+                   output_base = "",
+                   config_dir = "",
+                   revision = "latest",
+                   env = None):
+  """ Creates a repository with toolchain configs generated for an rbe-ubuntu container.
+
+  This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
+  Use this macro in your WORKSPACE.
+
+  Args:
+    bazel_version: The version of Bazel to use to generate toolchain configs.
+        `Use only (major, minor, patch), e.g., '0.20.0'.
+    output_base: Optional. The directory (under the project root) where the
+        produced toolchain configs will be copied to.
+    config_dir: Optional. Subdirectory where configs will be copied to.
+        Use only if output_base is defined.
+    revision: a revision of an rbe-ubuntu16-04 container.
+        See gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
+    env: dict. Additional env variables that will be set when running the
+        Bazel command to generate the toolchain configs.
+  """
     if output_base == "" and config_dir != "":
         fail("config_dir can only be used when output_base is set.")
     digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
