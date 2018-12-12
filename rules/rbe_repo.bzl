@@ -127,7 +127,12 @@ the PATH:
 """
 
 load("@io_bazel_rules_docker//container:pull.bzl", _pull = "pull")
-load("@bazel_toolchains//rules:version_check.bzl", "extract_version_number")
+load(
+    "@bazel_toolchains//rules:version_check.bzl",
+    "check_bazel_version",
+    "extract_version_number",
+    "parse_rc",
+)
 load(
     "@bazel_toolchains//rules:toolchain_containers.bzl",
     "RBE_UBUNTU16_04_LATEST",
@@ -149,7 +154,7 @@ RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 CONFIG_REPOS = ["local_config_cc"]
 
 def _impl(ctx):
-    """Core implementation of ."""
+    """Core implementation of _rbe_autoconfig repository rule."""
     project_root = ctx.os.environ.get(RBE_AUTOCONF_ROOT, None)
     use_default_project = False
     if not project_root:
@@ -175,14 +180,22 @@ def _impl(ctx):
     image_id = _load_image(ctx)
 
     # TODO(nlopezgi): Support parsing rc part of version
-    bazel_version = str(extract_version_number(native.bazel_version))
+    bazel_version = None
+    bazel_rc_version = None
+    if ctx.attr.bazel_version == "local":
+        check_bazel_version()
+        bazel_version = str(extract_version_number(native.bazel_version))
+        rc = parse_rc(native.bazel_version)
+        bazel_rc_version = rc if rc != -1 else None
     if ctx.attr.bazel_version != "local":
         bazel_version = ctx.attr.bazel_version
+        bazel_rc_version = ctx.attr.bazel_rc_version
 
     # run the container and extract the autoconf directory
     _run_and_extract(
         ctx,
         bazel_version = bazel_version,
+        bazel_rc_version = bazel_rc_version,
         image_id = image_id,
         outputs_tar = outputs_tar,
         project_root = project_root,
@@ -191,27 +204,14 @@ def _impl(ctx):
 
     # Create a default BUILD file with the platform + toolchain targets that
     # will work with RBE with the produced toolchain
-    toolchain_target = "@" + name + "//" + RBE_CONFIG_DIR
-    if ctx.attr.output_base != "":
-        toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + bazel_version
-        if ctx.attr.config_dir != "":
-            toolchain_target += ctx.attr.config_dir
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.platform.tpl"))
-    ctx.template(
-        "platforms/BUILD",
-        template,
-        {
-            "%{revision}": ctx.attr.revision,
-            "%{rbe_ubuntu16_04_sha256}": ctx.attr.digest,
-            "%{toolchain}": toolchain_target,
-        },
-        True,
-    )
+    _create_platform(ctx, bazel_version = bazel_version, name = name)
 
     # Expand outputs to project dir if user requested it
-    _expand_outputs(ctx, 
-       bazel_version = bazel_version, 
-       project_root = project_root)
+    _expand_outputs(
+        ctx,
+        bazel_version = bazel_version,
+        project_root = project_root,
+    )
 
 # Gets the sha256 of a file.
 def _sha256(ctx, file):
@@ -292,15 +292,16 @@ def _load_image(ctx):
 def _create_docker_cmd(
         ctx,
         bazel_version,
+        bazel_rc_version,
         outputs_tar,
         use_default_project):
     # Command to install Bazel version
     # If a specific Bazel and Bazel RC version is specified, install that version.
     bazel_url = "https://releases.bazel.build/" + bazel_version
-    if ctx.attr.bazel_rc_version:
-        bazel_url += ("/rc" + ctx.attr.bazel_rc_version +
+    if bazel_rc_version:
+        bazel_url += ("/rc" + bazel_rc_version +
                       "/bazel-" + bazel_version + "rc" +
-                      ctx.attr.bazel_rc_version)
+                      bazel_rc_version)
     else:
         bazel_url += "/release/bazel-" + bazel_version
     bazel_url += "-installer-linux-x86_64.sh"
@@ -373,6 +374,7 @@ def _create_docker_cmd(
 def _run_and_extract(
         ctx,
         bazel_version,
+        bazel_rc_version,
         image_id,
         outputs_tar,
         project_root,
@@ -381,6 +383,7 @@ def _run_and_extract(
     _create_docker_cmd(
         ctx,
         bazel_version = bazel_version,
+        bazel_rc_version = bazel_rc_version,
         outputs_tar = outputs_tar,
         use_default_project = use_default_project,
     )
@@ -428,6 +431,25 @@ def _run_and_extract(
     _print_exec_results("clean WORKSPACE", result)
     result = ctx.execute(["rm", ("./%s/tools" % RBE_CONFIG_DIR), "-drf"])
     _print_exec_results("clean tools", result)
+
+# Creates a BUILD file with the java and cc toolchain + platform targets
+def _create_platform(ctx, bazel_version, name):
+    toolchain_target = "@" + name + "//" + RBE_CONFIG_DIR
+    if ctx.attr.output_base != "":
+        toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + bazel_version
+        if ctx.attr.config_dir != "":
+            toolchain_target += ctx.attr.config_dir
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.platform.tpl"))
+    ctx.template(
+        "platforms/BUILD",
+        template,
+        {
+            "%{revision}": ctx.attr.revision,
+            "%{rbe_ubuntu16_04_sha256}": ctx.attr.digest,
+            "%{toolchain}": toolchain_target,
+        },
+        True,
+    )
 
 # Copies all outputs of the autoconfig rule to a directory in the project
 # sources
@@ -515,6 +537,7 @@ load("@bazel_toolchains//rules:environments.bzl", "clang_env")
 def rbe_autoconfig(
         name,
         bazel_version = None,
+        bazel_rc = None,
         output_base = "",
         config_dir = "",
         revision = "latest",
@@ -527,6 +550,8 @@ def rbe_autoconfig(
     Args:
       bazel_version: The version of Bazel to use to generate toolchain configs.
           `Use only (major, minor, patch), e.g., '0.20.0'.
+      bazel_rc: The rc (for the given version of Bazel) to use. Must be published
+          in https://releases.bazel.build
       output_base: Optional. The directory (under the project root) where the
           produced toolchain configs will be copied to.
       config_dir: Optional. Subdirectory where configs will be copied to.
@@ -540,6 +565,8 @@ def rbe_autoconfig(
         fail("config_dir can only be used when output_base is set.")
     if revision == "latest":
         revision = RBE_UBUNTU16_04_LATEST
+    if bazel_rc and not bazel_version:
+        fail("bazel_rc can only be used with bazel_version.")
     digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
     if not digest:
         fail(("Could not find a valid digest for revision %s " +
@@ -548,6 +575,7 @@ def rbe_autoconfig(
     _rbe_autoconfig(
         name = name,
         bazel_version = bazel_version,
+        bazel_rc = bazel_rc,
         config_dir = config_dir,
         digest = digest,
         env = env,
