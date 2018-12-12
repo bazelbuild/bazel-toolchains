@@ -52,6 +52,16 @@ Add to your WORKSPACE file the following:
     name="rbe_default",
     # Use the full absolute path to the project root (i.e., no '~', '../', or other special chars)
     project_root = "<project root>",
+    # Optional: use output_base to indicate a directory (under project_root) where the produced
+    # configs will be stored. The rule will copy all outputs to directory
+    # {project_root}/{output_base}/{bazel_version}/
+    output_base = "configs/ubuntu16_04_clang/1.1",
+    # Optional: use config_dir only when output_base is declared. Optionally create a sub-directory
+    # with the given name to store the produced configs.
+    config_dir = "default",
+    # Optional: pick a specific revision of rbe-ubuntu container
+    # (see //rules/toolchain_containers.bzl for supported values)
+    revision = "r328903",
   )
 
 For values of <latest_release> and other placeholders above, please see
@@ -68,7 +78,7 @@ load(
     _pull = "pull",
 )
 load("@bazel_toolchains//rules:version_check.bzl", "extract_version_number")
-load("@bazel_toolchains//rules:toolchain_containers.bzl", "public_rbe_debian8_sha256s")
+load("@bazel_toolchains//rules:toolchain_containers.bzl", "public_rbe_ubuntu16_04_sha256s")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -347,13 +357,13 @@ _rbe_autoconfig = repository_rule(
 )
 
 def rbe_autoconfig(name, project_root, bazel_version = None, output_base = "", config_dir = "", revision = "latest"):
-    # TODO(ngiraldo): Provide support for additional env variables
+    # TODO(ngiraldo): Provide support for passing additional env variables
 
-    digest = public_rbe_debian8_sha256s().get(revision, None)
+    digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
     if not digest:
-        fail("Could not find a valid digest for revision %s " +
+        fail(("Could not find a valid digest for revision %s " +
              "please check it is declared in " +
-             "@bazel_toolchains//rules:toolchain_containers.bzl" % revision)
+             "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
     _rbe_autoconfig(
         name = name,
         project_root = project_root,

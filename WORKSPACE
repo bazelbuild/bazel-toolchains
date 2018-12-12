@@ -94,15 +94,6 @@ rbe_autoconfig(
     name="rbe_default",
     # Use the full absolute path to the project root (i.e., no '~', '../', or other special chars)
     project_root = "/usr/local/google/home/ngiraldo/work/src/bazel-toolchains-fork/bazel-toolchains",
-    # Optional: use to indicate a directory (under project_root) where the produced
-    # configs will be stored. The rule will copy all outputs to directory 
-    # {project_root}/{output_base}/{bazel_version}/
-    output_base = "configs/ubuntu16_04_clang/1.1",
-    # Optional: use only when output_base is declared. Optionally create a sub-directory
-    # with the given name to store the produced configs.
-    config_dir = "default",
-    # TODO(nlopezgi): allow picking revision of rbe-ubuntu container
-    # revision = "r346485",
 )
 
 rbe_autoconfig(

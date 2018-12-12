@@ -28,17 +28,14 @@ def toolchain_container_sha256s():
     }
 
 # Update only when the container in Cloud Marketplace is made available.
-# List of tags and SHAs of gcr.io/cloud-marketplace/google/rbe-debian8
-def public_rbe_debian8_sha256s():
+# List of tags and SHAs of gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
+def public_rbe_ubuntu16_04_sha256s():
     return {
-        "latest": "sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224",
-        "r346485": "sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224",
-        "r342117": "sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf",
-        "r340178": "sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d",
-        "r337145": "sha256:46c4fd30ed413f16a8be697833f7c07997c61997c0dceda651e9167068ca2cd3",
-        "r328903": "sha256:0d5db936f8fa04638ca31e4fc117415068dca43dc343d605c0db2a15f433a327",
-        "r327695": "sha256:d84a7de5175a22505209f56b02f1da20ccec64880da09ee38eaef3670fbd2a56",
-        "r324073": "sha256:1ede2a929b44d629ec5abe86eee6d7ffea1d5a4d247489a8867d46cfde3e38bd",
-        "r322167": "sha256:b2d946c1ddc20af250fe85cf98bd648ac5519131659f7c36e64184b433175a33",
-        "r319946": "sha256:496193842f61c9494be68bd624e47c74d706cabf19a693c4653ffe96a97e43e3",
+        "latest": "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
+        "r346485": "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
+        "r342117": "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375",
+        "r340178": "sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928",
+        "r337145": "sha256:b348b2e63253d5e2d32613a349747f07dc82b6b1ecfb69e8c7ac81a653b857c2",
+        "r328903": "sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f",
+        "r327695": "sha256:b940d4f08ea79ce9a07220754052da2ac4a4316e035d8799769cea3c24d10c66",
     }
