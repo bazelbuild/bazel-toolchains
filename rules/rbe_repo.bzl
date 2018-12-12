@@ -70,7 +70,17 @@ There are two modes of using this repo rules:
     After that, you can run an RBE build pointing your crosstool_top flag to the
     produced files. If output_base is set to "rbe-configs" (recommended):
 
-      bazel build ... --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain ...
+      bazel build ... \ 
+                --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain \
+                --
+                --host_javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
+                --javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
+                --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
+                --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
+                --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/platforms:rbe_ubuntu1604 \
+                --host_platform=/rbe-configs/bazel_{bazel_version}/platforms:rbe_ubuntu1604 \
+                --platforms=/rbe-configs/bazel_{bazel_version}/platforms:rbe_ubuntu1604 \
+                --extra_toolchains=/rbe-configs/bazel_{bazel_version}/platforms:cc-toolchain \
 
     Where {bazel_version} corresponds to the version of bazel installed locally.
     We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
@@ -107,18 +117,20 @@ the PATH:
 
 """
 
-load(
-    "@io_bazel_rules_docker//container:pull.bzl",
-    _pull = "pull",
-)
+load("@io_bazel_rules_docker//container:pull.bzl", _pull = "pull")
 load("@bazel_toolchains//rules:version_check.bzl", "extract_version_number")
-load("@bazel_toolchains//rules:toolchain_containers.bzl", "public_rbe_ubuntu16_04_sha256s")
+load(
+    "@bazel_toolchains//rules:toolchain_containers.bzl",
+    "RBE_UBUNTU16_04_LATEST",
+    "public_rbe_ubuntu16_04_sha256s",
+)
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
 # https://github.com/bazelbuild/bazel/issues/1262
 _EXTERNAL_FOLDER_PREFIX = "external/"
 RBE_CONFIG_DIR = "rbe_config_cc"
+PLATFORM_DIR = "platforms"
 BAZEL_CONFIG_DIR = "/bazel-config"
 PROJECT_REPO_DIR = "project_src"
 OUTPUT_DIR = BAZEL_CONFIG_DIR + "/autoconf_out"
@@ -130,15 +142,16 @@ CONFIG_REPOS = ["local_config_cc"]
 def _impl(ctx):
     """Core implementation of ."""
     project_root = ctx.os.environ.get(RBE_AUTOCONF_ROOT, None)
-    use_default_project = False    
+    use_default_project = False
     if not project_root:
         if ctx.attr.output_base != "":
             fail(("%s env variable must be set for rbe_autoconfig" +
                   " to function properly when output_base is set") % RBE_AUTOCONF_ROOT)
+
         # Try to use the default project
         project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
         if not project_root.exists:
-            fail("Could not find default autoconf project in %s, please make sure "+
+            fail("Could not find default autoconf project in %s, please make sure " +
                  "the bazel-toolchains repo is properly imported in your workspace")
         project_root = str(project_root)
         use_default_project = True
@@ -167,24 +180,29 @@ def _impl(ctx):
         use_default_project = use_default_project,
     )
 
-    # TODO(ngiraldo): create a default BUILD file with the platform that will work
-    # with RBE with the produced toolchain
+    # Create a default BUILD file with the platform + toolchain targets that
+    # will work with RBE with the produced toolchain
+    toolchain_target = "@" + name + "//" + RBE_CONFIG_DIR
+    if ctx.attr.output_base != "":
+        toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + bazel_version
+        if ctx.attr.config_dir != "":
+            toolchain_target += ctx.attr.config_dir
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.platform.tpl"))
+    ctx.template(
+        "platforms/BUILD",
+        template,
+        {
+            "%{revision}": ctx.attr.revision,
+            "%{rbe_ubuntu16_04_sha256}": ctx.attr.digest,
+            "%{toolchain}": toolchain_target,
+        },
+        True,
+    )
 
     # Expand outputs to project dir if user requested it
-    if ctx.attr.output_base != "":
-        print("Copying outputs to project directory")
-        dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
-        if ctx.attr.config_dir != "":
-            dest += ctx.attr.config_dir
-        result = ctx.execute(["mkdir", "-p", "dest"])
-        _print_exec_results("create output dir", result)
-        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % RBE_CONFIG_DIR), True)
-        result = ctx.execute(["./local_config_files.sh"])
-        _print_exec_results("resolve autoconf files", result)
-        autoconf_files = result.stdout.splitlines()[0].split(" ")
-        args = ["cp"] + autoconf_files + [dest]
-        result = ctx.execute(args)
-        _print_exec_results("copy outputs", result, True, args)
+    _expand_outputs(ctx, 
+       bazel_version = bazel_version, 
+       project_root = project_root)
 
 # Gets the sha256 of a file.
 def _sha256(ctx, file):
@@ -307,13 +325,9 @@ def _create_docker_cmd(
     setup_default_project_cmd = ["cd ."]
     if use_default_project:
         setup_default_project_cmd += ["cd " + BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR]
-        setup_default_project_cmd += [ "mv BUILD.sample BUILD"]
-        setup_default_project_cmd += [ "touch WORKSPACE" ]
-    # We join the setup command with ';' in case e.g., the move fails, we should still
-    # continue.
-    # TODO(nlopezgi): confirm when this can happen and document it. 
-    #setup_default_project_cmd = " ; ".join(setup_default_project_cmd)    
-    # Command to run autoconfigure targets.
+        setup_default_project_cmd += ["mv BUILD.sample BUILD"]
+        setup_default_project_cmd += ["touch WORKSPACE"]
+
     bazel_cmd = "cd " + BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR
 
     # For each config repo we run the target @<config_repo>//...
@@ -406,6 +420,34 @@ def _run_and_extract(
     result = ctx.execute(["rm", ("./%s/tools" % RBE_CONFIG_DIR), "-drf"])
     _print_exec_results("clean tools", result)
 
+# Copies all outputs of the autoconfig rule to a directory in the project
+# sources
+def _expand_outputs(ctx, bazel_version, project_root):
+    if ctx.attr.output_base != "":
+        print("Copying outputs to project directory")
+        dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
+        if ctx.attr.config_dir != "":
+            dest += ctx.attr.config_dir + "/"
+        platform_dest = dest + PLATFORM_DIR + "/"
+
+        # Create the directories
+        result = ctx.execute(["mkdir", "-p", "platform_dest"])
+        _print_exec_results("create output dir", result)
+
+        # Get the files that were created in the RBE_CONFIG_DIR
+        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % RBE_CONFIG_DIR), True)
+        result = ctx.execute(["./local_config_files.sh"])
+        _print_exec_results("resolve autoconf files", result)
+        autoconf_files = result.stdout.splitlines()[0].split(" ")
+        args = ["cp"] + autoconf_files + [dest]
+
+        # Copy the files to dest
+        result = ctx.execute(args)
+        _print_exec_results("copy outputs", result, True, args)
+
+        # Copy the dest/platforms/BUILD file
+        result = ctx.execute("cp", str(ctx.path("platforms/BUILD")), platform_dest)
+
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
@@ -429,12 +471,6 @@ _rbe_autoconfig = repository_rule(
             doc = ("If set to False the flag --all_incompatible_changes will " +
                    "be used when generating the toolchain configs."),
         ),
-        "setup_cmd": attr.string(
-            default = "cd .",
-            doc = ("Optional. Pass an additional command that will be executed " +
-                   "(inside the container) before running bazel to generate the " +
-                   "toolchain configs"),
-        ),
         "output_base": attr.string(
             default = "",
             doc = ("Optional. The directory (under the project root) where the " +
@@ -447,6 +483,16 @@ _rbe_autoconfig = repository_rule(
                    "you can use this attr to indicate a type of config (e.g., default, " +
                    "msan). The configs will be generated in a sub-directory when this attr  " +
                    "is used."),
+        ),
+        "setup_cmd": attr.string(
+            default = "cd .",
+            doc = ("Optional. Pass an additional command that will be executed " +
+                   "(inside the container) before running bazel to generate the " +
+                   "toolchain configs"),
+        ),
+        "revision": attr.string(
+            mandatory = True,
+            doc = ("The revision of the rbe-ubuntu16-04 container"),
         ),
     },
     environ = [
@@ -483,6 +529,8 @@ def rbe_autoconfig(
     """
     if output_base == "" and config_dir != "":
         fail("config_dir can only be used when output_base is set.")
+    if revision == "latest":
+        revision = RBE_UBUNTU16_04_LATEST
     digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
     if not digest:
         fail(("Could not find a valid digest for revision %s " +
@@ -491,10 +539,11 @@ def rbe_autoconfig(
     _rbe_autoconfig(
         name = name,
         bazel_version = bazel_version,
+        config_dir = config_dir,
         digest = digest,
+        env = env,
+        output_base = output_base,
+        revision = revision,
         registry = "marketplace.gcr.io",
         repository = "google/rbe-ubuntu16-04",
-        config_dir = config_dir,
-        output_base = output_base,
-        env = env,
     )

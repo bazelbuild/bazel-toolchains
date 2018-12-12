@@ -29,9 +29,9 @@ def toolchain_container_sha256s():
 
 # Update only when the container in Cloud Marketplace is made available.
 # List of tags and SHAs of gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
+RBE_UBUNTU16_04_LATEST = "r346485"
 def public_rbe_ubuntu16_04_sha256s():
     return {
-        "latest": "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
         "r346485": "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
         "r342117": "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375",
         "r340178": "sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928",
