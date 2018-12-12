@@ -132,6 +132,8 @@ the PATH:
   - sha256sum
   - bash utilities (e.g., cp, mv, rm, etc)
 
+Known issues:
+  This rule cannot be executed inside a docker container.
 """
 
 load("@io_bazel_rules_docker//container:pull.bzl", _pull = "pull")
