@@ -88,6 +88,19 @@ There are two modes of using this repo rules:
     commands inside. We recommend you use output_base and check in the produced
     files so you dont need to run this rule with every clean build.
 
+Note this is a very not hermetic repository rule that can actually change the contents
+of your project sources. While this is generally not recommended by Bazel, its the
+only reasonable way to get a rule that can produce valid toolchains / platforms
+that need to be made available to Bazel before execution of any build actions.
+
+Note: this rule expects the following utilities to be installed and available on
+the PATH:
+  - docker
+  - gunzip
+  - tar
+  - sha256sum
+  - bash utilities (e.g., cp, mv, rm, etc)
+
 """
 
 load(
@@ -106,7 +119,7 @@ BAZEL_CONFIG_DIR = "/bazel-config"
 PROJECT_REPO_DIR = "project_src"
 OUTPUT_DIR = BAZEL_CONFIG_DIR + "/autoconf_out"
 REPO_DIR = BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR
-VERBOSE = True
+VERBOSE = False
 RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 CONFIG_REPOS = ["local_config_cc"]
 
@@ -157,13 +170,17 @@ def _impl(ctx):
         result = ctx.execute(args)
         _print_exec_results("copy outputs", result, True, args)
 
+# Gets the sha256 of a file.
 def _sha256(ctx, file):
     res = ctx.execute(["sha256sum", file])
     return res.stdout.split(" ")[0]
 
+# Expands a tar.gz file. Expects gunzip on the PATH.
 def _gunzip(ctx, layer):
     return ctx.execute(["gunzip", "-k", layer]).stdout
 
+# Convenience method to print results of execute (and fail on errors if needed).
+# Verbose logging is enabled via a global var in this bzl file.
 def _print_exec_results(prefix, exec_result, fail = False, args = None):
     if VERBOSE and exec_result.return_code != 0:
         print(prefix + "::error::" + exec_result.stderr)
@@ -174,7 +191,7 @@ def _print_exec_results(prefix, exec_result, fail = False, args = None):
             print("failed to run execute with the following args:" + str(args))
         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
 
-# pulls image using container_pull implementation
+# Pulls an image using container_pull implementation.
 def _pull_image(ctx):
     print("Pulling image.")
     pull_result = _pull.implementation(ctx)
@@ -301,6 +318,8 @@ def _create_docker_cmd(
     ]
     ctx.file("container/run_in_container.sh", "\n".join(docker_cmd), True)
 
+# Runs the container (creates command to run inside container) and extracts the
+# toolchain configs.
 def _run_and_extract(
         ctx,
         bazel_version,
@@ -353,7 +372,7 @@ def _run_and_extract(
     _print_exec_results("clean tools", result)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
-# rule directly, use rbe_autoconfig.
+# rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
     attrs = _pull.attrs + {
         "bazel_version": attr.string(
