@@ -17,8 +17,9 @@
 set -ex
 
 # This is a generated file that loads all docker layers built by "docker_build".
-
-#RUNFILES="/usr/local/google/home/ngiraldo/.cache/bazel/_bazel_ngiraldo/e446cb0c4208d313576b129eb9909a42/external"
+# This template is a variation of
+# https://github.com/bazelbuild/rules_docker/blob/master/container/incremental_load.sh.tpl
+# that can be used in repository rules (as opposed to regular Starlark rules)
 
 DOCKER="/usr/bin/docker"
 

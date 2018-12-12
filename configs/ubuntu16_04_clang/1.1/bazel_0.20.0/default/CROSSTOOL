@@ -50,12 +50,12 @@ toolchain {
 }
 
 toolchain {
-  toolchain_identifier: "local"
-  abi_version: "local"
-  abi_libc_version: "local"
+  toolchain_identifier: "linux_gnu_x86"
+  abi_version: "clang"
+  abi_libc_version: "glibc_2.19"
   builtin_sysroot: ""
-  compiler: "compiler"
-  host_system_name: "local"
+  compiler: "clang"
+  host_system_name: "i686-unknown-linux-gnu"
   needsPic: true
   supports_gold_linker: true
   supports_incremental_linker: false
@@ -63,9 +63,9 @@ toolchain {
   supports_interface_shared_objects: false
   supports_normalizing_ar: false
   supports_start_end_lib: true
-  target_libc: "local"
+  target_libc: "glibc_2.19"
   target_cpu: "k8"
-  target_system_name: "local"
+  target_system_name: "x86_64-unknown-linux-gnu"
   cxx_flag: "-std=c++0x"
   linker_flag: "-fuse-ld=gold"
   linker_flag: "-Wl,-no-as-needed"

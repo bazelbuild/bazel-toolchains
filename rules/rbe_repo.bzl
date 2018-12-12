@@ -18,13 +18,13 @@ Exposes the rbe_autoconfig macro that does the following:
 - Pulls an rbe-ubuntu 16_04 image
 - Loads the image in the local registry
 - Starts up a container using the rbe-ubuntu 16_04 image mounting the current project
-- Installs the current version of Bazel (one currently running) on the container 
+- Installs the current version of Bazel (one currently running) on the container
   (or the one passed as arg).
 - Runs a bazel command to build the local_config_cc
   remote repository, inside the container.
 - Extracts local_config_cc produced files (inside the container) to the produced
   remote repository.
-- Optionally copies the local_config_cc produced files to the project root under the
+- Optionally copies the local_config_cc produced files to the project srcs under the
   given output_base directory
 
 Add to your WORKSPACE file the following:
@@ -89,16 +89,17 @@ BAZEL_CONFIG_DIR = "/bazel-config"
 PROJECT_REPO_DIR = "project_src"
 OUTPUT_DIR = BAZEL_CONFIG_DIR + "/autoconf_out"
 REPO_DIR = BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR
-VERBOSE = False
+VERBOSE = True
+RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
+CONFIG_REPOS = ["local_config_cc"]
 
 def _impl(ctx):
     """Core implementation of ."""
-
+    project_root = ctx.os.environ.get(RBE_AUTOCONF_ROOT, None)
+    if not project_root:
+        fail("%s env variable must be set for rbe_autoconfig to function properly" % RBE_AUTOCONF_ROOT)
     name = ctx.attr.name
     outputs_tar = ctx.attr.name + "_out.tar"
-
-    # TODO(ngiraldo): read this from an ENV variable
-    project_root = ctx.attr.project_root
 
     # Pull the image
     _pull_image(ctx)
@@ -216,32 +217,26 @@ def _create_docker_cmd(
         bazel_version,
         outputs_tar):
     # Command to install Bazel version
-    install_bazel_cmd = "cd ."
-    if ctx.attr.use_bazel_head:
-        # If use_bazel_head was requested, we clone the source code from github and compile
-        # it using the release version with "bazel build //src:bazel".
-        install_bazel_cmd = "/install_bazel_head.sh"
-    elif bazel_version:
-        # If a specific Bazel and Bazel RC version is specified, install that version.
-        bazel_url = "https://releases.bazel.build/" + bazel_version
-        if ctx.attr.bazel_rc_version:
-            bazel_url += ("/rc" + ctx.attr.bazel_rc_version +
-                          "/bazel-" + bazel_version + "rc" +
-                          ctx.attr.bazel_rc_version)
-        else:
-            bazel_url += "/release/bazel-" + bazel_version
-        bazel_url += "-installer-linux-x86_64.sh"
-        install_bazel_cmd = ["bazel_url=" + bazel_url]
-        install_bazel_cmd += ["mkdir -p /src/bazel"]
-        install_bazel_cmd += ["cd /src/bazel/"]
-        install_bazel_cmd += ["wget $bazel_url --no-verbose --ca-certificate=/etc/ssl/certs/ca-certificates.crt -O /tmp/bazel-installer.sh"]
-        install_bazel_cmd += ["chmod +x /tmp/bazel-installer.sh"]
-        install_bazel_cmd += ["/tmp/bazel-installer.sh"]
-        install_bazel_cmd += ["rm -f /tmp/bazel-installer.sh"]
+    # If a specific Bazel and Bazel RC version is specified, install that version.
+    bazel_url = "https://releases.bazel.build/" + bazel_version
+    if ctx.attr.bazel_rc_version:
+        bazel_url += ("/rc" + ctx.attr.bazel_rc_version +
+                      "/bazel-" + bazel_version + "rc" +
+                      ctx.attr.bazel_rc_version)
+    else:
+        bazel_url += "/release/bazel-" + bazel_version
+    bazel_url += "-installer-linux-x86_64.sh"
+    install_bazel_cmd = ["bazel_url=" + bazel_url]
+    install_bazel_cmd += ["mkdir -p /src/bazel"]
+    install_bazel_cmd += ["cd /src/bazel/"]
+    install_bazel_cmd += ["wget $bazel_url --no-verbose --ca-certificate=/etc/ssl/certs/ca-certificates.crt -O /tmp/bazel-installer.sh"]
+    install_bazel_cmd += ["chmod +x /tmp/bazel-installer.sh"]
+    install_bazel_cmd += ["/tmp/bazel-installer.sh"]
+    install_bazel_cmd += ["rm -f /tmp/bazel-installer.sh"]
 
     # Command to recursively convert soft links to hard links in the config_repos
     deref_symlinks_cmd = []
-    for config_repo in ctx.attr.config_repos:
+    for config_repo in CONFIG_REPOS:
         symlinks_cmd = ("find $(bazel info output_base)/" +
                         _EXTERNAL_FOLDER_PREFIX + config_repo +
                         " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \;")
@@ -251,7 +246,7 @@ def _create_docker_cmd(
     # Command to copy produced toolchain configs to a tar at the root
     # of the container.
     copy_cmd = ["mkdir " + OUTPUT_DIR]
-    for config_repo in ctx.attr.config_repos:
+    for config_repo in CONFIG_REPOS:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + OUTPUT_DIR)
     copy_cmd.append("tar -cf /" + outputs_tar + " -C " + OUTPUT_DIR + "/ . ")
@@ -261,7 +256,7 @@ def _create_docker_cmd(
     bazel_cmd = "cd " + BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR
 
     # For each config repo we run the target @<config_repo>//...
-    bazel_targets = "@" + "//... @".join(ctx.attr.config_repos) + "//..."
+    bazel_targets = "@" + "//... @".join(CONFIG_REPOS) + "//..."
     bazel_flags = ""
     if not ctx.attr.incompatible_changes_off:
         bazel_flags += " --all_incompatible_changes"
@@ -303,12 +298,13 @@ def _run_and_extract(
     )
 
     # Create the docker run flags to mount the project + install file
+    # + set env vars
     docker_run_flags = [""]
-    project_root = ctx.attr.project_root
+    for env in ctx.attr.env:
+        docker_run_flags += ["--env", env +"="+ctx.attr.env[env]]
     target = project_root + ":" + REPO_DIR + ":ro"
-    docker_run_flags = ["-v", target]
+    docker_run_flags += ["-v", target]
     docker_run_flags += ["-v", str(ctx.path("container")) + ":/container"]
-
     # Create the template to run
     template = ctx.path(Label("@bazel_toolchains//rules:extract.sh.tpl"))
     ctx.template(
@@ -343,34 +339,67 @@ def _run_and_extract(
 # rule directly, use rbe_autoconfig.
 _rbe_autoconfig = repository_rule(
     attrs = _pull.attrs + {
-        "bazel_version": attr.string(default = "local"),
-        "bazel_rc_version": attr.string(),
-        "config_repos": attr.string_list(default = ["local_config_cc"]),
-        "incompatible_changes_off": attr.bool(default = True),
-        "project_root": attr.string(mandatory = True),
-        "setup_cmd": attr.string(default = "cd ."),
-        "use_bazel_head": attr.bool(default = False),
-        "output_base": attr.string(default = ""),
-        "config_dir": attr.string(default = ""),
+        "bazel_version": attr.string(
+            default = "local",
+            doc = ("The version of Bazel to use to generate toolchain configs." +
+                   "Use only (major, minor, patch), e.g., '0.20.0'."),
+        ),
+        "bazel_rc_version": attr.string(
+            doc = ("Optional. An rc version to use. Note an installer for the rc " +
+                   "must be available in https://releases.bazel.build."),
+        ),
+        "env": attr.string_dict(
+            doc = ("Optional. Dictionary from strings to strings. Additional env " +
+                   "variables that will be set when running the Bazel command to " +
+                   "generate the toolchain configs."),
+        ),
+        "incompatible_changes_off": attr.bool(
+            default = True,
+            doc = ("If set to False the flag --all_incompatible_changes will " +
+                   "be used when generating the toolchain configs."),
+        ),
+        "setup_cmd": attr.string(
+            default = "cd .",
+            doc = ("Optional. Pass an additional command that will be executed " +
+                   "(inside the container) before running bazel to generate the " +
+                   "toolchain configs"),
+        ),
+        "output_base": attr.string(
+            default = "",
+            doc = ("Optional. The directory (under the project root) where the " +
+                   "produced toolchain configs will be copied to."),
+        ),
+        "config_dir": attr.string(
+            default = "",
+            doc = ("Optional. Use only if output_base is defined. If you want to " +
+                   "create multiple toolchain configs (for the same version of Bazel) " +
+                   "you can use this attr to indicate a type of config (e.g., default, " +
+                   "msan). The configs will be generated in a sub-directory when this attr  " +
+                   "is used."),
+        ),
     },
+    environ = [
+        RBE_AUTOCONF_ROOT,
+    ],
     implementation = _impl,
 )
 
-def rbe_autoconfig(name, project_root, bazel_version = None, output_base = "", config_dir = "", revision = "latest"):
+def rbe_autoconfig(name, bazel_version = None, output_base = "", config_dir = "", revision = "latest", env = None):
     # TODO(ngiraldo): Provide support for passing additional env variables
-
+    if output_base == "" and config_dir != "":
+        fail("config_dir can only be used when output_base is set.")
     digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
     if not digest:
         fail(("Could not find a valid digest for revision %s " +
-             "please check it is declared in " +
-             "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
+              "please check it is declared in " +
+              "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
     _rbe_autoconfig(
         name = name,
-        project_root = project_root,
         bazel_version = bazel_version,
         digest = digest,
         registry = "marketplace.gcr.io",
         repository = "google/rbe-ubuntu16-04",
         config_dir = config_dir,
         output_base = output_base,
+        env = env,
     )

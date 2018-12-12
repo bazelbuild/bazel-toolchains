@@ -89,24 +89,20 @@ gcs_file(
 )
 
 load("//rules:rbe_repo.bzl", "rbe_autoconfig")
+load("@bazel_toolchains//rules:environments.bzl", "clang_env")
 
 rbe_autoconfig(
-    name="rbe_default",
-    # Use the full absolute path to the project root (i.e., no '~', '../', or other special chars)
-    project_root = "/usr/local/google/home/ngiraldo/work/src/bazel-toolchains-fork/bazel-toolchains",
-)
-
-rbe_autoconfig(
-    name="rbe_msan",
-    # Use the full absolute path to the project root (i.e., no '~', '../', or other special chars)
-    project_root = "/usr/local/google/home/ngiraldo/work/src/bazel-toolchains-fork/bazel-toolchains",
+    name = "rbe_default",
+    config_dir = "default",
+    env = clang_env(),
     output_base = "configs/ubuntu16_04_clang/1.1",
-    config_dir = "msan",
-    # TODO(nlopezgi): allow setting env variables
-    # env = {
-    #    "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    #},
-    # TODO(nlopezgi): allow picking revision of rbe-ubuntu container
-    # revision = "r346485",
 )
 
+rbe_autoconfig(
+    name = "rbe_msan",
+    config_dir = "msan",
+    env = clang_env() + {
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+    },
+    output_base = "configs/ubuntu16_04_clang/1.1",
+)
