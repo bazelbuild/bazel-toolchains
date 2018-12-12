@@ -57,14 +57,16 @@ Add to your WORKSPACE file the following:
 For values of <latest_release> and other placeholders above, please see
 the WORKSPACE file in this repo.
 
-This rule depends on the value of the environment variable "RBE_AUTOCONF_ROOT".
+This rule depends on the value of the environment variable "RBE_AUTOCONF_ROOT"
+when output_base is used.
 This env var should be set to point to the absolute path root of your project.
 Use the full absolute path to the project root (i.e., no '~', '../', or
 other special chars).
 
 There are two modes of using this repo rules:
-  - When output_base set (recommended), running the repo rule target will copy
-    the toolchain config files to the output_base folder in the project sources.
+  1 - When output_base set (recommended), running the repo rule target will copy
+    (env var "RBE_AUTOCONF_ROOT" is required) the toolchain config files to the
+    output_base folder in the project sources.
     After that, you can run an RBE build pointing your crosstool_top flag to the
     produced files. If output_base is set to "rbe-configs" (recommended):
 
@@ -76,7 +78,8 @@ There are two modes of using this repo rules:
     remote build (i.e., once files are checked in, you do not need to run this
     rule until there is a new version of Bazel you want to support running with).
 
-  - When output_base is not set, running this rule will create targets in the
+  2 - When output_base is not set (env var "RBE_AUTOCONF_ROOT" is not required),
+    running this rule will create targets in the
     remote repository (e.g., rbe_default) which can be used to point your
     flags to:
 
@@ -84,8 +87,8 @@ There are two modes of using this repo rules:
 
     Note running bazel clean --expunge_async, or otherwise modifying attrs or
     env variables used by this rule will trigger it to re-execute. Running this
-    repo rule is slow as it needs to pull a container, run it, and then run some
-    commands inside. We recommend you use output_base and check in the produced
+    repo rule takes some time as it needs to pull a container, run it, and then
+    run some commands inside. We recommend you use output_base and check in the produced
     files so you dont need to run this rule with every clean build.
 
 Note this is a very not hermetic repository rule that can actually change the
@@ -127,8 +130,19 @@ CONFIG_REPOS = ["local_config_cc"]
 def _impl(ctx):
     """Core implementation of ."""
     project_root = ctx.os.environ.get(RBE_AUTOCONF_ROOT, None)
+    use_default_project = False    
     if not project_root:
-        fail("%s env variable must be set for rbe_autoconfig to function properly" % RBE_AUTOCONF_ROOT)
+        if ctx.attr.output_base != "":
+            fail(("%s env variable must be set for rbe_autoconfig" +
+                  " to function properly when output_base is set") % RBE_AUTOCONF_ROOT)
+        # Try to use the default project
+        project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+        if not project_root.exists:
+            fail("Could not find default autoconf project in %s, please make sure "+
+                 "the bazel-toolchains repo is properly imported in your workspace")
+        project_root = str(project_root)
+        use_default_project = True
+
     name = ctx.attr.name
     outputs_tar = ctx.attr.name + "_out.tar"
 
@@ -150,6 +164,7 @@ def _impl(ctx):
         image_id = image_id,
         outputs_tar = outputs_tar,
         project_root = project_root,
+        use_default_project = use_default_project,
     )
 
     # TODO(ngiraldo): create a default BUILD file with the platform that will work
@@ -250,7 +265,8 @@ def _load_image(ctx):
 def _create_docker_cmd(
         ctx,
         bazel_version,
-        outputs_tar):
+        outputs_tar,
+        use_default_project):
     # Command to install Bazel version
     # If a specific Bazel and Bazel RC version is specified, install that version.
     bazel_url = "https://releases.bazel.build/" + bazel_version
@@ -287,6 +303,16 @@ def _create_docker_cmd(
     copy_cmd.append("tar -cf /" + outputs_tar + " -C " + OUTPUT_DIR + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
 
+    # if use_default_project was selected, we need to modify the WORKSPACE and BUILD file
+    setup_default_project_cmd = ["cd ."]
+    if use_default_project:
+        setup_default_project_cmd += ["cd " + BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR]
+        setup_default_project_cmd += [ "mv BUILD.sample BUILD"]
+        setup_default_project_cmd += [ "touch WORKSPACE" ]
+    # We join the setup command with ';' in case e.g., the move fails, we should still
+    # continue.
+    # TODO(nlopezgi): confirm when this can happen and document it. 
+    #setup_default_project_cmd = " ; ".join(setup_default_project_cmd)    
     # Command to run autoconfigure targets.
     bazel_cmd = "cd " + BAZEL_CONFIG_DIR + "/" + PROJECT_REPO_DIR
 
@@ -301,6 +327,8 @@ def _create_docker_cmd(
     # we start with "cd ." to make sure in case of failure everything after the
     # ";" will be executed
     clean_cmd = "cd . ; bazel clean"
+    if use_default_project:
+        clean_cmd += "; rm WORKSPACE ; mv BUILD BUILD.sample"
 
     docker_cmd = [
         "#!/bin/bash",
@@ -308,13 +336,11 @@ def _create_docker_cmd(
         ctx.attr.setup_cmd,
     ]
     docker_cmd += install_bazel_cmd
+    docker_cmd += setup_default_project_cmd
     docker_cmd += [
-        "echo === Running Bazel autoconfigure command ===",
         bazel_cmd,
-        "echo === Copying outputs ===",
         deref_symlinks_cmd,
         output_copy_cmd,
-        "echo === Cleaning up ===",
         clean_cmd,
     ]
     ctx.file("container/run_in_container.sh", "\n".join(docker_cmd), True)
@@ -326,12 +352,14 @@ def _run_and_extract(
         bazel_version,
         image_id,
         outputs_tar,
-        project_root):
+        project_root,
+        use_default_project):
     # Create command to run inside docker container
     _create_docker_cmd(
         ctx,
         bazel_version = bazel_version,
         outputs_tar = outputs_tar,
+        use_default_project = use_default_project,
     )
 
     # Create the docker run flags to mount the project + install file
@@ -339,7 +367,12 @@ def _run_and_extract(
     docker_run_flags = [""]
     for env in ctx.attr.env:
         docker_run_flags += ["--env", env + "=" + ctx.attr.env[env]]
-    target = project_root + ":" + REPO_DIR + ":ro"
+    mount_read_only_flag = ":ro"
+    if use_default_project:
+        # If we use the default project, we need to modify the WORKSPACE
+        # and BUILD files, so dont mount read-only
+        mount_read_only_flag = ""
+    target = project_root + ":" + REPO_DIR + mount_read_only_flag
     docker_run_flags += ["-v", target]
     docker_run_flags += ["-v", str(ctx.path("container")) + ":/container"]
 
@@ -422,13 +455,15 @@ _rbe_autoconfig = repository_rule(
     implementation = _impl,
 )
 
+load("@bazel_toolchains//rules:environments.bzl", "clang_env")
+
 def rbe_autoconfig(
         name,
         bazel_version = None,
         output_base = "",
         config_dir = "",
         revision = "latest",
-        env = None):
+        env = clang_env()):
     """ Creates a repository with toolchain configs generated for an rbe-ubuntu container.
 
     This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
