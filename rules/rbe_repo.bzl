@@ -72,7 +72,6 @@ There are two modes of using this repo rules:
 
       bazel build ... \ 
                 --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain \
-                --
                 --host_javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
                 --javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
@@ -81,6 +80,7 @@ There are two modes of using this repo rules:
                 --host_platform=/rbe-configs/bazel_{bazel_version}/platforms:rbe_ubuntu1604 \
                 --platforms=/rbe-configs/bazel_{bazel_version}/platforms:rbe_ubuntu1604 \
                 --extra_toolchains=/rbe-configs/bazel_{bazel_version}/platforms:cc-toolchain \
+                ... <other rbe flags> <build targets>
 
     Where {bazel_version} corresponds to the version of bazel installed locally.
     We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
@@ -93,7 +93,16 @@ There are two modes of using this repo rules:
     remote repository (e.g., rbe_default) which can be used to point your
     flags to:
 
-      bazel build ... --crosstool_top=@rbe_default//rbe_config_cc:toolchain ...
+      bazel build ... \ 
+                --crosstool_top=@rbe_default//rbe_config_cc:toolchain \
+                --host_javabase=@rbe_default//platforms:jdk8 \
+                --javabase=@rbe_default//platforms:jdk8 \
+                --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
+                --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
+                --extra_execution_platforms=@rbe_default//platforms:rbe_ubuntu1604 \
+                --host_platform=@rbe_default//platforms:rbe_ubuntu1604 \
+                --platforms=@rbe_default//platforms:rbe_ubuntu1604 \
+                --extra_toolchains=@rbe_default//platforms:cc-toolchain \
 
     Note running bazel clean --expunge_async, or otherwise modifying attrs or
     env variables used by this rule will trigger it to re-execute. Running this
