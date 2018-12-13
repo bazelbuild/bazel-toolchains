@@ -133,7 +133,8 @@ the PATH:
   - bash utilities (e.g., cp, mv, rm, etc)
 
 Known issues:
-  This rule cannot be executed inside a docker container.
+  - This rule cannot be executed inside a docker container.
+  - This rule can only run in Linux
 """
 
 load("@io_bazel_rules_docker//container:pull.bzl", _pull = "pull")
@@ -165,6 +166,8 @@ _CONFIG_REPOS = ["local_config_cc"]
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
+    # Perform some safety checks
+    _validate_host(ctx)
     project_root = ctx.os.environ.get(_RBE_AUTOCONF_ROOT, None)
     use_default_project = False
     if not project_root:
@@ -246,6 +249,28 @@ def _print_exec_results(prefix, exec_result, fail = False, args = None):
         if _VERBOSE and args:
             print("failed to run execute with the following args:" + str(args))
         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
+
+# Perform validations of host environment to be able to run the rule
+def _validate_host(ctx):
+    if ctx.os.name.lower() != "linux":
+        fail("Not running on linux host, cannot run rbe_autoconfig.")
+    if not ctx.which("docker"):
+        fail("Cannot run rbe_autoconfig as 'docker' was not found on the path.")
+    if ctx.execute(["docker", "ps"]).return_code != 0:
+        fail("Cannot run rbe_autoconfig as running 'docker ps' returned a " +
+              "non 0 exit code, please check you have permissions to run docker.")
+    if not ctx.which("gunzip"):
+        fail("Cannot run rbe_autoconfig as 'gunzip' was not found on the path.")
+    if not ctx.which("python"):
+        fail("Cannot run rbe_autoconfig as 'python' was not found on the path.")
+    if not ctx.execute(["python", " --version"]).startswith("2")
+        fail("Cannot run rbe_autoconfig as 'python' in the path is not pointing " +
+             "to a valid python 2 version."
+    if not ctx.which("sha256sum"):
+        fail("Cannot run rbe_autoconfig as 'sha256sum' was not found on the path.")
+    if not ctx.which("tar"):
+        fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
+
 
 # Pulls an image using container_pull implementation.
 def _pull_image(ctx):
