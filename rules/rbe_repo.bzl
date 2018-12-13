@@ -19,8 +19,7 @@ Exposes the rbe_autoconfig macro that does the following:
 - Starts up a container using the rbe-ubuntu 16_04 image mounting the current project
 - Installs the current version of Bazel (one currently running) on the container
   (or the one passed in with optional attr).
-- Runs a bazel command to build the local_config_cc
-  remote repository inside the container.
+- Runs a bazel command to build the local_config_cc remote repository inside the container.
 - Extracts local_config_cc produced files (inside the container) to the produced
   remote repository.
 - Optionally copies the local_config_cc produced files to the project srcs under the
@@ -129,7 +128,7 @@ the PATH:
   - tar
   - bash utilities (e.g., cp, mv, rm, etc)
 
-Known issues:
+Known limitations:
   - This rule cannot be executed inside a docker container.
   - This rule can only run in Linux.
 """
@@ -284,15 +283,6 @@ def _create_docker_cmd(
     install_bazel_cmd += ["/tmp/bazel-installer.sh"]
     install_bazel_cmd += ["rm -f /tmp/bazel-installer.sh"]
 
-    # Command to recursively convert soft links to hard links in the config_repos
-    deref_symlinks_cmd = []
-    for config_repo in _CONFIG_REPOS:
-        symlinks_cmd = ("find $(bazel info output_base)/" +
-                        _EXTERNAL_FOLDER_PREFIX + config_repo +
-                        " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \;")
-        deref_symlinks_cmd.append(symlinks_cmd)
-    deref_symlinks_cmd = " && ".join(deref_symlinks_cmd)
-
     # Command to copy produced toolchain configs to a tar at the root
     # of the container.
     copy_cmd = ["mkdir " + _OUTPUT_DIR]
@@ -327,14 +317,12 @@ def _create_docker_cmd(
 
     docker_cmd = [
         "#!/bin/bash",
-        "echo === Starting docker autoconfig ===",
         ctx.attr.setup_cmd,
     ]
     docker_cmd += install_bazel_cmd
     docker_cmd += setup_default_project_cmd
     docker_cmd += [
         bazel_cmd,
-        deref_symlinks_cmd,
         output_copy_cmd,
         clean_cmd,
     ]
@@ -525,7 +513,9 @@ def rbe_autoconfig(
 
     Args:
       bazel_version: The version of Bazel to use to generate toolchain configs.
-          `Use only (major, minor, patch), e.g., '0.20.0'.
+          `Use only (major, minor, patch), e.g., '0.20.0'. Default is "local"
+          which means the same version of Bazel that is currently running will
+          be used.
       bazel_rc: The rc (for the given version of Bazel) to use. Must be published
           in https://releases.bazel.build
       output_base: Optional. The directory (under the project root) where the
@@ -545,8 +535,8 @@ def rbe_autoconfig(
         fail("bazel_rc can only be used with bazel_version.")
     digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
     if not digest:
-        fail(("Could not find a valid digest for revision %s " +
-              "please check it is declared in " +
+        fail(("Could not find a valid digest for revision %s, " +
+              "please make sure it is declared in " +
               "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
     _rbe_autoconfig(
         name = name,

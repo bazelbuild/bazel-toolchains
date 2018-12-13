@@ -101,7 +101,7 @@ rbe_autoconfig(
 load("@bazel_toolchains//rules:environments.bzl", "clang_env")
 
 rbe_autoconfig(
-    name = "rbe_msan",
+    name = "rbe_msan_with_output_base",
     config_dir = "msan",
     env = clang_env() + {
         "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
