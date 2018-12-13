@@ -89,7 +89,7 @@ There are two modes of using this repo rules:
 
   2 - When output_base is not set (env var "RBE_AUTOCONF_ROOT" is not required),
     running this rule will create targets in the
-    remote repository (e.g., rbe_default) which can be used to point your
+    external repository folder (e.g., rbe_default) which can be used to point your
     flags to:
 
       bazel build ... \
@@ -355,7 +355,7 @@ def _run_and_extract(
     mount_read_only_flag = ":ro"
     if use_default_project:
         # If we use the default project, we need to modify the WORKSPACE
-        # and BUILD files, so dont mount read-only
+        # and BUILD files, so don't mount read-only
         mount_read_only_flag = ""
     target = project_root + ":" + _REPO_DIR + mount_read_only_flag
     docker_run_flags += ["-v", target]
@@ -407,7 +407,7 @@ def _create_platform(ctx, bazel_version, name):
             "%{rbe_ubuntu16_04_sha256}": ctx.attr.digest,
             "%{toolchain}": toolchain_target,
         },
-        True,
+        False,
     )
 
 # Copies all outputs of the autoconfig rule to a directory in the project
