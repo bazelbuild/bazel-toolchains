@@ -77,9 +77,9 @@ toolchain {
   cxx_builtin_include_directory: "/usr/local/lib/clang/8.0.0/include"
   cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu"
   cxx_builtin_include_directory: "/usr/include"
-  cxx_builtin_include_directory: "/usr/include/c++/5.4.0"
-  cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu/c++/5.4.0"
-  cxx_builtin_include_directory: "/usr/include/c++/5.4.0/backward"
+  cxx_builtin_include_directory: "/usr/include/c++/4.9"
+  cxx_builtin_include_directory: "/usr/include/x86_64-linux-gnu/c++/4.9"
+  cxx_builtin_include_directory: "/usr/include/c++/4.9/backward"
   objcopy_embed_flag: "-I"
   objcopy_embed_flag: "binary"
   unfiltered_cxx_flag: "-no-canonical-prefixes"
@@ -99,7 +99,7 @@ toolchain {
   tool_path {name: "cpp" path: "/usr/bin/cpp" }
   tool_path {name: "gcc" path: "/usr/local/bin/clang" }
   tool_path {name: "dwp" path: "/usr/bin/dwp" }
-  tool_path {name: "gcov" path: "/usr/bin/gcov" }
+  tool_path {name: "gcov" path: "/dev/null" }
   tool_path {name: "nm" path: "/usr/bin/nm" }
   tool_path {name: "objcopy" path: "/usr/bin/objcopy" }
   tool_path {name: "objdump" path: "/usr/bin/objdump" }

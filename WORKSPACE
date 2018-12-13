@@ -87,3 +87,24 @@ gcs_file(
     file = "test.txt",
     sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
 )
+
+load("//rules:rbe_repo.bzl", "rbe_autoconfig")
+
+rbe_autoconfig(name = "rbe_default")
+
+rbe_autoconfig(
+    name = "rbe_default_with_output_base",
+    config_dir = "default",
+    output_base = "configs/ubuntu16_04_clang/1.1",
+)
+
+load("@bazel_toolchains//rules:environments.bzl", "clang_env")
+
+rbe_autoconfig(
+    name = "rbe_msan_with_output_base",
+    config_dir = "msan",
+    env = clang_env() + {
+        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+    },
+    output_base = "configs/ubuntu16_04_clang/1.1",
+)

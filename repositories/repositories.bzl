@@ -56,9 +56,9 @@ def repositories():
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
-            sha256 = "f3e5c0500533d58be079db1a24ac909f2e0cd98c9d760f5e506e4d05b56c42dd",
-            strip_prefix = "rules_docker-a9bb1dab84cdf46e34d1b34b53a17bda129b5eba",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/a9bb1dab84cdf46e34d1b34b53a17bda129b5eba.tar.gz"],
+            sha256 = "bcbd52777e60dbb4d06e334453592a1de5cb2831989dfafd31c4c901447088cd",
+            strip_prefix = "rules_docker-dab1b15a7b8ae2b8088064420f2b73a6e1e712a8",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/dab1b15a7b8ae2b8088064420f2b73a6e1e712a8.tar.gz"],
         )
 
         # Register the docker toolchain type
@@ -84,6 +84,15 @@ def repositories():
             sha256 = "a97768efdba8ecfa4c2e71499b1ef8fbe95a22044cb26ed5ca062f91a2afcfb1",
             strip_prefix = "base-images-docker-4f13bab1c063aa7d7388f62a6807317e252bcae0",
             urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/4f13bab1c063aa7d7388f62a6807317e252bcae0.tar.gz"],
+        )
+
+    # =============================== Repo rule deps ==========================
+    if "bazel_skylib" not in excludes:
+        http_archive(
+            name = "bazel_skylib",
+            sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
+            strip_prefix = "bazel-skylib-0.6.0",
+            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
         )
 
     # ================================ GPG Keys ================================
