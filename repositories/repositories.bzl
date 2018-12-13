@@ -86,26 +86,6 @@ def repositories():
             urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/4f13bab1c063aa7d7388f62a6807317e252bcae0.tar.gz"],
         )
 
-    # =============================== Repo rule utils =========================
-    if "puller" not in excludes:
-        # The release of the github.com/google/containerregistry to consume.
-        CONTAINERREGISTRY_RELEASE = "v0.0.34"
-        http_file(
-            name = "puller",
-            executable = True,
-            sha256 = "2a3ccb6ef8f99ec0053b56380824a7c100ba00eb0e147d1bda748884113542f1",
-            urls = [("https://storage.googleapis.com/containerregistry-releases/" +
-                     CONTAINERREGISTRY_RELEASE + "/puller.par")],
-        )
-
-    if "bazel_skylib" not in excludes:
-        http_archive(
-            name = "bazel_skylib",
-            sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
-            strip_prefix = "bazel-skylib-0.6.0",
-            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
-        )
-
     # ================================ GPG Keys ================================
     # Bazel gpg key necessary to install Bazel in the containers.
     if "bazel_gpg" not in excludes:

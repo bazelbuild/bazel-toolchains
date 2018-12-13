@@ -15,13 +15,12 @@
 """Repository Rules to generate toolchain configs for an RBE-ubuntu16-04 container.
 
 Exposes the rbe_autoconfig macro that does the following:
-- Pulls an rbe-ubuntu 16_04 image
-- Loads the image in the local registry
+- Pulls an rbe-ubuntu 16_04 image (using 'docker pull')
 - Starts up a container using the rbe-ubuntu 16_04 image mounting the current project
 - Installs the current version of Bazel (one currently running) on the container
-  (or the one passed as arg).
+  (or the one passed in with optional attr).
 - Runs a bazel command to build the local_config_cc
-  remote repository, inside the container.
+  remote repository inside the container.
 - Extracts local_config_cc produced files (inside the container) to the produced
   remote repository.
 - Optionally copies the local_config_cc produced files to the project srcs under the
@@ -127,17 +126,14 @@ of any build actions.
 Note: this rule expects the following utilities to be installed and available on
 the PATH:
   - docker
-  - gunzip
   - tar
-  - sha256sum
   - bash utilities (e.g., cp, mv, rm, etc)
 
 Known issues:
   - This rule cannot be executed inside a docker container.
-  - This rule can only run in Linux
+  - This rule can only run in Linux.
 """
 
-load("@io_bazel_rules_docker//container:pull.bzl", _pull = "pull")
 load(
     "@bazel_toolchains//rules:version_check.bzl",
     "check_bazel_version",
@@ -160,9 +156,11 @@ _BAZEL_CONFIG_DIR = "/bazel-config"
 _PROJECT_REPO_DIR = "project_src"
 _OUTPUT_DIR = _BAZEL_CONFIG_DIR + "/autoconf_out"
 _REPO_DIR = _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
-_VERBOSE = False
+_VERBOSE = True
 _RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 _CONFIG_REPOS = ["local_config_cc"]
+# We use 'l.gcr.io' to not require users to do gcloud login
+_RBE_UBUNTU_GCR = "l.gcr.io/google/rbe-ubuntu16-04@"
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
@@ -189,13 +187,10 @@ def _impl(ctx):
     name = ctx.attr.name
     outputs_tar = ctx.attr.name + "_out.tar"
 
-    # Pull the image
+    # Pull the image using 'docker pull'
     _pull_image(ctx)
+    image_id = _RBE_UBUNTU_GCR + ctx.attr.digest
 
-    # Load it into the local registry
-    image_id = _load_image(ctx)
-
-    # TODO(nlopezgi): Support parsing rc part of version
     bazel_version = None
     bazel_rc_version = None
     if ctx.attr.bazel_version == "local":
@@ -229,15 +224,6 @@ def _impl(ctx):
         project_root = project_root,
     )
 
-# Gets the sha256 of a file.
-def _sha256(ctx, file):
-    res = ctx.execute(["sha256sum", file])
-    return res.stdout.split(" ")[0]
-
-# Expands a tar.gz file. Expects gunzip on the PATH.
-def _gunzip(ctx, layer):
-    return ctx.execute(["gunzip", "-k", layer]).stdout
-
 # Convenience method to print results of execute (and fail on errors if needed).
 # Verbose logging is enabled via a global var in this bzl file.
 def _print_exec_results(prefix, exec_result, fail = False, args = None):
@@ -259,71 +245,16 @@ def _validate_host(ctx):
     if ctx.execute(["docker", "ps"]).return_code != 0:
         fail("Cannot run rbe_autoconfig as running 'docker ps' returned a " +
               "non 0 exit code, please check you have permissions to run docker.")
-    if not ctx.which("gunzip"):
-        fail("Cannot run rbe_autoconfig as 'gunzip' was not found on the path.")
-    if not ctx.which("python"):
-        fail("Cannot run rbe_autoconfig as 'python' was not found on the path.")
-    if not ctx.execute(["python", " --version"]).startswith("2")
-        fail("Cannot run rbe_autoconfig as 'python' in the path is not pointing " +
-             "to a valid python 2 version."
-    if not ctx.which("sha256sum"):
-        fail("Cannot run rbe_autoconfig as 'sha256sum' was not found on the path.")
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
 
 
-# Pulls an image using container_pull implementation.
+# Pulls an image using 'docker pull'.
 def _pull_image(ctx):
     print("Pulling image.")
-    pull_result = _pull.implementation(ctx)
+    result = ctx.execute(["docker", "pull", _RBE_UBUNTU_GCR + ctx.attr.digest])
+    _print_exec_results("pull image", result, fail = True)
     print("Image pulled.")
-
-# Loads image into local registry.
-def _load_image(ctx):
-    # Find all the results from pull
-    config = ctx.path("image/config.json")
-
-    # Create a file with the sha256 of config.json
-    image_id = _sha256(ctx, config)
-    ctx.file("image/config.json.sha256", image_id)
-    config_sha = ctx.path("image/config.json.sha256")
-
-    # Find all the tar/gz files produced (sorted)
-    ctx.file("resolve_files.sh", "echo $(find . -name *.tar.gz | sort -n)", True)
-    result = ctx.execute(["./resolve_files.sh"])
-    _print_exec_results("resolve pulled files", result)
-    files = result.stdout.splitlines()[0].split(" ")
-    load_args = [config]
-
-    # For each tar.gz file: expand it, and create the args
-    print("Expanding pulled layers")
-    for layer in files:
-        layer = str(ctx.path(layer))
-        unzipped = layer.replace(".gz", "")
-        sha = unzipped.replace(".tar", ".sha256")
-        load_args += [sha, unzipped]
-        _gunzip(ctx, layer)
-
-    load_args = "' '".join(load_args)
-    load_statements = "import_config \'" + load_args + "\'"
-
-    # create the incremental_load.sh file using the template
-    template = ctx.path(Label("@bazel_toolchains//rules:incremental_load.sh.tpl"))
-    ctx.template(
-        "incremental_load.sh",
-        template,
-        {
-            "%{load_statements}": load_statements,
-        },
-        True,
-    )
-    print("Loading image")
-
-    # run the executable incremental_load.sh
-    result = ctx.execute(["./incremental_load.sh"])
-    _print_exec_results("incremental_load", result)
-    print("Image loaded")
-    return image_id
 
 # Creates file "container/run_in_container.sh" which can be mounted onto container
 # to run the commands to install bazel, run it and create the output tar
@@ -520,7 +451,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
-    attrs = _pull.attrs + {
+    attrs = {
         "bazel_version": attr.string(
             default = "local",
             doc = ("The version of Bazel to use to generate toolchain configs." +
@@ -529,6 +460,11 @@ _rbe_autoconfig = repository_rule(
         "bazel_rc_version": attr.string(
             doc = ("Optional. An rc version to use. Note an installer for the rc " +
                    "must be available in https://releases.bazel.build."),
+        ),
+        "digest": attr.string(
+            mandatory = True,
+            doc = ("The digest (sha256 sum) of the rbe-ubuntu16-04 " +
+                   "container to pull."),
         ),
         "env": attr.string_dict(
             doc = ("Optional. Dictionary from strings to strings. Additional env " +
@@ -619,7 +555,4 @@ def rbe_autoconfig(
         env = env,
         output_base = output_base,
         revision = revision,
-        # We use 'l.gcr.io' to not require users to do gcloud login
-        registry = "l.gcr.io",
-        repository = "google/rbe-ubuntu16-04",
     )
