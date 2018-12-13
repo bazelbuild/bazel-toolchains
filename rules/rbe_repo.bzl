@@ -150,20 +150,23 @@ load(
 # refactoring
 # https://github.com/bazelbuild/bazel/issues/1262
 _EXTERNAL_FOLDER_PREFIX = "external/"
-_RBE_CONFIG_DIR = "rbe_config_cc"
-_PLATFORM_DIR = "platforms"
+
 _BAZEL_CONFIG_DIR = "/bazel-config"
+_CONFIG_REPOS = ["local_config_cc"]
+_PLATFORM_DIR = "platforms"
 _PROJECT_REPO_DIR = "project_src"
 _OUTPUT_DIR = _BAZEL_CONFIG_DIR + "/autoconf_out"
 _REPO_DIR = _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
-_VERBOSE = True
 _RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
-_CONFIG_REPOS = ["local_config_cc"]
+_RBE_CONFIG_DIR = "rbe_config_cc"
+
 # We use 'l.gcr.io' to not require users to do gcloud login
 _RBE_UBUNTU_GCR = "l.gcr.io/google/rbe-ubuntu16-04@"
+_VERBOSE = False
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
+
     # Perform some safety checks
     _validate_host(ctx)
     project_root = ctx.os.environ.get(_RBE_AUTOCONF_ROOT, None)
@@ -244,10 +247,9 @@ def _validate_host(ctx):
         fail("Cannot run rbe_autoconfig as 'docker' was not found on the path.")
     if ctx.execute(["docker", "ps"]).return_code != 0:
         fail("Cannot run rbe_autoconfig as running 'docker ps' returned a " +
-              "non 0 exit code, please check you have permissions to run docker.")
+             "non 0 exit code, please check you have permissions to run docker.")
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
-
 
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx):
