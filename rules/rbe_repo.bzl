@@ -239,7 +239,7 @@ def _print_exec_results(prefix, exec_result, fail = False, args = None):
             print("failed to run execute with the following args:" + str(args))
         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
 
-# Perform validations of host environment to be able to run the rule
+# Perform validations of host environment to be able to run the rule.
 def _validate_host(ctx):
     if ctx.os.name.lower() != "linux":
         fail("Not running on linux host, cannot run rbe_autoconfig.")
