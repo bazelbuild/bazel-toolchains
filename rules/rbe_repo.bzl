@@ -64,8 +64,8 @@ Use the full absolute path to the project root (i.e., no '~', '../', or
 other special chars).
 
 There are two modes of using this repo rules:
-  1 - When output_base set (recommended), running the repo rule target will copy
-    (env var "RBE_AUTOCONF_ROOT" is required) the toolchain config files to the
+  1 - When output_base set (recommended; env var "RBE_AUTOCONF_ROOT" is required),
+    running the repo rule target will copy the toolchain config files to the
     output_base folder in the project sources.
     After that, you can run an RBE build pointing your crosstool_top flag to the
     produced files. If output_base is set to "rbe-configs" (recommended):
@@ -89,7 +89,7 @@ There are two modes of using this repo rules:
 
   2 - When output_base is not set (env var "RBE_AUTOCONF_ROOT" is not required),
     running this rule will create targets in the
-    external repository folder (e.g., rbe_default) which can be used to point your
+    external repository (e.g., rbe_default) which can be used to point your
     flags to:
 
       bazel build ... \
