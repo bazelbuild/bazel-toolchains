@@ -33,7 +33,7 @@ def _check_bazel_version(bazel_version_fallback):
         fail("\nCurrent Bazel version is lower than 0.2.1 and is not supported with rbe_autoconfig.")
     elif not native.bazel_version:
         print(("\nCurrent running Bazel is not a release version and one " +
-               " was not defined explicitly in rbe_autoconfig target. " +
-               "Falling bazk to '%s'") % bazel_version_fallback)
+               "was not defined explicitly in rbe_autoconfig target. " +
+               "Falling back to '%s'") % bazel_version_fallback)
         return bazel_version_fallback
     return native.bazel_version
