@@ -18,6 +18,8 @@
 
 workspace(name = "rbe_system_check")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+
 http_archive(
     name = "bazel_toolchains",
     sha256 = "%{sha256}",
