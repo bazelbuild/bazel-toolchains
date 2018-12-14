@@ -22,10 +22,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 
 http_archive(
     name = "bazel_toolchains",
-    sha256 = "%{sha256}",
-    strip_prefix = "bazel-toolchains-%{commit}",
+    sha256 = "${bazel_toolchains_sha256}",
+    strip_prefix = "bazel-toolchains-${bazel_toolchains_commit}",
     urls = [
-        "https://github.com/bazelbuild/bazel-toolchains/archive/%{commit}.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/${bazel_toolchains_commit}.tar.gz",
     ],
 )
 
