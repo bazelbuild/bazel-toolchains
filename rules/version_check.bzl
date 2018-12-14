@@ -18,7 +18,7 @@ def extract_version_number(bazel_version_fallback):
     return bazel_version
 
 def parse_rc(bazel_version):
-    if bazel_version.find("rc"):
+    if bazel_version.find("rc") != -1:
         rc = ""
         for i in range(len(bazel_version) - bazel_version.find("rc")):
             c = bazel_version[i]
