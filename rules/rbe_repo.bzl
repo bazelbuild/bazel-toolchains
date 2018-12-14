@@ -135,7 +135,6 @@ Known limitations:
 
 load(
     "@bazel_toolchains//rules:version_check.bzl",
-    "check_bazel_version",
     "extract_version_number",
     "parse_rc",
 )
@@ -196,8 +195,7 @@ def _impl(ctx):
     bazel_version = None
     bazel_rc_version = None
     if ctx.attr.bazel_version == "local":
-        check_bazel_version()
-        bazel_version = str(extract_version_number(native.bazel_version))
+        bazel_version = str(extract_version_number(ctx.attr.bazel_version_fallback))
         rc = parse_rc(native.bazel_version)
         bazel_rc_version = rc if rc != -1 else None
     if ctx.attr.bazel_version != "local":
@@ -451,6 +449,11 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. An rc version to use. Note an installer for the rc " +
                    "must be available in https://releases.bazel.build."),
         ),
+        "bazel_version_fallback": attr.string(
+            default = "0.20.0",
+            doc = ("Version to fallback to if not provided explicitly and local " +
+                   "is non release version."),
+        ),
         "digest": attr.string(
             mandatory = True,
             doc = ("The digest (sha256 sum) of the rbe-ubuntu16-04 " +
@@ -515,7 +518,9 @@ def rbe_autoconfig(
       bazel_version: The version of Bazel to use to generate toolchain configs.
           `Use only (major, minor, patch), e.g., '0.20.0'. Default is "local"
           which means the same version of Bazel that is currently running will
-          be used.
+          be used. If local is a non release version, rbe_autoconfig will fallback
+          to using the latest release version (see default for bazel_version_fallback
+          in attrs of _rbe_autoconfig for current latest).
       bazel_rc: The rc (for the given version of Bazel) to use. Must be published
           in https://releases.bazel.build
       output_base: Optional. The directory (under the project root) where the

@@ -1,6 +1,6 @@
 """ Helpers to parse and check version of bazel."""
 
-def extract_version_number(bazel_version):
+def extract_version_number(bazel_version_fallback):
     """Extracts the semantic version number from a version string
 
     Args:
@@ -10,6 +10,7 @@ def extract_version_number(bazel_version):
     Returns:
       The semantic version string, like "1.2.3".
     """
+    bazel_version = _check_bazel_version(bazel_version_fallback):
     for i in range(len(bazel_version)):
         c = bazel_version[i]
         if not (c.isdigit() or c == "."):
@@ -27,9 +28,11 @@ def parse_rc(bazel_version):
                 return int(rc)
             rc += c
 
-def check_bazel_version():
+def _check_bazel_version(bazel_version_fallback):
     if "bazel_version" not in dir(native):
         fail("\nCurrent Bazel version is lower than 0.2.1 and is not supported with rbe_autoconfig.")
     elif not native.bazel_version:
-        fail("\nCurrent running Bazel is not a release version and one " +
+        print("\nCurrent running Bazel is not a release version and one " +
              " was not defined explicitly in rbe_autoconfig target.")
+        return bazel_version_fallback
+    return native.bazel_version
