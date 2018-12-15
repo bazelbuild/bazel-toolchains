@@ -50,13 +50,8 @@ toolchain(
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
-alias(
-    name = "rbe_ubuntu1604",
-    actual = ":rbe_ubuntu1604_%{revision}",
-)
-
 platform(
-    name = "rbe_ubuntu1604_%{revision}",
+    name = "rbe_platform",
     constraint_values = [
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//platforms:linux",
@@ -65,7 +60,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@%{rbe_ubuntu16_04_sha256}"
+          value:"docker://%{image_id}"
         }
         """,
 )
