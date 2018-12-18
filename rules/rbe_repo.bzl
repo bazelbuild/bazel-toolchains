@@ -162,12 +162,12 @@ Known limitations:
 """
 
 load(
-    "@bazel_toolchains//rules:version_check.bzl",
+    "//rules:version_check.bzl",
     "extract_version_number",
     "parse_rc",
 )
 load(
-    "@bazel_toolchains//rules:toolchain_containers.bzl",
+    "//rules:toolchain_containers.bzl",
     "RBE_UBUNTU16_04_LATEST",
     "public_rbe_ubuntu16_04_sha256s",
 )
@@ -591,7 +591,7 @@ _rbe_autoconfig = repository_rule(
     implementation = _impl,
 )
 
-load("@bazel_toolchains//rules:environments.bzl", "clang_env")
+load("//rules:environments.bzl", "clang_env")
 
 def rbe_autoconfig(
         name,

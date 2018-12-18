@@ -98,7 +98,7 @@ rbe_autoconfig(
     output_base = "configs/ubuntu16_04_clang/1.1",
 )
 
-load("@bazel_toolchains//rules:environments.bzl", "clang_env")
+load("//rules:environments.bzl", "clang_env")
 
 rbe_autoconfig(
     name = "rbe_msan_with_output_base",
