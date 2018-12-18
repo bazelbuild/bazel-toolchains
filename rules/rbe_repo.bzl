@@ -270,12 +270,12 @@ def _impl(ctx):
 
 # Convenience method to print results of execute (and fail on errors if needed).
 # Verbose logging is enabled via a global var in this bzl file.
-def _print_exec_results(prefix, exec_result, fail = False, args = None):
+def _print_exec_results(prefix, exec_result, fail_on_error = False, args = None):
     if _VERBOSE and exec_result.return_code != 0:
         print(prefix + "::error::" + exec_result.stderr)
     elif _VERBOSE:
         print(prefix + "::success::" + exec_result.stdout)
-    if fail and exec_result.return_code != 0:
+    if fail_on_error and exec_result.return_code != 0:
         if _VERBOSE and args:
             print("failed to run execute with the following args:" + str(args))
         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
@@ -296,7 +296,7 @@ def _validate_host(ctx):
 def _pull_image(ctx, image_name):
     print("Pulling image.")
     result = ctx.execute(["docker", "pull", image_name])
-    _print_exec_results("pull image", result, fail = True)
+    _print_exec_results("pull image", result, fail_on_error = True)
     print("Image pulled.")
 
 # Creates file "container/run_in_container.sh" which can be mounted onto container
