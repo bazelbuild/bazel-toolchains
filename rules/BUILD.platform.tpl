@@ -38,29 +38,24 @@ java_runtime(
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//tools/cpp:clang",
+        %{exec_compatible_with}
     ],
     target_compatible_with = [
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//platforms:x86_64",
+        %{target_compatible_with}
     ],
     toolchain = "%{toolchain}:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
 platform(
-    name = "rbe_platform",
+    name = "platform",
     constraint_values = [
-        "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//tools/cpp:clang",
+        %{exec_compatible_with}
     ],
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://%{image_id}"
+          value:"docker://%{image_name}"
         }
         """,
 )

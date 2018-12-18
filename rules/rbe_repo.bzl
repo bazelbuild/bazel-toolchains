@@ -14,7 +14,7 @@
 
 """Repository Rules to generate toolchain configs for a container image.
 
-The toolchain configs (+platform) produced by this rule can be used to, e.g.,
+The toolchain configs (+ platform) produced by this rule can be used to, e.g.,
 run a remote build in which remote actions will run inside a container image.
 
 Exposes the rbe_autoconfig macro that does the following:
@@ -97,14 +97,14 @@ There are two modes of using this repo rules:
 
       bazel build ... \
                 --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain \
-                --host_javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
-                --javabase=//rbe-configs/bazel_{bazel_version}/platforms:jdk8 \
+                --host_javabase=//rbe-configs/bazel_{bazel_version}/config:jdk8 \
+                --javabase=//rbe-configs/bazel_{bazel_version}/config:jdk8 \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
-                --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/platforms:rbe_platform \
-                --host_platform=/rbe-configs/bazel_{bazel_version}/platforms:rbe_platform \
-                --platforms=/rbe-configs/bazel_{bazel_version}/platforms:rbe_platform \
-                --extra_toolchains=/rbe-configs/bazel_{bazel_version}/platforms:cc-toolchain \
+                --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
+                --host_platform=/rbe-configs/bazel_{bazel_version}/config:platform \
+                --platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
+                --extra_toolchains=/rbe-configs/bazel_{bazel_version}/config:cc-toolchain \
                 ... <other rbe flags> <build targets>
 
     We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
@@ -120,14 +120,14 @@ There are two modes of using this repo rules:
 
       bazel build ... \
                 --crosstool_top=@rbe_default//rbe_config_cc:toolchain \
-                --host_javabase=@rbe_default//platforms:jdk8 \
-                --javabase=@rbe_default//platforms:jdk8 \
+                --host_javabase=@rbe_default//config:jdk8 \
+                --javabase=@rbe_default//config:jdk8 \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
-                --extra_execution_platforms=@rbe_default//platforms:rbe_platform \
-                --host_platform=@rbe_default//platforms:rbe_platform \
-                --platforms=@rbe_default//platforms:rbe_platform \
-                --extra_toolchains=@rbe_default//platforms:cc-toolchain \
+                --extra_execution_platforms=@rbe_default//config:platform \
+                --host_platform=@rbe_default//config:platform \
+                --platforms=@rbe_default//config:platform \
+                --extra_toolchains=@rbe_default//config:cc-toolchain \
 
     Note running bazel clean --expunge_async, or otherwise modifying attrs or
     env variables used by this rule will trigger it to re-execute. Running this
@@ -179,7 +179,7 @@ _EXTERNAL_FOLDER_PREFIX = "external/"
 
 _BAZEL_CONFIG_DIR = "/bazel-config"
 _CONFIG_REPOS = ["local_config_cc"]
-_PLATFORM_DIR = "platforms"
+_PLATFORM_DIR = "configs"
 _PROJECT_REPO_DIR = "project_src"
 _OUTPUT_DIR = _BAZEL_CONFIG_DIR + "/autoconf_out"
 _REPO_DIR = _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
@@ -189,6 +189,15 @@ _RBE_CONFIG_DIR = "rbe_config_cc"
 # We use 'l.gcr.io' to not require users to do gcloud login
 _RBE_UBUNTU_REPO = "google/rbe-ubuntu16-04"
 _RBE_UBUNTU_REGISTRY = "l.gcr.io"
+_RBE_UBUNTU_EXEC_COMPAT_WITH = [
+    "@bazel_tools//platforms:x86_64",
+    "@bazel_tools//platforms:linux",
+    "@bazel_tools//tools/cpp:clang",
+]
+_RBE_UBUNTU_TARGET_COMPAT_WITH = [
+    "@bazel_tools//platforms:linux",
+    "@bazel_tools//platforms:x86_64",
+]
 _VERBOSE = False
 
 def _impl(ctx):
@@ -217,10 +226,10 @@ def _impl(ctx):
     name = ctx.attr.name
     outputs_tar = ctx.attr.name + "_out.tar"
 
-    image_id = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
+    image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
 
     # Pull the image using 'docker pull'
-    _pull_image(ctx, image_id)
+    _pull_image(ctx, image_name)
 
     bazel_version = None
     bazel_rc_version = None
@@ -237,7 +246,7 @@ def _impl(ctx):
         ctx,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
-        image_id = image_id,
+        image_name = image_name,
         outputs_tar = outputs_tar,
         project_root = project_root,
         use_default_project = use_default_project,
@@ -248,7 +257,7 @@ def _impl(ctx):
     _create_platform(
         ctx,
         bazel_version = bazel_version,
-        image_id = image_id,
+        image_name = image_name,
         name = name,
     )
 
@@ -284,9 +293,9 @@ def _validate_host(ctx):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
 
 # Pulls an image using 'docker pull'.
-def _pull_image(ctx, image_id):
+def _pull_image(ctx, image_name):
     print("Pulling image.")
-    result = ctx.execute(["docker", "pull", image_id])
+    result = ctx.execute(["docker", "pull", image_name])
     _print_exec_results("pull image", result, fail = True)
     print("Image pulled.")
 
@@ -379,7 +388,7 @@ def _run_and_extract(
         ctx,
         bazel_version,
         bazel_rc_version,
-        image_id,
+        image_name,
         outputs_tar,
         project_root,
         use_default_project):
@@ -414,7 +423,7 @@ def _run_and_extract(
         {
             "%{docker_run_flags}": " ".join(docker_run_flags),
             "%{commands}": "/container/run_in_container.sh",
-            "%{image_id}": image_id,
+            "%{image_name}": image_name,
             "%{extract_file}": "/" + outputs_tar,
             "%{output}": str(ctx.path(".")) + "/output.tar",
         },
@@ -437,19 +446,31 @@ def _run_and_extract(
     _print_exec_results("clean tools", result)
 
 # Creates a BUILD file with the java and cc toolchain + platform targets
-def _create_platform(ctx, bazel_version, image_id, name):
+def _create_platform(
+        ctx,
+        bazel_version,
+        image_name,
+        name):
     toolchain_target = "@" + name + "//" + _RBE_CONFIG_DIR
     if ctx.attr.output_base != "":
         toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + bazel_version
         if ctx.attr.config_dir != "":
             toolchain_target += ctx.attr.config_dir
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.platform.tpl"))
+    exec_compatible_with = ("\"" +
+                            ("\",\n        \"").join(ctx.attr.exec_compatible_with) +
+                            "\",")
+    target_compatible_with = ("\"" +
+                              ("\",\n        \"").join(ctx.attr.target_compatible_with) +
+                              "\",")
     ctx.template(
-        "platforms/BUILD",
+        _PLATFORM_DIR + "/BUILD",
         template,
         {
+            "%{exec_compatible_with}": exec_compatible_with,
+            "%{image_name}": image_name,
+            "%{target_compatible_with}": target_compatible_with,
             "%{toolchain}": toolchain_target,
-            "%{image_id}": image_id,
         },
         False,
     )
@@ -479,8 +500,8 @@ def _expand_outputs(ctx, bazel_version, project_root):
         result = ctx.execute(args)
         _print_exec_results("copy outputs", result, True, args)
 
-        # Copy the dest/platforms/BUILD file
-        result = ctx.execute("cp", str(ctx.path("platforms/BUILD")), platform_dest)
+        # Copy the dest/{_PLATFORM_DIR}/BUILD file
+        result = ctx.execute("cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
@@ -502,7 +523,9 @@ _rbe_autoconfig = repository_rule(
         ),
         "digest": attr.string(
             mandatory = True,
-            doc = ("The digest (sha256 sum) of the image to pull."),
+            doc = ("The digest (sha256 sum) of the image to pull. For example, " +
+                   "sha256:f1330b2f02714d3a3e98c5b1f6524fbb9c15154e44a31fb3caecb7a6ad4e8445" +
+                   ", note the digest includes 'sha256sum:'"),
         ),
         "env": attr.string_dict(
             doc = ("Optional. Dictionary from strings to strings. Additional env " +
@@ -535,16 +558,33 @@ _rbe_autoconfig = repository_rule(
         ),
         "registry": attr.string(
             default = _RBE_UBUNTU_REGISTRY,
-            doc = ("The registry to pull the container from. Default is " +
+            doc = ("The registry to pull the container from. For example, " +
+                   "l.gcr.io or marketplace.gcr.io. The default is the " +
                    "value for rbe-ubuntu16-04 image."),
         ),
         "repository": attr.string(
             default = _RBE_UBUNTU_REPO,
-            doc = ("The repository to pull the container from. Default is " +
+            doc = ("The repository to pull the container from. For example," +
+                   " google/ubuntu. The default is the " +
                    " value for the rbe-ubuntu16-04 image."),
         ),
         "revision": attr.string(
             doc = ("The revision of the rbe-ubuntu16-04 container."),
+        ),
+        "exec_compatible_with": attr.string_list(
+            default = _RBE_UBUNTU_EXEC_COMPAT_WITH,
+            doc = ("The list of constraints that will be added to the " +
+                   "toolchain in its exec_compatible_with attribute (and to " +
+                   "the platform in its constraint_values attr). For " +
+                   "example, [\"@bazel_tools//platforms:linux\"]. Default " +
+                   " is set to values for rbe-ubuntu16-04 container."),
+        ),
+        "target_compatible_with": attr.string_list(
+            default = _RBE_UBUNTU_TARGET_COMPAT_WITH,
+            doc = ("The list of constraints that will be added to the " +
+                   "toolchain in its target_compatible_with attribute. For " +
+                   "example, [\"@bazel_tools//platforms:linux\"]. Default " +
+                   " is set to values for rbe-ubuntu16-04 container."),
         ),
     },
     environ = [
@@ -559,13 +599,15 @@ def rbe_autoconfig(
         name,
         bazel_version = None,
         bazel_rc = None,
-        output_base = "",
         config_dir = "",
+        digest = None,
+        env = clang_env(),
+        exec_compatible_with = None,
+        output_base = "",
         revision = "latest",
         registry = None,
-        digest = None,
         repository = None,
-        env = clang_env()):
+        target_compatible_with = None):
     """ Creates a repository with toolchain configs generated for a container image.
 
     This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
@@ -580,6 +622,9 @@ def rbe_autoconfig(
           in attrs of _rbe_autoconfig for current latest).
       bazel_rc: The rc (for the given version of Bazel) to use. Must be published
           in https://releases.bazel.build
+      exec_compatible_with: Optional. List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
       digest: Optional. The digest of the image to pull. Should only be set if
           a custom container is required.
           Must be set together with registry and repository.
@@ -596,6 +641,9 @@ def rbe_autoconfig(
       revision: Optional. A revision of an rbe-ubuntu16-04 container to use.
           Should not be set if repository, registry and digest are used.
           See gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
+      target_compatible_with: List of constraints to add to the produced
+          toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
+          target_compatible_with attr.
       env: dict. Optional. Additional env variables that will be set when
           running the Bazel command to generate the toolchain configs.
           Set to values for rbe-ubuntu16-04 container.
@@ -608,6 +656,9 @@ def rbe_autoconfig(
         fail("config_dir can only be used when output_base is set.")
     if revision == "latest":
         revision = RBE_UBUNTU16_04_LATEST
+    if revision != "latest" and (digest or repository or registry):
+        fail("'revision' cannot be set if 'digest', 'repository' or " +
+             "'registry' are set.")
     if not ((not digest and not repository and not registry) or
             (digest and repository and registry)):
         fail("All of 'digest', 'repository' and 'registry' or none of them " +
@@ -629,8 +680,10 @@ def rbe_autoconfig(
         config_dir = config_dir,
         digest = digest,
         env = env,
+        exec_compatible_with = exec_compatible_with,
         output_base = output_base,
-        revision = revision,
         registry = registry,
         repository = repository,
+        revision = revision,
+        target_compatible_with = target_compatible_with,
     )
