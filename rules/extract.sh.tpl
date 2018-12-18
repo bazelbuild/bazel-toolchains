@@ -19,7 +19,7 @@ set -ex
 # This is a generated file that runs a docker container, waits for it to
 # finish running and copies a file to an output location.
 
-id=$(docker run -d %{docker_run_flags} %{image_id} %{commands})
+id=$(docker run -d %{docker_run_flags} %{image_name} %{commands})
 
 docker wait $id
 docker cp $id:%{extract_file} %{output}

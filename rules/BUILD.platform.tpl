@@ -38,34 +38,24 @@ java_runtime(
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//tools/cpp:clang",
+        %{exec_compatible_with}
     ],
     target_compatible_with = [
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//platforms:x86_64",
+        %{target_compatible_with}
     ],
     toolchain = "%{toolchain}:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
-alias(
-    name = "rbe_ubuntu1604",
-    actual = ":rbe_ubuntu1604_%{revision}",
-)
-
 platform(
-    name = "rbe_ubuntu1604_%{revision}",
+    name = "platform",
     constraint_values = [
-        "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//tools/cpp:clang",
+        %{exec_compatible_with}
     ],
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@%{rbe_ubuntu16_04_sha256}"
+          value:"docker://%{image_name}"
         }
         """,
 )
