@@ -654,11 +654,11 @@ def rbe_autoconfig(
     """
     if output_base == "" and config_dir != "":
         fail("config_dir can only be used when output_base is set.")
-    if revision == "latest":
-        revision = RBE_UBUNTU16_04_LATEST
     if revision != "latest" and (digest or repository or registry):
         fail("'revision' cannot be set if 'digest', 'repository' or " +
              "'registry' are set.")
+    if revision == "latest":
+        revision = RBE_UBUNTU16_04_LATEST
     if not ((not digest and not repository and not registry) or
             (digest and repository and registry)):
         fail("All of 'digest', 'repository' and 'registry' or none of them " +
