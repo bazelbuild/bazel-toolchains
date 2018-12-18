@@ -179,7 +179,7 @@ _EXTERNAL_FOLDER_PREFIX = "external/"
 
 _BAZEL_CONFIG_DIR = "/bazel-config"
 _CONFIG_REPOS = ["local_config_cc"]
-_PLATFORM_DIR = "configs"
+_PLATFORM_DIR = "config"
 _PROJECT_REPO_DIR = "project_src"
 _OUTPUT_DIR = _BAZEL_CONFIG_DIR + "/autoconf_out"
 _REPO_DIR = _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
