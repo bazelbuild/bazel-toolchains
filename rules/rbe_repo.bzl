@@ -218,8 +218,8 @@ def _impl(ctx):
         # expected path.
         project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
         if not project_root.exists:
-            fail("Could not find default autoconf project in %s, please make sure " +
-                 "the bazel-toolchains repo is properly imported in your workspace")
+            fail(("Could not find default autoconf project in %s, please make sure " +
+                  "the bazel-toolchains repo is properly imported in your workspace") % str(project_root))
         project_root = str(project_root)
         use_default_project = True
 
