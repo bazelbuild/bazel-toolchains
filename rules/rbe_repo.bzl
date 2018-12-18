@@ -208,7 +208,7 @@ def _impl(ctx):
     project_root = ctx.os.environ.get(_RBE_AUTOCONF_ROOT, None)
     use_default_project = False
     if not project_root:
-        if ctx.attr.output_base != "":
+        if ctx.attr.output_base:
             fail(("%s env variable must be set for rbe_autoconfig" +
                   " to function properly when output_base is set") % _RBE_AUTOCONF_ROOT)
 
@@ -452,9 +452,9 @@ def _create_platform(
         image_name,
         name):
     toolchain_target = "@" + name + "//" + _RBE_CONFIG_DIR
-    if ctx.attr.output_base != "":
+    if ctx.attr.output_base:
         toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + bazel_version
-        if ctx.attr.config_dir != "":
+        if ctx.attr.config_dir:
             toolchain_target += ctx.attr.config_dir
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.platform.tpl"))
     exec_compatible_with = ("\"" +
@@ -478,10 +478,10 @@ def _create_platform(
 # Copies all outputs of the autoconfig rule to a directory in the project
 # sources
 def _expand_outputs(ctx, bazel_version, project_root):
-    if ctx.attr.output_base != "":
+    if ctx.attr.output_base:
         print("Copying outputs to project directory")
         dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
-        if ctx.attr.config_dir != "":
+        if ctx.attr.config_dir:
             dest += ctx.attr.config_dir + "/"
         platform_dest = dest + _PLATFORM_DIR + "/"
 
@@ -525,7 +525,7 @@ _rbe_autoconfig = repository_rule(
             mandatory = True,
             doc = ("The digest (sha256 sum) of the image to pull. For example, " +
                    "sha256:f1330b2f02714d3a3e98c5b1f6524fbb9c15154e44a31fb3caecb7a6ad4e8445" +
-                   ", note the digest includes 'sha256sum:'"),
+                   ", note the digest includes 'sha256:'"),
         ),
         "env": attr.string_dict(
             doc = ("Optional. Dictionary from strings to strings. Additional env " +
@@ -538,12 +538,10 @@ _rbe_autoconfig = repository_rule(
                    "be used when generating the toolchain configs."),
         ),
         "output_base": attr.string(
-            default = "",
             doc = ("Optional. The directory (under the project root) where the " +
                    "produced toolchain configs will be copied to."),
         ),
         "config_dir": attr.string(
-            default = "",
             doc = ("Optional. Use only if output_base is defined. If you want to " +
                    "create multiple toolchain configs (for the same version of Bazel) " +
                    "you can use this attr to indicate a type of config (e.g., default, " +
@@ -599,12 +597,12 @@ def rbe_autoconfig(
         name,
         bazel_version = None,
         bazel_rc = None,
-        config_dir = "",
+        config_dir = None,
         digest = None,
         env = clang_env(),
         exec_compatible_with = None,
-        output_base = "",
-        revision = "latest",
+        output_base = None,
+        revision = None,
         registry = None,
         repository = None,
         target_compatible_with = None):
@@ -652,13 +650,11 @@ def rbe_autoconfig(
           Should be overriden if a custom container does not extend
           rbe-ubuntu16-04.
     """
-    if output_base == "" and config_dir != "":
+    if not output_base and config_dir:
         fail("config_dir can only be used when output_base is set.")
-    if revision != "latest" and (digest or repository or registry):
+    if revision and (digest or repository or registry):
         fail("'revision' cannot be set if 'digest', 'repository' or " +
              "'registry' are set.")
-    if revision == "latest":
-        revision = RBE_UBUNTU16_04_LATEST
     if not ((not digest and not repository and not registry) or
             (digest and repository and registry)):
         fail("All of 'digest', 'repository' and 'registry' or none of them " +
@@ -666,9 +662,9 @@ def rbe_autoconfig(
     if bazel_rc and not bazel_version:
         fail("bazel_rc can only be used with bazel_version.")
     if not digest:
+        if not revision or revision == "latest":
+            revision = RBE_UBUNTU16_04_LATEST
         digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
-    else:
-        revision = None
     if not digest:
         fail(("Could not find a valid digest for revision %s, " +
               "please make sure it is declared in " +
