@@ -1,8 +1,6 @@
 ---
 platforms:
   rbe_ubuntu1604:
-    build_targets:
-    - "@rbe_default//rbe_config_cc:toolchain"
     test_targets:
     - "//tests/config:debian-jessie-autoconfig_test"
     # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
