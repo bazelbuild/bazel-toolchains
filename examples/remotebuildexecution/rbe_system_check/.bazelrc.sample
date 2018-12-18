@@ -38,5 +38,5 @@ build:remote --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
 build:remote --extra_execution_platforms=@rbe_default//config:platform
 build:remote --host_platform=@rbe_default//config:platform
 build:remote --platforms=@rbe_default//config:platform
-build:remote --extra_toolchains=@rbe_default//config:platform
+build:remote --extra_toolchains=@rbe_default//config:cc-toolchain
 
