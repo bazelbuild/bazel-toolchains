@@ -20,13 +20,14 @@ def extract_version_number(bazel_version_fallback):
 def parse_rc(bazel_version):
     if bazel_version.find("rc") != -1:
         rc = ""
-        for i in range(len(bazel_version) - bazel_version.find("rc")):
-            c = bazel_version[i]
+        for i in range(len(bazel_version) - bazel_version.find("rc") - 2):
+            c = bazel_version[i + bazel_version.find("rc") + 2]
             if not c.isdigit():
                 if rc == "":
                     return -1
-                return int(rc)
+                break
             rc += c
+        return int(rc)
 
 def _check_bazel_version(bazel_version_fallback):
     if "bazel_version" not in dir(native):

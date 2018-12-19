@@ -311,9 +311,9 @@ def _create_docker_cmd(
     # If a specific Bazel and Bazel RC version is specified, install that version.
     bazel_url = "https://releases.bazel.build/" + bazel_version
     if bazel_rc_version:
-        bazel_url += ("/rc" + bazel_rc_version +
+        bazel_url += ("/rc" + str(bazel_rc_version) +
                       "/bazel-" + bazel_version + "rc" +
-                      bazel_rc_version)
+                      str(bazel_rc_version))
     else:
         bazel_url += "/release/bazel-" + bazel_version
     bazel_url += "-installer-linux-x86_64.sh"
@@ -433,7 +433,7 @@ def _run_and_extract(
     # run run_and_extract.sh
     print("Running container")
     result = ctx.execute(["./run_and_extract.sh"])
-    _print_exec_results("run_and_extract", result)
+    _print_exec_results("run_and_extract", result, fail_on_error=True)
 
     # Expand outputs inside this remote repo
     result = ctx.execute(["tar", "-xf", "output.tar"])
