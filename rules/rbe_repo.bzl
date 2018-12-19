@@ -433,7 +433,7 @@ def _run_and_extract(
     # run run_and_extract.sh
     print("Running container")
     result = ctx.execute(["./run_and_extract.sh"])
-    _print_exec_results("run_and_extract", result, fail_on_error=True)
+    _print_exec_results("run_and_extract", result, fail_on_error = True)
 
     # Expand outputs inside this remote repo
     result = ctx.execute(["tar", "-xf", "output.tar"])
