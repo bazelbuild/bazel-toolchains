@@ -31,8 +31,8 @@ build:remote --auth_enabled=true
 # Toolchain/platform flags that work with rbe_autoconfig rule.
 # Note target name must be set to "rbe_default" to use these flags as is.
 build:remote --crosstool_top=@rbe_default//rbe_config_cc:toolchain
-build:remote --host_javabase=@rbe_default//config:jdk8
-build:remote --javabase=@rbe_default//config:jdk8
+build:remote --host_javabase=@rbe_default//config:jdk
+build:remote --javabase=@rbe_default//config:jdk
 build:remote --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
 build:remote --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
 build:remote --extra_execution_platforms=@rbe_default//config:platform
