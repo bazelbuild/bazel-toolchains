@@ -314,7 +314,7 @@ def _get_java_home(ctx, image_name):
         _print_exec_results("get java_home", result, fail_on_error = True)
         java_home = result.stdout.splitlines()[0]
         if java_home == "":
-            fail("Could not find JAVA_HOME in the container and one was not "+
+            fail("Could not find JAVA_HOME in the container and one was not " +
                  "passed to rbe_autoconfig rule.")
     return java_home
 
@@ -560,9 +560,9 @@ _rbe_autoconfig = repository_rule(
         ),
         "java_home": attr.string(
             doc = ("Optional. The location of java_home in the container. " +
-                   "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. If "+
-                   "not set, the rule will attempt to read the JAVA_HOME env "+
-                   "var from the container. If that is not set the rule will "+
+                   "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. If " +
+                   "not set, the rule will attempt to read the JAVA_HOME env " +
+                   "var from the container. If that is not set the rule will " +
                    "fail."),
         ),
         "output_base": attr.string(
