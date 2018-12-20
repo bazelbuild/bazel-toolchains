@@ -97,8 +97,8 @@ There are two modes of using this repo rules:
 
       bazel build ... \
                 --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain \
-                --host_javabase=//rbe-configs/bazel_{bazel_version}/config:jdk8 \
-                --javabase=//rbe-configs/bazel_{bazel_version}/config:jdk8 \
+                --host_javabase=//rbe-configs/bazel_{bazel_version}/config:jdk \
+                --javabase=//rbe-configs/bazel_{bazel_version}/config:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
@@ -194,6 +194,7 @@ _RBE_UBUNTU_EXEC_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//tools/cpp:clang",
 ]
+_RBE_UBUNTU_JAVA_HOME = "/usr/lib/jvm/java-8-openjdk-amd64"
 _RBE_UBUNTU_TARGET_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//platforms:x86_64",
@@ -463,12 +464,14 @@ def _create_platform(
     target_compatible_with = ("\"" +
                               ("\",\n        \"").join(ctx.attr.target_compatible_with) +
                               "\",")
+    # TODO(ngiraldo): enable detecting java_home in the container directly.
     ctx.template(
         _PLATFORM_DIR + "/BUILD",
         template,
         {
             "%{exec_compatible_with}": exec_compatible_with,
             "%{image_name}": image_name,
+            "%{java_home}": ctx.attr.java_home,
             "%{target_compatible_with}": target_compatible_with,
             "%{toolchain}": toolchain_target,
         },
@@ -537,6 +540,12 @@ _rbe_autoconfig = repository_rule(
             doc = ("If set to False the flag --all_incompatible_changes will " +
                    "be used when generating the toolchain configs."),
         ),
+        "java_home": attr.string(
+            default = _RBE_UBUNTU_JAVA_HOME,
+            doc = ("Optional. The location of java_home in the container. " +
+                   "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. The "+
+                   "default is set to value for rbe-ubuntu16-04 container."),
+        ),
         "output_base": attr.string(
             doc = ("Optional. The directory (under the project root) where the " +
                    "produced toolchain configs will be copied to."),
@@ -601,6 +610,7 @@ def rbe_autoconfig(
         digest = None,
         env = clang_env(),
         exec_compatible_with = None,
+        java_home = None,
         output_base = None,
         revision = None,
         registry = None,
@@ -626,6 +636,9 @@ def rbe_autoconfig(
       digest: Optional. The digest of the image to pull. Should only be set if
           a custom container is required.
           Must be set together with registry and repository.
+      java_home: Optional. The location of java_home in the container. For
+          example , '/usr/lib/jvm/java-8-openjdk-amd64'. The defauult is set
+          to value for rbe-ubuntu16-04 container.
       output_base: Optional. The directory (under the project root) where the
           produced toolchain configs will be copied to.
       config_dir: Optional. Subdirectory where configs will be copied to.
@@ -677,6 +690,7 @@ def rbe_autoconfig(
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
+        java_home = java_home,
         output_base = output_base,
         registry = registry,
         repository = repository,
