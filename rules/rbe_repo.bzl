@@ -198,7 +198,7 @@ _RBE_UBUNTU_TARGET_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//platforms:x86_64",
 ]
-_VERBOSE = True
+_VERBOSE = False
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
