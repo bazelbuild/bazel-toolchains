@@ -469,6 +469,9 @@ def _create_platform(
         result = ctx.execute(java_home_args)
         _print_exec_results("get java_home", result, fail_on_error = True)
         java_home = result.stdout
+        if java_home == "":
+            fail("Could not find JAVA_HOME in the container and one was not "+
+                 "passed to rbe_autoconfig rule.")
     ctx.template(
         _PLATFORM_DIR + "/BUILD",
         template,
@@ -613,7 +616,7 @@ def rbe_autoconfig(
         bazel_rc = None,
         config_dir = None,
         digest = None,
-        env = clang_env(),
+        env = None,
         exec_compatible_with = None,
         java_home = None,
         output_base = None,
@@ -684,6 +687,8 @@ def rbe_autoconfig(
         if not revision or revision == "latest":
             revision = RBE_UBUNTU16_04_LATEST
         digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
+        if not env:
+            env = clang_env()
     if not digest:
         fail(("Could not find a valid digest for revision %s, " +
               "please make sure it is declared in " +
