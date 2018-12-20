@@ -120,8 +120,8 @@ There are two modes of using this repo rules:
 
       bazel build ... \
                 --crosstool_top=@rbe_default//rbe_config_cc:toolchain \
-                --host_javabase=@rbe_default//config:jdk8 \
-                --javabase=@rbe_default//config:jdk8 \
+                --host_javabase=@rbe_default//config:jdk \
+                --javabase=@rbe_default//config:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --extra_execution_platforms=@rbe_default//config:platform \
