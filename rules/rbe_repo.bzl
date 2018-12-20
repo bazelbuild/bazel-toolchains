@@ -194,12 +194,11 @@ _RBE_UBUNTU_EXEC_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//tools/cpp:clang",
 ]
-_RBE_UBUNTU_JAVA_HOME = "/usr/lib/jvm/java-8-openjdk-amd64"
 _RBE_UBUNTU_TARGET_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//platforms:x86_64",
 ]
-_VERBOSE = False
+_VERBOSE = True
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
@@ -464,7 +463,12 @@ def _create_platform(
     target_compatible_with = ("\"" +
                               ("\",\n        \"").join(ctx.attr.target_compatible_with) +
                               "\",")
-    # TODO(ngiraldo): enable detecting java_home in the container directly.
+    java_home = ctx.attr.java_home
+    if not java_home:
+        java_home_args = ["docker", "run", image_name, "printenv", "JAVA_HOME"]
+        result = ctx.execute(java_home_args)
+        _print_exec_results("get java_home", result, fail_on_error = True)
+        java_home = result.stdout
     ctx.template(
         _PLATFORM_DIR + "/BUILD",
         template,
@@ -541,10 +545,11 @@ _rbe_autoconfig = repository_rule(
                    "be used when generating the toolchain configs."),
         ),
         "java_home": attr.string(
-            default = _RBE_UBUNTU_JAVA_HOME,
             doc = ("Optional. The location of java_home in the container. " +
-                   "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. The "+
-                   "default is set to value for rbe-ubuntu16-04 container."),
+                   "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. If "+
+                   "not set, the rule will attempt to read the JAVA_HOME env "+
+                   "var from the container. If that is not set the rule will "+
+                   "fail."),
         ),
         "output_base": attr.string(
             doc = ("Optional. The directory (under the project root) where the " +
@@ -637,8 +642,9 @@ def rbe_autoconfig(
           a custom container is required.
           Must be set together with registry and repository.
       java_home: Optional. The location of java_home in the container. For
-          example , '/usr/lib/jvm/java-8-openjdk-amd64'. The defauult is set
-          to value for rbe-ubuntu16-04 container.
+          example , '/usr/lib/jvm/java-8-openjdk-amd64'. If not set, the rule
+          will attempt to read the JAVA_HOME env var from the container.
+          If that is not set the rule will fail.
       output_base: Optional. The directory (under the project root) where the
           produced toolchain configs will be copied to.
       config_dir: Optional. Subdirectory where configs will be copied to.
