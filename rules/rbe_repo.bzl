@@ -241,6 +241,10 @@ def _impl(ctx):
         bazel_version = ctx.attr.bazel_version
         bazel_rc_version = ctx.attr.bazel_rc_version
 
+    # Get the value of JAVA_HOME to set in the produced
+    # java_runtime
+    java_home = _get_java_home(ctx, image_name)
+
     # run the container and extract the autoconf directory
     _run_and_extract(
         ctx,
@@ -258,6 +262,7 @@ def _impl(ctx):
         ctx,
         bazel_version = bazel_version,
         image_name = image_name,
+        java_home = java_home,
         name = name,
     )
 
@@ -298,6 +303,20 @@ def _pull_image(ctx, image_name):
     result = ctx.execute(["docker", "pull", image_name])
     _print_exec_results("pull image", result, fail_on_error = True)
     print("Image pulled.")
+
+# Gets the value of java_home either from attr or
+# by running docker run image_name printenv JAVA_HOME.
+def _get_java_home(ctx, image_name):
+    java_home = ctx.attr.java_home
+    if not java_home:
+        java_home_args = ["docker", "run", image_name, "printenv", "JAVA_HOME"]
+        result = ctx.execute(java_home_args)
+        _print_exec_results("get java_home", result, fail_on_error = True)
+        java_home = result.stdout.splitlines()[0]
+        if java_home == "":
+            fail("Could not find JAVA_HOME in the container and one was not "+
+                 "passed to rbe_autoconfig rule.")
+    return java_home
 
 # Creates file "container/run_in_container.sh" which can be mounted onto container
 # to run the commands to install bazel, run it and create the output tar
@@ -450,6 +469,7 @@ def _create_platform(
         ctx,
         bazel_version,
         image_name,
+        java_home,
         name):
     toolchain_target = "@" + name + "//" + _RBE_CONFIG_DIR
     if ctx.attr.output_base:
@@ -463,22 +483,13 @@ def _create_platform(
     target_compatible_with = ("\"" +
                               ("\",\n        \"").join(ctx.attr.target_compatible_with) +
                               "\",")
-    java_home = ctx.attr.java_home
-    if not java_home:
-        java_home_args = ["docker", "run", image_name, "printenv", "JAVA_HOME"]
-        result = ctx.execute(java_home_args)
-        _print_exec_results("get java_home", result, fail_on_error = True)
-        java_home = result.stdout
-        if java_home == "":
-            fail("Could not find JAVA_HOME in the container and one was not "+
-                 "passed to rbe_autoconfig rule.")
     ctx.template(
         _PLATFORM_DIR + "/BUILD",
         template,
         {
             "%{exec_compatible_with}": exec_compatible_with,
             "%{image_name}": image_name,
-            "%{java_home}": ctx.attr.java_home,
+            "%{java_home}": java_home,
             "%{target_compatible_with}": target_compatible_with,
             "%{toolchain}": toolchain_target,
         },
