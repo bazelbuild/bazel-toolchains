@@ -198,7 +198,7 @@ _RBE_UBUNTU_TARGET_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//platforms:x86_64",
 ]
-_VERBOSE = False
+_VERBOSE = True
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
@@ -307,15 +307,27 @@ def _pull_image(ctx, image_name):
 # Gets the value of java_home either from attr or
 # by running docker run image_name printenv JAVA_HOME.
 def _get_java_home(ctx, image_name):
-    java_home = ctx.attr.java_home
-    if not java_home:
-        java_home_args = ["docker", "run", image_name, "printenv", "JAVA_HOME"]
-        result = ctx.execute(java_home_args)
-        _print_exec_results("get java_home", result, fail_on_error = True)
-        java_home = result.stdout.splitlines()[0]
-        if java_home == "":
-            fail("Could not find JAVA_HOME in the container and one was not " +
-                 "passed to rbe_autoconfig rule.")
+    if ctx.attr.java_home:
+        return ctx.attr.java_home
+
+    # Create the template to run
+    template = ctx.path(Label("@bazel_toolchains//rules:get_java_home.sh.tpl"))
+    ctx.template(
+        "get_java_home.sh",
+        template,
+        {
+            "%{image_name}": image_name,
+        },
+        True,
+    )
+
+    # run get_java_home.sh
+    result = ctx.execute(["./get_java_home.sh"])
+    _print_exec_results("get java_home", result, fail_on_error = True)
+    java_home = result.stdout.splitlines()[0]
+    if java_home == "":
+        fail("Could not find JAVA_HOME in the container and one was not " +
+             "passed to rbe_autoconfig rule.")
     return java_home
 
 # Creates file "container/run_in_container.sh" which can be mounted onto container
