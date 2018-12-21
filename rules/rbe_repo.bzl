@@ -97,8 +97,8 @@ There are two modes of using this repo rules:
 
       bazel build ... \
                 --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain \
-                --host_javabase=//rbe-configs/bazel_{bazel_version}/config:jdk8 \
-                --javabase=//rbe-configs/bazel_{bazel_version}/config:jdk8 \
+                --host_javabase=//rbe-configs/bazel_{bazel_version}/config:jdk \
+                --javabase=//rbe-configs/bazel_{bazel_version}/config:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
@@ -120,8 +120,8 @@ There are two modes of using this repo rules:
 
       bazel build ... \
                 --crosstool_top=@rbe_default//rbe_config_cc:toolchain \
-                --host_javabase=@rbe_default//config:jdk8 \
-                --javabase=@rbe_default//config:jdk8 \
+                --host_javabase=@rbe_default//config:jdk \
+                --javabase=@rbe_default//config:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --extra_execution_platforms=@rbe_default//config:platform \
@@ -198,7 +198,7 @@ _RBE_UBUNTU_TARGET_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//platforms:x86_64",
 ]
-_VERBOSE = False
+_VERBOSE = True
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
@@ -241,6 +241,10 @@ def _impl(ctx):
         bazel_version = ctx.attr.bazel_version
         bazel_rc_version = ctx.attr.bazel_rc_version
 
+    # Get the value of JAVA_HOME to set in the produced
+    # java_runtime
+    java_home = _get_java_home(ctx, image_name)
+
     # run the container and extract the autoconf directory
     _run_and_extract(
         ctx,
@@ -258,6 +262,7 @@ def _impl(ctx):
         ctx,
         bazel_version = bazel_version,
         image_name = image_name,
+        java_home = java_home,
         name = name,
     )
 
@@ -298,6 +303,32 @@ def _pull_image(ctx, image_name):
     result = ctx.execute(["docker", "pull", image_name])
     _print_exec_results("pull image", result, fail_on_error = True)
     print("Image pulled.")
+
+# Gets the value of java_home either from attr or
+# by running docker run image_name printenv JAVA_HOME.
+def _get_java_home(ctx, image_name):
+    if ctx.attr.java_home:
+        return ctx.attr.java_home
+
+    # Create the template to run
+    template = ctx.path(Label("@bazel_toolchains//rules:get_java_home.sh.tpl"))
+    ctx.template(
+        "get_java_home.sh",
+        template,
+        {
+            "%{image_name}": image_name,
+        },
+        True,
+    )
+
+    # run get_java_home.sh
+    result = ctx.execute(["./get_java_home.sh"])
+    _print_exec_results("get java_home", result, fail_on_error = True)
+    java_home = result.stdout.splitlines()[0]
+    if java_home == "":
+        fail("Could not find JAVA_HOME in the container and one was not " +
+             "passed to rbe_autoconfig rule.")
+    return java_home
 
 # Creates file "container/run_in_container.sh" which can be mounted onto container
 # to run the commands to install bazel, run it and create the output tar
@@ -450,6 +481,7 @@ def _create_platform(
         ctx,
         bazel_version,
         image_name,
+        java_home,
         name):
     toolchain_target = "@" + name + "//" + _RBE_CONFIG_DIR
     if ctx.attr.output_base:
@@ -469,6 +501,7 @@ def _create_platform(
         {
             "%{exec_compatible_with}": exec_compatible_with,
             "%{image_name}": image_name,
+            "%{java_home}": java_home,
             "%{target_compatible_with}": target_compatible_with,
             "%{toolchain}": toolchain_target,
         },
@@ -537,6 +570,13 @@ _rbe_autoconfig = repository_rule(
             doc = ("If set to False the flag --all_incompatible_changes will " +
                    "be used when generating the toolchain configs."),
         ),
+        "java_home": attr.string(
+            doc = ("Optional. The location of java_home in the container. " +
+                   "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. If " +
+                   "not set, the rule will attempt to read the JAVA_HOME env " +
+                   "var from the container. If that is not set the rule will " +
+                   "fail."),
+        ),
         "output_base": attr.string(
             doc = ("Optional. The directory (under the project root) where the " +
                    "produced toolchain configs will be copied to."),
@@ -599,8 +639,9 @@ def rbe_autoconfig(
         bazel_rc = None,
         config_dir = None,
         digest = None,
-        env = clang_env(),
+        env = None,
         exec_compatible_with = None,
+        java_home = None,
         output_base = None,
         revision = None,
         registry = None,
@@ -626,6 +667,10 @@ def rbe_autoconfig(
       digest: Optional. The digest of the image to pull. Should only be set if
           a custom container is required.
           Must be set together with registry and repository.
+      java_home: Optional. The location of java_home in the container. For
+          example , '/usr/lib/jvm/java-8-openjdk-amd64'. If not set, the rule
+          will attempt to read the JAVA_HOME env var from the container.
+          If that is not set the rule will fail.
       output_base: Optional. The directory (under the project root) where the
           produced toolchain configs will be copied to.
       config_dir: Optional. Subdirectory where configs will be copied to.
@@ -665,6 +710,8 @@ def rbe_autoconfig(
         if not revision or revision == "latest":
             revision = RBE_UBUNTU16_04_LATEST
         digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
+        if not env:
+            env = clang_env()
     if not digest:
         fail(("Could not find a valid digest for revision %s, " +
               "please make sure it is declared in " +
@@ -677,6 +724,7 @@ def rbe_autoconfig(
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
+        java_home = java_home,
         output_base = output_base,
         registry = registry,
         repository = repository,
