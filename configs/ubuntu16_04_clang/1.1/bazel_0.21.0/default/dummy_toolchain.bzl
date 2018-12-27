@@ -1,4 +1,5 @@
-# Copyright 2019 The Bazel Authors. All rights reserved.
+# pylint: disable=g-bad-file-header
+# Copyright 2017 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,3 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Skylark rule that stubs a toolchain."""
+
+def _dummy_toolchain_impl(ctx):
+    ctx = ctx  # unused argument
+    toolchain = platform_common.ToolchainInfo()
+    return [toolchain]
+
+dummy_toolchain = rule(_dummy_toolchain_impl, attrs = {})

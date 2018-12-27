@@ -6,7 +6,7 @@ build:remote --host_javabase=@bazel_toolchains//configs/debian8_clang/0.4.0:jdk8
 build:remote --javabase=@bazel_toolchains//configs/debian8_clang/0.4.0:jdk8
 build:remote --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
 build:remote --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-build:remote --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.20.0/default:toolchain
+build:remote --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.21.0/default:toolchain
 build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # Platform flags:
 # The toolchain container used for execution is defined in the target indicated
@@ -16,7 +16,7 @@ build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 # "extra_toolchains" to be selected (given constraints defined in
 # "exec_compatible_with").
 # More about platforms: https://docs.bazel.build/versions/master/platforms.html
-build:remote --extra_toolchains=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.20.0/cpp:cc-toolchain-clang-x86_64-default
+build:remote --extra_toolchains=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.21.0/cpp:cc-toolchain-clang-x86_64-default
 build:remote --extra_execution_platforms=@bazel_toolchains//configs/debian8_clang/0.4.0:rbe_debian8
 build:remote --host_platform=@bazel_toolchains//configs/debian8_clang/0.4.0:rbe_debian8
 build:remote --platforms=@bazel_toolchains//configs/debian8_clang/0.4.0:rbe_debian8
@@ -39,5 +39,5 @@ build:remote-msan --copt=-fsanitize=memory
 build:remote-msan --linkopt=-fsanitize=memory
 build:remote-msan --cxxopt=--stdlib=libc++
 build:remote-msan --copt=-fsanitize-memory-track-origins
-build:remote-msan --host_crosstool_top=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.20.0/default:toolchain
-build:remote-msan --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.20.0/msan:toolchain
+build:remote-msan --host_crosstool_top=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.21.0/default:toolchain
+build:remote-msan --crosstool_top=@bazel_toolchains//configs/debian8_clang/0.4.0/bazel_0.21.0/msan:toolchain

@@ -1,4 +1,6 @@
-# Copyright 2019 The Bazel Authors. All rights reserved.
+#!/bin/bash
+#
+# Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,4 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Ship the environment to the C++ action
+#
+set -eu
 
+# Set-up the environment
+
+
+# Call the C++ compiler
+/usr/local/bin/clang "$@"
