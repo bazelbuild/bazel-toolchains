@@ -14,6 +14,7 @@
 
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download_deb_pkgs = "download")
 load("@base_images_docker//package_managers:apt_key.bzl", _apt_key = "key")
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 def _input_validation(kwargs):
     allowed_attribues = ["name", "base", "language_layers"]
@@ -29,13 +30,13 @@ container = [
     ".tar.xz",
 ]
 
-generate_deb_tar_attrs = _download_deb_pkgs.attrs + {
+generate_deb_tar_attrs = dicts.add(_download_deb_pkgs.attrs, {
     "base": attr.label(allow_files = container),
     "packages": attr.string_list(),
     "keys": attr.label_list(
         allow_files = True,
     ),
-}
+})
 
 aggregate_debian_pkgs_attrs = {
     "base": attr.label(allow_files = container),
@@ -46,8 +47,7 @@ aggregate_debian_pkgs_attrs = {
     "additional_repos": attr.string_list(),
     "_image_id_extractor": attr.label(
         default = "@io_bazel_rules_docker//contrib:extract_image_id.py",
-        allow_files = True,
-        single_file = True,
+        allow_single_file = True,
     ),
 }
 

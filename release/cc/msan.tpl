@@ -9,9 +9,9 @@ docker_toolchain_autoconfig(
     additional_repos = ${DISTRO}_clang_default_repos(),
     base = "@${DISTRO}-clang//image",
     bazel_version = "${BAZEL_VERSION}",
-    env = clang_env() + {
+    env = dicts.add(clang_env(), {
         "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    }),
     keys = ${DISTRO}_clang_default_keys(),
     packages = ${DISTRO}_clang_default_packages(),
     tags = ["manual"],
