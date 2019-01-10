@@ -327,15 +327,15 @@ def _use_standard_config(ctx, bazel_version, bazel_rc_version, revision):
     # Verify a toolchain config exists for the given version of Bazel and the
     # given revision of the container
     config_version = public_rbe_ubuntu16_04_config_version().get(revision, None)
-    supported = False
+    config_found = False
     for b_v in config_to_bazel_versions().get(config_version):
         if b_v == bazel_version:
-            supported = True
+            config_found = True
             break
-    if not supported:
+    if not config_found:
         return False
 
-    # If it is supported, create the BUILD files with the aliases
+    # If a config is found, create the BUILD files with the aliases
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_container.tpl"))
     jdk = "@bazel_toolchains//configs/ubuntu16_04_clang/%s:jdk8" % config_version
     cc_toolchain = "@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/cpp:cc-toolchain-clang-x86_64-default" % (config_version, bazel_version)
