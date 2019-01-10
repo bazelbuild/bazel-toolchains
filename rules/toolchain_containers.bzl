@@ -41,6 +41,8 @@ def public_rbe_ubuntu16_04_sha256s():
         "r327695": "sha256:b940d4f08ea79ce9a07220754052da2ac4a4316e035d8799769cea3c24d10c66",
     }
 
+# Map from revisions of rbe ubuntu16_04 to corresponding mayor container versions.
+# Kept here as it needs to be updated along with the def above.
 def public_rbe_ubuntu16_04_config_version():
     return {
         "r346485": "1.1",

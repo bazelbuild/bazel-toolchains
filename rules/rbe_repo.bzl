@@ -20,7 +20,7 @@ container image.
 
 Exposes the rbe_autoconfig macro that does the following:
 - If users selects the standard rbe-ubuntu 16_04 image, create aliases to
-the appropriate toolchain / platform targets for the current version of Bazel
+  the appropriate toolchain / platform targets for the current version of Bazel
 - Otherwise, pull the selected toolchain container image (using 'docker pull').
 - Starts up a container using the pulled image, mounting either a small sample
   project or the current project (if output_base is set).
@@ -117,7 +117,7 @@ There are two modes of using this repo rules:
     you do not need to run this rule until there is a new version of Bazel
     you want to support running with, or you need to update your container).
 
-  2 - When output_base is not set (recommended for users of the 
+  2 - When output_base is not set (recommended for users of the
     rbe-ubuntu 16_04 images - env var "RBE_AUTOCONF_ROOT" is not required),
     running this rule will create targets in the
     external repository (e.g., rbe_default) which can be used to point your
@@ -143,7 +143,7 @@ There are two modes of using this repo rules:
 
 The {bazel_version} above corresponds to the version of bazel installed locally.
 Note you can override this version and pass an optional rc # if desired.
-Running this rule with a non release version (e.g., built from source) will result in 
+Running this rule with a non release version (e.g., built from source) will result in
 picking as bazel version <bazel_version_fallback> defined in the attrs of this rule.
 Note the bazel_version / bazel_rc must be published in https://releases.bazel.build/...
 
@@ -226,7 +226,8 @@ def _impl(ctx):
 
     # Deal with the simple case first: if user picks rbe-ubuntu 16_04 container and
     # a config exists for the current version of Bazel, just create aliases
-    if (ctx.attr.use_checked_in_confs and ctx.attr.registry == _RBE_UBUNTU_REGISTRY and
+    if (ctx.attr.use_checked_in_confs and
+        ctx.attr.registry == _RBE_UBUNTU_REGISTRY and
         ctx.attr.repository == _RBE_UBUNTU_REPO):
         if _use_standard_config(ctx, bazel_version, bazel_rc_version, ctx.attr.revision):
             # If a standard config was found we are done and can just return.

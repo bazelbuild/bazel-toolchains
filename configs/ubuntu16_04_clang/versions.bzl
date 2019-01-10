@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
+# Returns a dict with mayor container versions mapped to supported bazel versions.
 def config_to_bazel_versions():
     return {
         "1.0": ["0.13.0", "0.14.1", "0.15.0", "0.16.1"],
