@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Repository Rules to generate toolchain configs for a container image.
+"""Repository Rules to pick/generate toolchain configs for a container image.
 
-The toolchain configs (+ platform) produced by this rule can be used to, e.g.,
-run a remote build in which remote actions will run inside a container image.
+The toolchain configs (+ platform) produced/selected by this rule can be used
+to, e.g., run a remote build in which remote actions will run inside a
+container image.
 
 Exposes the rbe_autoconfig macro that does the following:
-- Pulls an rbe-ubuntu 16_04 image (using 'docker pull'). Image to pull can be overriden.
+- If users selects the standard rbe-ubuntu 16_04 image, create aliases to
+the appropriate toolchain / platform targets for the current version of Bazel
+- Otherwise, pull the selected toolchain container image (using 'docker pull').
 - Starts up a container using the pulled image, mounting either a small sample
   project or the current project (if output_base is set).
 - Installs the current version of Bazel (one currently running) on the container
@@ -89,9 +92,10 @@ Use the full absolute path to the project root (i.e., no '~', '../', or
 other special chars).
 
 There are two modes of using this repo rules:
-  1 - When output_base set (recommended; env var "RBE_AUTOCONF_ROOT" is required),
-    running the repo rule target will copy the toolchain config files to the
-    output_base folder in the project sources.
+  1 - When output_base set (recommended if using a custom toolchain container
+    image; env var "RBE_AUTOCONF_ROOT" is required), running the repo rule
+    target will copy the toolchain config files to the output_base folder in
+    the project sources.
     After that, you can run an RBE build pointing your crosstool_top flag to the
     produced files. If output_base is set to "rbe-configs" (recommended):
 
@@ -113,7 +117,8 @@ There are two modes of using this repo rules:
     you do not need to run this rule until there is a new version of Bazel
     you want to support running with, or you need to update your container).
 
-  2 - When output_base is not set (env var "RBE_AUTOCONF_ROOT" is not required),
+  2 - When output_base is not set (recommended for users of the 
+    rbe-ubuntu 16_04 images - env var "RBE_AUTOCONF_ROOT" is not required),
     running this rule will create targets in the
     external repository (e.g., rbe_default) which can be used to point your
     flags to:
@@ -131,16 +136,16 @@ There are two modes of using this repo rules:
 
     Note running bazel clean --expunge_async, or otherwise modifying attrs or
     env variables used by this rule will trigger it to re-execute. Running this
-    repo rule takes some time as it needs to pull a container, run it, and then
-    run some commands inside. We recommend you use output_base and check in the produced
+    repo rule can take some time (if you are not using the rbe-ubuntu 16_04 container)
+    as it needs to pull a container, run it, and then run some commands inside.
+    We recommend you use output_base and check in the produced
     files so you dont need to run this rule with every clean build.
 
 The {bazel_version} above corresponds to the version of bazel installed locally.
-Note you can override this version and pass an optional rc# if desired.
-Running this rule with a non release version (e.g., built from source) will not work.
-If running with bazel built from source you must pass a bazel_version and bazel_rc
-to rbe_autoconfig. Also, note the bazel_version bazel_rc must be published in
-https://releases.bazel.build/...
+Note you can override this version and pass an optional rc # if desired.
+Running this rule with a non release version (e.g., built from source) will result in 
+picking as bazel version <bazel_version_fallback> defined in the attrs of this rule.
+Note the bazel_version / bazel_rc must be published in https://releases.bazel.build/...
 
 Note this is a very not hermetic repository rule that can actually change the
 contents of your project sources. While this is generally not recommended by
@@ -149,14 +154,14 @@ toolchains / platforms that need to be made available to Bazel before execution
 of any build actions.
 
 Note: this rule expects the following utilities to be installed and available on
-the PATH:
+the PATH (if any container other than rbe-ubuntu 16_04 is used):
   - docker
   - tar
   - bash utilities (e.g., cp, mv, rm, etc)
   - docker authentication to pull the desired container should be set up
     (rbe-ubuntu16-04 does not require any auth setup currently).
 
-Known limitations:
+Known limitations (if any container other than rbe-ubuntu 16_04 is used):
   - This rule cannot be executed inside a docker container.
   - This rule can only run in Linux.
 """
@@ -169,7 +174,12 @@ load(
 load(
     "//rules:toolchain_containers.bzl",
     "RBE_UBUNTU16_04_LATEST",
+    "public_rbe_ubuntu16_04_config_version",
     "public_rbe_ubuntu16_04_sha256s",
+)
+load(
+    "//configs/ubuntu16_04_clang:versions.bzl",
+    "config_to_bazel_versions",
 )
 
 # External folder is set to be deprecated, lets keep it here for easy
@@ -203,6 +213,25 @@ _VERBOSE = True
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
 
+    # Resolve the Bazel version to use
+    bazel_version = None
+    bazel_rc_version = None
+    if ctx.attr.bazel_version == "local":
+        bazel_version = str(extract_version_number(ctx.attr.bazel_version_fallback))
+        rc = parse_rc(native.bazel_version)
+        bazel_rc_version = rc if rc != -1 else None
+    if ctx.attr.bazel_version != "local":
+        bazel_version = ctx.attr.bazel_version
+        bazel_rc_version = ctx.attr.bazel_rc_version
+
+    # Deal with the simple case first: if user picks rbe-ubuntu 16_04 container and
+    # a config exists for the current version of Bazel, just create aliases
+    if (ctx.attr.use_checked_in_confs and ctx.attr.registry == _RBE_UBUNTU_REGISTRY and
+        ctx.attr.repository == _RBE_UBUNTU_REPO):
+        if _use_standard_config(ctx, bazel_version, bazel_rc_version, ctx.attr.revision):
+            # If a standard config was found we are done and can just return.
+            return
+
     # Perform some safety checks
     _validate_host(ctx)
     project_root = ctx.os.environ.get(_RBE_AUTOCONF_ROOT, None)
@@ -226,20 +255,9 @@ def _impl(ctx):
     name = ctx.attr.name
     outputs_tar = ctx.attr.name + "_out.tar"
 
-    image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
-
     # Pull the image using 'docker pull'
+    image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
     _pull_image(ctx, image_name)
-
-    bazel_version = None
-    bazel_rc_version = None
-    if ctx.attr.bazel_version == "local":
-        bazel_version = str(extract_version_number(ctx.attr.bazel_version_fallback))
-        rc = parse_rc(native.bazel_version)
-        bazel_rc_version = rc if rc != -1 else None
-    if ctx.attr.bazel_version != "local":
-        bazel_version = ctx.attr.bazel_version
-        bazel_rc_version = ctx.attr.bazel_rc_version
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
@@ -296,6 +314,53 @@ def _validate_host(ctx):
              "non 0 exit code, please check you have permissions to run docker.")
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
+
+# Checks if a standard published config can be used for the given revision
+# of the rbe ubuntu 16_04 container. If so, produces BUILD files with aliases
+# for all the required toolchain / platform targets. Otherwise returns false.
+def _use_standard_config(ctx, bazel_version, bazel_rc_version, revision):
+    # If rc version is required, simply return
+    if bazel_rc_version:
+        return False
+
+    # Verify a toolchain config exists for the given version of Bazel and the
+    # given revision of the container
+    config_version = public_rbe_ubuntu16_04_config_version().get(revision, None)
+    supported = False
+    for b_v in config_to_bazel_versions().get(config_version):
+        if b_v == bazel_version:
+            supported = True
+            break
+    if not supported:
+        return False
+
+    # If it is supported, create the BUILD files with the aliases
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_container.tpl"))
+    jdk = "@bazel_toolchains//configs/ubuntu16_04_clang/%s:jdk8" % config_version
+    cc_toolchain = "@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/cpp:cc-toolchain-clang-x86_64-default" % (config_version, bazel_version)
+    platform = "@bazel_toolchains//configs/ubuntu16_04_clang/%s:rbe_ubuntu1604" % config_version
+    ctx.template(
+        _PLATFORM_DIR + "/BUILD",
+        template,
+        {
+            "%{jdk}": jdk,
+            "%{cc-toolchain}": cc_toolchain,
+            "%{platform}": platform,
+        },
+        False,
+    )
+
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_toolchain.tpl"))
+    toolchain = "@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default:toolchain" % (config_version, bazel_version)
+    ctx.template(
+        _RBE_CONFIG_DIR + "/BUILD",
+        template,
+        {
+            "%{toolchain}": toolchain,
+        },
+        False,
+    )
+    return True
 
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
@@ -550,9 +615,9 @@ _rbe_autoconfig = repository_rule(
                    "must be available in https://releases.bazel.build."),
         ),
         "bazel_version_fallback": attr.string(
-            default = "0.20.0",
+            default = "0.21.0",
             doc = ("Version to fallback to if not provided explicitly and local " +
-                   "is non release version."),
+                   "is non-release version."),
         ),
         "digest": attr.string(
             mandatory = True,
@@ -624,6 +689,11 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
+        "use_checked_in_confs": attr.bool(
+            default = True,
+            doc = ("If set to False the checked-in configs in bazel-toolchains" +
+                   "repo are ignored and a container is allways pulled."),
+        ),
     },
     environ = [
         _RBE_AUTOCONF_ROOT,
@@ -646,7 +716,8 @@ def rbe_autoconfig(
         revision = None,
         registry = None,
         repository = None,
-        target_compatible_with = None):
+        target_compatible_with = None,
+        use_checked_in_confs = True):
     """ Creates a repository with toolchain configs generated for a container image.
 
     This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
@@ -687,6 +758,10 @@ def rbe_autoconfig(
       target_compatible_with: List of constraints to add to the produced
           toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
           target_compatible_with attr.
+      use_checked_in_confs: Default: True. Try to look for checked in configs
+          before generating them. If set to false the rule will allways attempt
+          to generate the configs by pulling a toolchain container and running
+          Bazel inside.
       env: dict. Optional. Additional env variables that will be set when
           running the Bazel command to generate the toolchain configs.
           Set to values for rbe-ubuntu16-04 container.
@@ -730,4 +805,5 @@ def rbe_autoconfig(
         repository = repository,
         revision = revision,
         target_compatible_with = target_compatible_with,
+        use_checked_in_confs = use_checked_in_confs,
     )
