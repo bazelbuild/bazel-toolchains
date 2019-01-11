@@ -61,7 +61,7 @@ container_pull(
 container_pull(
     name = "debian8-clang-test",
     digest = "sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f",
-    registry = "marketplace.gcr.io",
+    registry = "l.gcr.io",
     repository = "google/clang-debian8",
 )
 

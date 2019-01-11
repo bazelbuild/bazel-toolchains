@@ -21,6 +21,8 @@ load(
     "container_pull",
 )
 
+_REGISTRY = "l.gcr.io"
+
 def images():
     """Pull containers used in bazel-toolchains.
 
@@ -73,7 +75,7 @@ def images():
         container_pull(
             name = "debian8",
             digest = toolchain_container_sha256s()["debian8"],
-            registry = "marketplace.gcr.io",
+            registry = _REGISTRY,
             repository = "google/debian8",
         )
 
@@ -81,7 +83,7 @@ def images():
         container_pull(
             name = "ubuntu16_04",
             digest = toolchain_container_sha256s()["ubuntu16_04"],
-            registry = "marketplace.gcr.io",
+            registry = _REGISTRY,
             repository = "google/ubuntu16_04",
         )
 
@@ -92,7 +94,7 @@ def images():
         container_pull(
             name = "debian8_python3",
             digest = toolchain_container_sha256s()["debian8_python3"],
-            registry = "marketplace.gcr.io",
+            registry = _REGISTRY,
             repository = "google/python",
         )
 
@@ -111,7 +113,7 @@ def images():
         container_pull(
             name = "debian8-clang",
             digest = toolchain_container_sha256s()["debian8_clang"],
-            registry = "marketplace.gcr.io",
+            registry = _REGISTRY,
             repository = "google/clang-debian8",
         )
 
@@ -119,7 +121,7 @@ def images():
         container_pull(
             name = "ubuntu16_04-clang",
             digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
-            registry = "marketplace.gcr.io",
+            registry = _REGISTRY,
             repository = "google/clang-ubuntu",
         )
 
