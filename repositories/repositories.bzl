@@ -61,6 +61,17 @@ def repositories():
             urls = ["https://github.com/bazelbuild/rules_docker/archive/2c9816ba7e2998c521e19171245105e3255009ec.tar.gz"],
         )
 
+        load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+        load(
+            "//toolchains/docker:toolchain.bzl",
+            docker_toolchain_configure = "toolchain_configure",
+        )
+
+        docker_toolchain_configure(
+            name = "docker_config",
+            docker_path = "/usr/bin/docker",
+        )
+
         # Register the docker toolchain type
         native.register_toolchains(
             # Register the default docker toolchain that expects the 'docker'

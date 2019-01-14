@@ -21,7 +21,7 @@ load(
     "container_pull",
 )
 
-_REGISTRY = "l.gcr.io"
+_REGISTRY = "marketplace.gcr.io"
 
 def images():
     """Pull containers used in bazel-toolchains.
