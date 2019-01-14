@@ -171,6 +171,7 @@ load(
     "RBE_UBUNTU16_04_LATEST",
     "public_rbe_ubuntu16_04_sha256s",
 )
+load("//rules:environments.bzl", "clang_env")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -630,8 +631,6 @@ _rbe_autoconfig = repository_rule(
     ],
     implementation = _impl,
 )
-
-load("//rules:environments.bzl", "clang_env")
 
 def rbe_autoconfig(
         name,

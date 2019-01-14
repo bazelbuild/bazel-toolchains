@@ -112,12 +112,16 @@ rbe_autoconfig(
 )
 
 load("//rules:environments.bzl", "clang_env")
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 rbe_autoconfig(
     name = "rbe_msan_with_output_base",
     config_dir = "msan",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     output_base = "configs/ubuntu16_04_clang/1.1",
 )
