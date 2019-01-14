@@ -42,7 +42,6 @@ load(
     "@io_bazel_rules_docker//container:container.bzl",
     "container_pull",
 )
-
 load(
     "//repositories:images.bzl",
     bazel_toolchains_images = "images",
