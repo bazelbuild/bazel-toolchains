@@ -75,12 +75,16 @@ Add to your WORKSPACE file the following:
   bazel_toolchains_repositories()
 
   load(
-      "@io_bazel_rules_docker//container:container.bzl",
+      "@io_bazel_rules_docker//repositories:repositories.bzl",
       container_repositories = "repositories",
-      "container_pull",
   )
 
   container_repositories()
+
+  load(
+      "@io_bazel_rules_docker//container:container.bzl",
+      "container_pull",
+  )
 
   # Pulls the my_image used as base for example above
   container_pull(
