@@ -181,6 +181,7 @@ load(
     "//configs/ubuntu16_04_clang:versions.bzl",
     "config_to_bazel_versions",
 )
+load("//rules:environments.bzl", "clang_env")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -701,8 +702,6 @@ _rbe_autoconfig = repository_rule(
     ],
     implementation = _impl,
 )
-
-load("//rules:environments.bzl", "clang_env")
 
 def rbe_autoconfig(
         name,

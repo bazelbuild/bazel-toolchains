@@ -24,6 +24,7 @@ load(
     "debian8_clang_default_packages",
     "debian8_clang_default_repos",
 )
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 # Created on 2017.10.18
 docker_toolchain_autoconfig(
@@ -104,9 +105,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.11.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -136,9 +140,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.12.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -168,9 +175,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.13.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -200,9 +210,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.14.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -232,9 +245,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.15.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -268,9 +284,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.16.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -304,9 +323,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.16.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -340,9 +362,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.17.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -376,9 +401,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.18.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -412,9 +440,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.19.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -448,9 +479,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.19.2",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -484,9 +518,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.20.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],
@@ -520,9 +557,12 @@ docker_toolchain_autoconfig(
     additional_repos = debian8_clang_default_repos(),
     base = "@debian8-clang//image",
     bazel_version = "0.21.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = debian8_clang_default_keys(),
     packages = debian8_clang_default_packages(),
     tags = ["manual"],

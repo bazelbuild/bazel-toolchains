@@ -24,6 +24,7 @@ load(
     "ubuntu16_04_clang_default_packages",
     "ubuntu16_04_clang_default_repos",
 )
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 # Created on 2018.05.09
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
@@ -48,9 +49,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.13.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -80,9 +84,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.14.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -112,9 +119,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.15.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -148,9 +158,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.16.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -184,9 +197,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.16.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -220,9 +236,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.17.1",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -256,9 +275,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.18.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -292,9 +314,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.19.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -328,9 +353,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.19.2",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -364,9 +392,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.20.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -400,9 +431,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.21.0",
-    env = clang_env() + {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    },
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
