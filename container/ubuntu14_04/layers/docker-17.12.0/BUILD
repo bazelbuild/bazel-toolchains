@@ -24,7 +24,7 @@ load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
 # in the container. So create a prerequisite container first.
 toolchain_container(
     name = "docker-prereq",
-    base = "@ubuntu14_04//image",
+    base = "@trusty//image",
     packages = [
         "apt-transport-https",
     ],
@@ -55,6 +55,6 @@ download_pkgs(
 
 language_tool_layer(
     name = "docker-ltl",
-    base = "@ubuntu16_04//image",
+    base = "@trusty//image",
     installables_tar = ":docker-packages.tar",
 )
