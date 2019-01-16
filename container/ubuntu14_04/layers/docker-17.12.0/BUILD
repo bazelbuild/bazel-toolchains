@@ -27,8 +27,8 @@ toolchain_container(
     base = "@trusty//image",
     packages = [
         "apt-transport-https",
-        "curl",
         "ca-certificates",
+        "curl",
     ],
 )
 
