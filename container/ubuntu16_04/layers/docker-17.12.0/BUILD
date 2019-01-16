@@ -34,7 +34,7 @@ add_apt_key(
     name = "docker-key-image",
     image = ":docker-prereq.tar",
     keys = [
-        "@xenial_docker_gpg//file",
+        "@docker_gpg//file",
     ],
 )
 

@@ -105,25 +105,9 @@ def repositories():
         )
 
     # Docker gpg key necessary to install Docker in the containers.
-    if "debian_docker_gpg" not in excludes:
+    if "docker_gpg" not in excludes:
         http_file(
-            name = "debian_docker_gpg",
-            sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-            urls = ["https://download.docker.com/linux/debian/gpg"],
-        )
-
-    # Docker gpg key necessary to install Docker in the containers.
-    if "xenial_docker_gpg" not in excludes:
-        http_file(
-            name = "xenial_docker_gpg",
-            sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
-            urls = ["https://download.docker.com/linux/ubuntu/gpg"],
-        )
-
-    # Docker gpg key necessary to install Docker in the containers.
-    if "trusty_docker_gpg" not in excludes:
-        http_file(
-            name = "trusty_docker_gpg",
+            name = "docker_gpg",
             sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
             urls = ["https://download.docker.com/linux/ubuntu/gpg"],
         )

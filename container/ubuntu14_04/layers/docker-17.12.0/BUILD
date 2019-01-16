@@ -36,7 +36,7 @@ add_apt_key(
     name = "docker-key-image",
     image = ":docker-prereq.tar",
     keys = [
-        "@trusty_docker_gpg//file",
+        "@docker_gpg//file",
     ],
 )
 
