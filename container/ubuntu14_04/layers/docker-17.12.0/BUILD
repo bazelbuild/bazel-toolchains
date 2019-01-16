@@ -27,6 +27,8 @@ toolchain_container(
     base = "@trusty//image",
     packages = [
         "apt-transport-https",
+        "curl",
+        "ca-certificates",
     ],
 )
 
@@ -34,20 +36,17 @@ add_apt_key(
     name = "docker-key-image",
     image = ":docker-prereq.tar",
     keys = [
-        "@xenial_docker_gpg//file",
+        "@trusty_docker_gpg//file",
     ],
 )
 
 download_pkgs(
     name = "docker-packages",
     additional_repos = [
-        "deb [arch=amd64] https://download.docker.com/linux/ubuntu trusty stable edge",
+        "deb [arch=amd64] https://download.docker.com/linux/ubuntu trusty stable",
     ],
     image_tar = ":docker-key-image.tar",
     packages = [
-        "apt-transport-https",
-        "ca-certificates",
-        "curl",
         "docker-ce=17.12.0~ce-0~ubuntu",
         "linux-image-extra-virtual",
     ],
