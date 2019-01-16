@@ -24,9 +24,11 @@ load("@base_images_docker//package_managers:download_pkgs.bzl", "download_pkgs")
 # in the container. So create a prerequisite container first.
 toolchain_container(
     name = "docker-prereq",
-    base = "@ubuntu16_04//image",
+    base = "@trusty//image",
     packages = [
         "apt-transport-https",
+        "ca-certificates",
+        "curl",
     ],
 )
 
@@ -41,13 +43,10 @@ add_apt_key(
 download_pkgs(
     name = "docker-packages",
     additional_repos = [
-        "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable edge",
+        "deb [arch=amd64] https://download.docker.com/linux/ubuntu trusty stable",
     ],
     image_tar = ":docker-key-image.tar",
     packages = [
-        "apt-transport-https",
-        "ca-certificates",
-        "curl",
         "docker-ce=17.12.0~ce-0~ubuntu",
         "linux-image-extra-virtual",
     ],
@@ -55,6 +54,6 @@ download_pkgs(
 
 language_tool_layer(
     name = "docker-ltl",
-    base = "@ubuntu16_04//image",
+    base = "@trusty//image",
     installables_tar = ":docker-packages.tar",
 )
