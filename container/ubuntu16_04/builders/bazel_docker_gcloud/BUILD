@@ -67,6 +67,7 @@ language_tool_layer(
     name = "bazel_%s_docker_gcloud-test" % bazel_version,
     configs = [
         ":container.yaml",
+        "//container/common:docker-17.12.0.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:python3_rbe.yaml",
@@ -75,7 +76,6 @@ language_tool_layer(
         "//container/common/bazel:bazel_tools.yaml",
         "//container/common/bazel:extra_tools.yaml",
         "//container/ubuntu16_04:ubuntu16_04.yaml",
-        "//container/ubuntu16_04/layers/docker-17.12.0:docker-17.12.0.yaml",
         "//container/ubuntu16_04/layers/gcloud:gcloud.yaml",
     ],
     image = ":bazel_%s_docker_gcloud" % bazel_version,

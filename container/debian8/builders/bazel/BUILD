@@ -52,6 +52,7 @@ language_tool_layer(
         "//container/debian8/layers/python:python-ltl",
         "//container/debian8/layers/bazel:bazel-tools",
         "//container/debian8/layers/bazel:bazel_%s-ltl" % bazel_version,
+        "//container/debian8/layers/docker-17.12.0:docker-ltl",
     ],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
@@ -72,6 +73,7 @@ language_tool_layer(
     name = "bazel_%s-test" % bazel_version,
     configs = [
         ":container.yaml",
+        "//container/common:docker-17.12.0.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:python3.yaml",
