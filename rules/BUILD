@@ -22,7 +22,7 @@ exports_files([
 ])
 
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 filegroup(
     name = "bazel_installers",
@@ -40,28 +40,28 @@ pkg_tar(
     ],
 )
 
-skylark_library(
+bzl_library(
     name = "environments",
     srcs = [
         "environments.bzl",
     ],
 )
 
-skylark_library(
+bzl_library(
     name = "toolchain_containers",
     srcs = [
         "toolchain_containers.bzl",
     ],
 )
 
-skylark_library(
+bzl_library(
     name = "gcs",
     srcs = [
         "gcs.bzl",
     ],
 )
 
-skylark_library(
+bzl_library(
     name = "docker_config",
     srcs = [
         "docker_config.bzl",

@@ -56,9 +56,9 @@ def repositories():
     if "io_bazel_rules_docker" not in excludes:
         http_archive(
             name = "io_bazel_rules_docker",
-            sha256 = "8a04c209b1080506a0f16f81d6f9ce9f2d25f936e4c2f8c8dd1f8bbafa07ed49",
-            strip_prefix = "rules_docker-3732c9d05315bef6a3dbd195c545d6fea3b86880",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/3732c9d05315bef6a3dbd195c545d6fea3b86880.tar.gz"],
+            sha256 = "4abb48f56b838957c9c72ac511b44f79612fcf39d08338fad14a8e3f6b0572ea",
+            strip_prefix = "rules_docker-b8ff6a85ec359db3fd5657accd3e524daf12016d",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/b8ff6a85ec359db3fd5657accd3e524daf12016d.tar.gz"],
         )
 
         # Register the docker toolchain type
@@ -74,16 +74,16 @@ def repositories():
     if "io_bazel_rules_go" not in excludes:
         http_archive(
             name = "io_bazel_rules_go",
-            urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.16.0/rules_go-0.16.0.tar.gz"],
-            sha256 = "ee5fe78fe417c685ecb77a0a725dc9f6040ae5beb44a0ba4ddb55453aad23a8a",
+            urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.16.5/rules_go-0.16.5.tar.gz"],
+            sha256 = "7be7dc01f1e0afdba6c8eb2b43d2fa01c743be1b9273ab1eaf6c233df078d705",
         )
 
     if "base_images_docker" not in excludes:
         http_archive(
             name = "base_images_docker",
-            sha256 = "a97768efdba8ecfa4c2e71499b1ef8fbe95a22044cb26ed5ca062f91a2afcfb1",
-            strip_prefix = "base-images-docker-4f13bab1c063aa7d7388f62a6807317e252bcae0",
-            urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/4f13bab1c063aa7d7388f62a6807317e252bcae0.tar.gz"],
+            sha256 = "ce6043d38aa7fad421910311aecec865beb060eb56d8c3eb5af62b2805e9379c",
+            strip_prefix = "base-images-docker-7657d04ad9e30b9b8d981b96ae57634cd45ba18a",
+            urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/7657d04ad9e30b9b8d981b96ae57634cd45ba18a.tar.gz"],
         )
 
     # =============================== Repo rule deps ==========================

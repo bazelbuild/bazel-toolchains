@@ -75,12 +75,16 @@ Add to your WORKSPACE file the following:
   bazel_toolchains_repositories()
 
   load(
-      "@io_bazel_rules_docker//container:container.bzl",
+      "@io_bazel_rules_docker//repositories:repositories.bzl",
       container_repositories = "repositories",
-      "container_pull",
   )
 
   container_repositories()
+
+  load(
+      "@io_bazel_rules_docker//container:container.bzl",
+      "container_pull",
+  )
 
   # Pulls the my_image used as base for example above
   container_pull(
@@ -120,6 +124,7 @@ load(
 )
 load("@base_images_docker//util:run.bzl", _extract = "extract")
 load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -232,7 +237,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.git_repo:
         clean_cmd += " && cd " + bazel_config_dir + " && rm -drf " + project_repo_dir
 
-    install_sh = ctx.new_file(name + "_install.sh")
+    install_sh = ctx.actions.declare_file(name + "_install.sh")
     ctx.actions.write(
         output = install_sh,
         content = "\n ".join([
@@ -257,10 +262,10 @@ def _docker_toolchain_autoconfig_impl(ctx):
     if ctx.attr.repo_pkg_tar:
         files += [ctx.file.repo_pkg_tar]
 
-    image_tar = ctx.new_file(name + ".tar")
+    image_tar = ctx.actions.declare_file(name + ".tar")
 
     # TODO(nlopezgi): fix upstream issue that output_executable is required
-    load_image_sh_file = ctx.new_file(name + "load.sh")
+    load_image_sh_file = ctx.actions.declare_file(name + "load.sh")
     _container.image.implementation(
         ctx,
         files = files,
@@ -291,7 +296,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
         run_cmd = install_sh.basename,
     ))
 
-    extract_tar_file = ctx.new_file(name + "_extract.tar")
+    extract_tar_file = ctx.actions.declare_file(name + "_extract.tar")
     _extract.implementation(
         ctx,
         name = ctx.attr.name + "_extract",
@@ -312,12 +317,12 @@ def _docker_toolchain_autoconfig_impl(ctx):
     )
 
 docker_toolchain_autoconfig_ = rule(
-    attrs = _container.image.attrs + {
+    attrs = dicts.add(_container.image.attrs, {
         "config_repos": attr.string_list(default = ["local_config_cc"]),
         "mount_project": attr.string(),
         "use_default_project": attr.bool(default = False),
         "git_repo": attr.string(),
-        "repo_pkg_tar": attr.label(allow_files = tar_filetype, single_file = True),
+        "repo_pkg_tar": attr.label(allow_single_file = tar_filetype),
         "bazel_version": attr.string(),
         "bazel_rc_version": attr.string(),
         "use_bazel_head": attr.bool(default = False),
@@ -331,19 +336,17 @@ docker_toolchain_autoconfig_ = rule(
         # TODO(nlopezgi): fix upstream attr declaration that is missing repo name
         "_extract_tpl": attr.label(
             default = Label("@base_images_docker//util:extract.sh.tpl"),
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "_image_id_extractor": attr.label(
             default = "@io_bazel_rules_docker//contrib:extract_image_id.py",
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
-    },
-    outputs = _container.image.outputs + {
+    }),
+    outputs = dicts.add(_container.image.outputs, {
         "log": "%{name}.log",
         "output_tar": "%{name}_outputs.tar",
-    },
+    }),
     toolchains = ["@io_bazel_rules_docker//toolchains/docker:toolchain_type"],
     implementation = _docker_toolchain_autoconfig_impl,
 )

@@ -14,16 +14,16 @@
 
 licenses(["notice"])  # Apache 2.0
 
-load("@bazel_skylib//:skylark_library.bzl", "skylark_library")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-skylark_library(
+bzl_library(
     name = "debian_pkg_tar",
     srcs = [
         "debian_pkg_tar.bzl",
     ],
 )
 
-skylark_library(
+bzl_library(
     name = "docker_toolchains",
     srcs = [
         "docker_toolchains.bzl",
