@@ -53,6 +53,7 @@ language_tool_layer(
         "//container/ubuntu14_04/layers/bazel:bazel-tools",
         "//container/ubuntu14_04/layers/bazel:bazel_%s-ltl" % bazel_version,
         "//container/ubuntu14_04/layers/docker-17.12.0:docker-ltl",
+        "//container/ubuntu14_04/layers/gcloud:gcloud-ltl",
     ],
 ) for bazel_version, _ in BAZEL_VERSION_SHA256S.items()]
 
@@ -74,6 +75,7 @@ language_tool_layer(
     configs = [
         ":container.yaml",
         "//container/common:docker-17.12.0.yaml",
+        "//container/common/gcloud:gcloud.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:python3.yaml",

@@ -27,7 +27,7 @@ language_tool_layer(
     additional_repos = [
         "deb http://packages.cloud.google.com/apt cloud-sdk-xenial main",
     ],
-    base = "@ubuntu16_04//image",
+    base = "@debian8//image",
     keys = [
         "@gcloud_gpg//file",
     ],
