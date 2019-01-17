@@ -227,9 +227,7 @@ def _impl(ctx):
 
     # Deal with the simple case first: if user picks rbe-ubuntu 16_04 container and
     # a config exists for the current version of Bazel, just create aliases
-    if (ctx.attr.use_checked_in_confs and
-        ctx.attr.registry == _RBE_UBUNTU_REGISTRY and
-        ctx.attr.repository == _RBE_UBUNTU_REPO):
+    if ctx.attr.use_checked_in_confs:
         if _use_standard_config(ctx, bazel_version, bazel_rc_version, ctx.attr.revision):
             # If a standard config was found we are done and can just return.
             return
@@ -791,6 +789,12 @@ def rbe_autoconfig(
         fail(("Could not find a valid digest for revision %s, " +
               "please make sure it is declared in " +
               "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
+    # If the user has set a custom env, registry or repository dont use
+    # checked in configs
+    if ((env and env != clang_env()) or
+        (registry and registry != _RBE_UBUNTU_REGISTRY) or
+        (repository and repository != _RBE_UBUNTU_REPO)):
+        use_checked_in_confs = False
     _rbe_autoconfig(
         name = name,
         bazel_version = bazel_version,
