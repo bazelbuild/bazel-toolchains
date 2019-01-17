@@ -789,6 +789,7 @@ def rbe_autoconfig(
         fail(("Could not find a valid digest for revision %s, " +
               "please make sure it is declared in " +
               "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
+
     # If the user has set a custom env, registry or repository don't use
     # checked in configs
     if ((env and env != clang_env()) or
