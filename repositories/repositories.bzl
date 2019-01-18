@@ -100,6 +100,7 @@ def repositories():
     if "bazel_gpg" not in excludes:
         http_file(
             name = "bazel_gpg",
+            downloaded_file_path = "bazel_gpg",
             sha256 = "30af2ca7abfb65987cd61802ca6e352aadc6129dfb5bfc9c81f16617bc3a4416",
             urls = ["https://bazel.build/bazel-release.pub.gpg"],
         )
@@ -108,6 +109,7 @@ def repositories():
     if "docker_gpg" not in excludes:
         http_file(
             name = "docker_gpg",
+            downloaded_file_path = "docker_gpg",
             sha256 = "1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570",
             urls = ["https://download.docker.com/linux/ubuntu/gpg"],
         )
@@ -116,6 +118,7 @@ def repositories():
     if "gcloud_gpg" not in excludes:
         http_file(
             name = "gcloud_gpg",
+            downloaded_file_path = "gcloud_gpg",
             sha256 = "226ba1072f20e4ff97ee4f94e87bf45538a900a6d9b25399a7ac3dc5a2f3af87",
             urls = ["https://packages.cloud.google.com/apt/doc/apt-key.gpg"],
         )
@@ -124,6 +127,7 @@ def repositories():
     if "launchpad_openjdk_gpg" not in excludes:
         http_file(
             name = "launchpad_openjdk_gpg",
+            downloaded_file_path = "launchpad_openjdk_gpg",
             sha256 = "54b6274820df34a936ccc6f5cb725a9b7bb46075db7faf0ef7e2d86452fa09fd",
             urls = ["http://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0xEB9B1D8886F44E2A"],
         )
