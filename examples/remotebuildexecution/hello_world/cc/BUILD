@@ -28,6 +28,7 @@ cc_binary(
 
 cc_test(
     name = "say_hello_test",
+    size = "small",
     srcs = ["say_hello_test.cc"],
     deps = [":say_hello"],
 )
