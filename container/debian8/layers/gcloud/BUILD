@@ -25,7 +25,7 @@ load(
 language_tool_layer(
     name = "gcloud-ltl",
     additional_repos = [
-        "deb http://packages.cloud.google.com/apt cloud-sdk-xenial main",
+        "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main",
     ],
     base = "@debian8//image",
     keys = [
