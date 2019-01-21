@@ -75,11 +75,11 @@ language_tool_layer(
     configs = [
         ":container.yaml",
         "//container/common:docker-17.12.0.yaml",
-        "//container/common/gcloud:gcloud.yaml",
         "//container/common:java.yaml",
         "//container/common:python2.yaml",
         "//container/common:python3.yaml",
         "//container/common/clang:clang.yaml",
+        "//container/common/gcloud:gcloud.yaml",
         "//container/common/bazel:bazel_%s.yaml" % bazel_version,
         "//container/common/bazel:bazel_tools.yaml",
         "//container/common/bazel:extra_tools.yaml",
