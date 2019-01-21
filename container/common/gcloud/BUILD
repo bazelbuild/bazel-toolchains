@@ -16,22 +16,14 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//rules/container:docker_toolchains.bzl", "language_tool_layer")
 load(
     "//container/common/gcloud:version.bzl",
     "GCLOUD_VERSION",
 )
 
-language_tool_layer(
-    name = "gcloud-ltl",
-    additional_repos = [
-        "deb http://packages.cloud.google.com/apt cloud-sdk-xenial main",
-    ],
-    base = "@ubuntu16_04//image",
-    keys = [
-        "@gcloud_gpg//file",
-    ],
-    packages = [
-        "google-cloud-sdk=%s" % GCLOUD_VERSION,
-    ],
+genrule(
+    name = "generate_gcloud_yaml",
+    srcs = ["gcloud.yaml.tpl"],
+    outs = ["gcloud.yaml"],
+    cmd = "sed 's|{_GCLOUD_VERSION}|" + GCLOUD_VERSION.rpartition("-")[0] + "|' <$< >$@",
 )
