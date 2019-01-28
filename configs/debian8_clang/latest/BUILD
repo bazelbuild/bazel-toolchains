@@ -25,7 +25,10 @@ LATEST_CONFIG_VERSION = "0.4.0"
 
 LATEST_BAZEL_VERSION = "0.22.0"
 
-CONFIG_TYPES = ["default", "msan"]
+CONFIG_TYPES = [
+    "default",
+    "msan",
+]
 
 # DO NOT depend on the following latest alias in your production jobs.
 # These are for internal and our CI use only. We DO NOT guarantee that they
