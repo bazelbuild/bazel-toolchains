@@ -790,9 +790,11 @@ def rbe_autoconfig(
               "please make sure it is declared in " +
               "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
 
-    # If the user has set a custom env, registry or repository don't use
+    # If the user has set a custom env, custom java_home,
+    # registry or repository, don't use
     # checked in configs
     if ((env and env != clang_env()) or
+        (java_home) or
         (registry and registry != _RBE_UBUNTU_REGISTRY) or
         (repository and repository != _RBE_UBUNTU_REPO)):
         use_checked_in_confs = False
