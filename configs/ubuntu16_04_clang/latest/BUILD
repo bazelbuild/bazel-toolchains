@@ -23,12 +23,9 @@ PACKAGE = "//configs/ubuntu16_04_clang/"
 
 LATEST_CONFIG_VERSION = "1.1"
 
-LATEST_BAZEL_VERSION = "0.21.0"
+LATEST_BAZEL_VERSION = "0.22.0"
 
-CONFIG_TYPES = [
-    "default",
-    "msan",
-]
+CONFIG_TYPES = ["default", "msan"]
 
 # DO NOT depend on the following latest alias in your production jobs.
 # These are for internal and our CI use only. We DO NOT guarantee that they
