@@ -615,7 +615,7 @@ _rbe_autoconfig = repository_rule(
                    "must be available in https://releases.bazel.build."),
         ),
         "bazel_version_fallback": attr.string(
-            default = "0.21.0",
+            default = "0.22.0",
             doc = ("Version to fallback to if not provided explicitly and local " +
                    "is non-release version."),
         ),

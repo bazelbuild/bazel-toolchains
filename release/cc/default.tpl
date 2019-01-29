@@ -14,4 +14,7 @@ docker_toolchain_autoconfig(
     packages = ${DISTRO}_clang_default_packages(),
     tags = ["manual"],
     test = True,
+    # TODO (smukherj1): Disable this. Needed to generate configs for Bazel
+    # 0.22.0.
+    incompatible_changes_off = True,
 )
