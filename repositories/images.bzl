@@ -75,44 +75,6 @@ def images():
     """
     excludes = native.existing_rules().keys()
 
-    if "debian8" not in excludes:
-        container_pull(
-            name = "debian8",
-            digest = toolchain_container_sha256s()["debian8"],
-            registry = _REGISTRY,
-            repository = "google/debian8",
-        )
-
-    if "ubuntu16_04" not in excludes:
-        container_pull(
-            name = "ubuntu16_04",
-            digest = toolchain_container_sha256s()["ubuntu16_04"],
-            registry = _REGISTRY,
-            repository = "google/ubuntu16_04",
-        )
-
-    if "debian8_python3" not in excludes:
-        # Get debian8-built python3 interpreter from marketplace.gcr.io/google/python:latest.
-        # Base image: gcr.io/google-appengine/debian8:latest
-        # Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L155
-        container_pull(
-            name = "debian8_python3",
-            digest = toolchain_container_sha256s()["debian8_python3"],
-            registry = _REGISTRY,
-            repository = "google/python",
-        )
-
-    if "ubuntu16_04_python3" not in excludes:
-        # Get ubuntu16_04-built python3 interpreter from gcr.io/google-appengine/python:latest.
-        # Base image: gcr.io/gcp-runtimes/ubuntu_16_0_4:latest
-        # Base image ref: https://github.com/GoogleCloudPlatform/python-runtime/blob/a8a3e8b2d3239c184843db818e34a06f12dc1190/build.sh#L153
-        container_pull(
-            name = "ubuntu16_04_python3",
-            digest = toolchain_container_sha256s()["ubuntu16_04_python3"],
-            registry = "gcr.io",
-            repository = "google-appengine/python",
-        )
-
     if "debian8-clang" not in excludes:
         container_pull(
             name = "debian8-clang",
@@ -127,14 +89,4 @@ def images():
             digest = toolchain_container_sha256s()["ubuntu16_04_clang"],
             registry = _REGISTRY,
             repository = "google/clang-ubuntu",
-        )
-
-    # Note that we pull trusty base from "index.docker.io" registry and not from
-    # "marketplace.gcr.io" as we do for other base images.
-    if "trusty" not in excludes:
-        container_pull(
-            name = "trusty",
-            registry = "index.docker.io",
-            repository = "library/ubuntu",
-            tag = "14.04",
         )
