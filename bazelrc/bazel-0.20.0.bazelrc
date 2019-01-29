@@ -15,10 +15,8 @@
 # This file is auto-generated from release/bazelrc.tpl and should not be
 # modified directly.
 
-# This .bazelrc file contains all of the flags required for the toolchain,
-# Remote Build Execution, and the Bazel Build Results UI. Specific flags in
-# your Bazel command allow you to use only the remote build, to use only the
-# results UI, or to use them both together.
+# This .bazelrc file contains all of the flags required for the provided
+# toolchain with Remote Build Execution.
 #
 # This .bazelrc file also contains all of the flags required for the local
 # docker sandboxing.
@@ -86,25 +84,6 @@ build:remote --remote_timeout=3600
 # default. You can use --auth_credentials=some_file.json to use a service
 # account credential instead.
 build:remote --auth_enabled=true
-
-# Set flags for uploading to BES in order to view results in the Bazel Build
-# Results UI.
-build:results --bes_backend="buildeventservice.googleapis.com"
-build:results --bes_timeout=60s
-build:results --tls_enabled
-
-# Output BES results url
-build:results --bes_results_url="https://source.cloud.google.com/results/invocations/"
-
-# Set flags for uploading to BES without Remote Build Execution.
-build:results-local --bes_backend="buildeventservice.googleapis.com"
-build:results-local --bes_timeout=60s
-build:results-local --tls_enabled=true
-build:results-local --auth_enabled=true
-build:results-local --spawn_strategy=local
-build:results-local --remote_cache=remotebuildexecution.googleapis.com
-build:results-local --remote_timeout=3600
-build:results-local --bes_results_url="https://source.cloud.google.com/results/invocations/"
 
 # The following flags are only necessary for local docker sandboxing
 # with the rbe-ubuntu16-04 container. Use of these flags is still experimental.
