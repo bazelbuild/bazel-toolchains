@@ -131,8 +131,20 @@ platform(
           name: "container-image"
           value:"docker://gcr.io/asci-toolchain/nosla-xenial-docker@sha256:b4f34255823ae7f95f38712b85013ec26926c8c5b565b0d3f1d32e1295394e9d"
         }
-	    properties: {
+        properties: {
           name: "dockerSiblingContainers"
+          value: "true"
+        }
+        properties: {
+          name: "dockerNetwork"
+          value: "standard"
+        }
+        properties: {
+          name: "dockerRunAsRoot"
+          value: "true"
+        }
+        properties: {
+          name: "dockerPrivileged"
           value: "true"
         }
         """,
