@@ -30,36 +30,6 @@ bazel_next_release = "0.20.0"
 
 bazel_next_release_rc = "3"
 
-# Targets here are for testing purposes, we do not actually
-# maintain these configs anywhere
-docker_toolchain_autoconfig(
-    name = "debian-jessie-autoconfig",
-    base = "//tests/container:rbe-test-jessie-with-pkgs.tar",
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-)
-
-docker_toolchain_autoconfig(
-    name = "debian-jessie-bazel-head-autoconfig",
-    base = "//tests/container:rbe-test-jessie-with-pkgs.tar",
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-    use_bazel_head = True,
-)
-
-# Note that we only support Bazel rc versions at 0.10.0 or above.
-docker_toolchain_autoconfig(
-    name = "debian-jessie-custom-bazel-rc-version-autoconfig",
-    base = "//tests/container:rbe-test-jessie-with-pkgs.tar",
-    bazel_rc_version = bazel_next_release_rc,
-    bazel_version = bazel_next_release,
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-)
-
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-autoconfig",
     base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
