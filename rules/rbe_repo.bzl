@@ -77,7 +77,7 @@ Add to your WORKSPACE file the following:
   rbe_autoconfig(
     name = "rbe_my_custom_container",
     registry = "gcr.io",
-    registry = "my-project/my-base",
+    repository = "my-project/my-base",
     # tag is not supported, always use a digest
     digest = "sha256:deadbeef",
   )
@@ -599,7 +599,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
         _print_exec_results("copy outputs", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file
-        result = ctx.execute("cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest)
+        result = ctx.execute(["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest])
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
