@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
 load(
     "//rules/container:debian_pkg_tar.bzl",
     "aggregate_debian_pkgs",
 )
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 aggregate_debian_pkgs(
     name = "ubuntu16-04-debian_pkgs",

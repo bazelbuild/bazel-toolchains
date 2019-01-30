@@ -18,11 +18,11 @@
 # the same compiled clang binary as in
 # https://console.cloud.google.com/launcher/details/google/clang-debian8
 
+load("@base_images_docker//util:run.bzl", "container_run_and_extract")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
-
-load("@base_images_docker//util:run.bzl", "container_run_and_extract")
 
 container_run_and_extract(
     name = "debian8_tar",

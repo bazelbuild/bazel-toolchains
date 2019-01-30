@@ -18,11 +18,11 @@
 # the same compiled clang binary as in
 # https://console.cloud.google.com/launcher/details/google/clang-debian8
 
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
-
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 pkg_tar(
     name = "open_jdk_tar",

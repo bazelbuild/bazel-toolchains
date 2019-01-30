@@ -118,13 +118,13 @@ Known issues:
  - Rule cannot be placed in the BUILD file at the root of a project
 """
 
+load("@base_images_docker//util:run.bzl", _extract = "extract")
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
+load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
-load("@base_images_docker//util:run.bzl", _extract = "extract")
-load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -318,21 +318,20 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
 docker_toolchain_autoconfig_ = rule(
     attrs = dicts.add(_container.image.attrs, {
-        "config_repos": attr.string_list(default = ["local_config_cc"]),
-        "mount_project": attr.string(),
-        "use_default_project": attr.bool(default = False),
-        "git_repo": attr.string(),
-        "repo_pkg_tar": attr.label(allow_single_file = tar_filetype),
-        "bazel_version": attr.string(),
-        "bazel_rc_version": attr.string(),
-        "use_bazel_head": attr.bool(default = False),
-        "setup_cmd": attr.string(default = "cd ."),
-        "packages": attr.string_list(),
         "additional_repos": attr.string_list(),
-        "keys": attr.string_list(),
+        "bazel_rc_version": attr.string(),
+        "bazel_version": attr.string(),
+        "config_repos": attr.string_list(default = ["local_config_cc"]),
+        "git_repo": attr.string(),
         "incompatible_changes_off": attr.bool(default = False),
+        "keys": attr.string_list(),
+        "mount_project": attr.string(),
+        "packages": attr.string_list(),
+        "repo_pkg_tar": attr.label(allow_single_file = tar_filetype),
+        "setup_cmd": attr.string(default = "cd ."),
         "test": attr.bool(default = True),
-        "_installers": attr.label(default = ":bazel_installers", allow_files = True),
+        "use_bazel_head": attr.bool(default = False),
+        "use_default_project": attr.bool(default = False),
         # TODO(nlopezgi): fix upstream attr declaration that is missing repo name
         "_extract_tpl": attr.label(
             default = Label("@base_images_docker//util:extract.sh.tpl"),
@@ -342,6 +341,7 @@ docker_toolchain_autoconfig_ = rule(
             default = "@io_bazel_rules_docker//contrib:extract_image_id.py",
             allow_single_file = True,
         ),
+        "_installers": attr.label(default = ":bazel_installers", allow_files = True),
     }),
     outputs = dicts.add(_container.image.outputs, {
         "log": "%{name}.log",

@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
+load("//container/common/clang:clang.bzl", "clang_env")
 load(
     "//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
 )
-load("//container/common/clang:clang.bzl", "clang_env")
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 language_tool_layer(
     name = "clang-ltl",

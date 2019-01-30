@@ -48,8 +48,8 @@ def _gcs_file_impl(ctx):
         Label("@bazel_toolchains//rules:gsutil_cp_and_validate.sh.tpl"),
         {
             "%{BUCKET}": ctx.attr.bucket,
-            "%{FILE}": ctx.attr.file,
             "%{DOWNLOAD_PATH}": str(download_path),
+            "%{FILE}": ctx.attr.file,
             "%{SHA256}": ctx.attr.sha256,
         },
     )
@@ -72,8 +72,8 @@ def _gcs_file_impl(ctx):
 gcs_file = repository_rule(
     attrs = {
         "bucket": attr.string(mandatory = True),
-        "file": attr.string(mandatory = True),
         "downloaded_file_path": attr.string(),
+        "file": attr.string(mandatory = True),
         "sha256": attr.string(mandatory = True),
     },
     implementation = _gcs_file_impl,

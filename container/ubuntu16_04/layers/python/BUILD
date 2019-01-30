@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
 load(
     "//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
 )
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 PYTHON_CLEANUP_COMMANDS = (
     "find /usr/lib/python* -name __pycache__ -exec rm -rf {} +"
@@ -38,11 +38,11 @@ language_tool_layer(
         "python3-dev",
     ],
     symlinks = {
+        "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
+        "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
+        "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
         "/usr/bin/python": "/usr/bin/python2.7",
         "/usr/bin/python3": "/opt/python3.6/bin/python3.6",
-        "/opt/python3.6/bin/python3": "/opt/python3.6/bin/python3.6",
-        "/opt/python3.6/bin/pip3": "/opt/python3.6/bin/pip3.6",
-        "/opt/python3.6/bin/easy_install3": "/opt/python3.6/bin/easy_install-3.6",
     },
     tars = ["//third_party/python:ubuntu16_04_tar/python.tar"],
 )

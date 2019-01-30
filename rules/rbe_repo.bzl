@@ -167,10 +167,10 @@ Known limitations (if any container other than rbe-ubuntu 16_04 is used):
 """
 
 load(
-    "//rules:version_check.bzl",
-    "extract_version_number",
-    "parse_rc",
+    "//configs/ubuntu16_04_clang:versions.bzl",
+    "config_to_bazel_versions",
 )
+load("//rules:environments.bzl", "clang_env")
 load(
     "//rules:toolchain_containers.bzl",
     "RBE_UBUNTU16_04_LATEST",
@@ -178,10 +178,10 @@ load(
     "public_rbe_ubuntu16_04_sha256s",
 )
 load(
-    "//configs/ubuntu16_04_clang:versions.bzl",
-    "config_to_bazel_versions",
+    "//rules:version_check.bzl",
+    "extract_version_number",
+    "parse_rc",
 )
-load("//rules:environments.bzl", "clang_env")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -343,8 +343,8 @@ def _use_standard_config(ctx, bazel_version, bazel_rc_version, revision):
         _PLATFORM_DIR + "/BUILD",
         template,
         {
-            "%{jdk}": jdk,
             "%{cc-toolchain}": cc_toolchain,
+            "%{jdk}": jdk,
             "%{platform}": platform,
         },
         False,
@@ -517,10 +517,10 @@ def _run_and_extract(
         "run_and_extract.sh",
         template,
         {
-            "%{docker_run_flags}": " ".join(docker_run_flags),
             "%{commands}": "/container/run_in_container.sh",
-            "%{image_name}": image_name,
+            "%{docker_run_flags}": " ".join(docker_run_flags),
             "%{extract_file}": "/" + outputs_tar,
+            "%{image_name}": image_name,
             "%{output}": str(ctx.path(".")) + "/output.tar",
         },
         True,
@@ -605,19 +605,26 @@ def _expand_outputs(ctx, bazel_version, project_root):
 # rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
     attrs = {
+        "bazel_rc_version": attr.string(
+            doc = ("Optional. An rc version to use. Note an installer for the rc " +
+                   "must be available in https://releases.bazel.build."),
+        ),
         "bazel_version": attr.string(
             default = "local",
             doc = ("The version of Bazel to use to generate toolchain configs." +
                    "Use only (major, minor, patch), e.g., '0.20.0'."),
         ),
-        "bazel_rc_version": attr.string(
-            doc = ("Optional. An rc version to use. Note an installer for the rc " +
-                   "must be available in https://releases.bazel.build."),
-        ),
         "bazel_version_fallback": attr.string(
             default = "0.22.0",
             doc = ("Version to fallback to if not provided explicitly and local " +
                    "is non-release version."),
+        ),
+        "config_dir": attr.string(
+            doc = ("Optional. Use only if output_base is defined. If you want to " +
+                   "create multiple toolchain configs (for the same version of Bazel) " +
+                   "you can use this attr to indicate a type of config (e.g., default, " +
+                   "msan). The configs will be generated in a sub-directory when this attr  " +
+                   "is used."),
         ),
         "digest": attr.string(
             mandatory = True,
@@ -629,6 +636,14 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. Dictionary from strings to strings. Additional env " +
                    "variables that will be set when running the Bazel command to " +
                    "generate the toolchain configs."),
+        ),
+        "exec_compatible_with": attr.string_list(
+            default = _RBE_UBUNTU_EXEC_COMPAT_WITH,
+            doc = ("The list of constraints that will be added to the " +
+                   "toolchain in its exec_compatible_with attribute (and to " +
+                   "the platform in its constraint_values attr). For " +
+                   "example, [\"@bazel_tools//platforms:linux\"]. Default " +
+                   " is set to values for rbe-ubuntu16-04 container."),
         ),
         "incompatible_changes_off": attr.bool(
             default = True,
@@ -646,19 +661,6 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. The directory (under the project root) where the " +
                    "produced toolchain configs will be copied to."),
         ),
-        "config_dir": attr.string(
-            doc = ("Optional. Use only if output_base is defined. If you want to " +
-                   "create multiple toolchain configs (for the same version of Bazel) " +
-                   "you can use this attr to indicate a type of config (e.g., default, " +
-                   "msan). The configs will be generated in a sub-directory when this attr  " +
-                   "is used."),
-        ),
-        "setup_cmd": attr.string(
-            default = "cd .",
-            doc = ("Optional. Pass an additional command that will be executed " +
-                   "(inside the container) before running bazel to generate the " +
-                   "toolchain configs"),
-        ),
         "registry": attr.string(
             default = _RBE_UBUNTU_REGISTRY,
             doc = ("The registry to pull the container from. For example, " +
@@ -674,13 +676,11 @@ _rbe_autoconfig = repository_rule(
         "revision": attr.string(
             doc = ("The revision of the rbe-ubuntu16-04 container."),
         ),
-        "exec_compatible_with": attr.string_list(
-            default = _RBE_UBUNTU_EXEC_COMPAT_WITH,
-            doc = ("The list of constraints that will be added to the " +
-                   "toolchain in its exec_compatible_with attribute (and to " +
-                   "the platform in its constraint_values attr). For " +
-                   "example, [\"@bazel_tools//platforms:linux\"]. Default " +
-                   " is set to values for rbe-ubuntu16-04 container."),
+        "setup_cmd": attr.string(
+            default = "cd .",
+            doc = ("Optional. Pass an additional command that will be executed " +
+                   "(inside the container) before running bazel to generate the " +
+                   "toolchain configs"),
         ),
         "target_compatible_with": attr.string_list(
             default = _RBE_UBUNTU_TARGET_COMPAT_WITH,

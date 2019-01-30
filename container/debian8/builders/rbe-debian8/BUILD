@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
+load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 load(
     "//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
     "toolchain_container",
 )
-load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 language_tool_layer(
     name = "base-ltl",
@@ -52,12 +52,12 @@ toolchain_container(
         "/bin/bash",
     ],
     env = {
-        # PATH envvar is a special case, and currently only the one in the
-        # topmost layer is set. So that we override it here to include all.
-        "PATH": "$PATH:/opt/python3.6/bin:/usr/local/go/bin",
         "LANG": "C.UTF-8",
         "LANGUAGE": "C.UTF-8",
         "LC_ALL": "C.UTF-8",
+        # PATH envvar is a special case, and currently only the one in the
+        # topmost layer is set. So that we override it here to include all.
+        "PATH": "$PATH:/opt/python3.6/bin:/usr/local/go/bin",
     },
     language_layers = [
         "base-ltl",

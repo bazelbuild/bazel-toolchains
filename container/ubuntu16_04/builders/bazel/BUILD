@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
+load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 load(
     "//rules/container:docker_toolchains.bzl",
     "language_tool_layer",
     "toolchain_container",
 )
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
-load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
-load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 # Tools that are needed in most builds, but not strictly required by bazel.
 language_tool_layer(

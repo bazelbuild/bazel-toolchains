@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
-
-load("//container/common/bazel:version.bzl", "BAZEL_VERSION_SHA256S")
 
 exports_files(glob(["**"]))
 

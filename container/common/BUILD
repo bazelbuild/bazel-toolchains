@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
-exports_files(glob(["*.yaml"]))
-
 load(
     "//third_party/golang:revision.bzl",
     "GOLANG_REVISION",
@@ -27,6 +21,12 @@ load(
     "JDK_VERSION",
     "JDK_VERSION_DECODED",
 )
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(glob(["*.yaml"]))
 
 genrule(
     name = "generate_go_yaml",

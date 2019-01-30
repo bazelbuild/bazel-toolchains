@@ -14,11 +14,11 @@
 
 """Definitions of language_tool_layer and toolchain_container rules."""
 
-load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
+load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
 load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
-load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
+load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
 load(":debian_pkg_tar.bzl", _generate_deb_tar = "generate")
 
 def _input_validation(kwargs):
@@ -173,21 +173,21 @@ def _language_tool_layer_impl(
     )
 
 language_tool_layer_attrs = dicts.add(_container.image.attrs, _key.attrs, _download.attrs, _install.attrs, {
+    "image": attr.label(
+        allow_single_file = True,
+    ),
     # Redeclare following attributes as non-mandatory.
     "image_tar": attr.label(
         allow_single_file = True,
     ),
-    "image": attr.label(
-        allow_single_file = True,
-    ),
-    "packages": attr.string_list(),
-    "keys": attr.label_list(
-        allow_files = True,
-    ),
     "installables_tar": attr.label(
         allow_single_file = True,
     ),
+    "keys": attr.label_list(
+        allow_files = True,
+    ),
     "output_image_name": attr.string(),
+    "packages": attr.string_list(),
 })
 
 language_tool_layer_ = rule(

@@ -21,15 +21,19 @@ load(
     "http_file",
 )
 load(
-    "//third_party/golang:revision.bzl",
-    "GOLANG_REVISION",
-    "GOLANG_SHA256",
+    "//container/common/bazel:version.bzl",
+    "BAZEL_VERSION_SHA256S",
 )
 load(
     "//third_party/clang:revision.bzl",
     "CLANG_REVISION",
     "DEBIAN8_CLANG_SHA256",
     "UBUNTU16_04_CLANG_SHA256",
+)
+load(
+    "//third_party/golang:revision.bzl",
+    "GOLANG_REVISION",
+    "GOLANG_SHA256",
 )
 load(
     "//third_party/libcxx:revision.bzl",
@@ -42,10 +46,6 @@ load(
     "JDK_VERSION",
     "OPENJDK_SHA256",
     "OPENJDK_SRC_SHA256",
-)
-load(
-    "//container/common/bazel:version.bzl",
-    "BAZEL_VERSION_SHA256S",
 )
 
 def repositories():
