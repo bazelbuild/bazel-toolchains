@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load(
     "@bazel_toolchains//rules:environments.bzl",
@@ -24,7 +21,10 @@ load(
     "ubuntu16_04_clang_default_packages",
     "ubuntu16_04_clang_default_repos",
 )
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 # Created on 2018.05.09
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7

@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("//rules/container:docker_toolchains.bzl", "toolchain_container")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
-
-load("//rules/container:docker_toolchains.bzl", "toolchain_container")
 
 # This file contains some sample targets that excersise the container rules
 # We just keep these as examples that should not break (unless indicated)

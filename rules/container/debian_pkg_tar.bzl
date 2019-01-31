@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@base_images_docker//package_managers:download_pkgs.bzl", _download_deb_pkgs = "download")
 load("@base_images_docker//package_managers:apt_key.bzl", _apt_key = "key")
+load("@base_images_docker//package_managers:download_pkgs.bzl", _download_deb_pkgs = "download")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 def _input_validation(kwargs):
@@ -32,19 +32,19 @@ container = [
 
 generate_deb_tar_attrs = dicts.add(_download_deb_pkgs.attrs, {
     "base": attr.label(allow_files = container),
-    "packages": attr.string_list(),
     "keys": attr.label_list(
         allow_files = True,
     ),
+    "packages": attr.string_list(),
 })
 
 aggregate_debian_pkgs_attrs = {
-    "base": attr.label(allow_files = container),
-    "language_layers": attr.label_list(),
 
     # Declare the following attributes since _download_deb_pkgs.implementation
     # need access those attribute if their overrides are None
     "additional_repos": attr.string_list(),
+    "base": attr.label(allow_files = container),
+    "language_layers": attr.label_list(),
     "_image_id_extractor": attr.label(
         default = "@io_bazel_rules_docker//contrib:extract_image_id.py",
         allow_single_file = True,
