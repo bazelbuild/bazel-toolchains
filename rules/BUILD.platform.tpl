@@ -18,11 +18,6 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load(
-    "@bazel_toolchains//third_party/openjdk:revision.bzl",
-    JDK_VERSION = "JDK_VERSION_DECODED",
-)
-
 java_runtime(
     name = "jdk",
     srcs = [],
