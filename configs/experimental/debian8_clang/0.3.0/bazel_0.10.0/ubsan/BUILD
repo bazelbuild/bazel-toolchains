@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load(":dummy_toolchain.bzl", "dummy_toolchain")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
@@ -45,9 +47,9 @@ filegroup(
 cc_toolchain_suite(
     name = "ubsan_experimental_toolchain",
     toolchains = {
-        "k8|clang": ":cc-compiler-k8",
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
         "ios_x86_64|compiler": ":cc-compiler-ios_x86_64",
+        "k8|clang": ":cc-compiler-k8",
     },
 )
 
@@ -112,7 +114,5 @@ toolchain(
     toolchain = "dummy_cc_toolchain_impl",
     toolchain_type = ":toolchain_type",
 )
-
-load(":dummy_toolchain.bzl", "dummy_toolchain")
 
 dummy_toolchain(name = "dummy_cc_toolchain_impl")

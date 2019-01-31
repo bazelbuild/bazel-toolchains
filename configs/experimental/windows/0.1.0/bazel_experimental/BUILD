@@ -34,10 +34,10 @@ cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+        "ios_x86_64|compiler": ":cc-compiler-ios_x86_64",
+        "x64_windows|mingw-gcc": ":cc-compiler-x64_windows_mingw",
         "x64_windows|msvc-cl": ":cc-compiler-x64_windows",
         "x64_windows|msys-gcc": ":cc-compiler-x64_windows_msys",
-        "x64_windows|mingw-gcc": ":cc-compiler-x64_windows_mingw",
-        "ios_x86_64|compiler": ":cc-compiler-ios_x86_64",
     },
 )
 
