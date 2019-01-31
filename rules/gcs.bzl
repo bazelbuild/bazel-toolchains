@@ -12,7 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Skylark rule for pulling a file from GCS bucket.
+"""Repository rule for pulling a file from GCS bucket.
+
+The rule uses gsutil tool installed in the system to download a file from a GCS bucket,
+and make it available for other rules to use (e.g. container_image rule).
+To install gsutil, please refer to:
+  https://cloud.google.com/storage/docs/gsutil
+You need to have read access to the GCS bucket.
 """
 
 _GCS_FILE_BUILD = """
@@ -48,8 +54,8 @@ def _gcs_file_impl(ctx):
         Label("@bazel_toolchains//rules:gsutil_cp_and_validate.sh.tpl"),
         {
             "%{BUCKET}": ctx.attr.bucket,
-            "%{FILE}": ctx.attr.file,
             "%{DOWNLOAD_PATH}": str(download_path),
+            "%{FILE}": ctx.attr.file,
             "%{SHA256}": ctx.attr.sha256,
         },
     )
@@ -71,23 +77,21 @@ def _gcs_file_impl(ctx):
 
 gcs_file = repository_rule(
     attrs = {
-        "bucket": attr.string(mandatory = True),
-        "file": attr.string(mandatory = True),
-        "downloaded_file_path": attr.string(),
-        "sha256": attr.string(mandatory = True),
+        "bucket": attr.string(
+            mandatory = True,
+            doc = "The GCS bucket which contains the file.",
+        ),
+        "downloaded_file_path": attr.string(
+            doc = "Path assigned to the file downloaded.",
+        ),
+        "file": attr.string(
+            mandatory = True,
+            doc = "The file which we are downloading.",
+        ),
+        "sha256": attr.string(
+            mandatory = True,
+            doc = "The expected SHA-256 of the file downloaded.",
+        ),
     },
     implementation = _gcs_file_impl,
 )
-"""Downloads a file from GCS bucket.
-The rule uses gsutil tool installed in the system to download a file from a GCS bucket,
-and make it available for other rules to use (e.g. container_image rule).
-To install gsutil, please refer to:
-  https://cloud.google.com/storage/docs/gsutil
-You need to have read access to the GCS bucket.
-Args:
-  name: Name of the rule.
-  bucket: The GCS bucket which contains the file.
-  file: The file which we are downloading.
-  downloaded_file_path: Path assigned to the file downloaded.
-  sha256: The expected SHA-256 of the file downloaded.
-"""

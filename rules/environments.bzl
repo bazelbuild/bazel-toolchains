@@ -15,27 +15,27 @@
 
 def gcc_env():
     return {
-        "ABI_VERSION": "gcc",
         "ABI_LIBC_VERSION": "glibc_2.19",
+        "ABI_VERSION": "gcc",
         "BAZEL_COMPILER": "gcc",
         "BAZEL_HOST_SYSTEM": "i686-unknown-linux-gnu",
-        "BAZEL_TARGET_LIBC": "glibc_2.19",
         "BAZEL_TARGET_CPU": "k8",
+        "BAZEL_TARGET_LIBC": "glibc_2.19",
         "BAZEL_TARGET_SYSTEM": "x86_64-unknown-linux-gnu",
         "CC_TOOLCHAIN_NAME": "linux_gnu_x86",
     }
 
 def clang_env():
     return {
-        "ABI_VERSION": "clang",
         "ABI_LIBC_VERSION": "glibc_2.19",
+        "ABI_VERSION": "clang",
         "BAZEL_COMPILER": "clang",
         "BAZEL_HOST_SYSTEM": "i686-unknown-linux-gnu",
-        "BAZEL_TARGET_LIBC": "glibc_2.19",
         "BAZEL_TARGET_CPU": "k8",
+        "BAZEL_TARGET_LIBC": "glibc_2.19",
         "BAZEL_TARGET_SYSTEM": "x86_64-unknown-linux-gnu",
-        "CC_TOOLCHAIN_NAME": "linux_gnu_x86",
         "CC": "clang",
+        "CC_TOOLCHAIN_NAME": "linux_gnu_x86",
     }
 
 def debian8_clang_default_packages():

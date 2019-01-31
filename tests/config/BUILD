@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
 load("//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load(
     "//rules:environments.bzl",
@@ -25,6 +21,10 @@ load(
     "debian8_clang_default_repos",
     "gcc_env",
 )
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 bazel_next_release = "0.20.0"
 

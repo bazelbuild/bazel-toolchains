@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load(
     "@bazel_toolchains//rules:environments.bzl",
@@ -24,7 +21,10 @@ load(
     "debian8_clang_default_packages",
     "debian8_clang_default_repos",
 )
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
+
+licenses(["notice"])  # Apache 2.0
+
+package(default_visibility = ["//visibility:public"])
 
 # Created on 2017.10.18
 docker_toolchain_autoconfig(

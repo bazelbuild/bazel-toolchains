@@ -15,11 +15,11 @@
 # Once recursive workspace is implemented in Bazel, this file should cease
 # to exist.
 
-load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     "container_pull",
 )
+load("//rules:toolchain_containers.bzl", "toolchain_container_sha256s")
 
 _REGISTRY = "marketplace.gcr.io"
 

@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
@@ -20,9 +23,6 @@ exports_files([
     "install_bazel_head.sh",
     "install_bazel_version.sh",
 ])
-
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 filegroup(
     name = "bazel_installers",

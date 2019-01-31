@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-licenses(["notice"])  # Apache 2.0
-
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+licenses(["notice"])  # Apache 2.0
 
 bzl_library(
     name = "debian_pkg_tar",

@@ -47,9 +47,9 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
-        "k8|clang": ":cc-compiler-k8",
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
         "ios_x86_64|compiler": ":cc-compiler-ios_x86_64",
+        "k8|clang": ":cc-compiler-k8",
     },
 )
 

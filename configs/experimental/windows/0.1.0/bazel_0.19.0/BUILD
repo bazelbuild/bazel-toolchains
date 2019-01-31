@@ -33,12 +33,12 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
+        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+        "x64_windows": ":cc-compiler-x64_windows_msys",
+        "x64_windows|mingw-gcc": ":cc-compiler-x64_windows_mingw",
         "x64_windows|msvc-cl": ":cc-compiler-x64_windows",
         "x64_windows|msys-gcc": ":cc-compiler-x64_windows_msys",
-        "x64_windows|mingw-gcc": ":cc-compiler-x64_windows_mingw",
-        "x64_windows": ":cc-compiler-x64_windows_msys",
-        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
     },
 )
 
