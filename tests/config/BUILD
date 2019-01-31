@@ -16,7 +16,6 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
-load("//rules/container:docker_toolchains.bzl", "toolchain_container")
 load("//rules:docker_config.bzl", "docker_toolchain_autoconfig")
 load(
     "//rules:environments.bzl",
@@ -31,87 +30,25 @@ bazel_next_release = "0.20.0"
 
 bazel_next_release_rc = "3"
 
-# Use "rbe-test-" prefix for easy identification of images to remove after the tests.
-toolchain_container(
-    name = "rbe-test-jessie-with-pkgs",
-    additional_repos = debian8_clang_default_repos(),
-    base = "@official_jessie//image",
-    keys = debian8_clang_default_keys(),
-    packages = debian8_clang_default_packages() + [
-        "gcc",
-    ],
-)
-
-# Targets here are for testing purposes, we do not actually
-# maintain these configs anywhere
-docker_toolchain_autoconfig(
-    name = "debian-jessie-autoconfig",
-    base = ":rbe-test-jessie-with-pkgs.tar",
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-)
-
-docker_toolchain_autoconfig(
-    name = "debian-jessie-bazel-head-autoconfig",
-    base = ":rbe-test-jessie-with-pkgs.tar",
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-    use_bazel_head = True,
-)
-
-# Note that we only support Bazel rc versions at 0.10.0 or above.
-docker_toolchain_autoconfig(
-    name = "debian-jessie-custom-bazel-rc-version-autoconfig",
-    base = ":rbe-test-jessie-with-pkgs.tar",
-    bazel_rc_version = bazel_next_release_rc,
-    bazel_version = bazel_next_release,
-    env = gcc_env(),
-    tags = ["manual"],
-    test = True,
-)
-
-# Use "rbe-test-" prefix for easy identification of images to remove after the tests.
-toolchain_container(
-    name = "rbe-test-xenial-with-pkgs",
-    additional_repos = [
-        "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8",
-    ],
-    base = "@official_xenial//image",
-    keys = [
-        "@bazel_gpg//file",
-    ],
-    packages = [
-        "bazel",
-        "curl",
-        "gcc",
-        "git",
-        "openjdk-8-jdk",
-        "python-dev",
-        "unzip",
-        "wget",
-        "zip",
-    ],
-)
-
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-autoconfig",
-    base = ":rbe-test-xenial-with-pkgs.tar",
+    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
+    incompatible_changes_off = True,
     tags = ["manual"],
     test = True,
 )
 
 docker_toolchain_autoconfig(
     name = "external-repo-autoconfig",
-    base = ":rbe-test-xenial-with-pkgs.tar",
+    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
     config_repos = [
         "local_config_sh",
         "local_config_cc",
     ],
     env = gcc_env(),
     git_repo = "https://github.com/bazelbuild/bazel",
+    incompatible_changes_off = True,
     tags = ["manual"],
     test = True,
 )
@@ -122,7 +59,7 @@ docker_toolchain_autoconfig(
 # bazel test //tests/config:this-project-repo-autoconfig_test --define mount_project=$(realpath .)
 docker_toolchain_autoconfig(
     name = "this-project-repo-autoconfig",
-    base = ":rbe-test-xenial-with-pkgs.tar",
+    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
     config_repos = [
         "local_config_sh",
         "local_config_cc",
@@ -136,7 +73,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
-    base = ":rbe-test-xenial-with-pkgs.tar",
+    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -146,7 +83,7 @@ docker_toolchain_autoconfig(
 # Note that we only support Bazel rc versions at 0.10.0 or above.
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
-    base = ":rbe-test-xenial-with-pkgs.tar",
+    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
     bazel_rc_version = bazel_next_release_rc,
     bazel_version = bazel_next_release,
     env = gcc_env(),

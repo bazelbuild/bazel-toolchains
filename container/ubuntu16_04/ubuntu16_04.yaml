@@ -1,7 +1,0 @@
-schemaVersion: "2.0.0"
-
-# Distro-specific tests
-fileContentTests:
-- name: 'os-version'
-  expectedContents: ['Ubuntu 16.04.* LTS']
-  path: '/etc/issue.net'

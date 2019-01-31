@@ -2,26 +2,15 @@
 platforms:
   rbe_ubuntu1604:
     test_targets:
-    - "//tests/config:debian-jessie-autoconfig_test"
-    # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
-    #- "//tests/config:debian-jessie-bazel-head-autoconfig_test"
-    - "//tests/config:debian-jessie-custom-bazel-rc-version-autoconfig_test"
     - "//tests/config:ubuntu-xenial-autoconfig_test"
+    # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
     #- "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
     - "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
     - "//tests/config:debian8_clang_autoconfig_test"
     - "//tests/config:external-repo-autoconfig_test"
     - "//tests/config:this-project-repo-autoconfig"
-    - "//configs/debian8_clang:default-debian8-clang-0.4.0-bazel_0.18.0-autoconfig_test"
-    - "//configs/debian8_clang:msan-debian8-clang-0.4.0-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
-    - "//container/debian8/builders/rbe-debian8:toolchain-test"
-    - "//container/ubuntu16_04/builders/rbe-ubuntu16_04:toolchain-test"
-    - "//container/ubuntu16_04/builders/bazel:bazel_0.18.0-test"
-    - "//container/ubuntu16_04/builders/bazel_docker_gcloud:bazel_0.18.0_docker_gcloud-test"
-    - "//container/debian8/builders/bazel:bazel_0.18.0-test"
-    - "//container/ubuntu14_04/builders/bazel:bazel_0.18.0-test"
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"

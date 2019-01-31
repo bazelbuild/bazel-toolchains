@@ -18,3 +18,8 @@ Release information of toolchain configs can be found at:
 https://releases.bazel.build/bazel-toolchains.html.
 
 This repository also hosts the skylark rule used to generate toolchain configs.
+
+This repo previously contained Bazel targets that are used to generate toolchain
+containers. Note that they have been migrated to the following two repos:
+* [layer-definitions](https://github.com/GoogleCloudPlatform/layer-definitions)
+* [container-definitions](https://github.com/GoogleCloudPlatform/container-definitions)

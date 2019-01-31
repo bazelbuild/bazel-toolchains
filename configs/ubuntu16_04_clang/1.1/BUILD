@@ -14,11 +14,6 @@
 
 package(default_visibility = ["//visibility:public"])
 
-load(
-    "//third_party/openjdk:revision.bzl",
-    JDK_VERSION = "JDK_VERSION_DECODED",
-)
-
 java_runtime(
     name = "jdk8",
     srcs = [],
@@ -28,7 +23,7 @@ java_runtime(
 java_runtime(
     name = "jdk10",
     srcs = [],
-    java_home = "/usr/lib/jvm/zulu" + JDK_VERSION + "-linux_x64-allmodules",
+    java_home = "/usr/lib/jvm/zulu10.2+3-jdk10.0.1-linux_x64-allmodules",
 )
 
 # Update every time when a new container is available publically.
@@ -135,6 +130,10 @@ platform(
         properties: {
           name: "container-image"
           value:"docker://gcr.io/asci-toolchain/nosla-xenial-docker@sha256:b4f34255823ae7f95f38712b85013ec26926c8c5b565b0d3f1d32e1295394e9d"
+        }
+        properties: {
+          name: "dockerSiblingContainers"
+          value: "true"
         }
         """,
 )
