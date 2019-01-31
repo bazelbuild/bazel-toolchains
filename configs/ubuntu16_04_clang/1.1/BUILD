@@ -135,18 +135,6 @@ platform(
           name: "dockerSiblingContainers"
           value: "true"
         }
-        properties: {
-          name: "dockerNetwork"
-          value: "standard"
-        }
-        properties: {
-          name: "dockerRunAsRoot"
-          value: "true"
-        }
-        properties: {
-          name: "dockerPrivileged"
-          value: "true"
-        }
         """,
 )
 

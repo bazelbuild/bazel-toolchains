@@ -34,6 +34,7 @@ docker_toolchain_autoconfig(
     name = "ubuntu-xenial-autoconfig",
     base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
+    incompatible_changes_off = True,
     tags = ["manual"],
     test = True,
 )
@@ -47,6 +48,7 @@ docker_toolchain_autoconfig(
     ],
     env = gcc_env(),
     git_repo = "https://github.com/bazelbuild/bazel",
+    incompatible_changes_off = True,
     tags = ["manual"],
     test = True,
 )

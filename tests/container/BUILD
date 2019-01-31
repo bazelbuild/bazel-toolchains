@@ -17,27 +17,10 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 load("//rules/container:docker_toolchains.bzl", "toolchain_container")
-load(
-    "//rules:environments.bzl",
-    "debian8_clang_default_keys",
-    "debian8_clang_default_packages",
-    "debian8_clang_default_repos",
-)
 
 # This file contains some sample targets that excersise the container rules
 # We just keep these as examples that should not break (unless indicated)
 # with changes.
-
-# Use "rbe-test-" prefix for easy identification of images to remove after the tests.
-toolchain_container(
-    name = "rbe-test-jessie-with-pkgs",
-    additional_repos = debian8_clang_default_repos(),
-    base = "@official_jessie//image",
-    keys = debian8_clang_default_keys(),
-    packages = debian8_clang_default_packages() + [
-        "gcc",
-    ],
-)
 
 # Use "rbe-test-" prefix for easy identification of images to remove after the tests.
 toolchain_container(
