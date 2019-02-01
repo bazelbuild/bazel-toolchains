@@ -92,7 +92,8 @@ def create_targets(container_configs_list, bazel_version):
             build_file.write(tpl)
 
 
-def update_latest_target_aliases(container_configs_list, bazel_version):
+def update_latest_target_aliases(container_configs_list, bazel_version,
+                                 buildifier):
   """Updates the alias targets pointing to latest toolchain targets.
 
   Example latest aliases clang-ubuntu container are located in
@@ -123,13 +124,18 @@ def update_latest_target_aliases(container_configs_list, bazel_version):
                 [("\"%s\"" % config_type)
                  for config_type in container_configs.config_types]),
             EXTRA_CONSTRAINTS="\n".join(
-                [("\"%s\"," % constraint) for constraint in constraints])
-        )
+                [("\"%s\"," % constraint) for constraint in constraints]))
 
         build_file.write(tpl)
 
+    subprocess.check_call(
+        shlex.split(
+            "%s --lint=fix %s" %
+            (buildifier, container_configs.get_latest_aliases_build_path())))
 
-def generate_toolchain_definition(container_configs_list, bazel_version):
+
+def generate_toolchain_definition(container_configs_list, bazel_version,
+                                  buildifier):
   """Generates new cpp toolchain definitions.
 
   Example cpp toolchain definitions for clang-ubuntu container are located in
@@ -188,7 +194,8 @@ def generate_toolchain_definition(container_configs_list, bazel_version):
           build_file.write(tpl)
 
       subprocess.check_call(
-          shlex.split("buildifier %s" % container_configs.get_cpp_build_path()))
+          shlex.split("%s --lint=fix %s" %
+                      (buildifier, container_configs.get_cpp_build_path())))
 
 
 def generate_metadata(container_configs_list):
