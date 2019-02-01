@@ -452,10 +452,7 @@ def _create_docker_cmd(
 
     # For each config repo we run the target @<config_repo>//...
     bazel_targets = "@" + "//... @".join(_CONFIG_REPOS) + "//..."
-    bazel_flags = ""
-    if not ctx.attr.incompatible_changes_off:
-        bazel_flags += " --all_incompatible_changes"
-    bazel_cmd += " && bazel build " + bazel_flags + " " + bazel_targets
+    bazel_cmd += " && bazel build " + bazel_targets
 
     # Command to run to clean up after autoconfiguration.
     # we start with "cd ." to make sure in case of failure everything after the
@@ -644,11 +641,6 @@ _rbe_autoconfig = repository_rule(
                    "the platform in its constraint_values attr). For " +
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
-        ),
-        "incompatible_changes_off": attr.bool(
-            default = True,
-            doc = ("If set to False the flag --all_incompatible_changes will " +
-                   "be used when generating the toolchain configs."),
         ),
         "java_home": attr.string(
             doc = ("Optional. The location of java_home in the container. " +

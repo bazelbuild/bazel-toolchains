@@ -223,10 +223,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
     # For each config repo we run the target @<config_repo>//...
     bazel_targets = "@" + "//... @".join(ctx.attr.config_repos) + "//..."
-    bazel_flags = ""
-    if not ctx.attr.incompatible_changes_off:
-        bazel_flags += " --all_incompatible_changes"
-    bazel_cmd += " && bazel build " + bazel_flags + " " + bazel_targets
+    bazel_cmd += " && bazel build " + bazel_targets
 
     # Command to run to clean up after autoconfiguration.
     # we start with "cd ." to make sure in case of failure everything after the
@@ -289,7 +286,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
            "> docker run -it {mount_flags} <image_id> bash\n" +
            "Where <image_id> is the image id printed out by the " +
            "{name}_extract.tar rule.\n" +
-           "Then run:\n>/ {run_cmd}\n" +
+           "Then run:\n>/{run_cmd}\n" +
            "from inside the container.").format(
         mount_flags = " ".join(docker_run_flags),
         name = ctx.attr.name,
@@ -323,7 +320,6 @@ docker_toolchain_autoconfig_ = rule(
         "bazel_version": attr.string(),
         "config_repos": attr.string_list(default = ["local_config_cc"]),
         "git_repo": attr.string(),
-        "incompatible_changes_off": attr.bool(default = False),
         "keys": attr.string_list(),
         "mount_project": attr.string(),
         "packages": attr.string_list(),
@@ -451,8 +447,6 @@ def docker_toolchain_autoconfig(**kwargs):
       additional_repos: list of additional debian package repos to use,
           in sources.list format.
       keys: list of additional gpg keys to use while downloading packages.
-      incompatible_changes_off: If True Bazel will run without the
-          all_incompatible_changes flag. Default False.
       test: a boolean which specifies whether a test target for this
           docker_toolchain_autoconfig will be added.
           If True, a test target with name {name}_test will be added.
