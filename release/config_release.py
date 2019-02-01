@@ -78,10 +78,15 @@ def _parse_arguments():
       "--bazel_version",
       required=True,
       help="the version of Bazel used to generate toolchain configs")
+  parser.add_argument(
+      "-l",
+      "--buildifier",
+      default="/usr/bin/buildifier",
+      help="the full path of buildifier used to format toolchain configs")
   return parser.parse_args()
 
 
-def main(bazel_version):
+def main(bazel_version, buildifier):
   """Main function.
 
   Examples of usage:
@@ -98,16 +103,19 @@ def main(bazel_version):
   cc_create.create_targets(container_configs_list, bazel_version)
 
   # Execute the target and extract toolchain configs.
-  cc_execute.execute_and_extract_configs(container_configs_list, bazel_version)
+  cc_execute.execute_and_extract_configs(container_configs_list, bazel_version,
+                                         buildifier)
 
   # Generate METADATA file.
   cc_create.generate_metadata(container_configs_list)
 
   # Generate new cpp toolchain definition targets.
-  cc_create.generate_toolchain_definition(container_configs_list, bazel_version)
+  cc_create.generate_toolchain_definition(container_configs_list, bazel_version,
+                                          buildifier)
 
   # Update aliases to latest toolchain configs.
-  cc_create.update_latest_target_aliases(container_configs_list, bazel_version)
+  cc_create.update_latest_target_aliases(container_configs_list, bazel_version,
+                                         buildifier)
 
   # Update toolchain.bazelrc file.
   toolchain_flags.update_toolchain_bazelrc_file(container_configs_list,
@@ -120,4 +128,4 @@ def main(bazel_version):
 if __name__ == "__main__":
 
   args = _parse_arguments()
-  main(args.bazel_version)
+  main(args.bazel_version, args.buildifier)

@@ -37,7 +37,8 @@ def _cleanup():
     shutil.rmtree(TMP_DIR)
 
 
-def execute_and_extract_configs(container_configs_list, bazel_version):
+def execute_and_extract_configs(container_configs_list, bazel_version,
+                                buildifier):
   """Executes the docker_toolchain_autoconfig targets and extract configs.
 
   If configs already exist in this repo, the script will delete them and
@@ -107,3 +108,8 @@ def execute_and_extract_configs(container_configs_list, bazel_version):
         member = tar.getmember(os.path.join(CONFIG_REPO, config_file))
         member.name = os.path.basename(member.name)
         tar.extract(member, config.get_config_dir())
+        if config_file == "BUILD" or config_file.endswith("bzl"):
+          subprocess.check_call(
+              shlex.split("%s --lint=fix %s" %
+                          (buildifier,
+                           os.path.join(config.get_config_dir(), config_file))))
