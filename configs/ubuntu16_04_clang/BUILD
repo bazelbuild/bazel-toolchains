@@ -454,9 +454,6 @@ docker_toolchain_autoconfig(
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.22.0",
     env = clang_env(),
-    # TODO (smukherj1): Disable this. Needed to generate configs for Bazel
-    # 0.22.0.
-    incompatible_changes_off = True,
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
@@ -479,9 +476,6 @@ docker_toolchain_autoconfig(
             "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
         },
     ),
-    # TODO (smukherj1): Disable this. Needed to generate configs for Bazel
-    # 0.22.0.
-    incompatible_changes_off = True,
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
