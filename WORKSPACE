@@ -130,3 +130,11 @@ rbe_autoconfig(
     ),
     output_base = "configs/ubuntu16_04_clang/1.1",
 )
+
+# Use in the RBE Ubuntu1604 container release.
+rbe_autoconfig(
+    name = "rbe_ubuntu1604_test",
+    registry = "gcr.io",
+    repository = "asci-toolchain/test-rbe-ubuntu16_04",
+    tag = "latest",
+)

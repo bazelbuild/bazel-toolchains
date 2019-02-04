@@ -78,7 +78,6 @@ Add to your WORKSPACE file the following:
     name = "rbe_my_custom_container",
     registry = "gcr.io",
     repository = "my-project/my-base",
-    # tag is not supported, always use a digest
     digest = "sha256:deadbeef",
   )
 
@@ -144,8 +143,8 @@ There are two modes of using this repo rules:
 The {bazel_version} above corresponds to the version of bazel installed locally.
 Note you can override this version and pass an optional rc # if desired.
 Running this rule with a non release version (e.g., built from source) will result in
-picking as bazel version <bazel_version_fallback> defined in the attrs of this rule.
-Note the bazel_version / bazel_rc must be published in https://releases.bazel.build/...
+picking as bazel version _BAZEL_VERSION_FALLBACK. Note the bazel_version / bazel_rc_version
+must be published in https://releases.bazel.build/...
 
 Note this is a very not hermetic repository rule that can actually change the
 contents of your project sources. While this is generally not recommended by
@@ -183,6 +182,9 @@ load(
     "parse_rc",
 )
 
+# Version to fallback to if not provided explicitly and local is non-release version.
+_BAZEL_VERSION_FALLBACK = "0.22.0"
+
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
 # https://github.com/bazelbuild/bazel/issues/1262
@@ -214,21 +216,10 @@ _VERBOSE = False
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
 
-    # Resolve the Bazel version to use
-    bazel_version = None
-    bazel_rc_version = None
-    if ctx.attr.bazel_version == "local":
-        bazel_version = str(extract_version_number(ctx.attr.bazel_version_fallback))
-        rc = parse_rc(native.bazel_version)
-        bazel_rc_version = rc if rc != -1 else None
-    if ctx.attr.bazel_version != "local":
-        bazel_version = ctx.attr.bazel_version
-        bazel_rc_version = ctx.attr.bazel_rc_version
-
     # Deal with the simple case first: if user picks rbe-ubuntu 16_04 container and
     # a config exists for the current version of Bazel, just create aliases
     if ctx.attr.use_checked_in_confs:
-        if _use_standard_config(ctx, bazel_version, bazel_rc_version, ctx.attr.revision):
+        if _use_standard_config(ctx, ctx.attr.bazel_version, ctx.attr.bazel_rc_version, ctx.attr.tag):
             # If a standard config was found we are done and can just return.
             return
 
@@ -256,8 +247,19 @@ def _impl(ctx):
     outputs_tar = ctx.attr.name + "_out.tar"
 
     # Pull the image using 'docker pull'
-    image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
+    image_name = None
+    if ctx.attr.digest:
+        image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
+    else:
+        image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
     _pull_image(ctx, image_name)
+
+    # If tag is specified instead of digest, resolve it to digest in the
+    # image_name as it will be used later on in the platform targets.
+    if ctx.attr.tag:
+        result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
+        _print_exec_results("Resolve image digest", result, fail_on_error = True)
+        image_name = result.stdout.splitlines()[0]
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
@@ -266,8 +268,8 @@ def _impl(ctx):
     # run the container and extract the autoconf directory
     _run_and_extract(
         ctx,
-        bazel_version = bazel_version,
-        bazel_rc_version = bazel_rc_version,
+        bazel_version = ctx.attr.bazel_version,
+        bazel_rc_version = ctx.attr.bazel_rc_version,
         image_name = image_name,
         outputs_tar = outputs_tar,
         project_root = project_root,
@@ -278,7 +280,7 @@ def _impl(ctx):
     # will work with RBE with the produced toolchain
     _create_platform(
         ctx,
-        bazel_version = bazel_version,
+        bazel_version = ctx.attr.bazel_version,
         image_name = image_name,
         java_home = java_home,
         name = name,
@@ -287,7 +289,7 @@ def _impl(ctx):
     # Expand outputs to project dir if user requested it
     _expand_outputs(
         ctx,
-        bazel_version = bazel_version,
+        bazel_version = ctx.attr.bazel_version,
         project_root = project_root,
     )
 
@@ -315,24 +317,13 @@ def _validate_host(ctx):
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
 
-# Checks if a standard published config can be used for the given revision
+# Checks if a standard published config can be used for the given tag
 # of the rbe ubuntu 16_04 container. If so, produces BUILD files with aliases
 # for all the required toolchain / platform targets. Otherwise returns false.
-def _use_standard_config(ctx, bazel_version, bazel_rc_version, revision):
-    # If rc version is required, simply return
-    if bazel_rc_version:
-        return False
+def _use_standard_config(ctx, bazel_version, bazel_rc_version, tag):
+    print("Checked-in configs found. Using checked-in configs.")
 
-    # Verify a toolchain config exists for the given version of Bazel and the
-    # given revision of the container
-    config_version = public_rbe_ubuntu16_04_config_version().get(revision, None)
-    config_found = False
-    for b_v in config_to_bazel_versions().get(config_version):
-        if b_v == bazel_version:
-            config_found = True
-            break
-    if not config_found:
-        return False
+    config_version = public_rbe_ubuntu16_04_config_version().get(tag, None)
 
     # If a config is found, create the BUILD files with the aliases
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_container.tpl"))
@@ -364,7 +355,7 @@ def _use_standard_config(ctx, bazel_version, bazel_rc_version, revision):
 
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
-    print("Pulling image.")
+    print("Pulling image %s." % image_name)
     result = ctx.execute(["docker", "pull", image_name])
     _print_exec_results("pull image", result, fail_on_error = True)
     print("Image pulled.")
@@ -611,11 +602,6 @@ _rbe_autoconfig = repository_rule(
             doc = ("The version of Bazel to use to generate toolchain configs." +
                    "Use only (major, minor, patch), e.g., '0.20.0'."),
         ),
-        "bazel_version_fallback": attr.string(
-            default = "0.22.0",
-            doc = ("Version to fallback to if not provided explicitly and local " +
-                   "is non-release version."),
-        ),
         "config_dir": attr.string(
             doc = ("Optional. Use only if output_base is defined. If you want to " +
                    "create multiple toolchain configs (for the same version of Bazel) " +
@@ -624,7 +610,6 @@ _rbe_autoconfig = repository_rule(
                    "is used."),
         ),
         "digest": attr.string(
-            mandatory = True,
             doc = ("The digest (sha256 sum) of the image to pull. For example, " +
                    "sha256:f1330b2f02714d3a3e98c5b1f6524fbb9c15154e44a31fb3caecb7a6ad4e8445" +
                    ", note the digest includes 'sha256:'"),
@@ -665,14 +650,14 @@ _rbe_autoconfig = repository_rule(
                    " google/ubuntu. The default is the " +
                    " value for the rbe-ubuntu16-04 image."),
         ),
-        "revision": attr.string(
-            doc = ("The revision of the rbe-ubuntu16-04 container."),
-        ),
         "setup_cmd": attr.string(
             default = "cd .",
             doc = ("Optional. Pass an additional command that will be executed " +
                    "(inside the container) before running bazel to generate the " +
                    "toolchain configs"),
+        ),
+        "tag": attr.string(
+            doc = ("The tag of the image to pull, e.g. latest."),
         ),
         "target_compatible_with": attr.string_list(
             default = _RBE_UBUNTU_TARGET_COMPAT_WITH,
@@ -696,14 +681,14 @@ _rbe_autoconfig = repository_rule(
 def rbe_autoconfig(
         name,
         bazel_version = None,
-        bazel_rc = None,
+        bazel_rc_version = None,
         config_dir = None,
         digest = None,
         env = None,
         exec_compatible_with = None,
         java_home = None,
         output_base = None,
-        revision = None,
+        tag = None,
         registry = None,
         repository = None,
         target_compatible_with = None,
@@ -718,33 +703,39 @@ def rbe_autoconfig(
           `Use only (major, minor, patch), e.g., '0.20.0'. Default is "local"
           which means the same version of Bazel that is currently running will
           be used. If local is a non release version, rbe_autoconfig will fallback
-          to using the latest release version (see default for bazel_version_fallback
-          in attrs of _rbe_autoconfig for current latest).
-      bazel_rc: The rc (for the given version of Bazel) to use. Must be published
-          in https://releases.bazel.build
+          to using the latest release version (see _BAZEL_VERSION_FALLBACK).
+      bazel_rc_version: The rc (for the given version of Bazel) to use. Must be published
+          in https://releases.bazel.build. E.g. 2.
+      config_dir: Optional. Subdirectory where configs will be copied to.
+          Use only if output_base is defined.
+      digest: Optional. The digest of the image to pull.
+          Should not be set if tag is used.
+          Must be set together with registry and repository.
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
-      digest: Optional. The digest of the image to pull. Should only be set if
-          a custom container is required.
-          Must be set together with registry and repository.
+      env: dict. Optional. Additional env variables that will be set when
+          running the Bazel command to generate the toolchain configs.
+          Set to values for gcr.io/cloud-marketplace/google/rbe-ubuntu16-04 container.
+          Does not need to be set if your custom container extends
+          the rbe-ubuntu16-04 container.
+          Should be overriden if a custom container does not extend the
+          rbe-ubuntu16-04 container.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. If not set, the rule
           will attempt to read the JAVA_HOME env var from the container.
           If that is not set the rule will fail.
       output_base: Optional. The directory (under the project root) where the
           produced toolchain configs will be copied to.
-      config_dir: Optional. Subdirectory where configs will be copied to.
-          Use only if output_base is defined.
+      tag: Optional. The tag of the container to use.
+          Should not be set if digest is used.
+          Must be set together with registry and repository.
       registry: Optional. The registry from which to pull the base image.
           Should only be set if a custom container is required.
           Must be set together with digest and repository.
       repository: Optional. he `repository` of images to pull from.
           Should only be set if a custom container is required.
           Must be set together with registry and digest.
-      revision: Optional. A revision of an rbe-ubuntu16-04 container to use.
-          Should not be set if repository, registry and digest are used.
-          See gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
       target_compatible_with: List of constraints to add to the produced
           toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
           target_compatible_with attr.
@@ -752,48 +743,81 @@ def rbe_autoconfig(
           before generating them. If set to false the rule will allways attempt
           to generate the configs by pulling a toolchain container and running
           Bazel inside.
-      env: dict. Optional. Additional env variables that will be set when
-          running the Bazel command to generate the toolchain configs.
-          Set to values for rbe-ubuntu16-04 container.
-          Does not need to be set if your custom container extends
-          an rbe-ubuntu16-04 container.
-          Should be overriden if a custom container does not extend
-          rbe-ubuntu16-04.
     """
     if not output_base and config_dir:
         fail("config_dir can only be used when output_base is set.")
-    if revision and (digest or repository or registry):
-        fail("'revision' cannot be set if 'digest', 'repository' or " +
-             "'registry' are set.")
-    if not ((not digest and not repository and not registry) or
-            (digest and repository and registry)):
-        fail("All of 'digest', 'repository' and 'registry' or none of them " +
-             "must be set.")
-    if bazel_rc and not bazel_version:
-        fail("bazel_rc can only be used with bazel_version.")
-    if not digest:
-        if not revision or revision == "latest":
-            revision = RBE_UBUNTU16_04_LATEST
-        digest = public_rbe_ubuntu16_04_sha256s().get(revision, None)
+
+    if bazel_rc_version and not bazel_version:
+        fail("bazel_rc_version can only be used with bazel_version.")
+
+    # Resolve the Bazel version to use.
+    if not bazel_version or bazel_version == "local":
+        bazel_version = str(extract_version_number(_BAZEL_VERSION_FALLBACK))
+        rc = parse_rc(native.bazel_version)
+        bazel_rc_version = rc if rc != -1 else None
+
+    if tag and digest:
+        fail("'tag' and 'digest' cannot be set at the same time.")
+
+    if not ((not digest and not tag and not repository and not registry) or
+            (digest and repository and registry) or
+            (tag and repository and registry)):
+        fail("All of 'digest', 'repository' and 'registry' or " +
+             "all of 'tag', 'repository' and 'registry' or " +
+             "none of them must be set.")
+
+    # Set to defaults only if both are unset.
+    if not repository and not registry and not tag and not digest:
+        repository = _RBE_UBUNTU_REPO
+        registry = _RBE_UBUNTU_REGISTRY
+        tag = RBE_UBUNTU16_04_LATEST
+
+    # Check if checked-in configs are available in this repo.
+    if registry and registry == _RBE_UBUNTU_REGISTRY and repository and repository == _RBE_UBUNTU_REPO:
         if not env:
             env = clang_env()
-    if not digest:
-        fail(("Could not find a valid digest for revision %s, " +
-              "please make sure it is declared in " +
-              "@bazel_toolchains//rules:toolchain_containers.bzl" % revision))
+        if tag:  # Implies `digest` is not specified.
+            if tag == "latest":
+                tag = RBE_UBUNTU16_04_LATEST
+            digest = public_rbe_ubuntu16_04_sha256s().get(tag, None)
+            if not digest:  # We didn't find checked-in configs in this repo.
+                use_checked_in_confs = False
+        else:  # Implies tag is not specified
+            for pair in public_rbe_ubuntu16_04_sha256s().items():
+                if pair[1] == digest:
+                    tag = pair[0]
+                    break
+            if not tag:
+                use_checked_in_confs = False
+
+        # Verify a toolchain config exists for the given version of Bazel and the
+        # given tag of the container
+        config_version = public_rbe_ubuntu16_04_config_version().get(tag, None)
+        if not config_version:
+            use_checked_in_confs = False
+        else:
+            config_found = False
+            for b_v in config_to_bazel_versions().get(config_version):
+                if b_v == bazel_version:
+                    config_found = True
+                    break
+            if not config_found:
+                use_checked_in_confs = False
 
     # If the user has set a custom env, custom java_home,
     # registry or repository, don't use
     # checked in configs
     if ((env and env != clang_env()) or
         (java_home) or
+        (bazel_rc_version) or
         (registry and registry != _RBE_UBUNTU_REGISTRY) or
         (repository and repository != _RBE_UBUNTU_REPO)):
         use_checked_in_confs = False
+
     _rbe_autoconfig(
         name = name,
         bazel_version = bazel_version,
-        bazel_rc = bazel_rc,
+        bazel_rc_version = bazel_rc_version,
         config_dir = config_dir,
         digest = digest,
         env = env,
@@ -802,7 +826,7 @@ def rbe_autoconfig(
         output_base = output_base,
         registry = registry,
         repository = repository,
-        revision = revision,
+        tag = tag,
         target_compatible_with = target_compatible_with,
         use_checked_in_confs = use_checked_in_confs,
     )
