@@ -78,6 +78,7 @@ Add to your WORKSPACE file the following:
     name = "rbe_my_custom_container",
     registry = "gcr.io",
     repository = "my-project/my-base",
+    # Digest is recommended for any use case other than testing.
     digest = "sha256:deadbeef",
   )
 
@@ -167,7 +168,7 @@ Known limitations (if any container other than rbe-ubuntu 16_04 is used):
 
 load(
     "//configs/ubuntu16_04_clang:versions.bzl",
-    "config_to_bazel_versions",
+    "bazel_to_config_versions",
 )
 load("//rules:environments.bzl", "clang_env")
 load(
@@ -219,9 +220,8 @@ def _impl(ctx):
     # Deal with the simple case first: if user picks rbe-ubuntu 16_04 container and
     # a config exists for the current version of Bazel, just create aliases
     if ctx.attr.use_checked_in_confs:
-        if _use_standard_config(ctx, ctx.attr.bazel_version, ctx.attr.bazel_rc_version, ctx.attr.tag):
-            # If a standard config was found we are done and can just return.
-            return
+        _use_standard_config(ctx, ctx.attr.bazel_version, ctx.attr.bazel_rc_version, ctx.attr.config_version)
+        return
 
     # Perform some safety checks
     _validate_host(ctx)
@@ -317,15 +317,11 @@ def _validate_host(ctx):
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
 
-# Checks if a standard published config can be used for the given tag
-# of the rbe ubuntu 16_04 container. If so, produces BUILD files with aliases
-# for all the required toolchain / platform targets. Otherwise returns false.
-def _use_standard_config(ctx, bazel_version, bazel_rc_version, tag):
-    print("Checked-in configs found. Using checked-in configs.")
+# Produces BUILD files with aliases for all the required toolchain / platform targets.
+def _use_standard_config(ctx, bazel_version, bazel_rc_version, config_version):
+    print("Using checked-in configs.")
 
-    config_version = public_rbe_ubuntu16_04_config_version().get(tag, None)
-
-    # If a config is found, create the BUILD files with the aliases
+    # Create the BUILD files with the aliases
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_container.tpl"))
     jdk = "@bazel_toolchains//configs/ubuntu16_04_clang/%s:jdk8" % config_version
     cc_toolchain = "@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/cpp:cc-toolchain-clang-x86_64-default" % (config_version, bazel_version)
@@ -351,7 +347,6 @@ def _use_standard_config(ctx, bazel_version, bazel_rc_version, tag):
         },
         False,
     )
-    return True
 
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
@@ -609,8 +604,12 @@ _rbe_autoconfig = repository_rule(
                    "msan). The configs will be generated in a sub-directory when this attr  " +
                    "is used."),
         ),
+        "config_version": attr.string(
+            doc = ("The config version found for the given container and Bazel version." +
+                   "Used internally when use_checked_in_confs is true."),
+        ),
         "digest": attr.string(
-            doc = ("The digest (sha256 sum) of the image to pull. For example, " +
+            doc = ("Optional. The digest (sha256 sum) of the image to pull. For example, " +
                    "sha256:f1330b2f02714d3a3e98c5b1f6524fbb9c15154e44a31fb3caecb7a6ad4e8445" +
                    ", note the digest includes 'sha256:'"),
         ),
@@ -621,7 +620,7 @@ _rbe_autoconfig = repository_rule(
         ),
         "exec_compatible_with": attr.string_list(
             default = _RBE_UBUNTU_EXEC_COMPAT_WITH,
-            doc = ("The list of constraints that will be added to the " +
+            doc = ("Optional. The list of constraints that will be added to the " +
                    "toolchain in its exec_compatible_with attribute (and to " +
                    "the platform in its constraint_values attr). For " +
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
@@ -640,13 +639,13 @@ _rbe_autoconfig = repository_rule(
         ),
         "registry": attr.string(
             default = _RBE_UBUNTU_REGISTRY,
-            doc = ("The registry to pull the container from. For example, " +
+            doc = ("Optional. The registry to pull the container from. For example, " +
                    "l.gcr.io or marketplace.gcr.io. The default is the " +
                    "value for rbe-ubuntu16-04 image."),
         ),
         "repository": attr.string(
             default = _RBE_UBUNTU_REPO,
-            doc = ("The repository to pull the container from. For example," +
+            doc = ("Optional. The repository to pull the container from. For example," +
                    " google/ubuntu. The default is the " +
                    " value for the rbe-ubuntu16-04 image."),
         ),
@@ -657,7 +656,7 @@ _rbe_autoconfig = repository_rule(
                    "toolchain configs"),
         ),
         "tag": attr.string(
-            doc = ("The tag of the image to pull, e.g. latest."),
+            doc = ("Optional. The tag of the image to pull, e.g. latest."),
         ),
         "target_compatible_with": attr.string_list(
             default = _RBE_UBUNTU_TARGET_COMPAT_WITH,
@@ -668,7 +667,7 @@ _rbe_autoconfig = repository_rule(
         ),
         "use_checked_in_confs": attr.bool(
             default = True,
-            doc = ("If set to False the checked-in configs in bazel-toolchains" +
+            doc = ("Optional. If set to False the checked-in configs in bazel-toolchains" +
                    "repo are ignored and a container is allways pulled."),
         ),
     },
@@ -766,59 +765,43 @@ def rbe_autoconfig(
              "all of 'tag', 'repository' and 'registry' or " +
              "none of them must be set.")
 
-    # Set to defaults only if both are unset.
+    # Set to defaults only if all are unset.
     if not repository and not registry and not tag and not digest:
         repository = _RBE_UBUNTU_REPO
         registry = _RBE_UBUNTU_REGISTRY
         tag = RBE_UBUNTU16_04_LATEST
 
-    # Check if checked-in configs are available in this repo.
-    if registry and registry == _RBE_UBUNTU_REGISTRY and repository and repository == _RBE_UBUNTU_REPO:
-        if not env:
-            env = clang_env()
-        if tag:  # Implies `digest` is not specified.
-            if tag == "latest":
-                tag = RBE_UBUNTU16_04_LATEST
-            digest = public_rbe_ubuntu16_04_sha256s().get(tag, None)
-            if not digest:  # We didn't find checked-in configs in this repo.
-                use_checked_in_confs = False
-        else:  # Implies tag is not specified
-            for pair in public_rbe_ubuntu16_04_sha256s().items():
-                if pair[1] == digest:
-                    tag = pair[0]
-                    break
-            if not tag:
-                use_checked_in_confs = False
+    if registry and registry == _RBE_UBUNTU_REGISTRY and repository and repository == _RBE_UBUNTU_REPO and not env:
+        env = clang_env()
 
-        # Verify a toolchain config exists for the given version of Bazel and the
-        # given tag of the container
-        config_version = public_rbe_ubuntu16_04_config_version().get(tag, None)
-        if not config_version:
-            use_checked_in_confs = False
-        else:
-            config_found = False
-            for b_v in config_to_bazel_versions().get(config_version):
-                if b_v == bazel_version:
-                    config_found = True
-                    break
-            if not config_found:
-                use_checked_in_confs = False
+    resolved_config_info = validateUseOfCheckedInConfigs(
+        registry,
+        repository,
+        tag,
+        digest,
+        use_checked_in_confs,
+        env,
+        java_home,
+        bazel_version,
+        bazel_rc_version,
+    )
 
-    # If the user has set a custom env, custom java_home,
-    # registry or repository, don't use
-    # checked in configs
-    if ((env and env != clang_env()) or
-        (java_home) or
-        (bazel_rc_version) or
-        (registry and registry != _RBE_UBUNTU_REGISTRY) or
-        (repository and repository != _RBE_UBUNTU_REPO)):
-        use_checked_in_confs = False
+    use_checked_in_confs = False
+    digest = digest
+    tag = tag
+    config_version = None
+    if resolved_config_info:
+        use_checked_in_confs = True
+        digest = resolved_config_info.digest
+        tag = resolved_config_info.tag
+        config_version = resolved_config_info.config_version
 
     _rbe_autoconfig(
         name = name,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
         config_dir = config_dir,
+        config_version = config_version,
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
@@ -829,4 +812,59 @@ def rbe_autoconfig(
         tag = tag,
         target_compatible_with = target_compatible_with,
         use_checked_in_confs = use_checked_in_confs,
+    )
+
+# Check if checked-in configs are available and should be used. If so, return a
+# struct{config_version, digest, tag} with resolved information. Otherwise,
+# return None.
+def validateUseOfCheckedInConfigs(
+        registry,
+        repository,
+        tag,
+        digest,
+        use_checked_in_confs,
+        env,
+        java_home,
+        bazel_version,
+        bazel_rc_version):
+    if not use_checked_in_confs:
+        return None
+    if registry and registry != _RBE_UBUNTU_REGISTRY:
+        return None
+    if repository and repository != _RBE_UBUNTU_REPO:
+        return None
+    if env and env != clang_env():
+        return None
+    if java_home:
+        return None
+    if bazel_rc_version:
+        return None
+
+    if tag:  # Implies `digest` is not specified.
+        if tag == "latest":
+            tag = RBE_UBUNTU16_04_LATEST
+        digest = public_rbe_ubuntu16_04_sha256s().get(tag, None)
+        if not digest:  # We didn't find checked-in configs in this repo.
+            return None
+    else:  # Implies tag is not specified
+        for pair in public_rbe_ubuntu16_04_sha256s().items():
+            if pair[1] == digest:
+                tag = pair[0]
+                break
+        if not tag:
+            return None
+
+    # Verify a toolchain config exists for the given version of Bazel and the
+    # given tag of the container
+    config_version = public_rbe_ubuntu16_04_config_version().get(tag, None)
+    if not config_version:
+        return None
+
+    if config_version != bazel_to_config_versions().get(bazel_version):
+        return None
+
+    return struct(
+        config_version = config_version,
+        digest = digest,
+        tag = tag,
     )
