@@ -134,6 +134,7 @@ rbe_autoconfig(
 # Use in the RBE Ubuntu1604 container release.
 rbe_autoconfig(
     name = "rbe_ubuntu1604_test",
+    env = clang_env(),
     registry = "gcr.io",
     repository = "asci-toolchain/test-rbe-ubuntu16_04",
     tag = "latest",

@@ -490,6 +490,7 @@ def _run_and_extract(
         # If we use the default project, we need to modify the WORKSPACE
         # and BUILD files, so don't mount read-only
         mount_read_only_flag = ""
+
     # If the rule is invoked from bazel-toolchains itself, then project_root
     # is a symlink, which can cause mounting issues on GCB.
     target = "$(realpath " + project_root + "):" + _REPO_DIR + mount_read_only_flag
@@ -837,7 +838,7 @@ def validateUseOfCheckedInConfigs(
                 tag = pair[0]
                 break
         if not tag:
-             # The given RBE Ubuntu1604 container digest is not one of the released ones.
+            # The given RBE Ubuntu1604 container digest is not one of the released ones.
             return None
 
     # Verify a toolchain config exists for the given version of Bazel and the
