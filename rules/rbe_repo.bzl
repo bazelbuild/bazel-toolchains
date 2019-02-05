@@ -490,7 +490,9 @@ def _run_and_extract(
         # If we use the default project, we need to modify the WORKSPACE
         # and BUILD files, so don't mount read-only
         mount_read_only_flag = ""
-    target = project_root + ":" + _REPO_DIR + mount_read_only_flag
+    # If the rule is invoked from bazel-toolchains itself, then project_root
+    # is a symlink, which can cause mounting issues on GCB.
+    target = "$(realpath " + project_root + "):" + _REPO_DIR + mount_read_only_flag
     docker_run_flags += ["-v", target]
     docker_run_flags += ["-v", str(ctx.path("container")) + ":/container"]
 
