@@ -260,6 +260,7 @@ def _impl(ctx):
         result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
         _print_exec_results("Resolve image digest", result, fail_on_error = True)
         image_name = result.stdout.splitlines()[0]
+        print("Image with given tag `%s` is resolved to %s" % (ctx.attr.tag, image_name))
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
@@ -592,8 +593,8 @@ def _expand_outputs(ctx, bazel_version, project_root):
 _rbe_autoconfig = repository_rule(
     attrs = {
         "bazel_rc_version": attr.string(
-            doc = ("Optional. An rc version to use. Note an installer for the rc " +
-                   "must be available in https://releases.bazel.build."),
+            doc = ("Optional. An rc version to use. Note an installer for " +
+                   "the rc must be available in https://releases.bazel.build."),
         ),
         "bazel_version": attr.string(
             default = "local",
@@ -601,18 +602,20 @@ _rbe_autoconfig = repository_rule(
                    "Use only (major, minor, patch), e.g., '0.20.0'."),
         ),
         "config_dir": attr.string(
-            doc = ("Optional. Use only if output_base is defined. If you want to " +
-                   "create multiple toolchain configs (for the same version of Bazel) " +
-                   "you can use this attr to indicate a type of config (e.g., default, " +
-                   "msan). The configs will be generated in a sub-directory when this attr  " +
-                   "is used."),
+            doc = ("Optional. Use only if output_base is defined. If you " +
+                   "want to create multiple toolchain configs (for the same " +
+                   "version of Bazel) you can use this attr to indicate a " +
+                   "type of config (e.g., default,  msan). The configs will " +
+                   "be generated in a sub-directory when this attr is used."),
         ),
         "config_version": attr.string(
-            doc = ("The config version found for the given container and Bazel version." +
+            doc = ("The config version found for the given container and " +
+                   "Bazel version. " +
                    "Used internally when use_checked_in_confs is true."),
         ),
         "digest": attr.string(
-            doc = ("Optional. The digest (sha256 sum) of the image to pull. For example, " +
+            doc = ("Optional. The digest (sha256 sum) of the image to pull. " +
+                   "For example, " +
                    "sha256:f1330b2f02714d3a3e98c5b1f6524fbb9c15154e44a31fb3caecb7a6ad4e8445" +
                    ", note the digest includes 'sha256:'"),
         ),
@@ -701,8 +704,8 @@ def rbe_autoconfig(
           which means the same version of Bazel that is currently running will
           be used. If local is a non release version, rbe_autoconfig will fallback
           to using the latest release version (see _BAZEL_VERSION_FALLBACK).
-      bazel_rc_version: The rc (for the given version of Bazel) to use. Must be published
-          in https://releases.bazel.build. E.g. 2.
+      bazel_rc_version: The rc (for the given version of Bazel) to use.
+          Must be published in https://releases.bazel.build. E.g. 2.
       config_dir: Optional. Subdirectory where configs will be copied to.
           Use only if output_base is defined.
       digest: Optional. The digest of the image to pull.
@@ -769,19 +772,21 @@ def rbe_autoconfig(
         registry = _RBE_UBUNTU_REGISTRY
         tag = RBE_UBUNTU16_04_LATEST
 
-    if registry and registry == _RBE_UBUNTU_REGISTRY and repository and repository == _RBE_UBUNTU_REPO and not env:
+    if ((registry and registry == _RBE_UBUNTU_REGISTRY) and
+        (repository and repository == _RBE_UBUNTU_REPO) and
+        (not env)):
         env = clang_env()
 
     config_version = validateUseOfCheckedInConfigs(
-        registry,
-        repository,
-        tag,
-        digest,
-        use_checked_in_confs,
-        env,
-        java_home,
-        bazel_version,
-        bazel_rc_version,
+        registry = registry,
+        repository = repository,
+        tag = tag,
+        digest = digest,
+        use_checked_in_confs = use_checked_in_confs,
+        env = env,
+        java_home = java_home,
+        bazel_version = bazel_version,
+        bazel_rc_version = bazel_rc_version,
     )
 
     _rbe_autoconfig(
@@ -838,7 +843,8 @@ def validateUseOfCheckedInConfigs(
                 tag = pair[0]
                 break
         if not tag:
-            # The given RBE Ubuntu1604 container digest is not one of the released ones.
+            # The given RBE Ubuntu1604 container digest is not one of the
+            # released ones.
             return None
 
     # Verify a toolchain config exists for the given version of Bazel and the
