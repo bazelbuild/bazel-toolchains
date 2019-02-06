@@ -260,7 +260,8 @@ def _impl(ctx):
         result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
         _print_exec_results("Resolve image digest", result, fail_on_error = True)
         image_name = result.stdout.splitlines()[0]
-        print("Image with given tag `%s` is resolved to %s" % (ctx.attr.tag, image_name))
+        print("Image with given tag `%s` is resolved to %s" %
+              (ctx.attr.tag, image_name))
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
