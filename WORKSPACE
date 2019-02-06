@@ -101,7 +101,7 @@ gcs_file(
     sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
 )
 
-load("//rules:rbe_repo.bzl", "rbe_autoconfig")
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
 rbe_autoconfig(name = "rbe_default")
 
@@ -129,4 +129,13 @@ rbe_autoconfig(
         },
     ),
     output_base = "configs/ubuntu16_04_clang/1.1",
+)
+
+# Use in the RBE Ubuntu1604 container release.
+rbe_autoconfig(
+    name = "rbe_ubuntu1604_test",
+    env = clang_env(),
+    registry = "gcr.io",
+    repository = "asci-toolchain/test-rbe-ubuntu16_04",
+    tag = "latest",
 )

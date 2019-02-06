@@ -20,4 +20,3 @@ set -ex
 # var in a docker image.
 
 echo $(docker inspect -f '{{range $i, $v := .Config.Env}}{{println $v}}{{end}}' %{image_name} | grep JAVA_HOME | cut -d'=' -f2)
-
