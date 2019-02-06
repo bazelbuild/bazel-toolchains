@@ -1,3 +1,2 @@
-bazel: "0.21.0"
-version: "7.0.0-r342117"
-
+bazel: 0.22.0
+version: 8.0.0
