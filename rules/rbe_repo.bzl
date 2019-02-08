@@ -593,7 +593,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
 # rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
     attrs = {
-        "bazel_rc_version": attr.string(
+        "bazel_rc_version": attr.int(
             doc = ("Optional. An rc version to use. Note an installer for " +
                    "the rc must be available in https://releases.bazel.build."),
         ),
