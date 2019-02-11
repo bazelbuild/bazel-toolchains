@@ -26,6 +26,12 @@ java_runtime(
     java_home = "/usr/lib/jvm/zulu10.2+3-jdk10.0.1-linux_x64-allmodules",
 )
 
+java_runtime(
+    name = "jdk11",
+    srcs = [],
+    java_home = "/usr/lib/jvm/11.29.3-ca-jdk11.0.2/reduced",
+)
+
 # Update every time when a new container is available publically.
 LATEST_CLANG_VERSION = "r346485"
 
