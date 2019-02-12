@@ -43,15 +43,6 @@ def _get_container_configs_list(bazel_version):
   Returns:
     A list of ContainerConfigs objects corresponding to the configs to generate.
   """
-  debian8_clang_configs = ContainerConfigs(
-      distro="debian8",
-      version="0.4.0",
-      image="gcr.io/cloud-marketplace/google/clang-debian8",
-      package="configs/debian8_clang",
-      config_types=CONFIG_TYPES,
-      platform_target="rbe_debian8",
-      git_root=GIT_ROOT,
-      bazel_version=bazel_version)
 
   ubuntu16_04_clang_configs = ContainerConfigs(
       distro="ubuntu16_04",
@@ -63,7 +54,7 @@ def _get_container_configs_list(bazel_version):
       git_root=GIT_ROOT,
       bazel_version=bazel_version)
 
-  return [debian8_clang_configs, ubuntu16_04_clang_configs]
+  return [ubuntu16_04_clang_configs]
 
 
 def _parse_arguments():
