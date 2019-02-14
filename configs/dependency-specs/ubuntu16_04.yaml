@@ -7,9 +7,10 @@ gcrDeps:
   - name: "IMAGE"
     location: "l.gcr.io/google/rbe-ubuntu16-04"
     tag: "latest"
-  # The Bazel container.
+  # The Ubuntu Bazel + Docker + Gcloud container which is tagged with the
+  # bazel version.
   - name: "BAZEL"
-    location: "l.gcr.io/google/bazel"
+    location: "gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud"
     tag: "latest"
 
 
