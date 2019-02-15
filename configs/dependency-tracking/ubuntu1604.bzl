@@ -1,4 +1,3 @@
-
 bazel = "0.21.0"
 registry = "l.gcr.io"
 repository = "google/rbe-ubuntu16-04"
