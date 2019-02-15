@@ -45,7 +45,7 @@ build:remote --platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:rbe_ub
 build:remote --spawn_strategy=remote
 build:remote --strategy=Javac=remote
 build:remote --strategy=Closure=remote
-build:remote --genrule_strategy=remote
+build:remote --strategy=Genrule=remote
 build:remote --define=EXECUTOR=remote
 
 # Enable the remote cache so action results can be shared across machines,
