@@ -131,8 +131,7 @@ rbe_autoconfig(
   registry=_ubuntu1604_registry,
   repository=_ubuntu1604_repository,
   digest=_ubuntu1604_digest,
-  output_base="configs",
-  config_dir="bazel{}-configs{}".format(_ubuntu1604_bazel, _ubuntu1604_configs_version),
+  output_base="configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version),
   use_checked_in_confs = False,
 )
 

@@ -8,7 +8,7 @@ dependency tracking file will be automatically updated by the config dependency
 update service. This in turn will trigger a GCB build to generate the new 
 configs.
 
-The following is an example Starlark for the RBE Ubuntu 16.04 container.
+The following is an example Starlark file for the RBE Ubuntu 16.04 container.
 ```python
 # The version of Bazel.
 bazel = "0.21.0"
