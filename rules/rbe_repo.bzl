@@ -318,13 +318,13 @@ def _validate_host(ctx):
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
 
-# Produces BUILD file with alias for all the cc_toolchain_suite target.
+# Produces BUILD files with alias for the C++/Java toolchain targets.
 def _use_standard_config(ctx):
     print("Using checked-in configs.")
 
     # Create the BUILD file with the alias for the cc_toolchain_suite
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_cc_toolchain.tpl"))
-    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default:toolchain" %
+    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s:toolchain" %
                  (ctx.attr.config_version, ctx.attr.bazel_version))
     ctx.template(
         _CC_CONFIG_DIR + "/BUILD",
@@ -337,7 +337,8 @@ def _use_standard_config(ctx):
 
     # Create the BUILD file with the alias for the java_runtime
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_java_runtime.tpl"))
-    java_runtime = "@bazel_toolchains//configs/ubuntu16_04_clang/%s:jdk8" % ctx.attr.config_version
+    java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/java:jdk" %
+                    (ctx.attr.config_version, ctx.attr.bazel_version))
     ctx.template(
         _JAVA_CONFIG_DIR + "/BUILD",
         template,
@@ -544,7 +545,7 @@ def _create_platform(ctx, image_name, name):
 
     # A checked in config was found
     if ctx.attr.config_version:
-        cc_toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default%s" %
+        cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s%s" %
                         (ctx.attr.config_version, ctx.attr.bazel_version, _CC_TOOLCHAIN))
     if ctx.attr.output_base:
         cc_toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + ctx.attr.bazel_version
@@ -804,7 +805,7 @@ def rbe_autoconfig(
     if not repository and not registry and not tag and not digest:
         repository = _RBE_UBUNTU_REPO
         registry = _RBE_UBUNTU_REGISTRY
-        tag = RBE_UBUNTU16_04_LATEST
+        digest = RBE_UBUNTU16_04_LATEST
 
     if ((registry and registry == _RBE_UBUNTU_REGISTRY) and
         (repository and repository == _RBE_UBUNTU_REPO) and
