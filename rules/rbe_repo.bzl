@@ -221,6 +221,45 @@ def _impl(ctx):
     else:
         image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
 
+    # If not using checked-in configs we need to pull the container and resolve its tag to digest
+    # before we create the platform target.
+    if not ctx.attr.config_version:
+        # Perform some safety checks
+        _validate_host(ctx)
+        project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
+
+        # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
+        use_default_project = False
+        if not project_root:
+            if ctx.attr.output_base:
+                fail(("%s env variable must be set for rbe_autoconfig" +
+                      " to function properly when output_base is set") % _AUTOCONF_ROOT)
+
+            # Try to use the default project
+            # This is Bazel black magic, we're traversing the directories in the output_base,
+            # assuming that the bazel_toolchains external repo will exist in the
+            # expected path.
+            project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+            if not project_root.exists:
+                fail(("Could not find default autoconf project in %s, please make sure " +
+                      "the bazel-toolchains repo is properly imported in your workspace") % str(project_root))
+            project_root = str(project_root)
+            use_default_project = True
+
+        outputs_tar = ctx.attr.name + "_out.tar"
+
+        # Pull the image using 'docker pull'
+        _pull_image(ctx, image_name)
+
+        # If tag is specified instead of digest, resolve it to digest in the
+        # image_name as it will be used later on in the platform targets.
+        if ctx.attr.tag:
+            result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
+            _print_exec_results("Resolve image digest", result, fail_on_error = True)
+            image_name = result.stdout.splitlines()[0]
+            print("Image with given tag `%s` is resolved to %s" %
+                  (ctx.attr.tag, image_name))
+
     # Create a default BUILD file with the platform + toolchain targets that
     # will work with RBE with the produced toolchain
     _create_platform(
@@ -229,47 +268,11 @@ def _impl(ctx):
         name = name,
     )
 
-    # Deal with the simple case first: if user picks rbe-ubuntu 16_04 container and
-    # a config exists for the current version of Bazel, just create aliases
+    # If user picks rbe-ubuntu 16_04 container and
+    # a config exists for the current version of Bazel, create aliases and return
     if ctx.attr.config_version:
         _use_standard_config(ctx)
         return
-
-    # Perform some safety checks
-    _validate_host(ctx)
-    project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
-
-    # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
-    use_default_project = False
-    if not project_root:
-        if ctx.attr.output_base:
-            fail(("%s env variable must be set for rbe_autoconfig" +
-                  " to function properly when output_base is set") % _AUTOCONF_ROOT)
-
-        # Try to use the default project
-        # This is Bazel black magic, we're traversing the directories in the output_base,
-        # assuming that the bazel_toolchains external repo will exist in the
-        # expected path.
-        project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
-        if not project_root.exists:
-            fail(("Could not find default autoconf project in %s, please make sure " +
-                  "the bazel-toolchains repo is properly imported in your workspace") % str(project_root))
-        project_root = str(project_root)
-        use_default_project = True
-
-    outputs_tar = ctx.attr.name + "_out.tar"
-
-    # Pull the image using 'docker pull'
-    _pull_image(ctx, image_name)
-
-    # If tag is specified instead of digest, resolve it to digest in the
-    # image_name as it will be used later on in the platform targets.
-    if ctx.attr.tag:
-        result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
-        _print_exec_results("Resolve image digest", result, fail_on_error = True)
-        image_name = result.stdout.splitlines()[0]
-        print("Image with given tag `%s` is resolved to %s" %
-              (ctx.attr.tag, image_name))
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
@@ -808,9 +811,12 @@ def rbe_autoconfig(
         digest = RBE_UBUNTU16_04_LATEST
 
     if ((registry and registry == _RBE_UBUNTU_REGISTRY) and
-        (repository and repository == _RBE_UBUNTU_REPO) and
-        (not env)):
-        env = clang_env()
+        (repository and repository == _RBE_UBUNTU_REPO)):
+        if not env:
+            env = clang_env()
+        if tag == "latest":
+            tag = None
+            digest = RBE_UBUNTU16_04_LATEST
 
     config_version = validateUseOfCheckedInConfigs(
         name = name,
