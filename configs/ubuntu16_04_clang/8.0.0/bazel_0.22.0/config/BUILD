@@ -21,24 +21,29 @@ package(default_visibility = ["//visibility:public"])
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
-        %{exec_compatible_with}
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
     ],
     target_compatible_with = [
-        %{target_compatible_with}
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "%{cc_toolchain}",
+    toolchain = "//configs/ubuntu16_04_clang/8.0.0/bazel_0.22.0:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
 platform(
     name = "platform",
     constraint_values = [
-        %{exec_compatible_with}
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//tools/cpp:clang",
     ],
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://%{image_name}"
+          value:"docker://l.gcr.io/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
         }
         """,
 )
