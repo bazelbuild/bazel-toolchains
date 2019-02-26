@@ -247,6 +247,7 @@ def _impl(ctx):
                       "the bazel-toolchains repo is imported in your workspace with name " +
                       "'bazel_toolchains' and imported before the rbe_autoconfig target " +
                       "declaration ") % str(project_root))
+                      "the bazel-toolchains repo is properly imported in your workspace") % str(project_root))
             project_root = str(project_root)
             use_default_project = True
 
