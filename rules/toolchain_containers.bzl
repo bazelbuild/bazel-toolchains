@@ -16,5 +16,3 @@ def toolchain_container_sha256s():
         # gcr.io/cloud-marketplace/google/clang-ubuntu
         "ubuntu16_04_clang": "sha256:9fe84f7c726419ab77a9680887ec4a518d1910a28284c2955620258db01c7aae",
     }
-
-

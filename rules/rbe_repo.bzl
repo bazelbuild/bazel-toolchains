@@ -169,8 +169,8 @@ Known limitations (if any container other than rbe-ubuntu 16_04 is used):
 load(
     "//configs/ubuntu16_04_clang:versions.bzl",
     "bazel_to_config_versions",
-    rbe_ubuntu16_04_config_version = "container_to_config_version",
     RBE_UBUNTU16_04_LATEST = "LATEST",
+    rbe_ubuntu16_04_config_version = "container_to_config_version",
 )
 load("//rules:environments.bzl", "clang_env")
 load(
@@ -221,8 +221,6 @@ def _impl(ctx):
     else:
         image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
 
-
-
     # Create a default BUILD file with the platform + toolchain targets that
     # will work with RBE with the produced toolchain
     _create_platform(
@@ -240,6 +238,7 @@ def _impl(ctx):
     # Perform some safety checks
     _validate_host(ctx)
     project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
+
     # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
     use_default_project = False
     if not project_root:
@@ -325,7 +324,8 @@ def _use_standard_config(ctx):
 
     # Create the BUILD file with the alias for the cc_toolchain_suite
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_cc_toolchain.tpl"))
-    toolchain = "@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default:toolchain" % (ctx.attr.config_version, ctx.attr.bazel_version)
+    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default:toolchain" %
+                 (ctx.attr.config_version, ctx.attr.bazel_version))
     ctx.template(
         _CC_CONFIG_DIR + "/BUILD",
         template,
@@ -526,7 +526,6 @@ def _run_and_extract(
     result = ctx.execute(["rm", ("./%s/tools" % _CC_CONFIG_DIR), "-drf"])
     _print_exec_results("clean tools", result)
 
-
 # Creates a BUILD file with the java_runtime target
 def _create_java_runtime(ctx, java_home):
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java_runtime.tpl"))
@@ -537,14 +536,16 @@ def _create_java_runtime(ctx, java_home):
             "%{java_home}": java_home,
         },
         False,
-    )    
+    )
 
 # Creates a BUILD file with the cc_toolchain and platform targets
 def _create_platform(ctx, image_name, name):
     cc_toolchain_target = "@" + name + "//" + _CC_CONFIG_DIR + _CC_TOOLCHAIN
+
     # A checked in config was found
     if ctx.attr.config_version:
-        cc_toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default%s" % (ctx.attr.config_version, ctx.attr.bazel_version, _CC_TOOLCHAIN))
+        cc_toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default%s" %
+                        (ctx.attr.config_version, ctx.attr.bazel_version, _CC_TOOLCHAIN))
     if ctx.attr.output_base:
         cc_toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + ctx.attr.bazel_version
         if ctx.attr.config_dir:
@@ -728,7 +729,7 @@ def rbe_autoconfig(
     Use this macro in your WORKSPACE.
 
     Args:
-      base_container: Optional. If the container to use for the RBE build 
+      base_container: Optional. If the container to use for the RBE build
           extends from the rbe-ubuntu16-04 image, you can pass the digest
           (sha256 sum) of the base container using this attr.
           The rule will enable use of checked-in configs if possible.
@@ -872,13 +873,14 @@ def validateUseOfCheckedInConfigs(
     if tag:  # Implies `digest` is not specified.
         if tag == "latest":
             digest = RBE_UBUNTU16_04_LATEST
-        # if any tag other than latest is used we will not use checked-in configs
-        # (to not hardcode tag info anywhere in these rules)
+            # if any tag other than latest is used we will not use checked-in configs
+            # (to not hardcode tag info anywhere in these rules)
+
         else:
             return None
 
     if base_container:
-        digest = base_container 
+        digest = base_container
 
     # Verify a toolchain config exists for the given version of Bazel and the
     # given digest of the container
