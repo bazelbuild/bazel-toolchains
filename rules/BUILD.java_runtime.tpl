@@ -18,27 +18,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
-toolchain(
-    name = "cc-toolchain",
-    exec_compatible_with = [
-        %{exec_compatible_with}
-    ],
-    target_compatible_with = [
-        %{target_compatible_with}
-    ],
-    toolchain = "%{cc_toolchain}",
-    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-)
-
-platform(
-    name = "generated_platform",
-    constraint_values = [
-        %{exec_compatible_with}
-    ],
-    remote_execution_properties = """
-        properties: {
-          name: "container-image"
-          value:"docker://%{image_name}"
-        }
-        """,
+java_runtime(
+    name = "jdk",
+    srcs = [],
+    java_home = "%{java_home}",
 )

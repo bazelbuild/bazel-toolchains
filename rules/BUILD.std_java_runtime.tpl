@@ -20,15 +20,5 @@ package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "jdk",
-    actual = "%{jdk}",
-)
-
-alias(
-    name = "cc-toolchain",
-    actual = "%{cc-toolchain}",
-)
-
-alias(
-    name = "platform",
-    actual = "%{platform}",
+    actual = "%{java_runtime}",
 )
