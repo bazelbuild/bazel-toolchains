@@ -31,7 +31,7 @@ toolchain(
 )
 
 platform(
-    name = "generated_platform",
+    name = "platform",
     constraint_values = [
         %{exec_compatible_with}
     ],
