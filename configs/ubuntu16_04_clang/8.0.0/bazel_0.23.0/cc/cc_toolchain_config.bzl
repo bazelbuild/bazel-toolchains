@@ -13,6 +13,8 @@
 # limitations under the License.
 
 """A Starlark cc_toolchain configuration rule"""
+
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
      "action_config",
      "artifact_name_pattern",
@@ -28,8 +30,6 @@ load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
      "variable_with_value",
      "with_feature_set",
      )
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
-
 
 all_compile_actions = [
     ACTION_NAMES.c_compile,

@@ -14,9 +14,12 @@
 
 # This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
 
-package(default_visibility = ["//visibility:public"])
-
+# Target that can provide the CC_FLAGS variable based on the current
+# cc_toolchain.
+load("@bazel_tools//tools/cpp:cc_flags_supplier.bzl", "cc_flags_supplier")
 load(":cc_toolchain_config.bzl", "cc_toolchain_config")
+
+package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
@@ -119,9 +122,5 @@ toolchain(
     toolchain = ":cc-compiler-armabi-v7a",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
-
-# Target that can provide the CC_FLAGS variable based on the current
-# cc_toolchain.
-load("@bazel_tools//tools/cpp:cc_flags_supplier.bzl", "cc_flags_supplier")
 
 cc_flags_supplier(name = "cc_flags")
