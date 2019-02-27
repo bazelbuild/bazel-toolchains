@@ -53,6 +53,7 @@ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
 =======
 
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
     "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "action_config",
@@ -63,13 +64,15 @@ load(
     "feature_set",
     "flag_group",
     "flag_set",
-    "make_variable",
     "tool",
     "tool_path",
     "variable_with_value",
     "with_feature_set",
 )
+<<<<<<< HEAD
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+>>>>>>> buildifier
+=======
 >>>>>>> buildifier
 
 all_compile_actions = [
