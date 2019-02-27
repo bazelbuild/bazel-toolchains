@@ -14,6 +14,7 @@
 
 """A Starlark cc_toolchain configuration rule"""
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
@@ -50,6 +51,26 @@ load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+
+load(
+    "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
+    "action_config",
+    "artifact_name_pattern",
+    "env_entry",
+    "env_set",
+    "feature",
+    "feature_set",
+    "flag_group",
+    "flag_set",
+    "make_variable",
+    "tool",
+    "tool_path",
+    "variable_with_value",
+    "with_feature_set",
+)
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+>>>>>>> buildifier
 
 all_compile_actions = [
     ACTION_NAMES.c_compile,
@@ -113,6 +134,9 @@ def _windows_msvc_impl(ctx):
 
     cxx_builtin_include_directories = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
         "/usr/local/include",
         "/usr/local/lib/clang/9.0.0/include",
         "/usr/include/x86_64-linux-gnu",
@@ -120,6 +144,7 @@ def _windows_msvc_impl(ctx):
         "/usr/include/c++/4.9",
         "/usr/include/x86_64-linux-gnu/c++/4.9",
         "/usr/include/c++/4.9/backward",
+<<<<<<< HEAD
 =======
 "/usr/local/include",
     "/usr/local/lib/clang/9.0.0/include",
@@ -129,6 +154,8 @@ def _windows_msvc_impl(ctx):
     "/usr/include/x86_64-linux-gnu/c++/4.9",
     "/usr/include/c++/4.9/backward"
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
     ]
 
     cpp_link_nodeps_dynamic_library_action = action_config(
@@ -420,6 +447,9 @@ def _windows_msvc_impl(ctx):
                             flag_group(
                                 flag_groups = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
                                     flag_group(
                                         flags = ["%{libraries_to_link.name}"],
                                         expand_if_false = "libraries_to_link.is_whole_archive",
@@ -428,6 +458,7 @@ def _windows_msvc_impl(ctx):
                                         flags = ["/WHOLEARCHIVE:%{libraries_to_link.name}"],
                                         expand_if_true = "libraries_to_link.is_whole_archive",
                                     ),
+<<<<<<< HEAD
 =======
                                   flag_group(
                                       flags = ["%{libraries_to_link.name}"],
@@ -438,6 +469,8 @@ def _windows_msvc_impl(ctx):
                                       expand_if_true = "libraries_to_link.is_whole_archive",
                                   ),
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
                                 ],
                                 expand_if_equal = variable_with_value(
                                     name = "libraries_to_link.type",
@@ -518,10 +551,14 @@ def _windows_msvc_impl(ctx):
                 flag_groups = [flag_group(flags = ["/MACHINE:X64"])],
             ),
 <<<<<<< HEAD
+<<<<<<< HEAD
         ],
 =======
          ],
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+        ],
+>>>>>>> buildifier
     )
 
     static_link_msvcrt_feature = feature(name = "static_link_msvcrt")
@@ -552,6 +589,7 @@ def _windows_msvc_impl(ctx):
                 actions = all_link_actions,
                 flag_groups = [
 <<<<<<< HEAD
+<<<<<<< HEAD
                     flag_group(
                         flags = ["", "/INCREMENTAL:NO"],
                     ),
@@ -560,6 +598,11 @@ def _windows_msvc_impl(ctx):
                       flags = ["", "/INCREMENTAL:NO"],
                   ),
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+                    flag_group(
+                        flags = ["", "/INCREMENTAL:NO"],
+                    ),
+>>>>>>> buildifier
                 ],
             ),
         ],
@@ -712,11 +755,15 @@ def _windows_msvc_impl(ctx):
                 flag_groups = [flag_group(flags = ["/DEFAULTLIB:msvcrt.lib"])],
             ),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
         ],
         requires = [
             feature_set(features = ["fastbuild"]),
             feature_set(features = ["opt"]),
         ],
+<<<<<<< HEAD
 =======
           ],
           requires = [
@@ -724,6 +771,8 @@ def _windows_msvc_impl(ctx):
               feature_set(features = ["opt"]),
           ],
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
     )
 
     disable_assertions_feature = feature(
@@ -915,6 +964,9 @@ def _windows_msvc_impl(ctx):
                 actions = [ACTION_NAMES.assemble],
                 flag_groups = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
                     flag_group(
                         flag_groups = [
                             flag_group(
@@ -925,6 +977,7 @@ def _windows_msvc_impl(ctx):
                         ],
                         expand_if_not_available = "output_preprocess_file",
                     ),
+<<<<<<< HEAD
 =======
                   flag_group(
                       flag_groups = [
@@ -937,6 +990,8 @@ def _windows_msvc_impl(ctx):
                       expand_if_not_available = "output_preprocess_file",
                   ),
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
                 ],
             ),
             flag_set(
@@ -1233,20 +1288,28 @@ def _windows_msys_mingw_impl(ctx):
     )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     copy_dynamic_libraries_to_binary_feature = feature(name = "copy_dynamic_libraries_to_binary")
 =======
     copy_dynamic_libraries_to_binary_feature = feature(name= "copy_dynamic_libraries_to_binary")
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    copy_dynamic_libraries_to_binary_feature = feature(name = "copy_dynamic_libraries_to_binary")
+>>>>>>> buildifier
 
     gcc_env_feature = feature(
         name = "gcc_env",
         enabled = True,
         env_sets = [
 <<<<<<< HEAD
+<<<<<<< HEAD
             env_set(
 =======
             env_set (
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+            env_set(
+>>>>>>> buildifier
                 actions = [
                     ACTION_NAMES.c_compile,
                     ACTION_NAMES.cpp_compile,
@@ -1262,16 +1325,21 @@ def _windows_msys_mingw_impl(ctx):
                 ],
                 env_entries = [
 <<<<<<< HEAD
+<<<<<<< HEAD
                     env_entry(key = "PATH", value = "NOT_USED"),
 =======
                     env_entry(key = "PATH", value = "NOT_USED")
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+                    env_entry(key = "PATH", value = "NOT_USED"),
+>>>>>>> buildifier
                 ],
             ),
         ],
     )
 
     msys_mingw_flags = [
+<<<<<<< HEAD
 <<<<<<< HEAD
     ]
     msys_mingw_link_flags = [
@@ -1281,6 +1349,10 @@ def _windows_msys_mingw_impl(ctx):
     msys_mingw_link_flags = [
  
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    ]
+    msys_mingw_link_flags = [
+>>>>>>> buildifier
     ]
 
     default_compile_flags_feature = feature(
@@ -1340,9 +1412,12 @@ def _windows_msys_mingw_impl(ctx):
 
     cxx_builtin_include_directories = [
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
     ]
 
     artifact_name_patterns = [
@@ -1356,9 +1431,12 @@ def _windows_msys_mingw_impl(ctx):
     make_variables = []
     tool_paths = [
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
     ]
 
     return cc_common.create_cc_toolchain_config_info(
@@ -1379,12 +1457,17 @@ def _windows_msys_mingw_impl(ctx):
         make_variables = make_variables,
         builtin_sysroot = builtin_sysroot,
 <<<<<<< HEAD
+<<<<<<< HEAD
         cc_target_os = cc_target_os,
     )
 =======
         cc_target_os = cc_target_os)
 
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+        cc_target_os = cc_target_os,
+    )
+>>>>>>> buildifier
 
 def _armeabi_impl(ctx):
     toolchain_identifier = "stub_armeabi-v7a"
@@ -1439,10 +1522,14 @@ def _armeabi_impl(ctx):
         make_variables = make_variables,
         builtin_sysroot = builtin_sysroot,
 <<<<<<< HEAD
+<<<<<<< HEAD
         cc_target_os = cc_target_os,
 =======
         cc_target_os = cc_target_os
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+        cc_target_os = cc_target_os,
+>>>>>>> buildifier
     )
 
 def _impl(ctx):
@@ -1455,6 +1542,9 @@ def _impl(ctx):
 
     tool_paths = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
         tool_path(name = "ar", path = "/usr/bin/ar"),
         tool_path(name = "ld", path = "/usr/bin/ld"),
         tool_path(name = "cpp", path = "/usr/bin/cpp"),
@@ -1465,6 +1555,7 @@ def _impl(ctx):
         tool_path(name = "objcopy", path = "/usr/bin/objcopy"),
         tool_path(name = "objdump", path = "/usr/bin/objdump"),
         tool_path(name = "strip", path = "/usr/bin/strip"),
+<<<<<<< HEAD
     ]
 
     cxx_builtin_include_directories = [
@@ -1497,6 +1588,18 @@ def _impl(ctx):
     "/usr/include/x86_64-linux-gnu/c++/4.9",
     "/usr/include/c++/4.9/backward"
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    ]
+
+    cxx_builtin_include_directories = [
+        "/usr/local/include",
+        "/usr/local/lib/clang/9.0.0/include",
+        "/usr/include/x86_64-linux-gnu",
+        "/usr/include",
+        "/usr/include/c++/4.9",
+        "/usr/include/x86_64-linux-gnu/c++/4.9",
+        "/usr/include/c++/4.9/backward",
+>>>>>>> buildifier
     ]
 
     action_configs = []
@@ -1504,12 +1607,16 @@ def _impl(ctx):
     compile_flags = [
         "-U_FORTIFY_SOURCE",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
         "-fstack-protector",
         "-Wall",
         "-Wthread-safety",
         "-Wself-assign",
         "-fcolor-diagnostics",
         "-fno-omit-frame-pointer",
+<<<<<<< HEAD
     ]
 
     dbg_compile_flags = [
@@ -1526,16 +1633,26 @@ def _impl(ctx):
     dbg_compile_flags = [
         "-g"
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    ]
+
+    dbg_compile_flags = [
+        "-g",
+>>>>>>> buildifier
     ]
 
     opt_compile_flags = [
         "-g0",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
         "-O2",
         "-D_FORTIFY_SOURCE=1",
         "-DNDEBUG",
         "-ffunction-sections",
         "-fdata-sections",
+<<<<<<< HEAD
     ]
 
     cxx_flags = [
@@ -1551,16 +1668,26 @@ def _impl(ctx):
     cxx_flags = [
         "-std=c++0x"
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    ]
+
+    cxx_flags = [
+        "-std=c++0x",
+>>>>>>> buildifier
     ]
 
     link_flags = [
         "-fuse-ld=gold",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
         "-Wl,-no-as-needed",
         "-Wl,-z,relro,-z,now",
         "-B/usr/local/bin",
         "-lstdc++",
         "-lm",
+<<<<<<< HEAD
     ]
 
     opt_link_flags = [
@@ -1576,21 +1703,33 @@ def _impl(ctx):
     opt_link_flags = [
         "-Wl,--gc-sections"
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    ]
+
+    opt_link_flags = [
+        "-Wl,--gc-sections",
+>>>>>>> buildifier
     ]
 
     unfiltered_compile_flags = [
         "-no-canonical-prefixes",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
         "-Wno-builtin-macro-redefined",
         "-D__DATE__=\"redacted\"",
         "-D__TIMESTAMP__=\"redacted\"",
         "-D__TIME__=\"redacted\"",
+<<<<<<< HEAD
 =======
     "-Wno-builtin-macro-redefined",
     "-D__DATE__=\"redacted\"",
     "-D__TIMESTAMP__=\"redacted\"",
     "-D__TIME__=\"redacted\""
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
     ]
 
     targets_windows_feature = feature(
@@ -1600,20 +1739,28 @@ def _impl(ctx):
     )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     copy_dynamic_libraries_to_binary_feature = feature(name = "copy_dynamic_libraries_to_binary")
 =======
     copy_dynamic_libraries_to_binary_feature = feature(name= "copy_dynamic_libraries_to_binary")
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    copy_dynamic_libraries_to_binary_feature = feature(name = "copy_dynamic_libraries_to_binary")
+>>>>>>> buildifier
 
     gcc_env_feature = feature(
         name = "gcc_env",
         enabled = True,
         env_sets = [
 <<<<<<< HEAD
+<<<<<<< HEAD
             env_set(
 =======
             env_set (
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+            env_set(
+>>>>>>> buildifier
                 actions = [
                     ACTION_NAMES.c_compile,
                     ACTION_NAMES.cpp_compile,
@@ -1629,10 +1776,14 @@ def _impl(ctx):
                 ],
                 env_entries = [
 <<<<<<< HEAD
+<<<<<<< HEAD
                     env_entry(key = "PATH", value = "NOT_USED"),
 =======
                     env_entry(key = "PATH", value = "NOT_USED")
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+                    env_entry(key = "PATH", value = "NOT_USED"),
+>>>>>>> buildifier
                 ],
             ),
         ],
@@ -1645,11 +1796,15 @@ def _impl(ctx):
     ]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     coverage_feature = feature(
 =======
     
     coverage_feature = feature (
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+    coverage_feature = feature(
+>>>>>>> buildifier
         name = "coverage",
         provides = ["profile"],
         flag_sets = [
@@ -1663,6 +1818,7 @@ def _impl(ctx):
                 ],
                 flag_groups = [
 <<<<<<< HEAD
+<<<<<<< HEAD
                     flag_group(flags = ["--coverage"]),
                 ],
             ),
@@ -1673,6 +1829,12 @@ def _impl(ctx):
             ),
             flag_set (
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+                    flag_group(flags = ["--coverage"]),
+                ],
+            ),
+            flag_set(
+>>>>>>> buildifier
                 actions = [
                     ACTION_NAMES.cpp_link_dynamic_library,
                     ACTION_NAMES.cpp_link_nodeps_dynamic_library,
@@ -1680,19 +1842,26 @@ def _impl(ctx):
                 ],
                 flag_groups = [
 <<<<<<< HEAD
+<<<<<<< HEAD
                     flag_group(flags = ["--coverage"]),
 =======
                     flag_group (flags = ["--coverage"]),
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+                    flag_group(flags = ["--coverage"]),
+>>>>>>> buildifier
                 ],
             ),
         ],
     )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
     supports_pic_feature = feature(
         name = "supports_pic",
         enabled = True,
@@ -1795,6 +1964,9 @@ def _impl(ctx):
             flag_set(
                 actions = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
                     ACTION_NAMES.preprocess_assemble,
                     ACTION_NAMES.linkstamp_compile,
                     ACTION_NAMES.c_compile,
@@ -1807,6 +1979,7 @@ def _impl(ctx):
                     ACTION_NAMES.cpp_link_executable,
                     ACTION_NAMES.cpp_link_dynamic_library,
                     ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+<<<<<<< HEAD
                 ],
                 flag_groups = [
                     flag_group(
@@ -1833,6 +2006,14 @@ def _impl(ctx):
                       expand_if_available = "sysroot",
                   ),
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+                ],
+                flag_groups = [
+                    flag_group(
+                        flags = ["--sysroot=%{sysroot}"],
+                        expand_if_available = "sysroot",
+                    ),
+>>>>>>> buildifier
                 ],
             ),
         ],
@@ -1845,6 +2026,9 @@ def _impl(ctx):
                 actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
                 flag_groups = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
                     flag_group(
                         flags = [
                             "-fprofile-use=%{fdo_profile_path}",
@@ -1852,6 +2036,7 @@ def _impl(ctx):
                         ],
                         expand_if_available = "fdo_profile_path",
                     ),
+<<<<<<< HEAD
 =======
                   flag_group(
                       flags = [
@@ -1861,6 +2046,8 @@ def _impl(ctx):
                       expand_if_available = "fdo_profile_path",
                   ),
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
                 ],
             ),
         ],
@@ -1876,6 +2063,9 @@ def _impl(ctx):
             flag_set(
                 actions = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
                     ACTION_NAMES.assemble,
                     ACTION_NAMES.preprocess_assemble,
                     ACTION_NAMES.linkstamp_compile,
@@ -1886,6 +2076,7 @@ def _impl(ctx):
                     ACTION_NAMES.cpp_module_codegen,
                     ACTION_NAMES.lto_backend,
                     ACTION_NAMES.clif_match,
+<<<<<<< HEAD
                 ],
                 flag_groups = [
                     flag_group(
@@ -1907,17 +2098,23 @@ def _impl(ctx):
                   ACTION_NAMES.cpp_module_codegen,
                   ACTION_NAMES.lto_backend,
                   ACTION_NAMES.clif_match,
+=======
+>>>>>>> buildifier
                 ],
                 flag_groups = [
-                  flag_group(
-                      flags = ["%{user_compile_flags}"],
-                      iterate_over = "user_compile_flags",
-                      expand_if_available = "user_compile_flags",
-                  ),
+                    flag_group(
+                        flags = ["%{user_compile_flags}"],
+                        iterate_over = "user_compile_flags",
+                        expand_if_available = "user_compile_flags",
+                    ),
                 ],
             ),
+<<<<<<< HEAD
           ],
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+        ],
+>>>>>>> buildifier
     )
 
     unfiltered_compile_flags_feature = feature(
@@ -1927,6 +2124,9 @@ def _impl(ctx):
             flag_set(
                 actions = [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> buildifier
                     ACTION_NAMES.assemble,
                     ACTION_NAMES.preprocess_assemble,
                     ACTION_NAMES.linkstamp_compile,
@@ -1937,6 +2137,7 @@ def _impl(ctx):
                     ACTION_NAMES.cpp_module_codegen,
                     ACTION_NAMES.lto_backend,
                     ACTION_NAMES.clif_match,
+<<<<<<< HEAD
 =======
                   ACTION_NAMES.assemble,
                   ACTION_NAMES.preprocess_assemble,
@@ -1949,6 +2150,8 @@ def _impl(ctx):
                   ACTION_NAMES.lto_backend,
                   ACTION_NAMES.clif_match,
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
                 ],
                 flag_groups = ([flag_group(flags = unfiltered_compile_flags)] if unfiltered_compile_flags else []),
             ),
@@ -1972,9 +2175,12 @@ def _impl(ctx):
 
     artifact_name_patterns = [
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
+=======
+>>>>>>> buildifier
     ]
 
     make_variables = []
@@ -2003,10 +2209,14 @@ cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
 <<<<<<< HEAD
+<<<<<<< HEAD
         "compiler": attr.string(),
         "cpu": attr.string(mandatory = True),
 =======
         "cpu" : attr.string(mandatory = True),
+=======
+        "cpu": attr.string(mandatory = True),
+>>>>>>> buildifier
         "compiler": attr.string(),
 >>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     },
