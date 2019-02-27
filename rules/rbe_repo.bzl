@@ -627,7 +627,8 @@ def _expand_outputs(ctx, bazel_version, project_root):
         _print_exec_results("copy java_runtime BUILD", result, True, args)
 
         # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
-        result = ctx.execute(["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest])
+        args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
+        result = ctx.execute(args)
         _print_exec_results("copy java_runtime BUILD", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file

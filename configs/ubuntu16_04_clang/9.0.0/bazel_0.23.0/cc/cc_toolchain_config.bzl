@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """A Starlark cc_toolchain configuration rule"""
+<<<<<<< HEAD
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
@@ -30,6 +31,25 @@ load(
     "variable_with_value",
     "with_feature_set",
 )
+=======
+load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
+     "action_config",
+     "artifact_name_pattern",
+     "env_entry",
+     "env_set",
+     "feature",
+     "feature_set",
+     "flag_group",
+     "flag_set",
+     "make_variable",
+     "tool",
+     "tool_path",
+     "variable_with_value",
+     "with_feature_set",
+     )
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
 
 all_compile_actions = [
     ACTION_NAMES.c_compile,
@@ -92,6 +112,7 @@ def _windows_msvc_impl(ctx):
     builtin_sysroot = None
 
     cxx_builtin_include_directories = [
+<<<<<<< HEAD
         "/usr/local/include",
         "/usr/local/lib/clang/9.0.0/include",
         "/usr/include/x86_64-linux-gnu",
@@ -99,6 +120,15 @@ def _windows_msvc_impl(ctx):
         "/usr/include/c++/4.9",
         "/usr/include/x86_64-linux-gnu/c++/4.9",
         "/usr/include/c++/4.9/backward",
+=======
+"/usr/local/include",
+    "/usr/local/lib/clang/9.0.0/include",
+    "/usr/include/x86_64-linux-gnu",
+    "/usr/include",
+    "/usr/include/c++/4.9",
+    "/usr/include/x86_64-linux-gnu/c++/4.9",
+    "/usr/include/c++/4.9/backward"
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     cpp_link_nodeps_dynamic_library_action = action_config(
@@ -389,6 +419,7 @@ def _windows_msvc_impl(ctx):
                             ),
                             flag_group(
                                 flag_groups = [
+<<<<<<< HEAD
                                     flag_group(
                                         flags = ["%{libraries_to_link.name}"],
                                         expand_if_false = "libraries_to_link.is_whole_archive",
@@ -397,6 +428,16 @@ def _windows_msvc_impl(ctx):
                                         flags = ["/WHOLEARCHIVE:%{libraries_to_link.name}"],
                                         expand_if_true = "libraries_to_link.is_whole_archive",
                                     ),
+=======
+                                  flag_group(
+                                      flags = ["%{libraries_to_link.name}"],
+                                      expand_if_false = "libraries_to_link.is_whole_archive",
+                                  ),
+                                  flag_group(
+                                      flags = ["/WHOLEARCHIVE:%{libraries_to_link.name}"],
+                                      expand_if_true = "libraries_to_link.is_whole_archive",
+                                  ),
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                                 ],
                                 expand_if_equal = variable_with_value(
                                     name = "libraries_to_link.type",
@@ -476,7 +517,11 @@ def _windows_msvc_impl(ctx):
                 actions = all_link_actions,
                 flag_groups = [flag_group(flags = ["/MACHINE:X64"])],
             ),
+<<<<<<< HEAD
         ],
+=======
+         ],
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     )
 
     static_link_msvcrt_feature = feature(name = "static_link_msvcrt")
@@ -506,9 +551,15 @@ def _windows_msvc_impl(ctx):
             flag_set(
                 actions = all_link_actions,
                 flag_groups = [
+<<<<<<< HEAD
                     flag_group(
                         flags = ["", "/INCREMENTAL:NO"],
                     ),
+=======
+                  flag_group(
+                      flags = ["", "/INCREMENTAL:NO"],
+                  ),
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
             ),
         ],
@@ -660,11 +711,19 @@ def _windows_msvc_impl(ctx):
                 actions = all_link_actions,
                 flag_groups = [flag_group(flags = ["/DEFAULTLIB:msvcrt.lib"])],
             ),
+<<<<<<< HEAD
         ],
         requires = [
             feature_set(features = ["fastbuild"]),
             feature_set(features = ["opt"]),
         ],
+=======
+          ],
+          requires = [
+              feature_set(features = ["fastbuild"]),
+              feature_set(features = ["opt"]),
+          ],
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     )
 
     disable_assertions_feature = feature(
@@ -855,6 +914,7 @@ def _windows_msvc_impl(ctx):
             flag_set(
                 actions = [ACTION_NAMES.assemble],
                 flag_groups = [
+<<<<<<< HEAD
                     flag_group(
                         flag_groups = [
                             flag_group(
@@ -865,6 +925,18 @@ def _windows_msvc_impl(ctx):
                         ],
                         expand_if_not_available = "output_preprocess_file",
                     ),
+=======
+                  flag_group(
+                      flag_groups = [
+                          flag_group(
+                              flags = ["/Fo%{output_file}", "/Zi"],
+                              expand_if_available = "output_file",
+                              expand_if_not_available = "output_assembly_file",
+                          ),
+                      ],
+                      expand_if_not_available = "output_preprocess_file",
+                  ),
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
             ),
             flag_set(
@@ -1160,13 +1232,21 @@ def _windows_msys_mingw_impl(ctx):
         enabled = True,
     )
 
+<<<<<<< HEAD
     copy_dynamic_libraries_to_binary_feature = feature(name = "copy_dynamic_libraries_to_binary")
+=======
+    copy_dynamic_libraries_to_binary_feature = feature(name= "copy_dynamic_libraries_to_binary")
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
 
     gcc_env_feature = feature(
         name = "gcc_env",
         enabled = True,
         env_sets = [
+<<<<<<< HEAD
             env_set(
+=======
+            env_set (
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 actions = [
                     ACTION_NAMES.c_compile,
                     ACTION_NAMES.cpp_compile,
@@ -1181,15 +1261,26 @@ def _windows_msys_mingw_impl(ctx):
                     ACTION_NAMES.cpp_link_static_library,
                 ],
                 env_entries = [
+<<<<<<< HEAD
                     env_entry(key = "PATH", value = "NOT_USED"),
+=======
+                    env_entry(key = "PATH", value = "NOT_USED")
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
             ),
         ],
     )
 
     msys_mingw_flags = [
+<<<<<<< HEAD
     ]
     msys_mingw_link_flags = [
+=======
+ 
+    ]
+    msys_mingw_link_flags = [
+ 
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     default_compile_flags_feature = feature(
@@ -1248,6 +1339,10 @@ def _windows_msys_mingw_impl(ctx):
     ]
 
     cxx_builtin_include_directories = [
+<<<<<<< HEAD
+=======
+
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     artifact_name_patterns = [
@@ -1260,6 +1355,10 @@ def _windows_msys_mingw_impl(ctx):
 
     make_variables = []
     tool_paths = [
+<<<<<<< HEAD
+=======
+
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     return cc_common.create_cc_toolchain_config_info(
@@ -1279,8 +1378,13 @@ def _windows_msys_mingw_impl(ctx):
         tool_paths = tool_paths,
         make_variables = make_variables,
         builtin_sysroot = builtin_sysroot,
+<<<<<<< HEAD
         cc_target_os = cc_target_os,
     )
+=======
+        cc_target_os = cc_target_os)
+
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
 
 def _armeabi_impl(ctx):
     toolchain_identifier = "stub_armeabi-v7a"
@@ -1334,7 +1438,11 @@ def _armeabi_impl(ctx):
         tool_paths = tool_paths,
         make_variables = make_variables,
         builtin_sysroot = builtin_sysroot,
+<<<<<<< HEAD
         cc_target_os = cc_target_os,
+=======
+        cc_target_os = cc_target_os
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     )
 
 def _impl(ctx):
@@ -1346,6 +1454,7 @@ def _impl(ctx):
         return _windows_msys_mingw_impl(ctx)
 
     tool_paths = [
+<<<<<<< HEAD
         tool_path(name = "ar", path = "/usr/bin/ar"),
         tool_path(name = "ld", path = "/usr/bin/ld"),
         tool_path(name = "cpp", path = "/usr/bin/cpp"),
@@ -1366,12 +1475,35 @@ def _impl(ctx):
         "/usr/include/c++/4.9",
         "/usr/include/x86_64-linux-gnu/c++/4.9",
         "/usr/include/c++/4.9/backward",
+=======
+        tool_path ( name= "ar", path= "/usr/bin/ar" ),
+        tool_path ( name= "ld", path= "/usr/bin/ld" ),
+        tool_path ( name= "cpp", path= "/usr/bin/cpp" ),
+        tool_path ( name= "gcc", path= "/usr/local/bin/clang" ),
+        tool_path ( name= "dwp", path= "/usr/bin/dwp" ),
+        tool_path ( name= "gcov", path= "/dev/null" ),
+        tool_path ( name= "nm", path= "/usr/bin/nm" ),
+        tool_path ( name= "objcopy", path= "/usr/bin/objcopy" ),
+        tool_path ( name= "objdump", path= "/usr/bin/objdump" ),
+        tool_path ( name= "strip", path= "/usr/bin/strip" ),
+    ]
+
+    cxx_builtin_include_directories = [
+"/usr/local/include",
+    "/usr/local/lib/clang/9.0.0/include",
+    "/usr/include/x86_64-linux-gnu",
+    "/usr/include",
+    "/usr/include/c++/4.9",
+    "/usr/include/x86_64-linux-gnu/c++/4.9",
+    "/usr/include/c++/4.9/backward"
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     action_configs = []
 
     compile_flags = [
         "-U_FORTIFY_SOURCE",
+<<<<<<< HEAD
         "-fstack-protector",
         "-Wall",
         "-Wthread-safety",
@@ -1382,10 +1514,23 @@ def _impl(ctx):
 
     dbg_compile_flags = [
         "-g",
+=======
+    "-fstack-protector",
+    "-Wall",
+    "-Wthread-safety",
+    "-Wself-assign",
+    "-fcolor-diagnostics",
+    "-fno-omit-frame-pointer"
+    ]
+
+    dbg_compile_flags = [
+        "-g"
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     opt_compile_flags = [
         "-g0",
+<<<<<<< HEAD
         "-O2",
         "-D_FORTIFY_SOURCE=1",
         "-DNDEBUG",
@@ -1395,10 +1540,22 @@ def _impl(ctx):
 
     cxx_flags = [
         "-std=c++0x",
+=======
+    "-O2",
+    "-D_FORTIFY_SOURCE=1",
+    "-DNDEBUG",
+    "-ffunction-sections",
+    "-fdata-sections"
+    ]
+
+    cxx_flags = [
+        "-std=c++0x"
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     link_flags = [
         "-fuse-ld=gold",
+<<<<<<< HEAD
         "-Wl,-no-as-needed",
         "-Wl,-z,relro,-z,now",
         "-B/usr/local/bin",
@@ -1408,14 +1565,32 @@ def _impl(ctx):
 
     opt_link_flags = [
         "-Wl,--gc-sections",
+=======
+    "-Wl,-no-as-needed",
+    "-Wl,-z,relro,-z,now",
+    "-B/usr/local/bin",
+    "-lstdc++",
+    "-lm"
+    ]
+
+    opt_link_flags = [
+        "-Wl,--gc-sections"
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     unfiltered_compile_flags = [
         "-no-canonical-prefixes",
+<<<<<<< HEAD
         "-Wno-builtin-macro-redefined",
         "-D__DATE__=\"redacted\"",
         "-D__TIMESTAMP__=\"redacted\"",
         "-D__TIME__=\"redacted\"",
+=======
+    "-Wno-builtin-macro-redefined",
+    "-D__DATE__=\"redacted\"",
+    "-D__TIMESTAMP__=\"redacted\"",
+    "-D__TIME__=\"redacted\""
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     targets_windows_feature = feature(
@@ -1424,13 +1599,21 @@ def _impl(ctx):
         enabled = True,
     )
 
+<<<<<<< HEAD
     copy_dynamic_libraries_to_binary_feature = feature(name = "copy_dynamic_libraries_to_binary")
+=======
+    copy_dynamic_libraries_to_binary_feature = feature(name= "copy_dynamic_libraries_to_binary")
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
 
     gcc_env_feature = feature(
         name = "gcc_env",
         enabled = True,
         env_sets = [
+<<<<<<< HEAD
             env_set(
+=======
+            env_set (
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 actions = [
                     ACTION_NAMES.c_compile,
                     ACTION_NAMES.cpp_compile,
@@ -1445,7 +1628,11 @@ def _impl(ctx):
                     ACTION_NAMES.cpp_link_static_library,
                 ],
                 env_entries = [
+<<<<<<< HEAD
                     env_entry(key = "PATH", value = "NOT_USED"),
+=======
+                    env_entry(key = "PATH", value = "NOT_USED")
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
             ),
         ],
@@ -1457,7 +1644,12 @@ def _impl(ctx):
         gcc_env_feature,
     ]
 
+<<<<<<< HEAD
     coverage_feature = feature(
+=======
+    
+    coverage_feature = feature (
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
         name = "coverage",
         provides = ["profile"],
         flag_sets = [
@@ -1470,22 +1662,37 @@ def _impl(ctx):
                     ACTION_NAMES.cpp_module_compile,
                 ],
                 flag_groups = [
+<<<<<<< HEAD
                     flag_group(flags = ["--coverage"]),
                 ],
             ),
             flag_set(
+=======
+                    flag_group (flags = ["--coverage"]),
+                ],
+            ),
+            flag_set (
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 actions = [
                     ACTION_NAMES.cpp_link_dynamic_library,
                     ACTION_NAMES.cpp_link_nodeps_dynamic_library,
                     ACTION_NAMES.cpp_link_executable,
                 ],
                 flag_groups = [
+<<<<<<< HEAD
                     flag_group(flags = ["--coverage"]),
+=======
+                    flag_group (flags = ["--coverage"]),
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
             ),
         ],
     )
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     supports_pic_feature = feature(
         name = "supports_pic",
         enabled = True,
@@ -1587,6 +1794,7 @@ def _impl(ctx):
         flag_sets = [
             flag_set(
                 actions = [
+<<<<<<< HEAD
                     ACTION_NAMES.preprocess_assemble,
                     ACTION_NAMES.linkstamp_compile,
                     ACTION_NAMES.c_compile,
@@ -1605,6 +1813,26 @@ def _impl(ctx):
                         flags = ["--sysroot=%{sysroot}"],
                         expand_if_available = "sysroot",
                     ),
+=======
+                  ACTION_NAMES.preprocess_assemble,
+                  ACTION_NAMES.linkstamp_compile,
+                  ACTION_NAMES.c_compile,
+                  ACTION_NAMES.cpp_compile,
+                  ACTION_NAMES.cpp_header_parsing,
+                  ACTION_NAMES.cpp_module_compile,
+                  ACTION_NAMES.cpp_module_codegen,
+                  ACTION_NAMES.lto_backend,
+                  ACTION_NAMES.clif_match,
+                  ACTION_NAMES.cpp_link_executable,
+                  ACTION_NAMES.cpp_link_dynamic_library,
+                  ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+                ],
+                flag_groups = [
+                  flag_group(
+                      flags = ["--sysroot=%{sysroot}"],
+                      expand_if_available = "sysroot",
+                  ),
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
             ),
         ],
@@ -1616,6 +1844,7 @@ def _impl(ctx):
             flag_set(
                 actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
                 flag_groups = [
+<<<<<<< HEAD
                     flag_group(
                         flags = [
                             "-fprofile-use=%{fdo_profile_path}",
@@ -1623,6 +1852,15 @@ def _impl(ctx):
                         ],
                         expand_if_available = "fdo_profile_path",
                     ),
+=======
+                  flag_group(
+                      flags = [
+                        "-fprofile-use=%{fdo_profile_path}",
+                        "-fprofile-correction",
+                      ],
+                      expand_if_available = "fdo_profile_path",
+                  ),
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
             ),
         ],
@@ -1637,6 +1875,7 @@ def _impl(ctx):
         flag_sets = [
             flag_set(
                 actions = [
+<<<<<<< HEAD
                     ACTION_NAMES.assemble,
                     ACTION_NAMES.preprocess_assemble,
                     ACTION_NAMES.linkstamp_compile,
@@ -1657,6 +1896,28 @@ def _impl(ctx):
                 ],
             ),
         ],
+=======
+                  ACTION_NAMES.assemble,
+                  ACTION_NAMES.preprocess_assemble,
+                  ACTION_NAMES.linkstamp_compile,
+                  ACTION_NAMES.c_compile,
+                  ACTION_NAMES.cpp_compile,
+                  ACTION_NAMES.cpp_header_parsing,
+                  ACTION_NAMES.cpp_module_compile,
+                  ACTION_NAMES.cpp_module_codegen,
+                  ACTION_NAMES.lto_backend,
+                  ACTION_NAMES.clif_match,
+                ],
+                flag_groups = [
+                  flag_group(
+                      flags = ["%{user_compile_flags}"],
+                      iterate_over = "user_compile_flags",
+                      expand_if_available = "user_compile_flags",
+                  ),
+                ],
+            ),
+          ],
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     )
 
     unfiltered_compile_flags_feature = feature(
@@ -1665,6 +1926,7 @@ def _impl(ctx):
         flag_sets = [
             flag_set(
                 actions = [
+<<<<<<< HEAD
                     ACTION_NAMES.assemble,
                     ACTION_NAMES.preprocess_assemble,
                     ACTION_NAMES.linkstamp_compile,
@@ -1675,6 +1937,18 @@ def _impl(ctx):
                     ACTION_NAMES.cpp_module_codegen,
                     ACTION_NAMES.lto_backend,
                     ACTION_NAMES.clif_match,
+=======
+                  ACTION_NAMES.assemble,
+                  ACTION_NAMES.preprocess_assemble,
+                  ACTION_NAMES.linkstamp_compile,
+                  ACTION_NAMES.c_compile,
+                  ACTION_NAMES.cpp_compile,
+                  ACTION_NAMES.cpp_header_parsing,
+                  ACTION_NAMES.cpp_module_compile,
+                  ACTION_NAMES.cpp_module_codegen,
+                  ACTION_NAMES.lto_backend,
+                  ACTION_NAMES.clif_match,
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
                 ],
                 flag_groups = ([flag_group(flags = unfiltered_compile_flags)] if unfiltered_compile_flags else []),
             ),
@@ -1697,6 +1971,10 @@ def _impl(ctx):
     ]
 
     artifact_name_patterns = [
+<<<<<<< HEAD
+=======
+
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     ]
 
     make_variables = []
@@ -1724,8 +2002,13 @@ def _impl(ctx):
 cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
+<<<<<<< HEAD
         "compiler": attr.string(),
         "cpu": attr.string(mandatory = True),
+=======
+        "cpu" : attr.string(mandatory = True),
+        "compiler": attr.string(),
+>>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
     },
     provides = [CcToolchainConfigInfo],
 )
