@@ -327,8 +327,8 @@ def _use_standard_config(ctx):
 
     # Create the BUILD file with the alias for the cc_toolchain_suite
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_cc_toolchain.tpl"))
-    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s:toolchain" %
-                 (ctx.attr.config_version, ctx.attr.bazel_version))
+    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/%s:toolchain" %
+                 (ctx.attr.config_version, ctx.attr.bazel_version, _CC_CONFIG_DIR))
     ctx.template(
         _CC_CONFIG_DIR + "/BUILD",
         template,
@@ -340,8 +340,8 @@ def _use_standard_config(ctx):
 
     # Create the BUILD file with the alias for the java_runtime
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_java_runtime.tpl"))
-    java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/java:jdk" %
-                    (ctx.attr.config_version, ctx.attr.bazel_version))
+    java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/%s:jdk" %
+                    (ctx.attr.config_version, ctx.attr.bazel_version, _JAVA_CONFIG_DIR))
     ctx.template(
         _JAVA_CONFIG_DIR + "/BUILD",
         template,
@@ -584,30 +584,35 @@ def _expand_outputs(ctx, bazel_version, project_root):
             dest += ctx.attr.config_dir + "/"
         platform_dest = dest + _PLATFORM_DIR + "/"
         java_dest = dest + _JAVA_CONFIG_DIR + "/"
+        cc_dest = dest + _CC_CONFIG_DIR + "/"
 
         # Create the directories
         result = ctx.execute(["mkdir", "-p", platform_dest])
-        _print_exec_results("create output dir", result)
+        _print_exec_results("create platform output dir", result)
         result = ctx.execute(["mkdir", "-p", java_dest])
-        _print_exec_results("create output dir", result)
+        _print_exec_results("create java output dir", result)
+        result = ctx.execute(["mkdir", "-p", cc_dest])
+        _print_exec_results("create cc output dir", result)
 
         # Get the files that were created in the _CC_CONFIG_DIR
         ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % _CC_CONFIG_DIR), True)
         result = ctx.execute(["./local_config_files.sh"])
         _print_exec_results("resolve autoconf files", result)
         autoconf_files = result.stdout.splitlines()[0].split(" ")
-        args = ["cp"] + autoconf_files + [dest]
+        args = ["cp"] + autoconf_files + [cc_dest]
 
-        # Copy the files to dest
+        # Copy the local_config_cc files to dest/{_CC_CONFIG_DIR}/
         result = ctx.execute(args)
-        _print_exec_results("copy outputs", result, True, args)
+        _print_exec_results("copy local_config_cc outputs", result, True, args)
 
         # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
-        result = ctx.execute(["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest])
+        args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
+        result = ctx.execute(args)
         _print_exec_results("copy java_runtime BUILD", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file
-        result = ctx.execute(["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest])
+        args = ["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest]
+        result = ctx.execute(args)
         _print_exec_results("copy platform BUILD", result, True, args)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
@@ -892,6 +897,9 @@ def validateUseOfCheckedInConfigs(
     # Verify a toolchain config exists for the given version of Bazel and the
     # given digest of the container
     config_version = rbe_ubuntu16_04_config_version().get(digest, None)
-    if not config_version or config_version != bazel_to_config_versions().get(bazel_version):
+    if not config_version:
         return None
-    return config_version
+    for supported_config in bazel_to_config_versions().get(bazel_version):
+        if config_version == supported_config:
+            return config_version
+    return None

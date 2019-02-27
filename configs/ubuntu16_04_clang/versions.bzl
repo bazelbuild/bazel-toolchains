@@ -15,9 +15,10 @@
 # Returns a dict with suppported Bazel versions mapped to the config version to use.
 def bazel_to_config_versions():
     return {
-        "0.20.0": "8.0.0",
-        "0.21.0": "8.0.0",
-        "0.22.0": "8.0.0",
+        "0.20.0": ["8.0.0"],
+        "0.21.0": ["8.0.0"],
+        "0.22.0": ["8.0.0", "9.0.0"],
+        "0.23.0": ["9.0.0"],
     }
 
 # Update only when the container in Cloud Marketplace is made available.
@@ -29,5 +30,6 @@ def container_to_config_version():
     return {
         "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c": "8.0.0",
         "sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928": "8.0.0",
+        "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729": "9.0.0",
         "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": "8.0.0",
     }
