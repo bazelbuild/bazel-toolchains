@@ -549,7 +549,7 @@ def _create_platform(ctx, image_name, name):
     # A checked in config was found
     if ctx.attr.config_version:
         cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s%s" %
-                        (ctx.attr.config_version, ctx.attr.bazel_version, _CC_TOOLCHAIN))
+                               (ctx.attr.config_version, ctx.attr.bazel_version, _CC_TOOLCHAIN))
     if ctx.attr.output_base:
         cc_toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + ctx.attr.bazel_version
         if ctx.attr.config_dir:
@@ -566,10 +566,10 @@ def _create_platform(ctx, image_name, name):
         _PLATFORM_DIR + "/BUILD",
         template,
         {
+            "%{cc_toolchain}": cc_toolchain_target,
             "%{exec_compatible_with}": exec_compatible_with,
             "%{image_name}": image_name,
             "%{target_compatible_with}": target_compatible_with,
-            "%{cc_toolchain}": cc_toolchain_target,
         },
         False,
     )
@@ -888,6 +888,7 @@ def validateUseOfCheckedInConfigs(
 
     if base_container_digest:
         digest = base_container_digest
+
     # Verify a toolchain config exists for the given version of Bazel and the
     # given digest of the container
     config_version = rbe_ubuntu16_04_config_version().get(digest, None)
