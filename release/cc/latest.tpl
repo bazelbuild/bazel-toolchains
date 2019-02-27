@@ -67,3 +67,9 @@ toolchain(
     toolchain = PACKAGE + LATEST_CONFIG_VERSION + "/bazel_" + LATEST_BAZEL_VERSION + "/default:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
+
+# For internal testing purpose only.
+alias(
+    name = "platform_docker",
+    actual = PACKAGE + LATEST_CONFIG_VERSION + ":nosla_xenial_docker",
+)
