@@ -16,7 +16,7 @@ platforms:
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--crosstool_top=@buildkite_config//:toolchain"
+    - "--crosstool_top=@buildkite_config//cc:toolchain"
     - "--host_javabase=@buildkite_config//java:jdk"
     - "--javabase=@buildkite_config//java:jdk"
     - "--host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8"

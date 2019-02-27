@@ -934,6 +934,7 @@ def validateUseOfCheckedInConfigs(
 
     if base_container_digest:
         digest = base_container_digest
+
     # Verify a toolchain config exists for the given version of Bazel and the
     # given digest of the container
     config_version = rbe_ubuntu16_04_config_version().get(digest, None)
