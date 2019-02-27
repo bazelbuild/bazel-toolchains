@@ -158,3 +158,13 @@ rbe_autoconfig(
     repository = "asci-toolchain/test-rbe-ubuntu16_04",
     tag = "latest",
 )
+
+# Use in the BazelCI.
+rbe_autoconfig(
+    name = "buildkite_config",
+    env = clang_env(),
+    registry = "gcr.io",
+    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+    digest = "sha256:f27fafcd3aef3a31d8fd89cca9c7a7e9ddef28194668f2afbfa3dab5aa3f19f7",
+    base_container_digest = "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
+)

@@ -614,7 +614,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
 # rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
     attrs = {
-        "base_container": attr.string(
+        "base_container_digest": attr.string(
             doc = ("Optional. If the container to use for the RBE build " +
                    "extends from the rbe-ubuntu16-04 image, you can " +
                    "pass the digest (sha256 sum) of the base container here " +
@@ -713,7 +713,7 @@ _rbe_autoconfig = repository_rule(
 
 def rbe_autoconfig(
         name,
-        base_container = None,
+        base_container_digest = None,
         bazel_version = None,
         bazel_rc_version = None,
         config_dir = None,
@@ -733,7 +733,7 @@ def rbe_autoconfig(
     Use this macro in your WORKSPACE.
 
     Args:
-      base_container: Optional. If the container to use for the RBE build
+      base_container_digest: Optional. If the container to use for the RBE build
           extends from the rbe-ubuntu16-04 image, you can pass the digest
           (sha256 sum) of the base container using this attr.
           The rule will enable use of checked-in configs if possible.
@@ -820,7 +820,7 @@ def rbe_autoconfig(
 
     config_version = validateUseOfCheckedInConfigs(
         name = name,
-        base_container = base_container,
+        base_container_digest = base_container_digest,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
         digest = digest,
@@ -834,7 +834,7 @@ def rbe_autoconfig(
 
     _rbe_autoconfig(
         name = name,
-        base_container = base_container,
+        base_container_digest = base_container_digest,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
         config_dir = config_dir,
@@ -854,7 +854,7 @@ def rbe_autoconfig(
 # the config version. Otherwise return None.
 def validateUseOfCheckedInConfigs(
         name,
-        base_container,
+        base_container_digest,
         bazel_version,
         bazel_rc_version,
         digest,
@@ -866,9 +866,9 @@ def validateUseOfCheckedInConfigs(
         use_checked_in_confs):
     if not use_checked_in_confs:
         return None
-    if not base_container and registry and registry != _RBE_UBUNTU_REGISTRY:
+    if not base_container_digest and registry and registry != _RBE_UBUNTU_REGISTRY:
         return None
-    if not base_container and repository and repository != _RBE_UBUNTU_REPO:
+    if not base_container_digest and repository and repository != _RBE_UBUNTU_REPO:
         return None
     if env and env != clang_env():
         return None
@@ -886,8 +886,8 @@ def validateUseOfCheckedInConfigs(
         else:
             return None
 
-    if base_container:
-        digest = base_container
+    if base_container_digest:
+        digest = base_container_digest
 
     # Verify a toolchain config exists for the given version of Bazel and the
     # given digest of the container
