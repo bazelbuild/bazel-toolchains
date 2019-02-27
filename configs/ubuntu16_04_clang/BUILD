@@ -26,6 +26,8 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+# This is the platform used by BuildKite CI that enables
+# docker capabilities for spinning up sibling containers
 platform(
     name = "docker_platform",
     parents = ["@buildkite_config//config:platform"],
