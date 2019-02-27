@@ -56,7 +56,6 @@ cc_toolchain_suite(
 
 cc_toolchain(
     name = "cc-compiler-k8",
-    toolchain_identifier = "linux_gnu_x86",
     all_files = ":compiler_deps",
     compiler_files = ":compiler_deps",
     cpu = "k8",
@@ -67,6 +66,7 @@ cc_toolchain(
     static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 1,
+    toolchain_identifier = "linux_gnu_x86",
 )
 
 toolchain(
@@ -84,7 +84,6 @@ toolchain(
 # Android tooling requires a default toolchain for the armeabi-v7a cpu.
 cc_toolchain(
     name = "cc-compiler-armeabi-v7a",
-    toolchain_identifier = "stub_armeabi-v7a",
     all_files = ":empty",
     compiler_files = ":empty",
     cpu = "local",
@@ -95,6 +94,7 @@ cc_toolchain(
     static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 1,
+    toolchain_identifier = "stub_armeabi-v7a",
 )
 
 toolchain(
@@ -109,4 +109,3 @@ toolchain(
     toolchain = ":cc-compiler-armabi-v7a",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
-

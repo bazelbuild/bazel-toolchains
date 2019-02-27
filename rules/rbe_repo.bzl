@@ -124,7 +124,7 @@ There are two modes of using this repo rules:
     flags to:
 
       bazel build ... \
-                --crosstool_top=@rbe_default//:toolchain \
+                --crosstool_top=@rbe_default//cc:toolchain \
                 --host_javabase=@rbe_default//java:jdk \
                 --javabase=@rbe_default//java:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
@@ -888,7 +888,6 @@ def validateUseOfCheckedInConfigs(
 
     if base_container_digest:
         digest = base_container_digest
-
     # Verify a toolchain config exists for the given version of Bazel and the
     # given digest of the container
     config_version = rbe_ubuntu16_04_config_version().get(digest, None)
