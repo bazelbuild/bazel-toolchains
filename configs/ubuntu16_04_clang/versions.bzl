@@ -18,7 +18,7 @@ def bazel_to_config_versions():
         "0.20.0": ["8.0.0"],
         "0.21.0": ["8.0.0"],
         "0.22.0": ["8.0.0", "9.0.0"],
-        "0.23.0": ["9.0.0"],
+        "0.23.0": ["8.0.0", "9.0.0"],
     }
 
 # Update only when the container in Cloud Marketplace is made available.
