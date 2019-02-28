@@ -165,6 +165,6 @@ rbe_autoconfig(
     env = clang_env(),
     registry = "gcr.io",
     repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
-    digest = "sha256:f27fafcd3aef3a31d8fd89cca9c7a7e9ddef28194668f2afbfa3dab5aa3f19f7",
-    base_container_digest = "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
+    digest = "sha256:176d4c94865d46a5d4896121aeb7ab8a3216bd56cc784c8485051e9cdead72d4",
+    base_container_digest = "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729",
 )
