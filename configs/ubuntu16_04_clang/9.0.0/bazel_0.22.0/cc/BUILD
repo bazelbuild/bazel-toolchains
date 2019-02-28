@@ -47,15 +47,26 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
+<<<<<<< HEAD
         "armeabi-v7a": ":cc-compiler-armeabi-v7a",
         "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
         "k8": ":cc-compiler-k8",
         "k8|clang": ":cc-compiler-k8",
+=======
+        "k8|clang": ":cc-compiler-k8",
+        "k8": ":cc-compiler-k8",
+        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
+>>>>>>> adding configs for clang 9.0.0 with bazel 0.22.0
     },
 )
 
 cc_toolchain(
     name = "cc-compiler-k8",
+<<<<<<< HEAD
+=======
+    toolchain_identifier = "linux_gnu_x86",
+>>>>>>> adding configs for clang 9.0.0 with bazel 0.22.0
     all_files = ":compiler_deps",
     ar_files = ":empty",
     as_files = ":empty",
@@ -66,7 +77,10 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 1,
+<<<<<<< HEAD
     toolchain_identifier = "linux_gnu_x86",
+=======
+>>>>>>> adding configs for clang 9.0.0 with bazel 0.22.0
 )
 
 toolchain(
@@ -84,6 +98,10 @@ toolchain(
 # Android tooling requires a default toolchain for the armeabi-v7a cpu.
 cc_toolchain(
     name = "cc-compiler-armeabi-v7a",
+<<<<<<< HEAD
+=======
+    toolchain_identifier = "stub_armeabi-v7a",
+>>>>>>> adding configs for clang 9.0.0 with bazel 0.22.0
     all_files = ":empty",
     ar_files = ":empty",
     as_files = ":empty",
@@ -94,7 +112,10 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 1,
+<<<<<<< HEAD
     toolchain_identifier = "stub_armeabi-v7a",
+=======
+>>>>>>> adding configs for clang 9.0.0 with bazel 0.22.0
 )
 
 toolchain(
@@ -109,3 +130,7 @@ toolchain(
     toolchain = ":cc-compiler-armabi-v7a",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
+<<<<<<< HEAD
+=======
+
+>>>>>>> adding configs for clang 9.0.0 with bazel 0.22.0
