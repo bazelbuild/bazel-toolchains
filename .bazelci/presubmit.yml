@@ -11,8 +11,8 @@ platforms:
     - "//tests/config:debian8_clang_autoconfig_test"
     - "//tests/config:external-repo-autoconfig_test"
     - "//tests/config:this-project-repo-autoconfig"
-    - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
-    - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
+    - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.2-bazel_0.23.0-autoconfig_test"
+    - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.2-bazel_0.23.0-autoconfig_test"
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
