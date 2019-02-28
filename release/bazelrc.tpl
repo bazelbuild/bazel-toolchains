@@ -45,7 +45,7 @@ build:remote --platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.2:rbe_ub
 build:remote --spawn_strategy=remote
 build:remote --strategy=Javac=remote
 build:remote --strategy=Closure=remote
-build:remote --genrule_strategy=remote
+build:remote --strategy=Genrule=remote
 build:remote --define=EXECUTOR=remote
 
 # Enable the remote cache so action results can be shared across machines,
@@ -75,7 +75,7 @@ build:docker-sandbox --experimental_docker_image=gcr.io/cloud-marketplace/google
 build:docker-sandbox --spawn_strategy=docker
 build:docker-sandbox --strategy=Javac=docker
 build:docker-sandbox --strategy=Closure=docker
-build:docker-sandbox --genrule_strategy=docker
+build:docker-sandbox --strategy=Genrule=docker
 build:docker-sandbox --define=EXECUTOR=remote
 build:docker-sandbox --experimental_docker_verbose
 build:docker-sandbox --experimental_enable_docker_sandbox
@@ -89,4 +89,4 @@ build:remote-cache --auth_enabled=true
 build:remote-cache --spawn_strategy=standalone
 build:remote-cache --strategy=Javac=standalone
 build:remote-cache --strategy=Closure=standalone
-build:remote-cache --genrule_strategy=standalone
+build:remote-cache --strategy=Genrule=standalone
