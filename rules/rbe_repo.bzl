@@ -184,7 +184,7 @@ load(
 )
 
 # Version to fallback to if not provided explicitly and local is non-release version.
-_BAZEL_VERSION_FALLBACK = "0.22.0"
+_BAZEL_VERSION_FALLBACK = "0.23.0"
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring

@@ -1,25 +1,20 @@
 def toolchain_container_sha256s():
     return {
         ###########################################################
-        # Base images                                             #
-        ###########################################################
-        # gcr.io/cloud-marketplace/google/debian8:latest
-        "debian8": "sha256:a6df7738c401aef6bf9c113eb1eea7f3921417fd4711ea28100681f2fe483ea2",
-
-        ###########################################################
         # Clang images                                            #
         ###########################################################
-        # gcr.io/cloud-marketplace/google/clang-debian8
+        # gcr.io/cloud-marketplace/google/clang-debian8@sha256:e076c87e670f9a3c95e250268f160397d1cee482ec195d51e40b992b34198395
+        # Debian8 Clang configs are deprecated. No need to update this SHA for
+        # config release purpose anymore.
         "debian8_clang": "sha256:e076c87e670f9a3c95e250268f160397d1cee482ec195d51e40b992b34198395",
-        # gcr.io/cloud-marketplace/google/ubuntu16_04:latest
-        "ubuntu16_04": "sha256:df51b5c52d71c9867cd9c1c88c81f67a85ff87f1defe7e9b7ac5fb7d652596bf",
-        # gcr.io/cloud-marketplace/google/clang-ubuntu
-        "ubuntu16_04_clang": "sha256:9fe84f7c726419ab77a9680887ec4a518d1910a28284c2955620258db01c7aae",
+
+        # gcr.io/cloud-marketplace/google/clang-ubuntu:latest
+        "ubuntu16_04_clang": "sha256:963ea21d047664257c91fb0e05d9a6e9acf1481ea1874736af4d4ceed1e02a0c",
     }
 
 # Update only when the container in Cloud Marketplace is made available.
 # List of tags and SHAs of gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
-RBE_UBUNTU16_04_LATEST = "r346485"
+RBE_UBUNTU16_04_LATEST = "r352865"
 
 def public_rbe_ubuntu16_04_sha256s():
     return {
@@ -29,6 +24,7 @@ def public_rbe_ubuntu16_04_sha256s():
         "r340178": "sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928",
         "r342117": "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375",
         "r346485": "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
+        "r352865": "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729",
     }
 
 # Map from revisions of rbe ubuntu16_04 to corresponding major container versions.
@@ -41,4 +37,5 @@ def public_rbe_ubuntu16_04_config_version():
         "r340178": "1.1",
         "r342117": "1.1",
         "r346485": "1.1",
+        "r352865": "1.2",
     }
