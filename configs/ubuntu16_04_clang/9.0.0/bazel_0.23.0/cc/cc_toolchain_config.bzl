@@ -1724,8 +1724,8 @@ def _impl(ctx):
 cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
-        "cpu": attr.string(mandatory = True),
         "compiler": attr.string(),
+        "cpu": attr.string(mandatory = True),
     },
     provides = [CcToolchainConfigInfo],
 )
