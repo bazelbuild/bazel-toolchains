@@ -150,11 +150,23 @@ rbe_autoconfig(
     output_base = "configs/ubuntu16_04_clang/1.1",
 )
 
+# TODO(xingao): think of a way to scale this to avoid having to add a new
+# rbe_autoconfig target in bazel-toolchains for every flavor of RBE containers.
+
 # Use in the RBE Ubuntu1604 container release.
 rbe_autoconfig(
     name = "rbe_ubuntu1604_test",
     env = clang_env(),
     registry = "gcr.io",
     repository = "asci-toolchain/test-rbe-ubuntu16_04",
+    tag = "latest",
+)
+
+# Use in the RBE Ubuntu1604 Docker container release.
+rbe_autoconfig(
+    name = "rbe_ubuntu1604_docker_test",
+    env = clang_env(),
+    registry = "gcr.io",
+    repository = "asci-toolchain/test-rbe-ubuntu1604-docker",
     tag = "latest",
 )
