@@ -117,22 +117,24 @@ rbe_autoconfig(
 )
 
 # Targets used by automatic config generation and release service.
-load("//configs/dependency-tracking:ubuntu1604.bzl",
-     _ubuntu1604_bazel="bazel",
-     _ubuntu1604_registry="registry",
-     _ubuntu1604_repository="repository",
-     _ubuntu1604_digest="digest",
-     _ubuntu1604_configs_version="configs_version")
+load(
+    "//configs/dependency-tracking:ubuntu1604.bzl",
+    _ubuntu1604_bazel = "bazel",
+    _ubuntu1604_configs_version = "configs_version",
+    _ubuntu1604_digest = "digest",
+    _ubuntu1604_registry = "registry",
+    _ubuntu1604_repository = "repository",
+)
 
 # Automatic config generation target for RBE Ubuntu 16.04
 rbe_autoconfig(
-  name = "rbe_autoconfig_autogen_ubuntu1604",
-  bazel_version=_ubuntu1604_bazel,
-  registry=_ubuntu1604_registry,
-  repository=_ubuntu1604_repository,
-  digest=_ubuntu1604_digest,
-  output_base="configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version),
-  use_checked_in_confs = False,
+    name = "rbe_autoconfig_autogen_ubuntu1604",
+    bazel_version = _ubuntu1604_bazel,
+    digest = _ubuntu1604_digest,
+    output_base = "configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version),
+    registry = _ubuntu1604_registry,
+    repository = _ubuntu1604_repository,
+    use_checked_in_confs = False,
 )
 
 load("//rules:environments.bzl", "clang_env")
