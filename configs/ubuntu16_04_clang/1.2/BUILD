@@ -75,7 +75,6 @@ alias(
 
 # ====================== RBE Ubuntu16_04 r352865 targets ======================
 
-
 # RBE Ubuntu16_04 r352865 with JDK 11
 platform(
     name = "rbe_ubuntu1604_r352865_jdk11",
