@@ -771,7 +771,9 @@ def rbe_autoconfig(
     if not repository and not registry and not tag and not digest:
         repository = _RBE_UBUNTU_REPO
         registry = _RBE_UBUNTU_REGISTRY
-        tag = RBE_UBUNTU16_04_LATEST
+        # If nothing is specified, assign the default digest instead of tag as
+        # the rbe ubuntu1604 containers are no longer tagged with the Clang version.
+        digest = public_rbe_ubuntu16_04_sha256s().get(RBE_UBUNTU16_04_LATEST, None)
 
     if ((registry and registry == _RBE_UBUNTU_REGISTRY) and
         (repository and repository == _RBE_UBUNTU_REPO) and
