@@ -21,9 +21,10 @@ package(default_visibility = ["//visibility:public"])
 
 PACKAGE = "//configs/ubuntu16_04_clang/"
 
-LATEST_CONFIG_VERSION = "1.2"
+# TODO(xingao): Change to 1.2 and bazel 0.23.0 once Buildkite CI has switched to Bazel 0.23.0.
+LATEST_CONFIG_VERSION = "1.1"
 
-LATEST_BAZEL_VERSION = "0.23.0"
+LATEST_BAZEL_VERSION = "0.22.0"
 
 CONFIG_TYPES = [
     "default",
