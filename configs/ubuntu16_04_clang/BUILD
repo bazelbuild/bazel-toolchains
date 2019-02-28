@@ -29,7 +29,7 @@ package(default_visibility = ["//visibility:public"])
 # This is the platform used by BuildKite CI that enables
 # docker capabilities for spinning up sibling containers
 platform(
-    name = "docker_platform",
+    name = "platform_docker",
     parents = ["@buildkite_config//config:platform"],
     remote_execution_properties = """
         {PARENT_REMOTE_EXECUTION_PROPERTIES}
