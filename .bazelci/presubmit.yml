@@ -22,6 +22,7 @@ platforms:
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.22.0-autoconfig_test"
       #- "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.2-bazel_0.23.0-autoconfig_test"
     test_flags:
+    - "--toolchain_resolution_debug"
     - "--test_output=errors"
     - "--verbose_failures"
     - "--crosstool_top=@buildkite_config//cc:toolchain"
