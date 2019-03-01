@@ -327,8 +327,11 @@ def _use_standard_config(ctx):
 
     # Create the BUILD file with the alias for the cc_toolchain_suite
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_cc_toolchain.tpl"))
-    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/%s:toolchain" %
-                 (ctx.attr.config_version, ctx.attr.bazel_version, _CC_CONFIG_DIR))
+    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
+        version = ctx.attr.config_version,
+        bazel_version = ctx.attr.bazel_version,
+        cc_dir = _CC_CONFIG_DIR,
+    ))
     ctx.template(
         _CC_CONFIG_DIR + "/BUILD",
         template,
@@ -340,8 +343,12 @@ def _use_standard_config(ctx):
 
     # Create the BUILD file with the alias for the java_runtime
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_java_runtime.tpl"))
-    java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/%s:jdk" %
-                    (ctx.attr.config_version, ctx.attr.bazel_version, _JAVA_CONFIG_DIR))
+    java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{java_dir}:jdk".format(
+        version = ctx.attr.config_version,
+        bazel_version = ctx.attr.bazel_version,
+        java_dir = _JAVA_CONFIG_DIR,
+    ))
+
     ctx.template(
         _JAVA_CONFIG_DIR + "/BUILD",
         template,
@@ -548,8 +555,12 @@ def _create_platform(ctx, image_name, name):
 
     # A checked in config was found
     if ctx.attr.config_version:
-        cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/%s%s" %
-                               (ctx.attr.config_version, ctx.attr.bazel_version, _CC_CONFIG_DIR, _CC_TOOLCHAIN))
+        cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}{target}".format(
+            version = ctx.attr.config_version,
+            bazel_version = ctx.attr.bazel_version,
+            cc_dir = _CC_CONFIG_DIR,
+            target = _CC_TOOLCHAIN,
+        ))
     if ctx.attr.output_base:
         cc_toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + ctx.attr.bazel_version
         if ctx.attr.config_dir:
