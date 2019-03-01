@@ -235,6 +235,8 @@ def _impl(ctx):
                 fail(("%s env variable must be set for rbe_autoconfig" +
                       " to function properly when output_base is set") % _AUTOCONF_ROOT)
 
+            # TODO(nlopezgi): consider using native.existing_rules() to validate
+            # bazel_toolchains repo exists.
             # Try to use the default project
             # This is Bazel black magic, we're traversing the directories in the output_base,
             # assuming that the bazel_toolchains external repo will exist in the
@@ -242,7 +244,9 @@ def _impl(ctx):
             project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
             if not project_root.exists:
                 fail(("Could not find default autoconf project in %s, please make sure " +
-                      "the bazel-toolchains repo is properly imported in your workspace") % str(project_root))
+                      "the bazel-toolchains repo is imported in your workspace with name " +
+                      "'bazel_toolchains' and imported before the rbe_autoconfig target " +
+                      "declaration ") % str(project_root))
             project_root = str(project_root)
             use_default_project = True
 
@@ -634,7 +638,7 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. If the container to use for the RBE build " +
                    "extends from the rbe-ubuntu16-04 image, you can " +
                    "pass the digest (sha256 sum) of the base container here " +
-                   "and this rule will attempt use of checked-in " +
+                   "and this rule will attempt to use checked-in " +
                    "configs if possible." +
                    "The digest (sha256 sum) of the base image. " +
                    "For example, " +
