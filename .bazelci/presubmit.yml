@@ -27,4 +27,4 @@ platforms:
     - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker,@buildkite_config//config:cc-toolchain"
-    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker,@buildkite_config//config:platform"
