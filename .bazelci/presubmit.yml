@@ -1,0 +1,35 @@
+
+---
+buildifier: true
+platforms:
+  rbe_ubuntu1604:
+    build_targets:
+    - "@buildkite_config//config:cc-toolchain"
+    build_flags:
+    - "--verbose_failures"
+    - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
+    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    test_targets:
+            #- "//tests/config:ubuntu-xenial-autoconfig_test"
+    # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
+    #- "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
+    #- "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
+      #- "//tests/config:debian8_clang_autoconfig_test"
+      #- "//tests/config:external-repo-autoconfig_test"
+      #- "//tests/config:this-project-repo-autoconfig_test"
+    - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.22.0-autoconfig_test"
+      #- "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.2-bazel_0.23.0-autoconfig_test"
+    test_flags:
+    - "--toolchain_resolution_debug"
+    - "--test_output=errors"
+    - "--verbose_failures"
+    - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+      #- "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
+    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker,//configs/ubuntu16_04_clang:platform_docker"
+      #- "--extra_execution_platforms=//configs/ubuntu16_04_clang:platform_docker"
+      #- "--host_platform=//configs/ubuntu16_04_clang:platform_docker"
+      #- "--platforms=//configs/ubuntu16_04_clang:platform_docker"
+    - "--extra_toolchains=@buildkite_config//config:cc-toolchain"
