@@ -56,7 +56,7 @@ alias(
 
 alias(
     name = "javabase",
-    actual = "@buildkite_config//java:jdk"
+    actual = "@buildkite_config//java:jdk",
     #actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
 )
 
