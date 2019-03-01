@@ -122,7 +122,6 @@ platform(
 
 # Experimental ubuntu1604 based container with Docker.
 # Based on l.gcr.io/google/rbe-ubuntu16-04:r340178
-# Deprecated: use //configs/ubuntu16_04_clang:docker_platform
 platform(
     name = "nosla_xenial_docker",
     constraint_values = [

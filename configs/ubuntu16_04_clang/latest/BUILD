@@ -56,7 +56,11 @@ alias(
 alias(
     name = "javabase",
     actual = "@buildkite_config//java:jdk",
-    #actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
+)
+
+alias(
+    name = "javabase_deprecated",
+    actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
 )
 
 # For internal testing purpose only.
