@@ -559,10 +559,10 @@ def _create_platform(ctx, image_name, name):
 
     # A checked in config was found
     if ctx.attr.config_version:
-        cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}{target}".format(
+        cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}{cc_dir}{target}".format(
             version = ctx.attr.config_version,
             bazel_version = ctx.attr.bazel_version,
-            cc_dir = _CC_CONFIG_DIR,
+            cc_dir = "",
             target = _CC_TOOLCHAIN,
         ))
     if ctx.attr.output_base:
