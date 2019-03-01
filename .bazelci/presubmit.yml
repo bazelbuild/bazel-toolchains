@@ -32,3 +32,4 @@ platforms:
     - "--extra_execution_platforms=//configs/ubuntu16_04_clang:docker_platform"
     - "--host_platform=//configs/ubuntu16_04_clang:docker_platform"
     - "--platforms=//configs/ubuntu16_04_clang:docker_platform"
+
