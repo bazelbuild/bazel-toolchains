@@ -23,7 +23,7 @@ def bazel_to_config_versions():
 
 # Update only when the container in Cloud Marketplace is made available.
 # List of tags and SHAs of gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
-LATEST = "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c"
+LATEST = "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729"
 
 # Map from sha256 of rbe ubuntu16_04 to corresponding major container versions.
 def container_to_config_version():
