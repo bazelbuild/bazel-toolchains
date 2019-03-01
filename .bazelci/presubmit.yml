@@ -25,7 +25,6 @@ platforms:
     - "--toolchain_resolution_debug"
     - "--test_output=errors"
     - "--verbose_failures"
-<<<<<<< HEAD
     - "--crosstool_top=@buildkite_config//cc:toolchain"
     - "--host_javabase=@buildkite_config//java:jdk"
     - "--javabase=@buildkite_config//java:jdk"
@@ -34,9 +33,3 @@ platforms:
     - "--extra_execution_platforms=//configs/ubuntu16_04_clang:docker_platform"
     - "--host_platform=//configs/ubuntu16_04_clang:docker_platform"
     - "--platforms=//configs/ubuntu16_04_clang:docker_platform"
-=======
-    - "--extra_toolchains=@buildkite_config//config:cc-toolchain"
-    - "--extra_execution_platforms=//configs/ubuntu16_04_clang:platform_docker"
-    - "--host_platform=//configs/ubuntu16_04_clang:platform_docker"
-    - "--platforms=//configs/ubuntu16_04_clang:platform_docker"
->>>>>>> test CI
