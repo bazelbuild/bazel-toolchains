@@ -27,14 +27,9 @@ LATEST_CONFIG_VERSION = "1.1"
 LATEST_BAZEL_VERSION = "0.22.0"
 
 CONFIG_TYPES = [
-    "default_deprecated",
+    "default",
     "msan",
 ]
-
-alias(
-    name = "crosstool_top_default",
-    actual = "@buildkite_config//cc:toolchain",
-)
 
 # DO NOT depend on the following latest alias in your production jobs.
 # These are for internal and our CI use only. We DO NOT guarantee that they
@@ -56,11 +51,6 @@ alias(
 
 alias(
     name = "javabase",
-    actual = "@buildkite_config//java:jdk",
-)
-
-alias(
-    name = "javabase_deprecated",
     actual = PACKAGE + LATEST_CONFIG_VERSION + ":jdk8",
 )
 
