@@ -30,6 +30,7 @@ package(default_visibility = ["//visibility:public"])
 # docker capabilities for spinning up sibling containers
 platform(
     name = "platform_docker",
+    constraint_values = ["//constraints:support_docker"]
     parents = ["@buildkite_config//config:platform"],
     remote_execution_properties = """
         {PARENT_REMOTE_EXECUTION_PROPERTIES}
