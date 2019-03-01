@@ -15,7 +15,7 @@ platforms:
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
-    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
-    - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
-    - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    - "--extra_toolchains=@buildkite_config//config:cc-toolchain"
+    - "--extra_execution_platforms=//configs/ubuntu16_04_clang:platform_docker"
+    - "--host_platform=//configs/ubuntu16_04_clang:platform_docker"
+    - "--platforms=//configs/ubuntu16_04_clang:platform_docker"
