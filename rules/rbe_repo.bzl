@@ -100,9 +100,9 @@ There are two modes of using this repo rules:
     produced files. If output_base is set to "rbe-configs" (recommended):
 
       bazel build ... \
-                --crosstool_top=//rbe-configs/bazel_{bazel_version}:toolchain \
-                --host_javabase=//rbe-configs/bazel_{bazel_version}/config:jdk \
-                --javabase=//rbe-configs/bazel_{bazel_version}/config:jdk \
+                --crosstool_top=//rbe-configs/bazel_{bazel_version}/cc:toolchain \
+                --host_javabase=//rbe-configs/bazel_{bazel_version}/java:jdk \
+                --javabase=//rbe-configs/bazel_{bazel_version}/java:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
@@ -124,9 +124,9 @@ There are two modes of using this repo rules:
     flags to:
 
       bazel build ... \
-                --crosstool_top=@rbe_default//rbe_config_cc:toolchain \
-                --host_javabase=@rbe_default//config:jdk \
-                --javabase=@rbe_default//config:jdk \
+                --crosstool_top=@rbe_default//cc:toolchain \
+                --host_javabase=@rbe_default//java:jdk \
+                --javabase=@rbe_default//java:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --extra_execution_platforms=@rbe_default//config:platform \
@@ -169,14 +169,10 @@ Known limitations (if any container other than rbe-ubuntu 16_04 is used):
 load(
     "//configs/ubuntu16_04_clang:versions.bzl",
     "bazel_to_config_versions",
+    RBE_UBUNTU16_04_LATEST = "LATEST",
+    rbe_ubuntu16_04_config_version = "container_to_config_version",
 )
 load("//rules:environments.bzl", "clang_env")
-load(
-    "//rules:toolchain_containers.bzl",
-    "RBE_UBUNTU16_04_LATEST",
-    "public_rbe_ubuntu16_04_config_version",
-    "public_rbe_ubuntu16_04_sha256s",
-)
 load(
     "//rules:version_check.bzl",
     "extract_version_number",
@@ -192,13 +188,15 @@ _BAZEL_VERSION_FALLBACK = "0.23.0"
 _EXTERNAL_FOLDER_PREFIX = "external/"
 
 _BAZEL_CONFIG_DIR = "/bazel-config"
+_CC_TOOLCHAIN = ":cc-compiler-k8"
 _CONFIG_REPOS = ["local_config_cc"]
 _PLATFORM_DIR = "config"
 _PROJECT_REPO_DIR = "project_src"
 _OUTPUT_DIR = _BAZEL_CONFIG_DIR + "/autoconf_out"
 _REPO_DIR = _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
-_RBE_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
-_RBE_CONFIG_DIR = "rbe_config_cc"
+_AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
+_CC_CONFIG_DIR = "cc"
+_JAVA_CONFIG_DIR = "java"
 
 # We use 'l.gcr.io' to not require users to do gcloud login
 _RBE_UBUNTU_REPO = "google/rbe-ubuntu16-04"
@@ -216,56 +214,74 @@ _VERBOSE = False
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
-
-    # Deal with the simple case first: if user picks rbe-ubuntu 16_04 container and
-    # a config exists for the current version of Bazel, just create aliases
-    if ctx.attr.config_version:
-        _use_standard_config(ctx, ctx.attr.bazel_version, ctx.attr.config_version)
-        return
-
-    # Perform some safety checks
-    _validate_host(ctx)
-    project_root = ctx.os.environ.get(_RBE_AUTOCONF_ROOT, None)
-    use_default_project = False
-    if not project_root:
-        if ctx.attr.output_base:
-            fail(("%s env variable must be set for rbe_autoconfig" +
-                  " to function properly when output_base is set") % _RBE_AUTOCONF_ROOT)
-
-        # Try to use the default project
-        # This is Bazel black magic, we're traversing the directories in the output_base,
-        # assuming that the bazel_toolchains external repo will exist in the
-        # expected path.
-        project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
-        if not project_root.exists:
-            fail(("Could not find default autoconf project in %s, please make sure " +
-                  "the bazel-toolchains repo is properly imported in your workspace") % str(project_root))
-        project_root = str(project_root)
-        use_default_project = True
-
     name = ctx.attr.name
-    outputs_tar = ctx.attr.name + "_out.tar"
-
-    # Pull the image using 'docker pull'
     image_name = None
     if ctx.attr.digest:
         image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
     else:
         image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
-    _pull_image(ctx, image_name)
 
-    # If tag is specified instead of digest, resolve it to digest in the
-    # image_name as it will be used later on in the platform targets.
-    if ctx.attr.tag:
-        result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
-        _print_exec_results("Resolve image digest", result, fail_on_error = True)
-        image_name = result.stdout.splitlines()[0]
-        print("Image with given tag `%s` is resolved to %s" %
-              (ctx.attr.tag, image_name))
+    # If not using checked-in configs we need to pull the container and resolve its tag to digest
+    # before we create the platform target.
+    if not ctx.attr.config_version:
+        # Perform some safety checks
+        _validate_host(ctx)
+        project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
+
+        # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
+        use_default_project = False
+        if not project_root:
+            if ctx.attr.output_base:
+                fail(("%s env variable must be set for rbe_autoconfig" +
+                      " to function properly when output_base is set") % _AUTOCONF_ROOT)
+
+            # TODO(nlopezgi): consider using native.existing_rules() to validate
+            # bazel_toolchains repo exists.
+            # Try to use the default project
+            # This is Bazel black magic, we're traversing the directories in the output_base,
+            # assuming that the bazel_toolchains external repo will exist in the
+            # expected path.
+            project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+            if not project_root.exists:
+                fail(("Could not find default autoconf project in %s, please make sure " +
+                      "the bazel-toolchains repo is imported in your workspace with name " +
+                      "'bazel_toolchains' and imported before the rbe_autoconfig target " +
+                      "declaration ") % str(project_root))
+            project_root = str(project_root)
+            use_default_project = True
+
+        outputs_tar = ctx.attr.name + "_out.tar"
+
+        # Pull the image using 'docker pull'
+        _pull_image(ctx, image_name)
+
+        # If tag is specified instead of digest, resolve it to digest in the
+        # image_name as it will be used later on in the platform targets.
+        if ctx.attr.tag:
+            result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
+            _print_exec_results("Resolve image digest", result, fail_on_error = True)
+            image_name = result.stdout.splitlines()[0]
+            print("Image with given tag `%s` is resolved to %s" %
+                  (ctx.attr.tag, image_name))
+
+    # Create a default BUILD file with the platform + toolchain targets that
+    # will work with RBE with the produced toolchain
+    _create_platform(
+        ctx,
+        image_name = image_name,
+        name = name,
+    )
+
+    # If user picks rbe-ubuntu 16_04 container and
+    # a config exists for the current version of Bazel, create aliases and return
+    if ctx.attr.config_version:
+        _use_standard_config(ctx)
+        return
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
     java_home = _get_java_home(ctx, image_name)
+    _create_java_runtime(ctx, java_home)
 
     # run the container and extract the autoconf directory
     _run_and_extract(
@@ -276,16 +292,6 @@ def _impl(ctx):
         outputs_tar = outputs_tar,
         project_root = project_root,
         use_default_project = use_default_project,
-    )
-
-    # Create a default BUILD file with the platform + toolchain targets that
-    # will work with RBE with the produced toolchain
-    _create_platform(
-        ctx,
-        bazel_version = ctx.attr.bazel_version,
-        image_name = image_name,
-        java_home = java_home,
-        name = name,
     )
 
     # Expand outputs to project dir if user requested it
@@ -319,33 +325,39 @@ def _validate_host(ctx):
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
 
-# Produces BUILD files with aliases for all the required toolchain / platform targets.
-def _use_standard_config(ctx, bazel_version, config_version):
+# Produces BUILD files with alias for the C++/Java toolchain targets.
+def _use_standard_config(ctx):
     print("Using checked-in configs.")
 
-    # Create the BUILD files with the aliases
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_container.tpl"))
-    jdk = "@bazel_toolchains//configs/ubuntu16_04_clang/%s:jdk8" % config_version
-    cc_toolchain = "@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/cpp:cc-toolchain-clang-x86_64-default" % (config_version, bazel_version)
-    platform = "@bazel_toolchains//configs/ubuntu16_04_clang/%s:rbe_ubuntu1604" % config_version
+    # Create the BUILD file with the alias for the cc_toolchain_suite
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.cc_alias.tpl"))
+    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
+        version = ctx.attr.config_version,
+        bazel_version = ctx.attr.bazel_version,
+        cc_dir = _CC_CONFIG_DIR,
+    ))
     ctx.template(
-        _PLATFORM_DIR + "/BUILD",
+        _CC_CONFIG_DIR + "/BUILD",
         template,
         {
-            "%{cc-toolchain}": cc_toolchain,
-            "%{jdk}": jdk,
-            "%{platform}": platform,
+            "%{toolchain}": toolchain,
         },
         False,
     )
 
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_toolchain.tpl"))
-    toolchain = "@bazel_toolchains//configs/ubuntu16_04_clang/%s/bazel_%s/default:toolchain" % (config_version, bazel_version)
+    # Create the BUILD file with the alias for the java_runtime
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java_alias.tpl"))
+    java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{java_dir}:jdk".format(
+        version = ctx.attr.config_version,
+        bazel_version = ctx.attr.bazel_version,
+        java_dir = _JAVA_CONFIG_DIR,
+    ))
+
     ctx.template(
-        _RBE_CONFIG_DIR + "/BUILD",
+        _JAVA_CONFIG_DIR + "/BUILD",
         template,
         {
-            "%{toolchain}": toolchain,
+            "%{java_runtime}": java_runtime,
         },
         False,
     )
@@ -522,25 +534,42 @@ def _run_and_extract(
     # Expand outputs inside this remote repo
     result = ctx.execute(["tar", "-xf", "output.tar"])
     _print_exec_results("expand_tar", result)
-    result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _RBE_CONFIG_DIR)])
+    result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _CC_CONFIG_DIR)])
     _print_exec_results("expand_tar", result)
-    result = ctx.execute(["rm", ("./%s/WORKSPACE" % _RBE_CONFIG_DIR)])
+    result = ctx.execute(["rm", ("./%s/WORKSPACE" % _CC_CONFIG_DIR)])
     _print_exec_results("clean WORKSPACE", result)
-    result = ctx.execute(["rm", ("./%s/tools" % _RBE_CONFIG_DIR), "-drf"])
+    result = ctx.execute(["rm", ("./%s/tools" % _CC_CONFIG_DIR), "-drf"])
     _print_exec_results("clean tools", result)
 
-# Creates a BUILD file with the java and cc toolchain + platform targets
-def _create_platform(
-        ctx,
-        bazel_version,
-        image_name,
-        java_home,
-        name):
-    toolchain_target = "@" + name + "//" + _RBE_CONFIG_DIR
+# Creates a BUILD file with the java_runtime target
+def _create_java_runtime(ctx, java_home):
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java.tpl"))
+    ctx.template(
+        _JAVA_CONFIG_DIR + "/BUILD",
+        template,
+        {
+            "%{java_home}": java_home,
+        },
+        False,
+    )
+
+# Creates a BUILD file with the cc_toolchain and platform targets
+def _create_platform(ctx, image_name, name):
+    cc_toolchain_target = "@" + name + "//" + _CC_CONFIG_DIR + _CC_TOOLCHAIN
+
+    # A checked in config was found
+    if ctx.attr.config_version:
+        cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}{target}".format(
+            version = ctx.attr.config_version,
+            bazel_version = ctx.attr.bazel_version,
+            cc_dir = _CC_CONFIG_DIR,
+            target = _CC_TOOLCHAIN,
+        ))
     if ctx.attr.output_base:
-        toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + bazel_version
+        cc_toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + ctx.attr.bazel_version
         if ctx.attr.config_dir:
-            toolchain_target += ctx.attr.config_dir
+            cc_toolchain_target += ctx.attr.config_dir
+        cc_toolchain_target += _CC_TOOLCHAIN
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.platform.tpl"))
     exec_compatible_with = ("\"" +
                             ("\",\n        \"").join(ctx.attr.exec_compatible_with) +
@@ -552,11 +581,10 @@ def _create_platform(
         _PLATFORM_DIR + "/BUILD",
         template,
         {
+            "%{cc_toolchain}": cc_toolchain_target,
             "%{exec_compatible_with}": exec_compatible_with,
             "%{image_name}": image_name,
-            "%{java_home}": java_home,
             "%{target_compatible_with}": target_compatible_with,
-            "%{toolchain}": toolchain_target,
         },
         False,
     )
@@ -570,29 +598,53 @@ def _expand_outputs(ctx, bazel_version, project_root):
         if ctx.attr.config_dir:
             dest += ctx.attr.config_dir + "/"
         platform_dest = dest + _PLATFORM_DIR + "/"
+        java_dest = dest + _JAVA_CONFIG_DIR + "/"
+        cc_dest = dest + _CC_CONFIG_DIR + "/"
 
         # Create the directories
-        result = ctx.execute(["mkdir", "-p", "platform_dest"])
-        _print_exec_results("create output dir", result)
+        result = ctx.execute(["mkdir", "-p", platform_dest])
+        _print_exec_results("create platform output dir", result)
+        result = ctx.execute(["mkdir", "-p", java_dest])
+        _print_exec_results("create java output dir", result)
+        result = ctx.execute(["mkdir", "-p", cc_dest])
+        _print_exec_results("create cc output dir", result)
 
-        # Get the files that were created in the _RBE_CONFIG_DIR
-        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % _RBE_CONFIG_DIR), True)
+        # Get the files that were created in the _CC_CONFIG_DIR
+        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % _CC_CONFIG_DIR), True)
         result = ctx.execute(["./local_config_files.sh"])
         _print_exec_results("resolve autoconf files", result)
         autoconf_files = result.stdout.splitlines()[0].split(" ")
-        args = ["cp"] + autoconf_files + [dest]
+        args = ["cp"] + autoconf_files + [cc_dest]
 
-        # Copy the files to dest
+        # Copy the local_config_cc files to dest/{_CC_CONFIG_DIR}/
         result = ctx.execute(args)
-        _print_exec_results("copy outputs", result, True, args)
+        _print_exec_results("copy local_config_cc outputs", result, True, args)
+
+        # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
+        args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
+        result = ctx.execute(args)
+        _print_exec_results("copy java_runtime BUILD", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file
-        result = ctx.execute(["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest])
+        args = ["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest]
+        result = ctx.execute(args)
+        _print_exec_results("copy platform BUILD", result, True, args)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
     attrs = {
+        "base_container_digest": attr.string(
+            doc = ("Optional. If the container to use for the RBE build " +
+                   "extends from the rbe-ubuntu16-04 image, you can " +
+                   "pass the digest (sha256 sum) of the base container here " +
+                   "and this rule will attempt to use checked-in " +
+                   "configs if possible." +
+                   "The digest (sha256 sum) of the base image. " +
+                   "For example, " +
+                   "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c" +
+                   ", note the digest includes 'sha256:'"),
+        ),
         "bazel_rc_version": attr.int(
             doc = ("Optional. An rc version to use. Note an installer for " +
                    "the rc must be available in https://releases.bazel.build."),
@@ -617,7 +669,7 @@ _rbe_autoconfig = repository_rule(
         "digest": attr.string(
             doc = ("Optional. The digest (sha256 sum) of the image to pull. " +
                    "For example, " +
-                   "sha256:f1330b2f02714d3a3e98c5b1f6524fbb9c15154e44a31fb3caecb7a6ad4e8445" +
+                   "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c" +
                    ", note the digest includes 'sha256:'"),
         ),
         "env": attr.string_dict(
@@ -674,13 +726,14 @@ _rbe_autoconfig = repository_rule(
         ),
     },
     environ = [
-        _RBE_AUTOCONF_ROOT,
+        _AUTOCONF_ROOT,
     ],
     implementation = _impl,
 )
 
 def rbe_autoconfig(
         name,
+        base_container_digest = None,
         bazel_version = None,
         bazel_rc_version = None,
         config_dir = None,
@@ -700,6 +753,10 @@ def rbe_autoconfig(
     Use this macro in your WORKSPACE.
 
     Args:
+      base_container_digest: Optional. If the container to use for the RBE build
+          extends from the rbe-ubuntu16-04 image, you can pass the digest
+          (sha256 sum) of the base container using this attr.
+          The rule will enable use of checked-in configs if possible.
       bazel_version: The version of Bazel to use to generate toolchain configs.
           `Use only (major, minor, patch), e.g., '0.20.0'. Default is "local"
           which means the same version of Bazel that is currently running will
@@ -771,29 +828,33 @@ def rbe_autoconfig(
     if not repository and not registry and not tag and not digest:
         repository = _RBE_UBUNTU_REPO
         registry = _RBE_UBUNTU_REGISTRY
-        # If nothing is specified, assign the default digest instead of tag as
-        # the rbe ubuntu1604 containers are no longer tagged with the Clang version.
-        digest = public_rbe_ubuntu16_04_sha256s().get(RBE_UBUNTU16_04_LATEST, None)
+        digest = RBE_UBUNTU16_04_LATEST
 
     if ((registry and registry == _RBE_UBUNTU_REGISTRY) and
-        (repository and repository == _RBE_UBUNTU_REPO) and
-        (not env)):
-        env = clang_env()
+        (repository and repository == _RBE_UBUNTU_REPO)):
+        if not env:
+            env = clang_env()
+        if tag == "latest":
+            tag = None
+            digest = RBE_UBUNTU16_04_LATEST
 
     config_version = validateUseOfCheckedInConfigs(
+        name = name,
+        base_container_digest = base_container_digest,
+        bazel_version = bazel_version,
+        bazel_rc_version = bazel_rc_version,
+        digest = digest,
+        env = env,
+        java_home = java_home,
         registry = registry,
         repository = repository,
         tag = tag,
-        digest = digest,
         use_checked_in_confs = use_checked_in_confs,
-        env = env,
-        java_home = java_home,
-        bazel_version = bazel_version,
-        bazel_rc_version = bazel_rc_version,
     )
 
     _rbe_autoconfig(
         name = name,
+        base_container_digest = base_container_digest,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
         config_dir = config_dir,
@@ -812,20 +873,22 @@ def rbe_autoconfig(
 # Check if checked-in configs are available and should be used. If so, return
 # the config version. Otherwise return None.
 def validateUseOfCheckedInConfigs(
+        name,
+        base_container_digest,
+        bazel_version,
+        bazel_rc_version,
+        digest,
+        env,
+        java_home,
         registry,
         repository,
         tag,
-        digest,
-        use_checked_in_confs,
-        env,
-        java_home,
-        bazel_version,
-        bazel_rc_version):
+        use_checked_in_confs):
     if not use_checked_in_confs:
         return None
-    if registry and registry != _RBE_UBUNTU_REGISTRY:
+    if not base_container_digest and registry and registry != _RBE_UBUNTU_REGISTRY:
         return None
-    if repository and repository != _RBE_UBUNTU_REPO:
+    if not base_container_digest and repository and repository != _RBE_UBUNTU_REPO:
         return None
     if env and env != clang_env():
         return None
@@ -836,24 +899,24 @@ def validateUseOfCheckedInConfigs(
 
     if tag:  # Implies `digest` is not specified.
         if tag == "latest":
-            tag = RBE_UBUNTU16_04_LATEST
-        digest = public_rbe_ubuntu16_04_sha256s().get(tag, None)
-        if not digest:  # We didn't find checked-in configs in this repo.
+            digest = RBE_UBUNTU16_04_LATEST
+            # if any tag other than latest is used we will not use checked-in configs
+            # (to not hardcode tag info anywhere in these rules)
+
+        else:
             return None
-    else:  # Implies tag is not specified
-        for pair in public_rbe_ubuntu16_04_sha256s().items():
-            if pair[1] == digest:
-                tag = pair[0]
-                break
-        if not tag:
-            # The given RBE Ubuntu1604 container digest is not one of the
-            # released ones.
-            return None
+
+    if base_container_digest:
+        digest = base_container_digest
 
     # Verify a toolchain config exists for the given version of Bazel and the
-    # given tag of the container
-    config_version = public_rbe_ubuntu16_04_config_version().get(tag, None)
-    if not config_version or config_version != bazel_to_config_versions().get(bazel_version):
+    # given digest of the container
+    config_version = rbe_ubuntu16_04_config_version().get(digest, None)
+    if not config_version:
         return None
-
-    return config_version
+    if not bazel_to_config_versions().get(bazel_version):
+        return None
+    for supported_config in bazel_to_config_versions().get(bazel_version):
+        if config_version == supported_config:
+            return config_version
+    return None

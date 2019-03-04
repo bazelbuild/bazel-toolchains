@@ -12,19 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-# Returns a dict with suppported Bazel versions mapped to the config version to use.
+# Returns a dict with Bazel versions mapped to supported container versions.
 def bazel_to_config_versions():
     return {
-        "0.13.0": "1.0",
-        "0.14.1": "1.0",
-        "0.15.0": "1.0",
-        "0.16.1": "1.1",
-        "0.17.1": "1.1",
-        "0.18.0": "1.1",
-        "0.19.0": "1.1",
-        "0.19.2": "1.1",
-        "0.20.0": "1.1",
-        "0.21.0": "1.1",
-        "0.22.0": "1.1",
-        "0.23.0": "1.2",
+        "0.20.0": ["8.0.0"],
+        "0.21.0": ["8.0.0"],
+        "0.22.0": ["8.0.0", "9.0.0"],
+        "0.23.0": ["8.0.0", "9.0.0"],
+    }
+
+# Update only when the container in Cloud Marketplace is made available.
+# sha256 of the latest gcr.io/cloud-marketplace/google/rbe-ubuntu16-04
+LATEST = "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729"
+
+# Map from sha256 of rbe ubuntu16_04 to corresponding container version.
+def container_to_config_version():
+    return {
+        "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c": "8.0.0",
+        "sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928": "8.0.0",
+        "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729": "9.0.0",
+        "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": "8.0.0",
     }

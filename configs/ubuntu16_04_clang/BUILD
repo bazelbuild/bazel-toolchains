@@ -26,6 +26,20 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+# This is the platform used by BuildKite CI that enables
+# docker capabilities for spinning up sibling containers
+platform(
+    name = "platform_docker",
+    parents = ["@buildkite_config//config:platform"],
+    remote_execution_properties = """
+        {PARENT_REMOTE_EXECUTION_PROPERTIES}
+        properties: {
+          name: "dockerSiblingContainers"
+          value: "true"
+        }
+        """,
+)
+
 # Created on 2018.05.09
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
 # Clang revision: r328903
