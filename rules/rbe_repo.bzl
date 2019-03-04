@@ -330,7 +330,7 @@ def _use_standard_config(ctx):
     print("Using checked-in configs.")
 
     # Create the BUILD file with the alias for the cc_toolchain_suite
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_cc.tpl"))
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.cc_alias.tpl"))
     toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
         version = ctx.attr.config_version,
         bazel_version = ctx.attr.bazel_version,
@@ -346,7 +346,7 @@ def _use_standard_config(ctx):
     )
 
     # Create the BUILD file with the alias for the java_runtime
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_java.tpl"))
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java_alias.tpl"))
     java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{java_dir}:jdk".format(
         version = ctx.attr.config_version,
         bazel_version = ctx.attr.bazel_version,
