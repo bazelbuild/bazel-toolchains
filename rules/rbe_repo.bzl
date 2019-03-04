@@ -914,6 +914,8 @@ def validateUseOfCheckedInConfigs(
     config_version = rbe_ubuntu16_04_config_version().get(digest, None)
     if not config_version:
         return None
+    if not bazel_to_config_versions().get(bazel_version):
+        return None
     for supported_config in bazel_to_config_versions().get(bazel_version):
         if config_version == supported_config:
             return config_version
