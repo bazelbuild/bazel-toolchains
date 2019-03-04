@@ -330,7 +330,7 @@ def _use_standard_config(ctx):
     print("Using checked-in configs.")
 
     # Create the BUILD file with the alias for the cc_toolchain_suite
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_cc_toolchain.tpl"))
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_cc.tpl"))
     toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
         version = ctx.attr.config_version,
         bazel_version = ctx.attr.bazel_version,
@@ -346,7 +346,7 @@ def _use_standard_config(ctx):
     )
 
     # Create the BUILD file with the alias for the java_runtime
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_java_runtime.tpl"))
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.std_java.tpl"))
     java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{java_dir}:jdk".format(
         version = ctx.attr.config_version,
         bazel_version = ctx.attr.bazel_version,
@@ -543,7 +543,7 @@ def _run_and_extract(
 
 # Creates a BUILD file with the java_runtime target
 def _create_java_runtime(ctx, java_home):
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java_runtime.tpl"))
+    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java.tpl"))
     ctx.template(
         _JAVA_CONFIG_DIR + "/BUILD",
         template,
