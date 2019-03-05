@@ -14,12 +14,9 @@
 
 # This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
 
-# Target that can provide the CC_FLAGS variable based on the current
-# cc_toolchain.
-load("@bazel_tools//tools/cpp:cc_flags_supplier.bzl", "cc_flags_supplier")
-load(":cc_toolchain_config.bzl", "cc_toolchain_config")
-
 package(default_visibility = ["//visibility:public"])
+
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
 
 licenses(["notice"])  # Apache 2.0
 
@@ -48,15 +45,17 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
-        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
-        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
-        "k8": ":cc-compiler-k8",
         "k8|clang": ":cc-compiler-k8",
+        "k8": ":cc-compiler-k8",
+        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
     },
 )
 
 cc_toolchain(
     name = "cc-compiler-k8",
+    toolchain_identifier = "linux_gnu_x86",
+    toolchain_config = ":linux_gnu_x86",
     all_files = ":compiler_deps",
     ar_files = ":empty",
     as_files = ":empty",
@@ -66,14 +65,12 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 1,
-    toolchain_config = ":linux_gnu_x86",
-    toolchain_identifier = "linux_gnu_x86",
 )
 
 cc_toolchain_config(
     name = "linux_gnu_x86",
-    compiler = "clang",
     cpu = "k8",
+    compiler = "clang",
 )
 
 toolchain(
@@ -91,6 +88,8 @@ toolchain(
 # Android tooling requires a default toolchain for the armeabi-v7a cpu.
 cc_toolchain(
     name = "cc-compiler-armeabi-v7a",
+    toolchain_identifier = "stub_armeabi-v7a",
+    toolchain_config = ":stub_armeabi-v7a",
     all_files = ":empty",
     ar_files = ":empty",
     as_files = ":empty",
@@ -100,14 +99,12 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 1,
-    toolchain_config = ":stub_armeabi-v7a",
-    toolchain_identifier = "stub_armeabi-v7a",
 )
 
 cc_toolchain_config(
     name = "stub_armeabi-v7a",
-    compiler = "compiler",
     cpu = "armeabi-v7a",
+    compiler = "compiler",
 )
 
 toolchain(
@@ -122,5 +119,9 @@ toolchain(
     toolchain = ":cc-compiler-armabi-v7a",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
+
+# Target that can provide the CC_FLAGS variable based on the current
+# cc_toolchain.
+load("@bazel_tools//tools/cpp:cc_flags_supplier.bzl", "cc_flags_supplier")
 
 cc_flags_supplier(name = "cc_flags")
