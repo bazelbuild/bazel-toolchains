@@ -753,6 +753,7 @@ def rbe_autoconfig(
     Use this macro in your WORKSPACE.
 
     Args:
+      name: Name of the rbe_autoconfig repository target.
       base_container_digest: Optional. If the container to use for the RBE build
           extends from the rbe-ubuntu16-04 image, you can pass the digest
           (sha256 sum) of the base container using this attr.
@@ -870,8 +871,6 @@ def rbe_autoconfig(
         target_compatible_with = target_compatible_with,
     )
 
-# Check if checked-in configs are available and should be used. If so, return
-# the config version. Otherwise return None.
 def validateUseOfCheckedInConfigs(
         name,
         base_container_digest,
@@ -884,6 +883,28 @@ def validateUseOfCheckedInConfigs(
         repository,
         tag,
         use_checked_in_confs):
+    """Check if checked-in configs are available and should be used.
+
+    If so, return the config version. Otherwise return None.
+
+    Args:
+        name: Name of the rule target.
+        base_container_digest: SHA256 sum digest of the base image.
+        bazel_version: Version string of the Bazel release.
+        bazel_rc_version: The RC version of the Bazel release if the given
+                          Bazel release is a RC.
+        digest: The digest of the container in which the configs are goings to
+                be used.
+        env: The environment dict.
+        java_home: Path to the Java home.
+        registry: The registry where the toolchain container can be found.
+        repository: The path to the toolchain container on the registry.
+        tag: The tag on the toolchain container.
+        use_checked_in_confs: Whether to use checked in configs.
+
+    Returns:
+        None
+    """
     if not use_checked_in_confs:
         return None
     if not base_container_digest and registry and registry != _RBE_UBUNTU_REGISTRY:

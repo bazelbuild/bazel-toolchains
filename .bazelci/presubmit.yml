@@ -1,5 +1,6 @@
 ---
-buildifier: true
+# TODO (suvanjan): Re-enable once issues are fixed.
+# buildifier: true
 platforms:
   rbe_ubuntu1604:
     test_targets:

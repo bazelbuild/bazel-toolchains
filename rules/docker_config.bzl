@@ -151,8 +151,6 @@ def _docker_toolchain_autoconfig_impl(ctx):
     Args:
       ctx: context. See docker_toolchain_autoconfig below for details
           of what this ctx must include
-    Returns:
-      null
     """
     bazel_config_dir = "/bazel-config"
     project_repo_dir = "project_src"
@@ -414,45 +412,47 @@ def docker_toolchain_autoconfig(**kwargs):
 
     Args:
       **kwargs:
-    Required Args
-      name: A unique name for this rule.
-      base: Docker image base - optionally with all tools pre-installed for
-          which a configuration will be generated. Packages can also be installed
-          by listing them in the 'packages' attriute.
-    Default Args:
-      config_repos: a list of remote repositories. Autoconfig will run targets in
-          each of these remote repositories and copy all contents to the mount
-          point.
-      env: Dictionary of env variables for Bazel / project specific autoconfigure
-      git_repo: A git repo with the sources for the project to be used for
-          autoconfigure. If no git_repo is passed, autoconfig will run with a
-          sample c++ project.
-      mount_project: mounts a directory passed in an absolute path as the project
-          to use for autoconfig. Cannot be used if git_repo is passed.
-          Make variable substitution is enabled, so use:
-            mount_project = "$(mount_project)",
-          and then run:
-            bazel build <autoconf target> --define mount_project=$(realpath .)
-          from the root of the project to mount it as the project to use for
-          autoconfig.
-      bazel_version: a specific version of Bazel used to generate toolchain
-          configs. Format: x.x.x
-      bazel_rc_version: a specific version of Bazel release candidate used to
-          generate toolchain configs. Input "2" if you would like to use rc2.
-      use_bazel_head = Download bazel head from github, compile it and use it
-          to run autoconfigure targets.
-      setup_cmd: a customized command that will run as the very first command
-          inside the docker container.
-      packages: list of packages to fetch and install in the base image.
-      additional_repos: list of additional debian package repos to use,
-          in sources.list format.
-      keys: list of additional gpg keys to use while downloading packages.
-      test: a boolean which specifies whether a test target for this
-          docker_toolchain_autoconfig will be added.
-          If True, a test target with name {name}_test will be added.
-          The test will build this docker_toolchain_autoconfig target, run the
-          output script, and check the toolchain configs for the c++ auto
-          generated config exist.
+            Required Args
+            name: A unique name for this rule.
+            base: Docker image base - optionally with all tools pre-installed
+                  for which a configuration will be generated. Packages can also
+                  be installed by listing them in the 'packages' attriute.
+            Default Args:
+            config_repos: a list of remote repositories. Autoconfig will run
+                targets in each of these remote repositories and copy all
+                contents to the mount point.
+            env: Dictionary of env variables for Bazel / project specific
+                 autoconfigure
+            git_repo: A git repo with the sources for the project to be used for
+                autoconfigure. If no git_repo is passed, autoconfig will run
+                with a sample c++ project.
+            mount_project: mounts a directory passed in an absolute path as the
+                           project to use for autoconfig. Cannot be used if
+                           git_repo is passed. Make variable substitution is
+                           enabled, so use:
+                            mount_project = "$(mount_project)",
+                           and then run:
+                            bazel build <autoconf target> --define mount_project=$(realpath .)
+                           from the root of the project to mount it as the
+                           project to use for autoconfig.
+            bazel_version: a specific version of Bazel used to generate toolchain
+                configs. Format: x.x.x
+            bazel_rc_version: a specific version of Bazel release candidate used to
+                generate toolchain configs. Input "2" if you would like to use rc2.
+            use_bazel_head = Download bazel head from github, compile it and use it
+                to run autoconfigure targets.
+            setup_cmd: a customized command that will run as the very first command
+                inside the docker container.
+            packages: list of packages to fetch and install in the base image.
+            additional_repos: list of additional debian package repos to use,
+                in sources.list format.
+            keys: list of additional gpg keys to use while downloading packages.
+            test: a boolean which specifies whether a test target for this
+                docker_toolchain_autoconfig will be added.
+                If True, a test target with name {name}_test will be added.
+                The test will build this docker_toolchain_autoconfig target, run the
+                output script, and check the toolchain configs for the c++ auto
+                generated config exist.
     """
     for reserved in reserved_attrs:
         if reserved in kwargs:
