@@ -1,3 +1,7 @@
+"""Provides a function that maps from clang container names to the digest of
+their latest available container.
+"""
+
 def toolchain_container_sha256s():
     return {
         ###########################################################

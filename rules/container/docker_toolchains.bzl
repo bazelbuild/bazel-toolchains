@@ -205,25 +205,25 @@ def language_tool_layer(**kwargs):
     https://github.com/GoogleCloudPlatform/base-images-docker/tree/master/package_managers,
     and configures the rest using https://github.com/bazelbuild/rules_docker#container_image-1.
 
-    Args:
-      Same args as https://github.com/bazelbuild/rules_docker#container_image-1
-      minus:
-        debs: debian packages should be listed in 'packages', or be included in
-              'installables_tar' as .deb files.
-      plus:
-        packages: list of packages to fetch and install in the base image.
-        additional_repos: list of additional debian package repos to use,
-          in sources.list format.
-        keys: list of labels of additional gpg keys to use while downloading
-          packages.
-        installables_tar: a tar of debian packages to install in the base image.
-        installation_cleanup_commands: cleanup commands to run after package
-          installation.
-
     Note:
       - 'additional_repos' can only be specified when 'packages' is speficified.
       - 'installation_cleanup_commands' can only be specified when at least one of
         'packages' or 'installables_tar' is specified.
+
+    Args:
+      **kwargs: Same args as https://github.com/bazelbuild/rules_docker#container_image-1
+            minus:
+                debs: debian packages should be listed in 'packages', or be included in
+                'installables_tar' as .deb files.
+            plus:
+                packages: list of packages to fetch and install in the base image.
+                additional_repos: list of additional debian package repos to use,
+                in sources.list format.
+                keys: list of labels of additional gpg keys to use while downloading
+                packages.
+                installables_tar: a tar of debian packages to install in the base image.
+                installation_cleanup_commands: cleanup commands to run after package
+                installation.
 
     Experimental rule.
     """
@@ -240,7 +240,7 @@ def _toolchain_container_impl(ctx):
 
     Args:
       ctx: ctx as the same as for container_image + list of language_tool_layer(s)
-      https://github.com/bazelbuild/rules_docker#container_image
+           https://github.com/bazelbuild/rules_docker#container_image
     """
 
     tars = []
@@ -309,20 +309,20 @@ def toolchain_container(**kwargs):
     """Composes multiple language_tool_layers into a single resulting image.
 
     Args:
-      Same args as https://github.com/bazelbuild/rules_docker#container_image-1
-      minus:
-        debs: debian packages should be listed in 'packages', or be included in
-              'installables_tar' as .deb files.
-      plus:
-        language_layers: a list of language_tool_layer.
-        installables_tar: a tar of debian packages to install in the base image.
-        packages: list of packages to fetch and install in the base image.
-        additional_repos: list of additional debian package repos to use,
-          in sources.list format.
-        keys: list of labels of additional gpg keys to use while downloading
-          packages.
-        installation_cleanup_commands: cleanup commands to run after package
-          installation.
+      **kwargs: Same args as https://github.com/bazelbuild/rules_docker#container_image-1
+            minus:
+                debs: debian packages should be listed in 'packages', or be included in
+                    'installables_tar' as .deb files.
+            plus:
+                language_layers: a list of language_tool_layer.
+                installables_tar: a tar of debian packages to install in the base image.
+                packages: list of packages to fetch and install in the base image.
+                additional_repos: list of additional debian package repos to use,
+                in sources.list format.
+                keys: list of labels of additional gpg keys to use while downloading
+                packages.
+                installation_cleanup_commands: cleanup commands to run after package
+                installation.
 
     If 'installables_tar' is specified in the 'toolchain_container' rule, then
     'packages' or 'installables_tar' specified in any of the 'language_layers'

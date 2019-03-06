@@ -14,6 +14,9 @@
 
 # Once recursive workspace is implemented in Bazel, this file should cease
 # to exist.
+"""
+Provides functions to pull the images used by this repository.
+"""
 
 load(
     "@io_bazel_rules_docker//container:container.bzl",

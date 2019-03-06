@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License
+"""Provides functionality to determine hosted configs for RBE Ubuntu 16.04."""
 
 # Returns a dict with Bazel versions mapped to supported container versions.
 def bazel_to_config_versions():

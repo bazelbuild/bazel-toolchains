@@ -1,3 +1,4 @@
+"""Information tracking the latest published configs for RBE Ubuntu 16.04"""
 bazel = "0.21.0"
 registry = "l.gcr.io"
 repository = "google/rbe-ubuntu16-04"
