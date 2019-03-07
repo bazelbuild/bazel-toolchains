@@ -16,7 +16,7 @@ platforms:
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--crosstool_top=@buildkite_config//cc:toolchain",
+    - "--crosstool_top=@buildkite_config//cc:toolchain"
     - "--extra_toolchains=@buildkite_config//config:cc-toolchain"
     - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang:platform_docker"
     - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang:platform_docker"
