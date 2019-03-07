@@ -1,4 +1,3 @@
-
 """Information tracking the latest published configs."""
 bazel = "0.23.1"
 registry = "l.gcr.io"
