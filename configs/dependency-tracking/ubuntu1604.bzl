@@ -1,6 +1,6 @@
-"""Information tracking the latest published configs for RBE Ubuntu 16.04"""
-bazel = "0.21.0"
+
+bazel = "0.23.1"
 registry = "l.gcr.io"
 repository = "google/rbe-ubuntu16-04"
-digest = "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
-configs_version = "7.0.0"
+digest = "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729"
+configs_version = "9.0.0"
