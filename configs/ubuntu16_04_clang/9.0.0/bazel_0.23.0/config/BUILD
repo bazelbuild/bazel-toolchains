@@ -43,15 +43,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-<<<<<<< HEAD
-<<<<<<< HEAD
           value:"docker://l.gcr.io/google/rbe-ubuntu16-04@sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729"
-=======
-          value:"docker://gcr.io/asci-toolchain/rbe-ubuntu16_04@sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729"
->>>>>>> adding configs for 0.23.0 with 8.0.0 and 9.0.0 clang
-=======
-          value:"docker://l.gcr.io/google/rbe-ubuntu16-04@sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729"
->>>>>>> fix 9.0.0 container details
         }
         """,
 )
