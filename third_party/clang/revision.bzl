@@ -1,1 +1,2 @@
-CLANG_REVISION = "r346485"
+"""Defines the latest available Clang revision."""
+CLANG_REVISION = "r352865"

@@ -4,8 +4,9 @@ def extract_version_number(bazel_version_fallback):
     """Extracts the semantic version number from a version string
 
     Args:
-      bazel_version: the version string that begins with the semantic version
-        e.g. "1.2.3rc1 abc1234" where "abc1234" is a commit hash.
+      bazel_version_fallback: The bazel version to fall back to if the version
+                              of Bazel running this function can't be
+                              determined.
 
     Returns:
       The semantic version string, like "1.2.3".
@@ -18,6 +19,14 @@ def extract_version_number(bazel_version_fallback):
     return bazel_version
 
 def parse_rc(bazel_version):
+    """Parse the version string of the given Bazel RC version
+
+    Args:
+        bazel_version: The Bazel version string.
+
+    Returns:
+        The integer RC number if the given bazel version was a RC version.
+    """
     if bazel_version.find("rc") != -1:
         rc = ""
         for i in range(len(bazel_version) - bazel_version.find("rc") - 2):

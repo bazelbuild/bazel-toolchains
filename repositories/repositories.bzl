@@ -14,6 +14,9 @@
 
 # Once recursive workspace is implemented in Bazel, this file should cease
 # to exist.
+"""
+Provides functions to pull all dependencies of this repository.
+"""
 
 load(
     "@bazel_tools//tools/build_defs/repo:http.bzl",

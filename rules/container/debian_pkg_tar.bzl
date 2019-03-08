@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+Provides functionality to organize debian packages into tarballs.
+"""
 
 load("@base_images_docker//package_managers:apt_key.bzl", _apt_key = "key")
 load("@base_images_docker//package_managers:download_pkgs.bzl", _download_deb_pkgs = "download")
@@ -176,9 +179,10 @@ def aggregate_debian_pkgs(**kwargs):
     """Aggregate debian packages from multiple language_tool_layers into a tarball.
 
     Args:
-      name: a unique name for this rule.
-      base: base os image used for this rule.
-      language_layers: a list of language_tool_layer targets.
+      **kwargs:
+            name: a unique name for this rule.
+            base: base os image used for this rule.
+            language_layers: a list of language_tool_layer targets.
 
     Only name, base, and language_layers attributes are allowed in this rule.
 

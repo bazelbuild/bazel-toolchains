@@ -27,7 +27,7 @@ from util import get_git_root
 
 GIT_ROOT = get_git_root()
 CONFIG_REPO = "./local_config_cc"
-CONFIG_FILES = ["CROSSTOOL", "BUILD", "cc_wrapper.sh", "dummy_toolchain.bzl"]
+CONFIG_FILES = ["cc_toolchain_config.bzl", "BUILD", "cc_wrapper.sh", "dummy_toolchain.bzl"]
 TMP_DIR = os.path.join(GIT_ROOT, "release", "tmp")
 
 

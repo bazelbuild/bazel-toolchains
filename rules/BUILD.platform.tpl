@@ -18,12 +18,6 @@
 
 package(default_visibility = ["//visibility:public"])
 
-java_runtime(
-    name = "jdk",
-    srcs = [],
-    java_home = "%{java_home}",
-)
-
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
@@ -32,7 +26,7 @@ toolchain(
     target_compatible_with = [
         %{target_compatible_with}
     ],
-    toolchain = "%{toolchain}:cc-compiler-k8",
+    toolchain = "%{cc_toolchain}",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 

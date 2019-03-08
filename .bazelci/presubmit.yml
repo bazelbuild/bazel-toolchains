@@ -1,5 +1,13 @@
 ---
-buildifier: true
+buildifier:
+  version: 0.22.0
+  # Check for issues with the format of our bazel config files.
+  # All warnings from https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md
+  # are enabled except:
+  # rule-impl-return,uninitialized,return-value,rule-impl-return,unsorted-dict-items,out-of-order-load
+  # TODO (suvanjan): Re-enable once issues and https://github.com/bazelbuild/buildtools/issues/575
+  # are fixed.
+  warnings: "attr-cfg,attr-license,attr-non-empty,attr-output-default,attr-single-file,confusing-name,constant-glob,ctx-actions,ctx-args,depset-iteration,depset-union,dict-concatenation,duplicated-name,filetype,function-docstring,git-repository,http-archive,integer-division,load,load-on-top,module-docstring,name-conventions,native-build,native-package,no-effect,output-group,package-name,package-on-top,positional-args,redefined-variable,repository-name,same-origin-load,string-iteration,unreachable,unused-variable"
 platforms:
   rbe_ubuntu1604:
     test_targets:
@@ -15,7 +23,8 @@ platforms:
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
-    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:nosla_xenial_docker"
-    - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:nosla_xenial_docker"
-    - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/1.1:nosla_xenial_docker"
+    - "--crosstool_top=@buildkite_config//cc:toolchain"
+    - "--extra_toolchains=@buildkite_config//config:cc-toolchain"
+    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang:platform_docker"
+    - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang:platform_docker"
+    - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang:platform_docker"

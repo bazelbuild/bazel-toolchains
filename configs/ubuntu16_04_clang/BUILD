@@ -26,6 +26,20 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+# This is the platform used by BuildKite CI that enables
+# docker capabilities for spinning up sibling containers
+platform(
+    name = "platform_docker",
+    parents = ["@buildkite_config//config:platform"],
+    remote_execution_properties = """
+        {PARENT_REMOTE_EXECUTION_PROPERTIES}
+        properties: {
+          name: "dockerSiblingContainers"
+          value: "true"
+        }
+        """,
+)
+
 # Created on 2018.05.09
 # Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:d553634f23f7c437ca35bbc4b6f1f38bb81be32b9ef2df4329dcd36762277bf7
 # Clang revision: r328903
@@ -470,6 +484,45 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.22.0",
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
+    keys = ubuntu16_04_clang_default_keys(),
+    packages = ubuntu16_04_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
+
+# This target is auto-generated from release/default.tpl and should not be
+# modified directly.
+# Created on 2019.2.27
+# Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:963ea21d047664257c91fb0e05d9a6e9acf1481ea1874736af4d4ceed1e02a0c
+# Clang revision: r352865
+docker_toolchain_autoconfig(
+    name = "default-ubuntu16_04-clang-1.2-bazel_0.23.0-autoconfig",
+    additional_repos = ubuntu16_04_clang_default_repos(),
+    base = "@ubuntu16_04-clang//image",
+    bazel_version = "0.23.0",
+    env = clang_env(),
+    keys = ubuntu16_04_clang_default_keys(),
+    packages = ubuntu16_04_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
+
+# This target is auto-generated from release/msan.tpl and should not be
+# modified directly.
+# Created on 2019.2.27
+# Container: gcr.io/cloud-marketplace/google/clang-ubuntu@sha256:963ea21d047664257c91fb0e05d9a6e9acf1481ea1874736af4d4ceed1e02a0c
+# Clang revision: r352865
+docker_toolchain_autoconfig(
+    name = "msan-ubuntu16_04-clang-1.2-bazel_0.23.0-autoconfig",
+    additional_repos = ubuntu16_04_clang_default_repos(),
+    base = "@ubuntu16_04-clang//image",
+    bazel_version = "0.23.0",
     env = dicts.add(
         clang_env(),
         {
