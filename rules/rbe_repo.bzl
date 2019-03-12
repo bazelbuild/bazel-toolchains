@@ -281,7 +281,8 @@ def _impl(ctx):
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
     java_home = _get_java_home(ctx, image_name)
-    _create_java_runtime(ctx, java_home)
+    if java_home != "":
+        _create_java_runtime(ctx, java_home)
 
     # run the container and extract the autoconf directory
     _run_and_extract(
@@ -299,6 +300,7 @@ def _impl(ctx):
         ctx,
         bazel_version = ctx.attr.bazel_version,
         project_root = project_root,
+        copy_java = java_home != ""
     )
 
 # Convenience method to print results of execute (and fail on errors if needed).
@@ -372,7 +374,7 @@ def _pull_image(ctx, image_name):
 # Gets the value of java_home either from attr or
 # by running docker run image_name printenv JAVA_HOME.
 def _get_java_home(ctx, image_name):
-    if ctx.attr.java_home:
+    if ctx.attr.java_home != None:
         return ctx.attr.java_home
 
     # Create the template to run
@@ -390,9 +392,6 @@ def _get_java_home(ctx, image_name):
     result = ctx.execute(["./get_java_home.sh"])
     _print_exec_results("get java_home", result, fail_on_error = True)
     java_home = result.stdout.splitlines()[0]
-    if java_home == "":
-        fail("Could not find JAVA_HOME in the container and one was not " +
-             "passed to rbe_autoconfig rule.")
     return java_home
 
 # Creates file "container/run_in_container.sh" which can be mounted onto container
@@ -589,9 +588,16 @@ def _create_platform(ctx, image_name, name):
         False,
     )
 
-# Copies all outputs of the autoconfig rule to a directory in the project
-# sources
-def _expand_outputs(ctx, bazel_version, project_root):
+def _expand_outputs(ctx, bazel_version, project_root, copy_java):
+    """
+    Copies all outputs of the autoconfig rule to a directory in the project.
+
+    Args:
+        ctx: The Bazel context.
+        bazel_version: The Bazel version string.
+        project_root: The output directory where configs will be copied to.
+        copy_java: Boolean indicating whether java configs should be copied.
+    """
     if ctx.attr.output_base:
         print("Copying outputs to project directory")
         dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
@@ -604,8 +610,9 @@ def _expand_outputs(ctx, bazel_version, project_root):
         # Create the directories
         result = ctx.execute(["mkdir", "-p", platform_dest])
         _print_exec_results("create platform output dir", result)
-        result = ctx.execute(["mkdir", "-p", java_dest])
-        _print_exec_results("create java output dir", result)
+        if copy_java:
+            result = ctx.execute(["mkdir", "-p", java_dest])
+            _print_exec_results("create java output dir", result)
         result = ctx.execute(["mkdir", "-p", cc_dest])
         _print_exec_results("create cc output dir", result)
 
@@ -621,9 +628,10 @@ def _expand_outputs(ctx, bazel_version, project_root):
         _print_exec_results("copy local_config_cc outputs", result, True, args)
 
         # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
-        args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
-        result = ctx.execute(args)
-        _print_exec_results("copy java_runtime BUILD", result, True, args)
+        if copy_java:
+            args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
+            result = ctx.execute(args)
+            _print_exec_results("copy java_runtime BUILD", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file
         args = ["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest]
@@ -689,8 +697,8 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. The location of java_home in the container. " +
                    "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. If " +
                    "not set, the rule will attempt to read the JAVA_HOME env " +
-                   "var from the container. If that is not set the rule will " +
-                   "fail."),
+                   "var from the container. If set to a blank string, the " +
+                   "rule will skip java config generation."),
         ),
         "output_base": attr.string(
             doc = ("Optional. The directory (under the project root) where the " +
@@ -783,7 +791,7 @@ def rbe_autoconfig(
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. If not set, the rule
           will attempt to read the JAVA_HOME env var from the container.
-          If that is not set the rule will fail.
+          If that is not set, java config generation will be skipped.
       output_base: Optional. The directory (under the project root) where the
           produced toolchain configs will be copied to.
       tag: Optional. The tag of the container to use.
