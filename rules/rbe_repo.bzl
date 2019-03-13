@@ -280,8 +280,9 @@ def _impl(ctx):
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
-    java_home = _get_java_home(ctx, image_name)
-    _create_java_runtime(ctx, java_home)
+    if ctx.attr.create_java_configs:
+        java_home = _get_java_home(ctx, image_name)
+        _create_java_runtime(ctx, java_home)
 
     # run the container and extract the autoconf directory
     _run_and_extract(
@@ -392,7 +393,8 @@ def _get_java_home(ctx, image_name):
     java_home = result.stdout.splitlines()[0]
     if java_home == "":
         fail("Could not find JAVA_HOME in the container and one was not " +
-             "passed to rbe_autoconfig rule.")
+             "passed to rbe_autoconfig rule. JAVA_HOME is required because " +
+             "create_java_configs is set to True")
     return java_home
 
 # Creates file "container/run_in_container.sh" which can be mounted onto container
@@ -589,9 +591,15 @@ def _create_platform(ctx, image_name, name):
         False,
     )
 
-# Copies all outputs of the autoconfig rule to a directory in the project
-# sources
 def _expand_outputs(ctx, bazel_version, project_root):
+    """
+    Copies all outputs of the autoconfig rule to a directory in the project.
+
+    Args:
+        ctx: The Bazel context.
+        bazel_version: The Bazel version string.
+        project_root: The output directory where configs will be copied to.
+    """
     if ctx.attr.output_base:
         print("Copying outputs to project directory")
         dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
@@ -604,8 +612,9 @@ def _expand_outputs(ctx, bazel_version, project_root):
         # Create the directories
         result = ctx.execute(["mkdir", "-p", platform_dest])
         _print_exec_results("create platform output dir", result)
-        result = ctx.execute(["mkdir", "-p", java_dest])
-        _print_exec_results("create java output dir", result)
+        if ctx.attr.create_java_configs:
+            result = ctx.execute(["mkdir", "-p", java_dest])
+            _print_exec_results("create java output dir", result)
         result = ctx.execute(["mkdir", "-p", cc_dest])
         _print_exec_results("create cc output dir", result)
 
@@ -621,9 +630,10 @@ def _expand_outputs(ctx, bazel_version, project_root):
         _print_exec_results("copy local_config_cc outputs", result, True, args)
 
         # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
-        args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
-        result = ctx.execute(args)
-        _print_exec_results("copy java_runtime BUILD", result, True, args)
+        if ctx.attr.create_java_configs:
+            args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
+            result = ctx.execute(args)
+            _print_exec_results("copy java_runtime BUILD", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file
         args = ["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest]
@@ -685,12 +695,19 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
+        "create_java_configs": attr.bool(
+            doc = (
+                "Optional. Specifies whether to generate java configs. " +
+                "Defauls to True."
+            ),
+        ),
         "java_home": attr.string(
-            doc = ("Optional. The location of java_home in the container. " +
-                   "For example, '/usr/lib/jvm/java-8-openjdk-amd64'. If " +
-                   "not set, the rule will attempt to read the JAVA_HOME env " +
-                   "var from the container. If that is not set the rule will " +
-                   "fail."),
+            doc = ("Optional. The location of java_home in the container. For " +
+                   "example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only " +
+                   "relevant if 'create_java_configs' is true. If 'create_java_configs' is " +
+                   "true and this attribute is not set, the rule will attempt to read the " +
+                   "JAVA_HOME env var from the container. If that is not set, the rule " +
+                   "will fail."),
         ),
         "output_base": attr.string(
             doc = ("Optional. The directory (under the project root) where the " +
@@ -740,6 +757,7 @@ def rbe_autoconfig(
         digest = None,
         env = None,
         exec_compatible_with = None,
+        create_java_configs = True,
         java_home = None,
         output_base = None,
         tag = None,
@@ -780,10 +798,14 @@ def rbe_autoconfig(
           the rbe-ubuntu16-04 container.
           Should be overriden if a custom container does not extend the
           rbe-ubuntu16-04 container.
+      create_java_configs: Optional. Specifies whether to generate java configs.
+          Defauls to True.
       java_home: Optional. The location of java_home in the container. For
-          example , '/usr/lib/jvm/java-8-openjdk-amd64'. If not set, the rule
-          will attempt to read the JAVA_HOME env var from the container.
-          If that is not set the rule will fail.
+          example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
+          relevant if 'create_java_configs' is true. If 'create_java_configs' is
+          true and this attribute is not set, the rule will attempt to read the
+          JAVA_HOME env var from the container. If that is not set, the rule
+          will fail.
       output_base: Optional. The directory (under the project root) where the
           produced toolchain configs will be copied to.
       tag: Optional. The tag of the container to use.
@@ -808,6 +830,9 @@ def rbe_autoconfig(
 
     if bazel_rc_version and not bazel_version:
         fail("bazel_rc_version can only be used with bazel_version.")
+
+    if not create_java_configs and java_home != None:
+        fail("java_home should not be set when create_java_configs is false.")
 
     # Resolve the Bazel version to use.
     if not bazel_version or bazel_version == "local":
@@ -846,6 +871,7 @@ def rbe_autoconfig(
         bazel_rc_version = bazel_rc_version,
         digest = digest,
         env = env,
+        create_java_configs = create_java_configs,
         java_home = java_home,
         registry = registry,
         repository = repository,
@@ -863,6 +889,7 @@ def rbe_autoconfig(
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
+        create_java_configs = create_java_configs,
         java_home = java_home,
         output_base = output_base,
         registry = registry,
@@ -878,6 +905,7 @@ def validateUseOfCheckedInConfigs(
         bazel_rc_version,
         digest,
         env,
+        create_java_configs,
         java_home,
         registry,
         repository,
@@ -896,6 +924,7 @@ def validateUseOfCheckedInConfigs(
         digest: The digest of the container in which the configs are goings to
                 be used.
         env: The environment dict.
+        create_java_configs: Whether java config generation is enabled.
         java_home: Path to the Java home.
         registry: The registry where the toolchain container can be found.
         repository: The path to the toolchain container on the registry.
@@ -913,7 +942,7 @@ def validateUseOfCheckedInConfigs(
         return None
     if env and env != clang_env():
         return None
-    if java_home:
+    if create_java_configs and java_home:
         return None
     if bazel_rc_version:
         return None
