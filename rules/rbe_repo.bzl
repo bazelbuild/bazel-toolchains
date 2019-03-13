@@ -695,18 +695,18 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
-        "create_java_configs" : attr.bool(
+        "create_java_configs": attr.bool(
             doc = (
                 "Optional. Specifies whether to generate java configs. " +
                 "Defauls to True."
-            )
+            ),
         ),
         "java_home": attr.string(
-            doc = ("Optional. The location of java_home in the container. For "+
-                   "example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only "+
-                   "relevant if 'create_java_configs' is true. If 'create_java_configs' is "+
-                   "true and this attribute is not set, the rule will attempt to read the "+
-                   "JAVA_HOME env var from the container. If that is not set, the rule "+
+            doc = ("Optional. The location of java_home in the container. For " +
+                   "example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only " +
+                   "relevant if 'create_java_configs' is true. If 'create_java_configs' is " +
+                   "true and this attribute is not set, the rule will attempt to read the " +
+                   "JAVA_HOME env var from the container. If that is not set, the rule " +
                    "will fail."),
         ),
         "output_base": attr.string(
