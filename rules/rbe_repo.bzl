@@ -831,6 +831,9 @@ def rbe_autoconfig(
     if bazel_rc_version and not bazel_version:
         fail("bazel_rc_version can only be used with bazel_version.")
 
+    if not create_java_configs and java_home != None:
+        fail("java_home should not be set when create_java_configs is false.")
+
     # Resolve the Bazel version to use.
     if not bazel_version or bazel_version == "local":
         bazel_version = str(extract_version_number(_BAZEL_VERSION_FALLBACK))
