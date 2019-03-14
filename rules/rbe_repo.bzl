@@ -198,9 +198,8 @@ _AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 _CC_CONFIG_DIR = "cc"
 _JAVA_CONFIG_DIR = "java"
 
-# We use 'l.gcr.io' to not require users to do gcloud login
 _RBE_UBUNTU_REPO = "google/rbe-ubuntu16-04"
-_RBE_UBUNTU_REGISTRY = "l.gcr.io"
+_RBE_UBUNTU_REGISTRY = "marketplace.gcr.io"
 _RBE_UBUNTU_EXEC_COMPAT_WITH = [
     "@bazel_tools//platforms:x86_64",
     "@bazel_tools//platforms:linux",
@@ -366,7 +365,9 @@ def _use_standard_config(ctx):
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
     print("Pulling image %s." % image_name)
-    result = ctx.execute(["docker", "pull", image_name])
+    # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
+    # issues for users who do not do gcloud login.
+    result = ctx.execute(["docker", "pull", image_name.replace("marketplace.gcr.io", "l.gcr.io")])
     _print_exec_results("pull image", result, fail_on_error = True)
     print("Image pulled.")
 
@@ -676,6 +677,12 @@ _rbe_autoconfig = repository_rule(
                    "Bazel version. " +
                    "Used internally when use_checked_in_confs is true."),
         ),
+        "create_java_configs": attr.bool(
+            doc = (
+                "Optional. Specifies whether to generate java configs. " +
+                "Defauls to True."
+            ),
+        ),
         "digest": attr.string(
             doc = ("Optional. The digest (sha256 sum) of the image to pull. " +
                    "For example, " +
@@ -694,12 +701,6 @@ _rbe_autoconfig = repository_rule(
                    "the platform in its constraint_values attr). For " +
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
-        ),
-        "create_java_configs": attr.bool(
-            doc = (
-                "Optional. Specifies whether to generate java configs. " +
-                "Defauls to True."
-            ),
         ),
         "java_home": attr.string(
             doc = ("Optional. The location of java_home in the container. For " +
