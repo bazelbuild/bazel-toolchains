@@ -365,6 +365,7 @@ def _use_standard_config(ctx):
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
     print("Pulling image %s." % image_name)
+
     # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
     # issues for users who do not do gcloud login.
     result = ctx.execute(["docker", "pull", image_name.replace("marketplace.gcr.io", "l.gcr.io")])
