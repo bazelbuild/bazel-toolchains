@@ -47,7 +47,7 @@ def _get_container_configs_list(bazel_version):
   ubuntu16_04_clang_configs = ContainerConfigs(
       distro="ubuntu16_04",
       version="1.2",
-      image="gcr.io/cloud-marketplace/google/clang-ubuntu",
+      image="marketplace.gcr.io/google/clang-ubuntu",
       package="configs/ubuntu16_04_clang",
       config_types=CONFIG_TYPES,
       platform_target="rbe_ubuntu1604",

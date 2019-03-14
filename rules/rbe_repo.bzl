@@ -793,7 +793,7 @@ def rbe_autoconfig(
           exec_compatible_with/constraint_values attrs, respectively.
       env: dict. Optional. Additional env variables that will be set when
           running the Bazel command to generate the toolchain configs.
-          Set to values for gcr.io/cloud-marketplace/google/rbe-ubuntu16-04 container.
+          Set to values for marketplace.gcr.io/google/rbe-ubuntu16-04 container.
           Does not need to be set if your custom container extends
           the rbe-ubuntu16-04 container.
           Should be overriden if a custom container does not extend the
