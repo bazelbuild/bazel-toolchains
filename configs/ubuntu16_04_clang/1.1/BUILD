@@ -121,7 +121,7 @@ platform(
 )
 
 # Experimental ubuntu1604 based container with Docker.
-# Based on l.gcr.io/google/rbe-ubuntu16-04:r340178
+# Based on marketplace.gcr.io/google/rbe-ubuntu16-04:r340178
 platform(
     name = "nosla_xenial_docker",
     constraint_values = [

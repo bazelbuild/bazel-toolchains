@@ -716,8 +716,7 @@ _rbe_autoconfig = repository_rule(
         "registry": attr.string(
             default = _RBE_UBUNTU_REGISTRY,
             doc = ("Optional. The registry to pull the container from. For example, " +
-                   "l.gcr.io or marketplace.gcr.io. The default is the " +
-                   "value for rbe-ubuntu16-04 image."),
+                   "marketplace.gcr.io. The default is the value for rbe-ubuntu16-04 image."),
         ),
         "repository": attr.string(
             default = _RBE_UBUNTU_REPO,

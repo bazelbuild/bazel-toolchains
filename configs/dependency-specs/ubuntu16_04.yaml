@@ -5,7 +5,7 @@ revisionsFilePath: "configs/dependency-tracking/ubuntu16_04.yaml"
 gcrDeps:
   # The RBE Ubuntu 16.04 toolchain container.
   - name: "IMAGE"
-    location: "l.gcr.io/google/rbe-ubuntu16-04"
+    location: "marketplace.gcr.io/google/rbe-ubuntu16-04"
     tag: "latest"
   # The Ubuntu Bazel + Docker + Gcloud container which is tagged with the
   # bazel version.

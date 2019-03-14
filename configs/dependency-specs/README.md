@@ -10,15 +10,15 @@ The following is an example YAML config for the RBE Ubuntu 16.04 container.
 # Location of the config-dependency tracker file on the repository
 # specified in the Github spec YAML file to the toolchain configs update
 # service.
-revisionsFilePath: "configs/dependency-tracking/ubuntu16_04.yaml" 
+revisionsFilePath: "configs/dependency-tracking/ubuntu16_04.yaml"
 gcrDeps:
   # The RBE Ubuntu 16.04 toolchain container.
   - name: "IMAGE"
-    location: "l.gcr.io/google/rbe-ubuntu16-04"
+    location: "marketplace.gcr.io/google/rbe-ubuntu16-04"
     tag: "latest"
   # The Bazel container.
   - name: "BAZEL"
-    location: "l.gcr.io/google/bazel"
+    location: "marketplace.gcr.io/google/bazel"
     tag: "latest"
 ```
 
