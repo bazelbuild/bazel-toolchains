@@ -14,6 +14,8 @@
 
 # This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
 
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
@@ -47,8 +49,6 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
-        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
-        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
         "k8": ":cc-compiler-k8",
         "k8|clang": ":cc-compiler-k8",
     },
@@ -57,16 +57,24 @@ cc_toolchain_suite(
 cc_toolchain(
     name = "cc-compiler-k8",
     all_files = ":compiler_deps",
+    ar_files = ":empty",
+    as_files = ":empty",
     compiler_files = ":compiler_deps",
-    cpu = "k8",
+    #cpu = "k8",
     dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
+    #dynamic_runtime_libs = [":empty"],
     linker_files = ":compiler_deps",
     objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
+    #static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 1,
+    toolchain_config = ":linux_gnu_x86",
     toolchain_identifier = "linux_gnu_x86",
+)
+
+cc_toolchain_config(
+    name = "linux_gnu_x86",
+    cpu = "k8",
 )
 
 toolchain(
@@ -81,31 +89,3 @@ toolchain(
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
-# Android tooling requires a default toolchain for the armeabi-v7a cpu.
-cc_toolchain(
-    name = "cc-compiler-armeabi-v7a",
-    all_files = ":empty",
-    compiler_files = ":empty",
-    cpu = "local",
-    dwp_files = ":empty",
-    dynamic_runtime_libs = [":empty"],
-    linker_files = ":empty",
-    objcopy_files = ":empty",
-    static_runtime_libs = [":empty"],
-    strip_files = ":empty",
-    supports_param_files = 1,
-    toolchain_identifier = "stub_armeabi-v7a",
-)
-
-toolchain(
-    name = "cc-toolchain-armeabi-v7a",
-    exec_compatible_with = [
-        # TODO(katre): add autodiscovered constraints for host CPU and OS.
-    ],
-    target_compatible_with = [
-        "@bazel_tools//platforms:arm",
-        "@bazel_tools//platforms:android",
-    ],
-    toolchain = ":cc-compiler-armabi-v7a",
-    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-)
