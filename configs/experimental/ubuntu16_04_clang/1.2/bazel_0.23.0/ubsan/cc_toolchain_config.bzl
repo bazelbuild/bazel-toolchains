@@ -2270,7 +2270,7 @@ def _impl(ctx):
     elif (ctx.attr.cpu == "k8"):
         cxx_builtin_include_directories = [
                 "/usr/local/include",
-                "/usr/local/lib/clang/8.0.0/include",
+                "/usr/local/lib/clang/9.0.0/include",
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "/usr/include/c++/5.4.0",
