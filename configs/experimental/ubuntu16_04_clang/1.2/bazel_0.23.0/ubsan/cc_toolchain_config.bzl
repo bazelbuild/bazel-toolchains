@@ -1,4 +1,4 @@
-load("//tools/cpp:cc_toolchain_config_lib.bzl",
+load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "action_config",
     "artifact_name_pattern",
     "env_entry",

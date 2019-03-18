@@ -14,17 +14,16 @@
 
 # This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
 
-# Target that can provide the CC_FLAGS variable based on the current
-# cc_toolchain.
-load("@bazel_tools//tools/cpp:cc_flags_supplier.bzl", "cc_flags_supplier")
-load(":cc_toolchain_config.bzl", "cc_toolchain_config")
-
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
 cc_library(
     name = "malloc",
+)
+
+cc_library(
+    name = "stl",
 )
 
 filegroup(
@@ -58,22 +57,16 @@ cc_toolchain_suite(
 cc_toolchain(
     name = "cc-compiler-k8",
     all_files = ":compiler_deps",
-    ar_files = ":empty",
-    as_files = ":empty",
     compiler_files = ":compiler_deps",
+    cpu = "k8",
     dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
     linker_files = ":compiler_deps",
     objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 1,
-    toolchain_config = ":linux_gnu_x86",
     toolchain_identifier = "linux_gnu_x86",
-)
-
-cc_toolchain_config(
-    name = "linux_gnu_x86",
-    compiler = "clang",
-    cpu = "k8",
 )
 
 toolchain(
@@ -92,22 +85,16 @@ toolchain(
 cc_toolchain(
     name = "cc-compiler-armeabi-v7a",
     all_files = ":empty",
-    ar_files = ":empty",
-    as_files = ":empty",
     compiler_files = ":empty",
+    cpu = "local",
     dwp_files = ":empty",
+    dynamic_runtime_libs = [":empty"],
     linker_files = ":empty",
     objcopy_files = ":empty",
+    static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 1,
-    toolchain_config = ":stub_armeabi-v7a",
     toolchain_identifier = "stub_armeabi-v7a",
-)
-
-cc_toolchain_config(
-    name = "stub_armeabi-v7a",
-    compiler = "compiler",
-    cpu = "armeabi-v7a",
 )
 
 toolchain(
@@ -122,5 +109,3 @@ toolchain(
     toolchain = ":cc-compiler-armabi-v7a",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
-
-cc_flags_supplier(name = "cc_flags")
