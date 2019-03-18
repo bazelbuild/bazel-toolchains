@@ -65,7 +65,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d"
         }
         properties: {
           name: "jdk-version"
@@ -87,7 +87,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d"
         }
         properties: {
           name: "jdk-version"
@@ -109,7 +109,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:75ba06b78aa99e58cfb705378c4e3d6f0116052779d00628ecb73cd35b5ea77d"
         }
         """,
 )
@@ -129,7 +129,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
         }
         properties: {
           name: "jdk-version"
@@ -151,7 +151,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
         }
         properties: {
           name: "jdk-version"
@@ -173,7 +173,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:4893599fb00089edc8351d9c26b31d3f600774cb5addefb00c70fdb6ca797abf"
         }
         """,
 )
@@ -193,7 +193,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224"
         }
         properties: {
           name: "jdk-version"
@@ -215,7 +215,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224"
         }
         properties: {
           name: "jdk-version"
@@ -237,7 +237,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-debian8@sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224"
+          value:"docker://marketplace.gcr.io/google/rbe-debian8@sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224"
         }
         """,
 )
