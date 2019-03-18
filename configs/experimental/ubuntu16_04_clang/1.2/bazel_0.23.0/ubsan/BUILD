@@ -60,12 +60,9 @@ cc_toolchain(
     ar_files = ":empty",
     as_files = ":empty",
     compiler_files = ":compiler_deps",
-    #cpu = "k8",
     dwp_files = ":empty",
-    #dynamic_runtime_libs = [":empty"],
     linker_files = ":compiler_deps",
     objcopy_files = ":empty",
-    #static_runtime_libs = [":empty"],
     strip_files = ":empty",
     supports_param_files = 1,
     toolchain_config = ":linux_gnu_x86",
@@ -88,4 +85,3 @@ toolchain(
     toolchain = ":cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
-

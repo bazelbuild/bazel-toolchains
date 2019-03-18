@@ -1,13 +1,26 @@
-load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
+# Copyright 2019 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""A Starlark cc_toolchain configuration rule"""
+
+load(
+    "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "action_config",
     "artifact_name_pattern",
-    "env_entry",
-    "env_set",
     "feature",
-    "feature_set",
     "flag_group",
     "flag_set",
-    "make_variable",
     "tool",
     "tool_path",
     "variable_with_value",
@@ -287,21 +300,21 @@ def _impl(ctx):
     )
 
     action_configs = [
-            assemble_action,
-            preprocess_assemble_action,
-            linkstamp_compile_action,
-            c_compile_action,
-            cpp_compile_action,
-            cpp_header_parsing_action,
-            cpp_module_compile_action,
-            cpp_module_codegen_action,
-            cpp_link_executable_action,
-            cpp_link_nodeps_dynamic_library_action,
-            cpp_link_dynamic_library_action,
-            cpp_link_static_library_action,
-            strip_action,
-            objcopy_embed_data_action,
-        ]
+        assemble_action,
+        preprocess_assemble_action,
+        linkstamp_compile_action,
+        c_compile_action,
+        cpp_compile_action,
+        cpp_header_parsing_action,
+        cpp_module_compile_action,
+        cpp_module_codegen_action,
+        cpp_link_executable_action,
+        cpp_link_nodeps_dynamic_library_action,
+        cpp_link_dynamic_library_action,
+        cpp_link_static_library_action,
+        strip_action,
+        objcopy_embed_data_action,
+    ]
 
     no_legacy_features_feature = feature(name = "no_legacy_features")
 
@@ -1208,58 +1221,58 @@ def _impl(ctx):
     supports_pic_feature = feature(name = "supports_pic", enabled = True)
 
     features = [
-            no_legacy_features_feature,
-            default_compile_flags_feature,
-            static_link_cpp_runtimes_feature,
-            dependency_file_feature,
-            random_seed_feature,
-            pic_feature,
-            per_object_debug_info_feature,
-            preprocessor_defines_feature,
-            includes_feature,
-            include_paths_feature,
-            fdo_instrument_feature,
-            fdo_prefetch_hints_feature,
-            autofdo_feature,
-            symbol_counts_feature,
-            shared_flag_feature,
-            linkstamps_feature,
-            output_execpath_flags_feature,
-            runtime_library_search_directories_feature,
-            library_search_directories_feature,
-            archiver_flags_feature,
-            libraries_to_link_feature,
-            force_pic_flags_feature,
-            user_link_flags_feature,
-            default_link_flags_feature,
-            fission_support_feature,
-            strip_debug_symbols_feature,
-            coverage_feature,
-            fdo_optimize_feature,
-            fully_static_link_feature,
-            user_compile_flags_feature,
-            sysroot_feature,
-            unfiltered_compile_flags_feature,
-            linker_param_file_feature,
-            compiler_input_flags_feature,
-            compiler_output_flags_feature,
-            supports_dynamic_linker_feature,
-            supports_start_end_lib_feature,
-            supports_pic_feature,
-            objcopy_embed_flags_feature,
-            opt_feature,
-            dbg_feature,
-        ]
+        no_legacy_features_feature,
+        default_compile_flags_feature,
+        static_link_cpp_runtimes_feature,
+        dependency_file_feature,
+        random_seed_feature,
+        pic_feature,
+        per_object_debug_info_feature,
+        preprocessor_defines_feature,
+        includes_feature,
+        include_paths_feature,
+        fdo_instrument_feature,
+        fdo_prefetch_hints_feature,
+        autofdo_feature,
+        symbol_counts_feature,
+        shared_flag_feature,
+        linkstamps_feature,
+        output_execpath_flags_feature,
+        runtime_library_search_directories_feature,
+        library_search_directories_feature,
+        archiver_flags_feature,
+        libraries_to_link_feature,
+        force_pic_flags_feature,
+        user_link_flags_feature,
+        default_link_flags_feature,
+        fission_support_feature,
+        strip_debug_symbols_feature,
+        coverage_feature,
+        fdo_optimize_feature,
+        fully_static_link_feature,
+        user_compile_flags_feature,
+        sysroot_feature,
+        unfiltered_compile_flags_feature,
+        linker_param_file_feature,
+        compiler_input_flags_feature,
+        compiler_output_flags_feature,
+        supports_dynamic_linker_feature,
+        supports_start_end_lib_feature,
+        supports_pic_feature,
+        objcopy_embed_flags_feature,
+        opt_feature,
+        dbg_feature,
+    ]
 
     cxx_builtin_include_directories = [
-            "/usr/local/include",
-            "/usr/local/lib/clang/9.0.0/include",
-            "/usr/include/x86_64-linux-gnu",
-            "/usr/include",
-            "/usr/include/c++/5.4.0",
-            "/usr/include/x86_64-linux-gnu/c++/5.4.0",
-            "/usr/include/c++/5.4.0/backward",
-        ]
+        "/usr/local/include",
+        "/usr/local/lib/clang/9.0.0/include",
+        "/usr/include/x86_64-linux-gnu",
+        "/usr/include",
+        "/usr/include/c++/5.4.0",
+        "/usr/include/x86_64-linux-gnu/c++/5.4.0",
+        "/usr/include/c++/5.4.0/backward",
+    ]
 
     artifact_name_patterns = [
         artifact_name_pattern(
@@ -1364,7 +1377,6 @@ def _impl(ctx):
         tool_path(name = "strip", path = "/usr/bin/strip"),
     ]
 
-
     out = ctx.actions.declare_file(ctx.label.name)
     ctx.actions.write(out, "Fake executable")
     return [
@@ -1385,16 +1397,17 @@ def _impl(ctx):
             tool_paths = tool_paths,
             make_variables = make_variables,
             builtin_sysroot = builtin_sysroot,
-            cc_target_os = cc_target_os
+            cc_target_os = cc_target_os,
         ),
         DefaultInfo(
             executable = out,
         ),
     ]
-cc_toolchain_config =  rule(
+
+cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
-        "cpu": attr.string(mandatory=True, values=["k8"]),
+        "cpu": attr.string(mandatory = True, values = ["k8"]),
     },
     provides = [CcToolchainConfigInfo],
     executable = True,
