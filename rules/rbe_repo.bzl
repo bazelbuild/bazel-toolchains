@@ -220,6 +220,10 @@ def _impl(ctx):
     else:
         image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
 
+    # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
+    # issues for users who do not do gcloud login.
+    image_name = image_name.replace("marketplace.gcr.io", "l.gcr.io")
+
     # If not using checked-in configs we need to pull the container and resolve its tag to digest
     # before we create the platform target.
     if not ctx.attr.config_version:
@@ -267,7 +271,8 @@ def _impl(ctx):
     # will work with RBE with the produced toolchain
     _create_platform(
         ctx,
-        image_name = image_name,
+        # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
+        image_name = image_name.replace("l.gcr.io", "marketplace.gcr.io"),
         name = name,
     )
 
@@ -365,10 +370,7 @@ def _use_standard_config(ctx):
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
     print("Pulling image %s." % image_name)
-
-    # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
-    # issues for users who do not do gcloud login.
-    result = ctx.execute(["docker", "pull", image_name.replace("marketplace.gcr.io", "l.gcr.io")])
+    result = ctx.execute(["docker", "pull", image_name])
     _print_exec_results("pull image", result, fail_on_error = True)
     print("Image pulled.")
 
