@@ -23,7 +23,7 @@ PACKAGE = "//configs/ubuntu16_04_clang/"
 
 LATEST_CONFIG_VERSION = "1.2"
 
-LATEST_BAZEL_VERSION = "0.23.0"
+LATEST_BAZEL_VERSION = "0.24.0"
 
 CONFIG_TYPES = [
     "default",
