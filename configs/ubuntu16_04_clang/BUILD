@@ -562,9 +562,12 @@ docker_toolchain_autoconfig(
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang//image",
     bazel_version = "0.24.0",
-    env = dicts.add(clang_env(), {
-        "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-    }),
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
     keys = ubuntu16_04_clang_default_keys(),
     packages = ubuntu16_04_clang_default_packages(),
     tags = ["manual"],
