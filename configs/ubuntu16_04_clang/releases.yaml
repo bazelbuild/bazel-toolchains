@@ -136,3 +136,7 @@
   digest: c57825a253f7ca7580dc4b38b51a640be03200393123a197e0c8f2851a6cf8e9
   title: RBE Ubuntu 16.04 toolchain configs dependency update (#359)
   date: "2019-03-12"
+- commitSHA: a6edc1ee16daeb37e4b005db951622df8f882a06
+  digest: 9aa113ad4e0843ea9155fc77d9ebe10fb8a6e2b26bb881dafe4aeec215aa7d6a
+  title: RBE Ubuntu 16.04 toolchain configs dependency update (#372)
+  date: "2019-03-21"
