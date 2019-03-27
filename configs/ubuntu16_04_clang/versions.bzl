@@ -27,6 +27,7 @@ def bazel_to_config_versions():
         "0.23.0": ["8.0.0", "9.0.0"],
         "0.23.1": ["8.0.0", "9.0.0"],
         "0.23.2": ["9.0.0"],
+        "0.24.0": ["9.0.0"],
     }
 
 # sha256 digest of the latest version of the toolchain container.
