@@ -111,6 +111,11 @@ rbe_autoconfig(
 )
 
 rbe_autoconfig(
+    name = "rbe_default_copy_resources",
+    copy_resources = True,
+)
+
+rbe_autoconfig(
     name = "rbe_default_with_output_base",
     config_dir = "default",
     output_base = "configs/ubuntu16_04_clang/1.1",
