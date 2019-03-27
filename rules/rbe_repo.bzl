@@ -213,6 +213,12 @@ _VERBOSE = False
 
 def _impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
+
+    bazel_version_debug = "Bazel %s" % ctx.attr.bazel_version
+    if ctx.attr.bazel_rc_version:
+        bazel_version_debug += " rc%s" % ctx.attr.bazel_rc_version
+    print("%s is used in rbe_autoconfig." % bazel_version_debug)
+
     name = ctx.attr.name
     image_name = None
     if ctx.attr.digest:
