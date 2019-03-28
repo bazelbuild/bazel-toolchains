@@ -187,13 +187,13 @@ _BAZEL_VERSION_FALLBACK = "0.23.0"
 # https://github.com/bazelbuild/bazel/issues/1262
 _EXTERNAL_FOLDER_PREFIX = "external/"
 
-_BAZEL_CONFIG_DIR = "/bazel-config"
+_ROOT_DIR = "/rbe_autoconf"
 _CC_TOOLCHAIN = ":cc-compiler-k8"
 _CONFIG_REPOS = ["local_config_cc"]
 _PLATFORM_DIR = "config"
 _PROJECT_REPO_DIR = "project_src"
-_OUTPUT_DIR = _BAZEL_CONFIG_DIR + "/autoconf_out"
-_REPO_DIR = _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
+_OUTPUT_DIR = _ROOT_DIR + "/autoconf_out"
+_REPO_DIR = _ROOT_DIR + "/" + _PROJECT_REPO_DIR
 _AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 _CC_CONFIG_DIR = "cc"
 _JAVA_CONFIG_DIR = "java"
@@ -456,11 +456,11 @@ def _create_docker_cmd(
     # if use_default_project was selected, we need to modify the WORKSPACE and BUILD file
     setup_default_project_cmd = ["cd ."]
     if use_default_project:
-        setup_default_project_cmd += ["cd " + _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR]
+        setup_default_project_cmd += ["cd " + _ROOT_DIR + "/" + _PROJECT_REPO_DIR]
         setup_default_project_cmd += ["mv BUILD.sample BUILD"]
         setup_default_project_cmd += ["touch WORKSPACE"]
 
-    bazel_cmd = "cd " + _BAZEL_CONFIG_DIR + "/" + _PROJECT_REPO_DIR
+    bazel_cmd = "cd " + _ROOT_DIR + "/" + _PROJECT_REPO_DIR
 
     # For each config repo we run the target @<config_repo>//...
     bazel_targets = "@" + "//... @".join(_CONFIG_REPOS) + "//..."
@@ -506,22 +506,34 @@ def _run_and_extract(
         use_default_project = use_default_project,
     )
 
-    # Create the docker run flags to mount the project + install file
-    # + set env vars
-    docker_run_flags = [""]
+    # Create the docker run flags to set env vars
+    docker_run_flags = []
     for env in ctx.attr.env:
         docker_run_flags += ["--env", env + "=" + ctx.attr.env[env]]
-    mount_read_only_flag = ":ro"
-    if use_default_project:
-        # If we use the default project, we need to modify the WORKSPACE
-        # and BUILD files, so don't mount read-only
-        mount_read_only_flag = ""
 
-    # If the rule is invoked from bazel-toolchains itself, then project_root
-    # is a symlink, which can cause mounting issues on GCB.
-    target = "$(realpath " + project_root + "):" + _REPO_DIR + mount_read_only_flag
-    docker_run_flags += ["-v", target]
-    docker_run_flags += ["-v", str(ctx.path("container")) + ":/container"]
+    # Command to copy resources used for rbe_autoconfig to the container.
+    copy_data_cmd = []
+
+    # Command to clean up the data volume container.
+    clean_data_volume_cmd = ""
+    if ctx.attr.copy_resources:
+        copy_data_cmd.append("data_volume=$(docker create -v " + _ROOT_DIR + " " + image_name + ")")
+        copy_data_cmd.append("docker cp $(realpath " + project_root + ") $data_volume:" + _REPO_DIR)
+        copy_data_cmd.append("docker cp " + str(ctx.path("container")) + " $data_volume:" + _ROOT_DIR + "/container")
+        docker_run_flags += ["--volumes-from", "$data_volume"]
+        clean_data_volume_cmd = "docker rm $data_volume"
+    else:
+        mount_read_only_flag = ":ro"
+        if use_default_project:
+            # If we use the default project, we need to modify the WORKSPACE
+            # and BUILD files, so don't mount read-only
+            mount_read_only_flag = ""
+
+        # If the rule is invoked from bazel-toolchains itself, then project_root
+        # is a symlink, which can cause mounting issues on GCB.
+        target = "$(realpath " + project_root + "):" + _REPO_DIR + mount_read_only_flag
+        docker_run_flags += ["-v", target]
+        docker_run_flags += ["-v", str(ctx.path("container")) + ":" + _ROOT_DIR + "/container"]
 
     # Create the template to run
     template = ctx.path(Label("@bazel_toolchains//rules:extract.sh.tpl"))
@@ -529,7 +541,9 @@ def _run_and_extract(
         "run_and_extract.sh",
         template,
         {
-            "%{commands}": "/container/run_in_container.sh",
+            "%{clean_data_volume_cmd}": clean_data_volume_cmd,
+            "%{commands}": _ROOT_DIR + "/container/run_in_container.sh",
+            "%{copy_data_cmd}": " && ".join(copy_data_cmd),
             "%{docker_run_flags}": " ".join(docker_run_flags),
             "%{extract_file}": "/" + outputs_tar,
             "%{image_name}": image_name,
@@ -686,6 +700,16 @@ _rbe_autoconfig = repository_rule(
                    "Bazel version. " +
                    "Used internally when use_checked_in_confs is true."),
         ),
+        "copy_resources": attr.bool(
+            default = False,
+            doc = (
+                "Optional. Specifies whether to copy instead of mounting " +
+                "resources such as scripts and project source code to the " +
+                "container for Bazel autoconfig. Note that copy is more " +
+                "expensive and should only be enabled where mounting is not " +
+                "supported or allowed on the system."
+            ),
+        ),
         "create_java_configs": attr.bool(
             doc = (
                 "Optional. Specifies whether to generate java configs. " +
@@ -763,6 +787,7 @@ def rbe_autoconfig(
         bazel_version = None,
         bazel_rc_version = None,
         config_dir = None,
+        copy_resources = False,
         digest = None,
         env = None,
         exec_compatible_with = None,
@@ -794,6 +819,10 @@ def rbe_autoconfig(
           Must be published in https://releases.bazel.build. E.g. 2.
       config_dir: Optional. Subdirectory where configs will be copied to.
           Use only if output_base is defined.
+      copy_resources: Optional. Default to False, if set to True, resources
+          such as scripts and project source code will be copied to the container
+          instead of bind mounted. This is useful in system where bind mounting
+          is not allowed or supported.
       digest: Optional. The digest of the image to pull.
           Should not be set if tag is used.
           Must be set together with registry and repository.
@@ -895,6 +924,7 @@ def rbe_autoconfig(
         bazel_rc_version = bazel_rc_version,
         config_dir = config_dir,
         config_version = config_version,
+        copy_resources = copy_resources,
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
