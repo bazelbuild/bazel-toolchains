@@ -14,7 +14,6 @@
 
 """A Starlark cc_toolchain configuration rule"""
 
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
     "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "action_config",
@@ -30,6 +29,7 @@ load(
     "variable_with_value",
     "with_feature_set",
 )
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 all_compile_actions = [
     ACTION_NAMES.c_compile,
@@ -1726,8 +1726,8 @@ def _impl(ctx):
 cc_toolchain_config = rule(
     implementation = _impl,
     attrs = {
-        "compiler": attr.string(),
         "cpu": attr.string(mandatory = True),
+        "compiler": attr.string(),
     },
     provides = [CcToolchainConfigInfo],
 )

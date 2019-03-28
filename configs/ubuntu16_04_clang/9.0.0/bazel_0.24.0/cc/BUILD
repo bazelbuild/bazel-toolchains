@@ -14,9 +14,9 @@
 
 # This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
 
-load(":cc_toolchain_config.bzl", "cc_toolchain_config")
-
 package(default_visibility = ["//visibility:public"])
+
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
 
 licenses(["notice"])  # Apache 2.0
 
@@ -45,10 +45,10 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
-        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
-        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
-        "k8": ":cc-compiler-k8",
         "k8|clang": ":cc-compiler-k8",
+        "k8": ":cc-compiler-k8",
+        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
     },
 )
 
