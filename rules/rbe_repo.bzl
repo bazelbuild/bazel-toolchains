@@ -705,7 +705,9 @@ _rbe_autoconfig = repository_rule(
             doc = (
                 "Optional. Specifies whether to copy instead of mounting " +
                 "resources such as scripts and project source code to the " +
-                "container for Bazel autoconfig."
+                "container for Bazel autoconfig. Note that copy is more " +
+                "expensive and should only be enabled where mounting is not " +
+                "supported or allowed on the system."
             ),
         ),
         "create_java_configs": attr.bool(
