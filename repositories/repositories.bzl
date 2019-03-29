@@ -23,6 +23,8 @@ load(
     "http_archive",
     "http_file",
 )
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_toolchains//deps:io_bazel_rules_docker.bzl", io_bazel_rules_docker_version = "version")
 
 def repositories():
     """Download dependencies of bazel-toolchains."""
@@ -30,11 +32,11 @@ def repositories():
 
     # ============================== Repositories ==============================
     if "io_bazel_rules_docker" not in excludes:
-        http_archive(
+        git_repository(
             name = "io_bazel_rules_docker",
-            sha256 = "fe519e726201215ca3059223fb5b4181e97fa0d8efa33be382bef64d0bc43248",
-            strip_prefix = "rules_docker-0475563f497ca8104bde290e64a3b39e2428f042",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/0475563f497ca8104bde290e64a3b39e2428f042.tar.gz"],
+            commit = io_bazel_rules_docker_version,
+            remote = "https://github.com/bazelbuild/rules_docker.git",
+            # TODO (suvanjan): Add sha256 field once copybara supports it.
         )
 
         # Register the docker toolchain type
