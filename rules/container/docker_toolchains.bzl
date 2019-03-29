@@ -21,6 +21,19 @@ load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
 load(":debian_pkg_tar.bzl", _generate_deb_tar = "generate")
 
+LanguageToolLayerInfo = provider(fields = [
+    "container_parts",
+    "tars",
+    "input_files",
+    "env",
+    "symlinks",
+    "packages",
+    "additional_repos",
+    "keys",
+    "installables_tar",
+    "installation_cleanup_commands",
+])
+
 def _input_validation(kwargs):
     if "debs" in kwargs:
         fail("debs is not supported.")
@@ -105,7 +118,7 @@ def _language_tool_layer_impl(
             download_pkgs_output_script = download_pkgs_output_script,
         )
 
-        installables_tars.append(aggregated_debian_tar.providers[0].installables_tar)
+        installables_tars.append(aggregated_debian_tar[0].installables_tar)
 
     # Prepare new base image for the container_image rule.
     new_base = ctx.files.base[0]
@@ -157,20 +170,24 @@ def _language_tool_layer_impl(
     else:
         result_runfiles = result[1].default_runfiles
 
-    return struct(
-        runfiles = result_runfiles,
-        files = result[1].files,
-        container_parts = result[0].container_parts,
-        tars = tars,
-        input_files = files,
-        env = env,
-        symlinks = symlinks,
-        packages = packages,
-        additional_repos = additional_repos,
-        keys = keys,
-        installables_tar = ctx.file.installables_tar,
-        installation_cleanup_commands = installation_cleanup_commands,
-    )
+    return [
+        DefaultInfo(
+            files = result[1].files,
+            runfiles = result_runfiles,
+        ),
+        LanguageToolLayerInfo(
+            container_parts = result[0].container_parts,
+            tars = tars,
+            input_files = files,
+            env = env,
+            symlinks = symlinks,
+            packages = packages,
+            additional_repos = additional_repos,
+            keys = keys,
+            installables_tar = ctx.file.installables_tar,
+            installation_cleanup_commands = installation_cleanup_commands,
+        ),
+    ]
 
 language_tool_layer_attrs = dicts.add(_container.image.attrs, _key.attrs, _download.attrs, _install.attrs, {
     "image": attr.label(
