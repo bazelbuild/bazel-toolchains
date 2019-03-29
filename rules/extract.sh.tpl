@@ -19,8 +19,15 @@ set -ex
 # This is a generated file that runs a docker container, waits for it to
 # finish running and copies a file to an output location.
 
+# In system where bind mounting is not supported/allowed, we need to copy the
+# scripts and project source code used for Bazel autoconfig to the container.
+%{copy_data_cmd}
+
 id=$(docker run -d %{docker_run_flags} %{image_name} %{commands})
 
 docker wait $id
 docker cp $id:%{extract_file} %{output}
 docker rm $id
+
+# If a data volumn is created, delete it at the end.
+%{clean_data_volume_cmd}

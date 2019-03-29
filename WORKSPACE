@@ -69,7 +69,7 @@ container_pull(
     tag = "16.04",
 )
 
-# Pinned to gcr.io/cloud-marketplace/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
+# Pinned to marketplace.gcr.io/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
 # solely for testing purpose used by //tests/config:debian8_clang_autoconfig_test.
 container_pull(
     name = "debian8-clang-test",
@@ -108,6 +108,11 @@ rbe_autoconfig(name = "rbe_default")
 rbe_autoconfig(
     name = "rbe_default_no_checked_in_confs",
     use_checked_in_confs = False,
+)
+
+rbe_autoconfig(
+    name = "rbe_default_copy_resources",
+    copy_resources = True,
 )
 
 rbe_autoconfig(

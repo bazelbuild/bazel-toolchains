@@ -71,7 +71,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928"
         }
         properties: {
           name: "jdk-version"
@@ -93,7 +93,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928"
         }
         properties: {
           name: "jdk-version"
@@ -115,13 +115,13 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928"
         }
         """,
 )
 
 # Experimental ubuntu1604 based container with Docker.
-# Based on l.gcr.io/google/rbe-ubuntu16-04:r340178
+# Based on marketplace.gcr.io/google/rbe-ubuntu16-04:r340178
 platform(
     name = "nosla_xenial_docker",
     constraint_values = [
@@ -159,7 +159,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
         }
         properties: {
           name: "jdk-version"
@@ -181,7 +181,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
         }
         properties: {
           name: "jdk-version"
@@ -203,7 +203,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375"
         }
         """,
 )
@@ -223,7 +223,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c"
         }
         properties: {
           name: "jdk-version"
@@ -245,7 +245,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c"
         }
         properties: {
           name: "jdk-version"
@@ -267,7 +267,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c"
         }
         """,
 )
