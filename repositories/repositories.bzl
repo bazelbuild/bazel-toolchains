@@ -36,6 +36,7 @@ def repositories():
             name = "io_bazel_rules_docker",
             commit = io_bazel_rules_docker_version,
             remote = "https://github.com/bazelbuild/rules_docker.git",
+            # TODO (suvanjan): Add sha256 field once copybara supports it.
         )
 
         # Register the docker toolchain type
