@@ -46,6 +46,10 @@ platform(
           name: "dockerSiblingContainers"
           value: "true"
         }
+        properties: {
+          name: "dockerNetwork"
+          value: "standard"
+        }
         """,
 )
 

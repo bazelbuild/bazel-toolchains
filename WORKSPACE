@@ -69,24 +69,24 @@ container_pull(
     tag = "16.04",
 )
 
-# Pinned to marketplace.gcr.io/google/clang-debian8@sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f
-# solely for testing purpose used by //tests/config:debian8_clang_autoconfig_test.
+# Pinned to marketplace.gcr.io/google/clang-ubuntu@sha256:ab3f65314c94279e415926948f8428428e3b6057003f15197ffeae0b1b5a2386
+# solely for testing purpose used by //tests/config:ubuntu16_04_clang_autoconfig_test.
 container_pull(
-    name = "debian8-clang-test",
-    digest = "sha256:ac3b1fdc22c0f2b95abe67f2daf33788425fab52d4e6845900bfe1a42443098f",
+    name = "ubuntu16_04-clang-test",
+    digest = "sha256:ab3f65314c94279e415926948f8428428e3b6057003f15197ffeae0b1b5a2386",
     registry = "marketplace.gcr.io",
-    repository = "google/clang-debian8",
+    repository = "google/clang-ubuntu",
 )
 
-# Test purpose only. bazel-toolchains repo at release for Bazel 0.10.0.
-# https://github.com/bazelbuild/bazel-toolchains/releases/tag/acffd62
+# Test purpose only. bazel-toolchains repo at release for Bazel 0.24.0.
+# https://github.com/bazelbuild/bazel-toolchains/releases/tag/cddc376
 http_file(
     name = "bazel_toolchains_test",
-    downloaded_file_path = "44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
-    sha256 = "699b55a6916c687f4b7dc092dbbf5f64672cde0dc965f79717735ec4e5416556",
+    downloaded_file_path = "cddc376d428ada2927ad359211c3e356bd9c9fbb.tar.gz",
+    sha256 = "67335b3563d9b67dc2550b8f27cc689b64fadac491e69ce78763d9ba894cc5cc",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
-        "https://github.com/bazelbuild/bazel-toolchains/archive/44200e0c026d86c53470d107b3697a3e46469c43.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/cddc376d428ada2927ad359211c3e356bd9c9fbb.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/cddc376d428ada2927ad359211c3e356bd9c9fbb.tar.gz",
     ],
 )
 
