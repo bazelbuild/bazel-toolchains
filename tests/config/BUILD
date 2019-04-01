@@ -94,7 +94,7 @@ docker_toolchain_autoconfig(
 # can generate the exact same configs as before.
 # Container: marketplace.gcr.io/google/clang-ubuntu@sha256:ab3f65314c94279e415926948f8428428e3b6057003f15197ffeae0b1b5a2386
 docker_toolchain_autoconfig(
-    name = "ubuntu16_04-autoconfig",
+    name = "ubuntu16_04-clang-1.2-bazel_0.24.0-autoconfig",
     additional_repos = ubuntu16_04_clang_default_repos(),
     base = "@ubuntu16_04-clang-test//image",
     bazel_version = "0.24.0",
@@ -111,7 +111,7 @@ sh_test(
     timeout = "long",
     srcs = ["ubuntu16_04_clang_autoconfig_test.sh"],
     data = [
-        ":ubuntu16_04-autoconfig_outputs.tar",
+        ":ubuntu16_04-clang-1.2-bazel_0.24.0-autoconfig_outputs.tar",
         "@bazel_toolchains_test//file",
     ],
 )
