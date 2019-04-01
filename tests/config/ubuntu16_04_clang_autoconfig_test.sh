@@ -35,8 +35,11 @@ tar -xf ${AUTOCONFIG_SCRIPT}_outputs.tar -C ${TEST_TMPDIR}
 
 # Remove generated files that are not part of toolchain configs
 rm -rf ${TEST_TMPDIR}/local_config_cc/tools ${TEST_TMPDIR}/local_config_cc/WORKSPACE
-buildifier --lint=fix ${TEST_TMPDIR}/local_config_cc/BUILD
-buildifier --lint=fix ${TEST_TMPDIR}/local_config_cc/cc_toolchain_config.bzl
+BUILDIFIER_VERSION=0.22.0
+wget -q https://github.com/bazelbuild/buildtools/releases/download/${BUILDIFIER_VERSION}/buildifier
+chmod +x ./buildifier
+./buildifier --lint=fix ${TEST_TMPDIR}/local_config_cc/BUILD
+./buildifier --lint=fix ${TEST_TMPDIR}/local_config_cc/cc_toolchain_config.bzl
 
 # Unpack the tarball containing published toolchain configs for Bazel 0.10.0 from GitHub.
 tar -xf ${TEST_SRCDIR}/bazel_toolchains_test/file/${COMMIT}.tar.gz -C ${TEST_TMPDIR}
