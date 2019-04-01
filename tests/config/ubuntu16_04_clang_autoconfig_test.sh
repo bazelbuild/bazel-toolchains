@@ -25,13 +25,13 @@ set -ex
 # Define constants.
 WORKSPACE_ROOT=$(pwd)
 COMMIT=44200e0c026d86c53470d107b3697a3e46469c43
-BAZEL_VERSION=0.10.0
-CONFIG_VERSION=0.3.0
-TEST_CONFIGS_DIR=${TEST_TMPDIR}/bazel-toolchains-${COMMIT}/configs/debian8_clang/${CONFIG_VERSION}/bazel_${BAZEL_VERSION}/
-AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/tests/config/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig
+BAZEL_VERSION=0.24.0
+CONFIG_VERSION=1.2
+TEST_CONFIGS_DIR=${TEST_TMPDIR}/bazel-toolchains-${COMMIT}/configs/ubuntu16_04_clang/${CONFIG_VERSION}/bazel_${BAZEL_VERSION}/
+AUTOCONFIG_SCRIPT=${WORKSPACE_ROOT}/tests/config/ubuntu16_04-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig
 
 # Execute the autoconfig script and unpack toolchain config tarball.
-tar -xf ${WORKSPACE_ROOT}/tests/config/debian8-clang-${CONFIG_VERSION}-bazel_${BAZEL_VERSION}-autoconfig_outputs.tar -C ${TEST_TMPDIR}
+tar -xf ${AUTOCONFIG_SCRIPT}_outputs.tar -C ${TEST_TMPDIR}
 
 # Remove generated files that are not part of toolchain configs
 rm -rf ${TEST_TMPDIR}/local_config_cc/tools ${TEST_TMPDIR}/local_config_cc/WORKSPACE
