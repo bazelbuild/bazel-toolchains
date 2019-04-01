@@ -124,13 +124,11 @@ def _generate_deb_tar(
         output_script = output_script,
     )
 
-    return struct(
-        providers = [
-            InstallableTarInfo(
-                installables_tar = output_tar,
-            ),
-        ],
-    )
+    return [
+        InstallableTarInfo(
+            installables_tar = output_tar,
+        ),
+    ]
 
 def _aggregate_debian_pkgs_impl(ctx):
     """Implementation for the aggregate_debian_pkgs rule.
