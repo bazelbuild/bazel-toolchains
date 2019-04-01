@@ -11,6 +11,5 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Commit sha for bazelbuild/rules_docker."""
 
-version = "0475563f497ca8104bde290e64a3b39e2428f042"
+version = "8d59af072dd6e0d876f4a5f22a31fbe57152e00b"
