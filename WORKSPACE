@@ -170,6 +170,10 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "buildkite_config",
     base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
+    # Note that if you change the `digest`, you might also need to update the
+    # `base_container_digest` to make sure asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:<digest>
+    # and marketplace.gcr.io/google/rbe-ubuntu16-04:<base_container_digest> have the
+    # same Clang and JDK installed.
     digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
     env = clang_env(),
     registry = "gcr.io",
