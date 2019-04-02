@@ -144,3 +144,8 @@
   digest: 55290a75da1e02af8e343bf0b071e4f5383b030920e2442dc18421cb262b1864
   title: RBE Ubuntu 16.04 toolchain configs dependency update (#379)
   date: "2019-03-27"
+- commitSHA: f2c9219be2dcbe4d766fdbe6aa470eced168ed03
+  digest: 82f2f7d158b0f67579c5649a73adb1b9bea3e385df6b4c4368a1b53eed11dbfe
+  title: Toolchain configs for marketplace.gcr.io/google/rbe-ubuntu16-04, Bazel 0.24.0
+    (2019/04/02) (#396)
+  date: "2019-04-02"
