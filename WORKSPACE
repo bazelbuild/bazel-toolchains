@@ -118,7 +118,9 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "rbe_default_with_output_base",
     config_dir = "default",
-    output_base = "configs/ubuntu16_04_clang/1.1",
+    create_cc_configs = False,
+    external_repos = ["docker_config"],
+    output_base = "tests/temp",
 )
 
 # Targets used by automatic config generation and release service.
