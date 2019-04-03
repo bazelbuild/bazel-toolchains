@@ -25,6 +25,8 @@ load(
 )
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_toolchains//deps:io_bazel_rules_docker.bzl", io_bazel_rules_docker_version = "version")
+load("@bazel_toolchains//deps:io_bazel_rules_go.bzl", io_bazel_rules_go_version = "version")
+load("@bazel_toolchains//deps:base_images_docker.bzl", base_images_docker_version = "version")
 
 def repositories():
     """Download dependencies of bazel-toolchains."""
@@ -50,18 +52,21 @@ def repositories():
 
     # io_bazel_rules_go is the dependency of container_test rules.
     if "io_bazel_rules_go" not in excludes:
-        http_archive(
+        git_repository(
             name = "io_bazel_rules_go",
-            urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.16.5/rules_go-0.16.5.tar.gz"],
-            sha256 = "7be7dc01f1e0afdba6c8eb2b43d2fa01c743be1b9273ab1eaf6c233df078d705",
+            # TODO (suvanjan): Change this back to track releases instead of
+            # HEAD once copybara supports tracking tagged commits.
+            commit = io_bazel_rules_go_version,
+            remote = "https://github.com/bazelbuild/rules_go.git",
+            # TODO (suvanjan): Add sha256 field once copybara supports it.
         )
 
     if "base_images_docker" not in excludes:
-        http_archive(
+        git_repository(
             name = "base_images_docker",
-            sha256 = "ce6043d38aa7fad421910311aecec865beb060eb56d8c3eb5af62b2805e9379c",
-            strip_prefix = "base-images-docker-7657d04ad9e30b9b8d981b96ae57634cd45ba18a",
-            urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/7657d04ad9e30b9b8d981b96ae57634cd45ba18a.tar.gz"],
+            commit = base_images_docker_version,
+            remote = "https://github.com/GoogleContainerTools/base-images-docker.git",
+            # TODO (suvanjan): Add sha256 field once copybara supports it.
         )
 
     # =============================== Repo rule deps ==========================
