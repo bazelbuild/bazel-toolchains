@@ -505,8 +505,8 @@ def _run_and_extract(
         use_default_project):
     config_repos = []
     config_repos.extend(_CONFIG_REPOS)
-    if ctx.attr.external_repos:
-        config_repos.extend(ctx.attr.external_repos)
+    if ctx.attr.config_repos:
+        config_repos.extend(ctx.attr.config_repos)
 
     # Create command to run inside docker container
     _create_docker_cmd(
@@ -677,8 +677,8 @@ def _expand_outputs(ctx, bazel_version, project_root):
         _print_exec_results("copy platform BUILD", result, True, args)
 
         # Copy any additional external repos that were requested
-        if ctx.attr.external_repos:
-            for repo in ctx.attr.external_repos:
+        if ctx.attr.config_repos:
+            for repo in ctx.attr.config_repos:
                 repo_dest = dest + repo + "/"
                 result = ctx.execute(["mkdir", "-p", repo_dest])
                 _print_exec_results("create %s output dir" % repo, result)
@@ -722,6 +722,11 @@ _rbe_autoconfig = repository_rule(
                    "version of Bazel) you can use this attr to indicate a " +
                    "type of config (e.g., default,  msan). The configs will " +
                    "be generated in a sub-directory when this attr is used."),
+        ),
+        "config_repos": attr.string_list(
+            doc = ("Optional. list of additional external repos corresponding to " +
+                   "configure like repo rules that need to be produced in addition to " +
+                   "local_config_cc."),
         ),
         "config_version": attr.string(
             doc = ("The config version found for the given container and " +
@@ -768,11 +773,6 @@ _rbe_autoconfig = repository_rule(
                    "the platform in its constraint_values attr). For " +
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
-        ),
-        "external_repos": attr.string_list(
-            doc = ("Optional. list of additional external repos corresponding to " +
-                   "configure like repo rules that need to be produced in addition to " +
-                   "local_config_cc."),
         ),
         "java_home": attr.string(
             doc = ("Optional. The location of java_home in the container. For " +
@@ -826,13 +826,13 @@ def rbe_autoconfig(
         bazel_version = None,
         bazel_rc_version = None,
         config_dir = None,
+        config_repos = None,
         copy_resources = False,
+        create_cc_configs = True,
+        create_java_configs = True,
         digest = None,
         env = None,
         exec_compatible_with = None,
-        external_repos = None,
-        create_cc_configs = True,
-        create_java_configs = True,
         java_home = None,
         output_base = None,
         tag = None,
@@ -860,10 +860,17 @@ def rbe_autoconfig(
           Must be published in https://releases.bazel.build. E.g. 2.
       config_dir: Optional. Subdirectory where configs will be copied to.
           Use only if output_base is defined.
+      config_repos: Optional. list of additional external repos corresponding to
+          configure like repo rules that need to be produced in addition to
+          local_config_cc
       copy_resources: Optional. Default to False, if set to True, resources
           such as scripts and project source code will be copied to the container
           instead of bind mounted. This is useful in system where bind mounting
           is not allowed or supported.
+      create_cc_configs: Optional. Specifies whether to generate C/C++ configs.
+          Defauls to True.
+      create_java_configs: Optional. Specifies whether to generate java configs.
+          Defauls to True.
       digest: Optional. The digest of the image to pull.
           Should not be set if tag is used.
           Must be set together with registry and repository.
@@ -877,13 +884,6 @@ def rbe_autoconfig(
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
-      exteral_repos: Optional. list of additional external repos corresponding to
-          configure like repo rules that need to be produced in addition to
-          local_config_cc
-      create_cc_configs: Optional. Specifies whether to generate C/C++ configs.
-          Defauls to True.
-      create_java_configs: Optional. Specifies whether to generate java configs.
-          Defauls to True.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
           relevant if 'create_java_configs' is true. If 'create_java_configs' is
@@ -969,6 +969,7 @@ def rbe_autoconfig(
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
         config_dir = config_dir,
+        config_repos = config_repos,
         config_version = config_version,
         copy_resources = copy_resources,
         create_cc_configs = create_cc_configs,
@@ -976,7 +977,6 @@ def rbe_autoconfig(
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
-        external_repos = external_repos,
         java_home = java_home,
         output_base = output_base,
         registry = registry,
