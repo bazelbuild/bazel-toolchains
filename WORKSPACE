@@ -119,7 +119,7 @@ rbe_autoconfig(
     name = "rbe_default_with_output_base",
     config_dir = "default",
     create_cc_configs = False,
-    external_repos = ["docker_config"],
+    config_repos = ["docker_config"],
     output_base = "tests/temp",
 )
 

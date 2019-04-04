@@ -774,11 +774,6 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
-        "external_repos": attr.string_list(
-            doc = ("Optional. list of additional external repos corresponding to " +
-                   "configure like repo rules that need to be produced in addition to " +
-                   "local_config_cc."),
-        ),
         "java_home": attr.string(
             doc = ("Optional. The location of java_home in the container. For " +
                    "example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only " +
