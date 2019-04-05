@@ -1,0 +1,11 @@
+# Launch a RBE hello world build + unit test using the @rbe_default toolchain
+# configs.
+steps:
+- name: 'gcr.io/cloud-builders/bazel'
+  args:
+  - --bazelrc=bazelrc/.bazelrc
+  - test
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - --config=remote
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - --noremote_accept_cached
