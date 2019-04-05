@@ -1,7 +1,7 @@
 # Launch a RBE hello world build + unit test using the @rbe_default toolchain
 # configs.
 steps:
-- name: 'gcr.io/cloud-builders/bazel'
+- name: 'marketplace.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/.bazelrc
   - test
