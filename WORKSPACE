@@ -119,8 +119,6 @@ rbe_autoconfig(
     name = "rbe_default_with_output_base",
     config_dir = "default",
     create_cc_configs = False,
-    config_repos = ["docker_config"],
-    output_base = "tests/temp",
 )
 
 # Targets used by automatic config generation and release service.
