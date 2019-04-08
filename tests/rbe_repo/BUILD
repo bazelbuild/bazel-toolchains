@@ -22,7 +22,7 @@ sh_test(
         "$(location @rac_checked_in//test:empty)",
         "assert_basic_cofig",
         "assert_checked_in_confs",
-        "assert_cc_confs",
+        "assert_checked_in_cc_confs",
         "assert_java_confs",
     ],
     data = [
@@ -38,7 +38,7 @@ sh_test(
         "$(location @rac_checked_in_no_java//test:empty)",
         "assert_basic_cofig",
         "assert_checked_in_confs",
-        "assert_cc_confs",
+        "assert_checked_in_cc_confs",
         "assert_no_java_confs",
     ],
     data = [

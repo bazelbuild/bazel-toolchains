@@ -79,6 +79,14 @@ assert_cc_confs() {
   assert_file_exists ${DIR}/cc/cc_wrapper.sh
 }
 
+# Checks that cc config files were generated
+assert_checked_in_cc_confs() {
+  assert_file_exists ${DIR}/cc/stub.BUILD
+  assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
+  assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
+  assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
+}
+
 # Checks that cc config files were not generated
 assert_no_cc_confs() {
   assert_file_not_exists ${DIR}/cc/stub.BUILD
