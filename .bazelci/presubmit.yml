@@ -24,10 +24,11 @@ platforms:
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     test_flags:
-    - "--loading_phase_threads=1"
     - "--test_output=errors"
     - "--verbose_failures"
     - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
     - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    # TODO(nlopezgi): remove this flag once rbe_autoconfig can be run in parallel
+    - "--loading_phase_threads=1"
