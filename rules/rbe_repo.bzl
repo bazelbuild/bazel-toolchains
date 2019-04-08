@@ -706,12 +706,11 @@ def _expand_outputs(ctx, bazel_version, project_root):
                 result = ctx.execute(args)
                 _print_exec_results("copy %s repo files" % repo, result, True, args)
 
-# copies all contents of the external repo to a test directory
-# modifies name of all BUILD files
+# Copies all contents of the external repo to a test directory,
+# modifies name of all BUILD files (to enable file_test to operate on them), and
 # creates a root BUILD file in test directory with a filegroup that contains
 # all files.
 def _copy_to_test_dir(ctx):
-
     # Copy all files with rsync
     args = ["rsync", "-aR", "--exclude='test/empty'", "./", "./test"]
     result = ctx.execute(args)
@@ -731,7 +730,7 @@ filegroup(
 )
 """, False)
 
-    # create an empty file
+    # create an empty file to reference in tests
     ctx.file("test/empty", "", False)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this

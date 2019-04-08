@@ -192,22 +192,22 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "rac_generate",
     bazel_version = _ubuntu1604_bazel,
-    use_checked_in_confs = False,
     create_testdata = True,
+    use_checked_in_confs = False,
 )
 
 rbe_autoconfig(
     name = "rac_generate_no_java",
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
-    use_checked_in_confs = False,
     create_testdata = True,
+    use_checked_in_confs = False,
 )
 
 rbe_autoconfig(
     name = "rac_generate_no_cc",
     bazel_version = _ubuntu1604_bazel,
     create_cc_configs = False,
-    use_checked_in_confs = False,
     create_testdata = True,
+    use_checked_in_confs = False,
 )

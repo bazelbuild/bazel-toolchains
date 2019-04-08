@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This bash script defines common assertion functions for rbe_autoconfig
+# file checks.
+
 set -e
 
 assert_file_not_exists() {
