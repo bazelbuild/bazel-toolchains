@@ -233,6 +233,8 @@ def _impl(ctx):
     # If not using checked-in configs we need to pull the container and resolve its tag to digest
     # before we create the platform target.
     if not ctx.attr.config_version:
+        ctx.report_progress("validating host tools")
+
         # Perform some safety checks
         _validate_host(ctx)
         project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
@@ -275,6 +277,7 @@ def _impl(ctx):
 
     # Create a default BUILD file with the platform + toolchain targets that
     # will work with RBE with the produced toolchain
+    ctx.report_progress("creating platform")
     _create_platform(
         ctx,
         # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
@@ -304,6 +307,8 @@ def _impl(ctx):
         project_root = project_root,
         use_default_project = use_default_project,
     )
+
+    ctx.report_progress("expanding outputs")
 
     # Expand outputs to project dir if user requested it
     _expand_outputs(
@@ -375,10 +380,10 @@ def _use_standard_config(ctx):
 
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
-    print("Pulling image %s." % image_name)
+    ctx.report_progress("pulling image %s." % image_name)
     result = ctx.execute(["docker", "pull", image_name])
     _print_exec_results("pull image", result, fail_on_error = True)
-    print("Image pulled.")
+    ctx.report_progress("image pulled.")
 
 # Gets the value of java_home either from attr or
 # by running docker run image_name printenv JAVA_HOME.
@@ -411,6 +416,7 @@ def _get_java_home(ctx, image_name):
 # to run the commands to install bazel, run it and create the output tar
 def _create_docker_cmd(
         ctx,
+        config_repos,
         bazel_version,
         bazel_rc_version,
         outputs_tar,
@@ -437,7 +443,7 @@ def _create_docker_cmd(
     # Needed because some outputs of local_cc_config (e.g., dummy_toolchain.bzl)
     # could be symlinks.
     deref_symlinks_cmd = []
-    for config_repo in _CONFIG_REPOS:
+    for config_repo in config_repos:
         symlinks_cmd = ("find $(bazel info output_base)/" +
                         _EXTERNAL_FOLDER_PREFIX + config_repo +
                         " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \;")
@@ -447,7 +453,7 @@ def _create_docker_cmd(
     # Command to copy produced toolchain configs to a tar at the root
     # of the container.
     copy_cmd = ["mkdir " + _OUTPUT_DIR]
-    for config_repo in _CONFIG_REPOS:
+    for config_repo in config_repos:
         src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + _OUTPUT_DIR)
     copy_cmd.append("tar -cf /" + outputs_tar + " -C " + _OUTPUT_DIR + "/ . ")
@@ -463,7 +469,7 @@ def _create_docker_cmd(
     bazel_cmd = "cd " + _ROOT_DIR + "/" + _PROJECT_REPO_DIR
 
     # For each config repo we run the target @<config_repo>//...
-    bazel_targets = "@" + "//... @".join(_CONFIG_REPOS) + "//..."
+    bazel_targets = "@" + "//... @".join(config_repos) + "//..."
     bazel_cmd += " && bazel build " + bazel_targets
 
     # Command to run to clean up after autoconfiguration.
@@ -497,11 +503,17 @@ def _run_and_extract(
         outputs_tar,
         project_root,
         use_default_project):
+    config_repos = []
+    config_repos.extend(_CONFIG_REPOS)
+    if ctx.attr.config_repos:
+        config_repos.extend(ctx.attr.config_repos)
+
     # Create command to run inside docker container
     _create_docker_cmd(
         ctx,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
+        config_repos = config_repos,
         outputs_tar = outputs_tar,
         use_default_project = use_default_project,
     )
@@ -553,7 +565,7 @@ def _run_and_extract(
     )
 
     # run run_and_extract.sh
-    print("Running container")
+    ctx.report_progress("running container")
     result = ctx.execute(["./run_and_extract.sh"])
     _print_exec_results("run_and_extract", result, fail_on_error = True)
 
@@ -625,7 +637,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
         project_root: The output directory where configs will be copied to.
     """
     if ctx.attr.output_base:
-        print("Copying outputs to project directory")
+        ctx.report_progress("copying outputs to project directory")
         dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
         if ctx.attr.config_dir:
             dest += ctx.attr.config_dir + "/"
@@ -636,25 +648,25 @@ def _expand_outputs(ctx, bazel_version, project_root):
         # Create the directories
         result = ctx.execute(["mkdir", "-p", platform_dest])
         _print_exec_results("create platform output dir", result)
-        if ctx.attr.create_java_configs:
-            result = ctx.execute(["mkdir", "-p", java_dest])
-            _print_exec_results("create java output dir", result)
-        result = ctx.execute(["mkdir", "-p", cc_dest])
-        _print_exec_results("create cc output dir", result)
-
-        # Get the files that were created in the _CC_CONFIG_DIR
-        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % _CC_CONFIG_DIR), True)
-        result = ctx.execute(["./local_config_files.sh"])
-        _print_exec_results("resolve autoconf files", result)
-        autoconf_files = result.stdout.splitlines()[0].split(" ")
-        args = ["cp"] + autoconf_files + [cc_dest]
 
         # Copy the local_config_cc files to dest/{_CC_CONFIG_DIR}/
-        result = ctx.execute(args)
-        _print_exec_results("copy local_config_cc outputs", result, True, args)
+        if ctx.attr.create_cc_configs:
+            result = ctx.execute(["mkdir", "-p", cc_dest])
+            _print_exec_results("create cc output dir", result)
+
+            # Get the files that were created in the _CC_CONFIG_DIR
+            ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % _CC_CONFIG_DIR), True)
+            result = ctx.execute(["./local_config_files.sh"])
+            _print_exec_results("resolve autoconf files", result)
+            autoconf_files = result.stdout.splitlines()[0].split(" ")
+            args = ["cp"] + autoconf_files + [cc_dest]
+            result = ctx.execute(args)
+            _print_exec_results("copy local_config_cc outputs", result, True, args)
 
         # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
         if ctx.attr.create_java_configs:
+            result = ctx.execute(["mkdir", "-p", java_dest])
+            _print_exec_results("create java output dir", result)
             args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
             result = ctx.execute(args)
             _print_exec_results("copy java_runtime BUILD", result, True, args)
@@ -663,6 +675,22 @@ def _expand_outputs(ctx, bazel_version, project_root):
         args = ["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest]
         result = ctx.execute(args)
         _print_exec_results("copy platform BUILD", result, True, args)
+
+        # Copy any additional external repos that were requested
+        if ctx.attr.config_repos:
+            for repo in ctx.attr.config_repos:
+                repo_dest = dest + repo + "/"
+                result = ctx.execute(["mkdir", "-p", repo_dest])
+                _print_exec_results("create %s output dir" % repo, result)
+
+                # Get the files that were created in the repo dir
+                ctx.file(repo + "_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % repo), True)
+                result = ctx.execute(["./" + repo + "_config_files.sh"])
+                _print_exec_results("resolve %s repo files" % repo, result)
+                repo_files = result.stdout.splitlines()[0].split(" ")
+                args = ["cp"] + repo_files + [repo_dest]
+                result = ctx.execute(args)
+                _print_exec_results("copy %s repo files" % repo, result, True, args)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
@@ -695,6 +723,11 @@ _rbe_autoconfig = repository_rule(
                    "type of config (e.g., default,  msan). The configs will " +
                    "be generated in a sub-directory when this attr is used."),
         ),
+        "config_repos": attr.string_list(
+            doc = ("Optional. list of additional external repos corresponding to " +
+                   "configure like repo rules that need to be produced in addition to " +
+                   "local_config_cc."),
+        ),
         "config_version": attr.string(
             doc = ("The config version found for the given container and " +
                    "Bazel version. " +
@@ -708,6 +741,12 @@ _rbe_autoconfig = repository_rule(
                 "container for Bazel autoconfig. Note that copy is more " +
                 "expensive and should only be enabled where mounting is not " +
                 "supported or allowed on the system."
+            ),
+        ),
+        "create_cc_configs": attr.bool(
+            doc = (
+                "Optional. Specifies whether to generate C/C++ configs. " +
+                "Defauls to True."
             ),
         ),
         "create_java_configs": attr.bool(
@@ -787,11 +826,13 @@ def rbe_autoconfig(
         bazel_version = None,
         bazel_rc_version = None,
         config_dir = None,
+        config_repos = None,
         copy_resources = False,
+        create_cc_configs = True,
+        create_java_configs = True,
         digest = None,
         env = None,
         exec_compatible_with = None,
-        create_java_configs = True,
         java_home = None,
         output_base = None,
         tag = None,
@@ -819,16 +860,20 @@ def rbe_autoconfig(
           Must be published in https://releases.bazel.build. E.g. 2.
       config_dir: Optional. Subdirectory where configs will be copied to.
           Use only if output_base is defined.
+      config_repos: Optional. list of additional external repos corresponding to
+          configure like repo rules that need to be produced in addition to
+          local_config_cc
       copy_resources: Optional. Default to False, if set to True, resources
           such as scripts and project source code will be copied to the container
           instead of bind mounted. This is useful in system where bind mounting
           is not allowed or supported.
+      create_cc_configs: Optional. Specifies whether to generate C/C++ configs.
+          Defauls to True.
+      create_java_configs: Optional. Specifies whether to generate java configs.
+          Defauls to True.
       digest: Optional. The digest of the image to pull.
           Should not be set if tag is used.
           Must be set together with registry and repository.
-      exec_compatible_with: Optional. List of constraints to add to the produced
-          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
-          exec_compatible_with/constraint_values attrs, respectively.
       env: dict. Optional. Additional env variables that will be set when
           running the Bazel command to generate the toolchain configs.
           Set to values for marketplace.gcr.io/google/rbe-ubuntu16-04 container.
@@ -836,8 +881,9 @@ def rbe_autoconfig(
           the rbe-ubuntu16-04 container.
           Should be overriden if a custom container does not extend the
           rbe-ubuntu16-04 container.
-      create_java_configs: Optional. Specifies whether to generate java configs.
-          Defauls to True.
+      exec_compatible_with: Optional. List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
           relevant if 'create_java_configs' is true. If 'create_java_configs' is
@@ -907,9 +953,9 @@ def rbe_autoconfig(
         base_container_digest = base_container_digest,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
+        create_java_configs = create_java_configs,
         digest = digest,
         env = env,
-        create_java_configs = create_java_configs,
         java_home = java_home,
         registry = registry,
         repository = repository,
@@ -923,12 +969,14 @@ def rbe_autoconfig(
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
         config_dir = config_dir,
+        config_repos = config_repos,
         config_version = config_version,
         copy_resources = copy_resources,
+        create_cc_configs = create_cc_configs,
+        create_java_configs = create_java_configs,
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
-        create_java_configs = create_java_configs,
         java_home = java_home,
         output_base = output_base,
         registry = registry,
@@ -942,9 +990,9 @@ def validateUseOfCheckedInConfigs(
         base_container_digest,
         bazel_version,
         bazel_rc_version,
+        create_java_configs,
         digest,
         env,
-        create_java_configs,
         java_home,
         registry,
         repository,
