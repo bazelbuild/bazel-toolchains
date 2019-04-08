@@ -118,7 +118,7 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "rbe_default_with_output_base",
     config_dir = "default",
-    create_cc_configs = False,
+    output_base = "configs/ubuntu16_04_clang/1.1",
 )
 
 # Targets used by automatic config generation and release service.
