@@ -12,24 +12,98 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load(
-    "@bazel_tools//tools/build_rules:test_rules.bzl",
-    "file_test",
+sh_test(
+    name = "rac_checked_in_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rac_checked_in//test:empty)",
+        "assert_basic_cofig",
+        "assert_checked_in_confs",
+        "assert_cc_confs",
+        "assert_java_confs",
+    ],
+    data = [
+        "@rac_checked_in//test:empty",
+        "@rac_checked_in//test:exported_testdata",
+    ],
 )
 
-file_test(
-    name = "rbe_default_no_checked_in_confs_cc_wrapper_test",
-    file = "@rbe_default_no_checked_in_confs//cc:cc_wrapper.sh",
-    regexp = "/usr/local/bin/clang",
+sh_test(
+    name = "rac_checked_in_no_java_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rac_checked_in_no_java//test:empty)",
+        "assert_basic_cofig",
+        "assert_checked_in_confs",
+        "assert_cc_confs",
+        "assert_no_java_confs",
+    ],
+    data = [
+        "@rac_checked_in_no_java//test:empty",
+        "@rac_checked_in_no_java//test:exported_testdata",
+    ],
 )
 
-file_test(
-    name = "rbe_default_no_checked_in_confs_cc_toolchain_config_test",
-    file = "@rbe_default_no_checked_in_confs//cc:cc_toolchain_config.bzl",
-    regexp = "/usr/local/bin/clang",
+sh_test(
+    name = "rac_checked_in_no_cc_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rac_checked_in_no_cc//test:empty)",
+        "assert_basic_cofig",
+        "assert_checked_in_confs",
+        "assert_no_cc_confs",
+        "assert_java_confs",
+    ],
+    data = [
+        "@rac_checked_in_no_cc//test:empty",
+        "@rac_checked_in_no_cc//test:exported_testdata",
+    ],
 )
 
-# Shell tests that run find inside a given rbe_autoconfig repo and check the
-# found files match the expectation
+sh_test(
+    name = "rac_generate_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rac_generate//test:empty)",
+        "assert_basic_cofig",
+        "assert_no_checked_in_confs",
+        "assert_cc_confs",
+        "assert_java_confs",
+    ],
+    data = [
+        "@rac_generate//test:empty",
+        "@rac_generate//test:exported_testdata",
+    ],
+)
 
+sh_test(
+    name = "rac_generate_no_java_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rac_generate_no_java//test:empty)",
+        "assert_basic_cofig",
+        "assert_no_checked_in_confs",
+        "assert_cc_confs",
+        "assert_no_java_confs",
+    ],
+    data = [
+        "@rac_generate_no_java//test:empty",
+        "@rac_generate_no_java//test:exported_testdata",
+    ],
+)
 
+sh_test(
+    name = "rac_generate_no_cc_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rac_generate_no_cc//test:empty)",
+        "assert_basic_cofig",
+        "assert_no_checked_in_confs",
+        "assert_no_cc_confs",
+        "assert_java_confs",
+    ],
+    data = [
+        "@rac_generate_no_cc//test:empty",
+        "@rac_generate_no_cc//test:exported_testdata",
+    ],
+)

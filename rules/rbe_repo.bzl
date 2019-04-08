@@ -289,6 +289,10 @@ def _impl(ctx):
     # a config exists for the current version of Bazel, create aliases and return
     if ctx.attr.config_version:
         _use_standard_config(ctx)
+
+        # Copy all outputs to the test directory
+        if ctx.attr.create_testdata:
+            _copy_to_test_dir(ctx)
         return
 
     # Get the value of JAVA_HOME to set in the produced
@@ -316,6 +320,10 @@ def _impl(ctx):
         bazel_version = ctx.attr.bazel_version,
         project_root = project_root,
     )
+
+    # Copy all outputs to the test directory
+    if ctx.attr.create_testdata:
+        _copy_to_test_dir(ctx)
 
 # Convenience method to print results of execute (and fail on errors if needed).
 # Verbose logging is enabled via a global var in this bzl file.
@@ -345,38 +353,40 @@ def _validate_host(ctx):
 def _use_standard_config(ctx):
     print("Using checked-in configs.")
 
-    # Create the BUILD file with the alias for the cc_toolchain_suite
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.cc_alias.tpl"))
-    toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
-        version = ctx.attr.config_version,
-        bazel_version = ctx.attr.bazel_version,
-        cc_dir = _CC_CONFIG_DIR,
-    ))
-    ctx.template(
-        _CC_CONFIG_DIR + "/BUILD",
-        template,
-        {
-            "%{toolchain}": toolchain,
-        },
-        False,
-    )
+    if ctx.attr.create_cc_configs:
+        # Create the BUILD file with the alias for the cc_toolchain_suite
+        template = ctx.path(Label("@bazel_toolchains//rules:BUILD.cc_alias.tpl"))
+        toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
+            version = ctx.attr.config_version,
+            bazel_version = ctx.attr.bazel_version,
+            cc_dir = _CC_CONFIG_DIR,
+        ))
+        ctx.template(
+            _CC_CONFIG_DIR + "/BUILD",
+            template,
+            {
+                "%{toolchain}": toolchain,
+            },
+            False,
+        )
 
-    # Create the BUILD file with the alias for the java_runtime
-    template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java_alias.tpl"))
-    java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{java_dir}:jdk".format(
-        version = ctx.attr.config_version,
-        bazel_version = ctx.attr.bazel_version,
-        java_dir = _JAVA_CONFIG_DIR,
-    ))
+    if ctx.attr.create_java_configs:
+        # Create the BUILD file with the alias for the java_runtime
+        template = ctx.path(Label("@bazel_toolchains//rules:BUILD.java_alias.tpl"))
+        java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{java_dir}:jdk".format(
+            version = ctx.attr.config_version,
+            bazel_version = ctx.attr.bazel_version,
+            java_dir = _JAVA_CONFIG_DIR,
+        ))
 
-    ctx.template(
-        _JAVA_CONFIG_DIR + "/BUILD",
-        template,
-        {
-            "%{java_runtime}": java_runtime,
-        },
-        False,
-    )
+        ctx.template(
+            _JAVA_CONFIG_DIR + "/BUILD",
+            template,
+            {
+                "%{java_runtime}": java_runtime,
+            },
+            False,
+        )
 
 # Pulls an image using 'docker pull'.
 def _pull_image(ctx, image_name):
@@ -572,12 +582,16 @@ def _run_and_extract(
     # Expand outputs inside this remote repo
     result = ctx.execute(["tar", "-xf", "output.tar"])
     _print_exec_results("expand_tar", result)
-    result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _CC_CONFIG_DIR)])
-    _print_exec_results("expand_tar", result)
-    result = ctx.execute(["rm", ("./%s/WORKSPACE" % _CC_CONFIG_DIR)])
-    _print_exec_results("clean WORKSPACE", result)
-    result = ctx.execute(["rm", ("./%s/tools" % _CC_CONFIG_DIR), "-drf"])
-    _print_exec_results("clean tools", result)
+    if ctx.attr.create_cc_configs:
+        result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _CC_CONFIG_DIR)])
+        _print_exec_results("move local_config_cc files", result)
+        result = ctx.execute(["rm", ("./%s/WORKSPACE" % _CC_CONFIG_DIR)])
+        _print_exec_results("clean local_config_cc WORKSPACE", result)
+        result = ctx.execute(["rm", ("./%s/tools" % _CC_CONFIG_DIR), "-drf"])
+        _print_exec_results("clean tools in local_config_cc", result)
+    else:
+        result = ctx.execute(["rm", "./local_config_cc", "-dr"])
+        _print_exec_results("remove local_config_cc files", result)
 
 # Creates a BUILD file with the java_runtime target
 def _create_java_runtime(ctx, java_home):
@@ -692,6 +706,34 @@ def _expand_outputs(ctx, bazel_version, project_root):
                 result = ctx.execute(args)
                 _print_exec_results("copy %s repo files" % repo, result, True, args)
 
+# copies all contents of the external repo to a test directory
+# modifies name of all BUILD files
+# creates a root BUILD file in test directory with a filegroup that contains
+# all files.
+def _copy_to_test_dir(ctx):
+
+    # Copy all files with rsync
+    args = ["rsync", "-aR", "--exclude='test/empty'", "./", "./test"]
+    result = ctx.execute(args)
+    _print_exec_results("copy test output files", result, True, args)
+
+    # Rename BUILD files
+    ctx.file("rename_build_files.sh", "find ./test -name \"BUILD\" -exec sh -c 'mv \"$1\" \"$(dirname $1)/stub.BUILD\"' _ {} \;", True)
+    result = ctx.execute(["./rename_build_files.sh"])
+    _print_exec_results("Rename BUILD files in test output", result, True, args)
+
+    # create a root BUILD file with a filegroup
+    ctx.file("test/BUILD", """package(default_visibility = ["//visibility:public"])
+exports_files(["empty"])
+filegroup(
+    name = "exported_testdata",
+    srcs = glob(["**/*"]),
+)
+""", False)
+
+    # create an empty file
+    ctx.file("test/empty", "", False)
+
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
 _rbe_autoconfig = repository_rule(
@@ -753,6 +795,13 @@ _rbe_autoconfig = repository_rule(
             doc = (
                 "Optional. Specifies whether to generate java configs. " +
                 "Defauls to True."
+            ),
+        ),
+        "create_testdata": attr.bool(
+            doc = (
+                "Optional. Specifies whether to generate additional " +
+                "testing only outputs. " +
+                "Defauls to False."
             ),
         ),
         "digest": attr.string(
@@ -830,6 +879,7 @@ def rbe_autoconfig(
         copy_resources = False,
         create_cc_configs = True,
         create_java_configs = True,
+        create_testdata = False,
         digest = None,
         env = None,
         exec_compatible_with = None,
@@ -871,6 +921,8 @@ def rbe_autoconfig(
           Defauls to True.
       create_java_configs: Optional. Specifies whether to generate java configs.
           Defauls to True.
+      create_testdata: Optional. Specifies whether to generate additional testing
+          only outputs. Defauls to False.
       digest: Optional. The digest of the image to pull.
           Should not be set if tag is used.
           Must be set together with registry and repository.
@@ -974,6 +1026,7 @@ def rbe_autoconfig(
         copy_resources = copy_resources,
         create_cc_configs = create_cc_configs,
         create_java_configs = create_java_configs,
+        create_testdata = create_testdata,
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,

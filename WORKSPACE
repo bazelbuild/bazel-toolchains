@@ -103,22 +103,9 @@ gcs_file(
 
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
-rbe_autoconfig(name = "rbe_default")
-
-rbe_autoconfig(
-    name = "rbe_default_no_checked_in_confs",
-    use_checked_in_confs = False,
-)
-
 rbe_autoconfig(
     name = "rbe_default_copy_resources",
     copy_resources = True,
-)
-
-rbe_autoconfig(
-    name = "rbe_default_with_output_base",
-    config_dir = "default",
-    create_cc_configs = False,
 )
 
 # Targets used by automatic config generation and release service.
@@ -178,4 +165,49 @@ rbe_autoconfig(
     env = clang_env(),
     registry = "gcr.io",
     repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+)
+
+# Targets below for purposes of testing of rbe_autoconfig rule only
+
+rbe_autoconfig(
+    name = "rac_checked_in",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+)
+
+rbe_autoconfig(
+    name = "rac_checked_in_no_java",
+    bazel_version = _ubuntu1604_bazel,
+    create_java_configs = False,
+    create_testdata = True,
+)
+
+rbe_autoconfig(
+    name = "rac_checked_in_no_cc",
+    bazel_version = _ubuntu1604_bazel,
+    create_cc_configs = False,
+    create_testdata = True,
+)
+
+rbe_autoconfig(
+    name = "rac_generate",
+    bazel_version = _ubuntu1604_bazel,
+    use_checked_in_confs = False,
+    create_testdata = True,
+)
+
+rbe_autoconfig(
+    name = "rac_generate_no_java",
+    bazel_version = _ubuntu1604_bazel,
+    create_java_configs = False,
+    use_checked_in_confs = False,
+    create_testdata = True,
+)
+
+rbe_autoconfig(
+    name = "rac_generate_no_cc",
+    bazel_version = _ubuntu1604_bazel,
+    create_cc_configs = False,
+    use_checked_in_confs = False,
+    create_testdata = True,
 )
