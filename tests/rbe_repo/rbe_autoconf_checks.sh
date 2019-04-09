@@ -43,7 +43,7 @@ assert_file_exists() {
 
 # Checks the config BUILD file was created
 assert_basic_cofig() {
-  assert_file_exists ${DIR}/config/stub.BUILD
+  assert_file_exists ${DIR}/config/test.BUILD
 }
 
 # Checks that files not needed when using checked-in
@@ -63,17 +63,17 @@ assert_no_checked_in_confs() {
 
 # Checks that java config files were generated
 assert_java_confs() {
-  assert_file_exists ${DIR}/java/stub.BUILD
+  assert_file_exists ${DIR}/java/test.BUILD
 }
 
 # Checks that java config files were not generated
 assert_no_java_confs() {
-  assert_file_not_exists ${DIR}/java/stub.BUILD
+  assert_file_not_exists ${DIR}/java/test.BUILD
 }
 
 # Checks that cc config files were generated
 assert_cc_confs() {
-  assert_file_exists ${DIR}/cc/stub.BUILD
+  assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_exists ${DIR}/cc/cc_toolchain_config.bzl
   assert_file_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_exists ${DIR}/cc/cc_wrapper.sh
@@ -81,7 +81,7 @@ assert_cc_confs() {
 
 # Checks that cc config files were generated
 assert_checked_in_cc_confs() {
-  assert_file_exists ${DIR}/cc/stub.BUILD
+  assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
   assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
@@ -89,7 +89,7 @@ assert_checked_in_cc_confs() {
 
 # Checks that cc config files were not generated
 assert_no_cc_confs() {
-  assert_file_not_exists ${DIR}/cc/stub.BUILD
+  assert_file_not_exists ${DIR}/cc/test.BUILD
   assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
   assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
