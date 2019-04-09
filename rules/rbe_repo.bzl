@@ -307,17 +307,17 @@ def _impl(ctx):
     if ctx.attr.config_repos:
         config_repos.extend(ctx.attr.config_repos)
     if config_repos:
-      # run the container and extract the autoconf directory
-      _run_and_extract(
-          ctx,
-          bazel_version = ctx.attr.bazel_version,
-          bazel_rc_version = ctx.attr.bazel_rc_version,
-          config_repos = config_repos,
-          image_name = image_name,
-          outputs_tar = outputs_tar,
-          project_root = project_root,
-          use_default_project = use_default_project,
-      )
+        # run the container and extract the autoconf directory
+        _run_and_extract(
+            ctx,
+            bazel_version = ctx.attr.bazel_version,
+            bazel_rc_version = ctx.attr.bazel_rc_version,
+            config_repos = config_repos,
+            image_name = image_name,
+            outputs_tar = outputs_tar,
+            project_root = project_root,
+            use_default_project = use_default_project,
+        )
 
     ctx.report_progress("expanding outputs")
 
