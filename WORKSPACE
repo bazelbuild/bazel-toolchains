@@ -219,7 +219,6 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     copy_resources = True,
     create_testdata = True,
-    use_checked_in_confs = False,
 )
 
 rbe_autoconfig(
@@ -227,7 +226,6 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     config_repos = ["local_config_sh"],
     create_testdata = True,
-    use_checked_in_confs = False,
 )
 
 rbe_autoconfig(
@@ -236,5 +234,4 @@ rbe_autoconfig(
     config_repos = ["local_config_sh"],
     create_cc_configs = False,
     create_testdata = True,
-    use_checked_in_confs = False,
 )
