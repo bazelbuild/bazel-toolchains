@@ -16,6 +16,12 @@
 
 # This bash script defines common assertion functions for rbe_autoconfig
 # file checks.
+# Usage: Use only from an sh_test target.
+# First argument is the location of the empty file in the test
+# directory produced by rbe_autoconfig when create_testdata attr
+# is used.
+# All remaining args are interpreted as calls to functions in this
+# file.
 
 set -e
 
