@@ -301,16 +301,23 @@ def _impl(ctx):
         java_home = _get_java_home(ctx, image_name)
         _create_java_runtime(ctx, java_home)
 
-    # run the container and extract the autoconf directory
-    _run_and_extract(
-        ctx,
-        bazel_version = ctx.attr.bazel_version,
-        bazel_rc_version = ctx.attr.bazel_rc_version,
-        image_name = image_name,
-        outputs_tar = outputs_tar,
-        project_root = project_root,
-        use_default_project = use_default_project,
-    )
+    config_repos = []
+    if ctx.attr.create_cc_configs:
+        config_repos.extend(_CONFIG_REPOS)
+    if ctx.attr.config_repos:
+        config_repos.extend(ctx.attr.config_repos)
+    if config_repos:
+      # run the container and extract the autoconf directory
+      _run_and_extract(
+          ctx,
+          bazel_version = ctx.attr.bazel_version,
+          bazel_rc_version = ctx.attr.bazel_rc_version,
+          config_repos = config_repos,
+          image_name = image_name,
+          outputs_tar = outputs_tar,
+          project_root = project_root,
+          use_default_project = use_default_project,
+      )
 
     ctx.report_progress("expanding outputs")
 
@@ -512,15 +519,11 @@ def _run_and_extract(
         ctx,
         bazel_version,
         bazel_rc_version,
+        config_repos,
         image_name,
         outputs_tar,
         project_root,
         use_default_project):
-    config_repos = []
-    config_repos.extend(_CONFIG_REPOS)
-    if ctx.attr.config_repos:
-        config_repos.extend(ctx.attr.config_repos)
-
     # Create command to run inside docker container
     _create_docker_cmd(
         ctx,
@@ -586,20 +589,12 @@ def _run_and_extract(
     result = ctx.execute(["tar", "-xf", "output.tar"])
     _print_exec_results("expand_tar", result)
 
-    # TODO(ngiraldo): If user does not want cc_configs generated, we are
-    # currently still producing them in the container, but deleting them here.
-    # We actually need to not produce them (and make sure Bazel command does
-    # not fail in the process).
-    if ctx.attr.create_cc_configs:
-        result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _CC_CONFIG_DIR)])
-        _print_exec_results("move local_config_cc files", result)
-        result = ctx.execute(["rm", ("./%s/WORKSPACE" % _CC_CONFIG_DIR)])
-        _print_exec_results("clean local_config_cc WORKSPACE", result)
-        result = ctx.execute(["rm", ("./%s/tools" % _CC_CONFIG_DIR), "-drf"])
-        _print_exec_results("clean tools in local_config_cc", result)
-    else:
-        result = ctx.execute(["rm", "./local_config_cc", "-dr"])
-        _print_exec_results("remove local_config_cc files", result)
+    result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _CC_CONFIG_DIR)])
+    _print_exec_results("move local_config_cc files", result)
+    result = ctx.execute(["rm", ("./%s/WORKSPACE" % _CC_CONFIG_DIR)])
+    _print_exec_results("clean local_config_cc WORKSPACE", result)
+    result = ctx.execute(["rm", ("./%s/tools" % _CC_CONFIG_DIR), "-drf"])
+    _print_exec_results("clean tools in local_config_cc", result)
 
 # Creates a BUILD file with the java_runtime target
 def _create_java_runtime(ctx, java_home):

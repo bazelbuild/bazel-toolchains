@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load(
+    "@bazel_tools//tools/build_rules:test_rules.bzl",
+    "file_test",
+)
+
 # sh_tests below verify that the rbe_autoconfig targets have the
 # right file structure in the external folder repo
 
@@ -101,7 +106,9 @@ sh_test(
     args = [
         "$(location @rbe_autoconf_generate_no_cc//test:empty)",
         "assert_basic_cofig",
-        "assert_no_checked_in_confs",
+        # output and run_and_extract should not be present
+        # as no config_repos were requested
+        "assert_checked_in_confs",
         "assert_no_cc_confs",
         "assert_java_confs",
     ],
@@ -111,6 +118,108 @@ sh_test(
     ],
 )
 
-# TODO(nlopezgi): Add tests that verify the contents of the produced BUILD files (alias vs targets)
+# file_test below check contents of produced BUILD files
+
+file_test(
+    name = "rbe_autoconf_checked_in_cc_alias_test",
+    file = "@rbe_autoconf_checked_in//test:cc/test.BUILD",
+    regexp = "alias",
+)
+
+file_test(
+    name = "rbe_autoconf_checked_in_java_alias_test",
+    file = "@rbe_autoconf_checked_in//test:java/test.BUILD",
+    regexp = "alias",
+)
+
+file_test(
+    name = "rbe_autoconf_checked_in_cc_alias_no_java_test",
+    file = "@rbe_autoconf_checked_in_no_java//test:cc/test.BUILD",
+    regexp = "alias",
+)
+
+file_test(
+    name = "rbe_autoconf_checked_in_java_alias_no_cc_test",
+    file = "@rbe_autoconf_checked_in_no_cc//test:java/test.BUILD",
+    regexp = "alias",
+)
+
+file_test(
+    name = "rbe_autoconf_generate_cc_toolchain_test",
+    file = "@rbe_autoconf_generate//test:cc/test.BUILD",
+    regexp = "cc_toolchain",
+)
+
+file_test(
+    name = "rbe_autoconf_generate_cc_toolchain_config_test",
+    file = "@rbe_autoconf_generate//test:cc/test.BUILD",
+    regexp = "cc_toolchain_config",
+)
+
+file_test(
+    name = "rbe_autoconf_generate_cc_compiler_test",
+    file = "@rbe_autoconf_generate//test:cc/test.BUILD",
+    regexp = "cc-compiler-k8",
+)
+
+file_test(
+    name = "rbe_autoconf_generate_java_runtime_test",
+    file = "@rbe_autoconf_generate//test:java/test.BUILD",
+    regexp = "java_runtime",
+)
+
+# Tests that validate Bazel command executed in container
+# includes the list of config repos
+file_test(
+    name = "rbe_autoconf_generate_run_in_container_test",
+    file = "@rbe_autoconf_generate//test:container/run_in_container.sh",
+    regexp = "bazel build @local_config_cc",
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_run_in_container_test",
+    file = "@rbe_autoconf_config_repos//test:container/run_in_container.sh",
+    regexp = "@local_config_sh/",
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_sh_toolchain_test",
+    file = "@rbe_autoconf_config_repos//test:local_config_sh/test.BUILD",
+    regexp = "sh_toolchain",
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_no_cc_config_run_in_container_test",
+    file = "@rbe_autoconf_config_repos_no_cc_config//test:container/run_in_container.sh",
+    regexp = "bazel build @local_config_sh/",
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_no_cc_config_sh_toolchain_test",
+    file = "@rbe_autoconf_config_repos_no_cc_config//test:local_config_sh/test.BUILD",
+    regexp = "sh_toolchain",
+)
+
+# Basic test for platform target
+# TODO(nlopezgi): add more tests for platform target
+file_test(
+    name = "rbe_autoconf_checked_in_platform_test",
+    file = "@rbe_autoconf_checked_in//test:config/test.BUILD",
+    regexp = "platform",
+)
+
+# Tests validate run_and_extract uses mount volumes (-v) vs
+# data volumes.
+file_test(
+    name = "rbe_autoconf_generate_run_and_extract_test",
+    file = "@rbe_autoconf_generate//test:run_and_extract.sh",
+    regexp = "realpath",
+)
+
+file_test(
+    name = "rbe_autoconf_copy_run_and_extract_test",
+    file = "@rbe_autoconf_copy_resources//test:run_and_extract.sh",
+    regexp = "data_volume",
+)
+
 # TODO(nlopezgi): Add tests that verify files were copied to output_folder
-# TODO(nlopezgi): Add tests that verify copy_resources does not mount (check script)
