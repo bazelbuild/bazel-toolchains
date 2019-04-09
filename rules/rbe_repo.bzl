@@ -582,6 +582,10 @@ def _run_and_extract(
     # Expand outputs inside this remote repo
     result = ctx.execute(["tar", "-xf", "output.tar"])
     _print_exec_results("expand_tar", result)
+    # TODO(ngiraldo): If user does not want cc_configs generated, we are
+    # currently still producing them in the container, but deleting them here.
+    # We actually need to not produce them (and make sure Bazel command does
+    # not fail in the process).
     if ctx.attr.create_cc_configs:
         result = ctx.execute(["mv", "./local_config_cc", ("./%s" % _CC_CONFIG_DIR)])
         _print_exec_results("move local_config_cc files", result)
