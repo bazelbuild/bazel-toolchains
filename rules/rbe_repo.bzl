@@ -1072,6 +1072,10 @@ def validateUseOfCheckedInConfigs(
         digest: The digest of the container in which the configs are goings to
                 be used.
         env: The environment dict.
+        config_repos: List of additional config repos, if not empty checked-in
+                      configs will not be used
+        copy_resources: whether to copy or mount resources. If true checked-
+                        in configs will not be used.
         create_java_configs: Whether java config generation is enabled.
         java_home: Path to the Java home.
         registry: The registry where the toolchain container can be found.
