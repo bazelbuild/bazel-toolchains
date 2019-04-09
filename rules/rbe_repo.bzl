@@ -716,7 +716,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
 # all files.
 def _copy_to_test_dir(ctx):
     # Copy all files with rsync
-    args = ["rsync", "-aR", "--exclude='test/empty'", "./", "./test"]
+    args = ["rsync", "-aR", "./", "./test"]
     result = ctx.execute(args)
     _print_exec_results("copy test output files", result, True, args)
 
