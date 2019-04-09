@@ -229,3 +229,12 @@ rbe_autoconfig(
     create_testdata = True,
     use_checked_in_confs = False,
 )
+
+rbe_autoconfig(
+    name = "rbe_autoconf_config_repos_no_cc_config",
+    bazel_version = _ubuntu1604_bazel,
+    config_repos = ["local_config_sh"],
+    create_cc_configs = False,
+    create_testdata = True,
+    use_checked_in_confs = False,
+)

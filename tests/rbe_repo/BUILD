@@ -106,7 +106,9 @@ sh_test(
     args = [
         "$(location @rbe_autoconf_generate_no_cc//test:empty)",
         "assert_basic_cofig",
-        "assert_no_checked_in_confs",
+        # output and run_and_extract should not be present
+        # as no config_repos were requested
+        "assert_checked_in_confs",
         "assert_no_cc_confs",
         "assert_java_confs",
     ],
@@ -186,6 +188,20 @@ file_test(
     regexp = "sh_toolchain",
 )
 
+file_test(
+    name = "rbe_autoconf_config_repos_no_cc_config_run_in_container_test",
+    file = "@rbe_autoconf_config_repos_no_cc_config//test:container/run_in_container.sh",
+    regexp = "bazel build @local_config_sh/",
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_no_cc_config_sh_toolchain_test",
+    file = "@rbe_autoconf_config_repos_no_cc_config//test:local_config_sh/test.BUILD",
+    regexp = "sh_toolchain",
+)
+
+# Basic test for platform target
+# TODO(nlopezgi): add more tests for platform target
 file_test(
     name = "rbe_autoconf_checked_in_platform_test",
     file = "@rbe_autoconf_checked_in//test:config/test.BUILD",
