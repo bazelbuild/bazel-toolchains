@@ -222,4 +222,17 @@ file_test(
     regexp = "data_volume",
 )
 
+# Tests for use of java_home attr
+file_test(
+    name = "rbe_autoconf_custom_java_home_java_runtime_test",
+    file = "@rbe_autoconf_custom_java_home//test:java/test.BUILD",
+    regexp = "java_runtime",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_java_home_java_runtime_value_test",
+    file = "@rbe_autoconf_custom_java_home//test:java/test.BUILD",
+    regexp = "test-case-java-home",
+)
+
 # TODO(nlopezgi): Add tests that verify files were copied to output_folder
