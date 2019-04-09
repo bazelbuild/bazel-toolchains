@@ -9,3 +9,8 @@ steps:
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+
+# Specify a custom GCS bucket hosted on the GCP project owned by toolchains
+# team to upload logs.
+logsBucket: "gs://asci-toolchain-gcb-logs-bucket-from-bazel-untrusted"
+
