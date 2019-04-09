@@ -103,6 +103,8 @@ gcs_file(
 
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
+rbe_autoconfig(name = "rbe_default")
+
 rbe_autoconfig(
     name = "rbe_default_copy_resources",
     copy_resources = True,
