@@ -735,7 +735,9 @@ filegroup(
 )
 """, False)
 
-    # create an empty file to reference in tests
+    # Create an empty file to reference in test.
+    # This is needed for tests to reference the location
+    # of all test outputs.
     ctx.file("test/empty", "", False)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this

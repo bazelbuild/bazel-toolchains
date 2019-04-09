@@ -16,98 +16,98 @@
 # right file structure in the external folder repo
 
 sh_test(
-    name = "rac_checked_in_test",
+    name = "rbe_autoconf_checked_in_test",
     srcs = [":rbe_autoconf_checks.sh"],
     args = [
-        "$(location @rac_checked_in//test:empty)",
+        "$(location @rbe_autoconf_checked_in//test:empty)",
         "assert_basic_cofig",
         "assert_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
     ],
     data = [
-        "@rac_checked_in//test:empty",
-        "@rac_checked_in//test:exported_testdata",
+        "@rbe_autoconf_checked_in//test:empty",
+        "@rbe_autoconf_checked_in//test:exported_testdata",
     ],
 )
 
 sh_test(
-    name = "rac_checked_in_no_java_test",
+    name = "rbe_autoconf_checked_in_no_java_test",
     srcs = [":rbe_autoconf_checks.sh"],
     args = [
-        "$(location @rac_checked_in_no_java//test:empty)",
+        "$(location @rbe_autoconf_checked_in_no_java//test:empty)",
         "assert_basic_cofig",
         "assert_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_no_java_confs",
     ],
     data = [
-        "@rac_checked_in_no_java//test:empty",
-        "@rac_checked_in_no_java//test:exported_testdata",
+        "@rbe_autoconf_checked_in_no_java//test:empty",
+        "@rbe_autoconf_checked_in_no_java//test:exported_testdata",
     ],
 )
 
 sh_test(
-    name = "rac_checked_in_no_cc_test",
+    name = "rbe_autoconf_checked_in_no_cc_test",
     srcs = [":rbe_autoconf_checks.sh"],
     args = [
-        "$(location @rac_checked_in_no_cc//test:empty)",
+        "$(location @rbe_autoconf_checked_in_no_cc//test:empty)",
         "assert_basic_cofig",
         "assert_checked_in_confs",
         "assert_no_cc_confs",
         "assert_java_confs",
     ],
     data = [
-        "@rac_checked_in_no_cc//test:empty",
-        "@rac_checked_in_no_cc//test:exported_testdata",
+        "@rbe_autoconf_checked_in_no_cc//test:empty",
+        "@rbe_autoconf_checked_in_no_cc//test:exported_testdata",
     ],
 )
 
 sh_test(
-    name = "rac_generate_test",
+    name = "rbe_autoconf_generate_test",
     srcs = [":rbe_autoconf_checks.sh"],
     args = [
-        "$(location @rac_generate//test:empty)",
+        "$(location @rbe_autoconf_generate//test:empty)",
         "assert_basic_cofig",
         "assert_no_checked_in_confs",
         "assert_cc_confs",
         "assert_java_confs",
     ],
     data = [
-        "@rac_generate//test:empty",
-        "@rac_generate//test:exported_testdata",
+        "@rbe_autoconf_generate//test:empty",
+        "@rbe_autoconf_generate//test:exported_testdata",
     ],
 )
 
 sh_test(
-    name = "rac_generate_no_java_test",
+    name = "rbe_autoconf_generate_no_java_test",
     srcs = [":rbe_autoconf_checks.sh"],
     args = [
-        "$(location @rac_generate_no_java//test:empty)",
+        "$(location @rbe_autoconf_generate_no_java//test:empty)",
         "assert_basic_cofig",
         "assert_no_checked_in_confs",
         "assert_cc_confs",
         "assert_no_java_confs",
     ],
     data = [
-        "@rac_generate_no_java//test:empty",
-        "@rac_generate_no_java//test:exported_testdata",
+        "@rbe_autoconf_generate_no_java//test:empty",
+        "@rbe_autoconf_generate_no_java//test:exported_testdata",
     ],
 )
 
 sh_test(
-    name = "rac_generate_no_cc_test",
+    name = "rbe_autoconf_generate_no_cc_test",
     srcs = [":rbe_autoconf_checks.sh"],
     args = [
-        "$(location @rac_generate_no_cc//test:empty)",
+        "$(location @rbe_autoconf_generate_no_cc//test:empty)",
         "assert_basic_cofig",
         "assert_no_checked_in_confs",
         "assert_no_cc_confs",
         "assert_java_confs",
     ],
     data = [
-        "@rac_generate_no_cc//test:empty",
-        "@rac_generate_no_cc//test:exported_testdata",
+        "@rbe_autoconf_generate_no_cc//test:empty",
+        "@rbe_autoconf_generate_no_cc//test:exported_testdata",
     ],
 )
 
