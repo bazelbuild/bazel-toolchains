@@ -321,6 +321,9 @@ def _impl(ctx):
         project_root = project_root,
     )
 
+    # TODO(nlopezgi): refactor call to _copy_to_test_dir
+    # so that its not needed to be duplicated here and
+    # above.
     # Copy all outputs to the test directory
     if ctx.attr.create_testdata:
         _copy_to_test_dir(ctx)
