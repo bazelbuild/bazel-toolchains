@@ -238,3 +238,11 @@ rbe_autoconfig(
     create_testdata = True,
     use_checked_in_confs = False,
 )
+
+rbe_autoconfig(
+    name = "rbe_autoconf_custom_java_home",
+    bazel_version = _ubuntu1604_bazel,
+    create_cc_configs = False,
+    create_testdata = True,
+    java_home = "test-case-java-home",
+)
