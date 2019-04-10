@@ -246,3 +246,12 @@ rbe_autoconfig(
     create_testdata = True,
     java_home = "test-case-java-home",
 )
+
+rbe_autoconfig(
+    name = "rbe_autoconf_old_container",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    digest = "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
+    registry = _ubuntu1604_registry,
+    repository = _ubuntu1604_repository,
+)

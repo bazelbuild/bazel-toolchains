@@ -17,6 +17,11 @@ load(
     "file_test",
 )
 
+load(
+    "//configs/ubuntu16_04_clang:versions.bzl",
+    RBE_UBUNTU16_04_LATEST = "LATEST",
+)
+
 # sh_tests below verify that the rbe_autoconfig targets have the
 # right file structure in the external folder repo
 
@@ -218,12 +223,41 @@ file_test(
     regexp = "sh_toolchain",
 )
 
-# Basic test for platform target
-# TODO(nlopezgi): add more tests for platform target
+# Tests for platform target
 file_test(
     name = "rbe_autoconf_checked_in_platform_test",
     file = "@rbe_autoconf_checked_in//test:config/test.BUILD",
     regexp = "platform",
+)
+
+file_test(
+    name = "rbe_autoconf_checked_in_platform_containersha_test",
+    file = "@rbe_autoconf_checked_in//test:config/test.BUILD",
+    regexp = RBE_UBUNTU16_04_LATEST,
+)
+
+file_test(
+    name = "rbe_autoconf_generate_platform_test",
+    file = "@rbe_autoconf_generate//test:config/test.BUILD",
+    regexp = "platform",
+)
+
+file_test(
+    name = "rbe_autoconf_checked_generate_containersha_test",
+    file = "@rbe_autoconf_generate//test:config/test.BUILD",
+    regexp = RBE_UBUNTU16_04_LATEST,
+)
+
+file_test(
+    name = "rbe_autoconf_old_container_platform_test",
+    file = "@rbe_autoconf_old_container//test:config/test.BUILD",
+    regexp = "platform",
+)
+
+file_test(
+    name = "rbe_autoconf_old_container_containersha_test",
+    file = "@rbe_autoconf_old_container//test:config/test.BUILD",
+    regexp = "87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
 )
 
 # Tests validate run_and_extract uses mount volumes (-v) vs
