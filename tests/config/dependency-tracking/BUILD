@@ -21,7 +21,7 @@ package(default_visibility = ["//visibility:public"])
 bzl_library(
     name = "dependency-tracking",
     srcs = [
-        "ubuntu1604_no_updates.bzl",
-        "ubuntu160_updates_exist.bzl",
+        "no_updates.bzl",
+        "trigger_config_gen.bzl",
     ],
 )

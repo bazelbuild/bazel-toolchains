@@ -1,7 +1,7 @@
 # Location of the config-dependency tracker file on the repository
 # specified in the Github spec YAML file to the toolchain configs update
 # service.
-revisionsFilePath: "configs/tests/dependency-tracking/ubuntu1604_no_updates.bzl"
+revisionsFilePath: "test/config/dependency-tracking/no_updates.bzl"
 gcrDeps:
   # The copy of the RBE Ubuntu 16.04 toolchain container.
   - name: "IMAGE"
