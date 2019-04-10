@@ -1,0 +1,14 @@
+# Location of the config-dependency tracker file on the repository
+# specified in the Github spec YAML file to the toolchain configs update
+# service.
+revisionsFilePath: "tests/config/dependency-tracking/trigger_config_gen.bzl"
+gcrDeps:
+  # The copy of the RBE Ubuntu 16.04 toolchain container.
+  - name: "IMAGE"
+    location: "gcr.io/asci-toolchain/toolchain-configs-e2e-test/rbe-ubuntu16-04"
+    tag: "latest"
+  # The copy of the Ubuntu Bazel + Docker + Gcloud container which is tagged
+  # with the bazel version.
+  - name: "BAZEL"
+    location: "gcr.io/asci-toolchain/toolchain-configs-e2e-test/nosla-ubuntu16_04-bazel-docker-gcloud"
+    tag: "latest"
