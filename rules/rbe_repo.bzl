@@ -1009,8 +1009,6 @@ def rbe_autoconfig(
         base_container_digest = base_container_digest,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
-        config_repos = config_repos,
-        copy_resources = copy_resources,
         create_java_configs = create_java_configs,
         digest = digest,
         env = env,
@@ -1049,8 +1047,6 @@ def validateUseOfCheckedInConfigs(
         base_container_digest,
         bazel_version,
         bazel_rc_version,
-        config_repos,
-        copy_resources,
         create_java_configs,
         digest,
         env,
@@ -1072,10 +1068,6 @@ def validateUseOfCheckedInConfigs(
         digest: The digest of the container in which the configs are goings to
                 be used.
         env: The environment dict.
-        config_repos: List of additional config repos, if not empty checked-in
-                      configs will not be used
-        copy_resources: whether to copy or mount resources. If true checked-
-                        in configs will not be used.
         create_java_configs: Whether java config generation is enabled.
         java_home: Path to the Java home.
         registry: The registry where the toolchain container can be found.
@@ -1097,10 +1089,6 @@ def validateUseOfCheckedInConfigs(
     if create_java_configs and java_home:
         return None
     if bazel_rc_version:
-        return None
-    if config_repos:
-        return None
-    if copy_resources:
         return None
 
     if tag:  # Implies `digest` is not specified.
