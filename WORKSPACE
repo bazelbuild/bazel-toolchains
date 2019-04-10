@@ -134,7 +134,7 @@ rbe_autoconfig(
 # RBE Autoconfig targets to do integration testing on the automatic toolchain
 # configs release process.
 load(
-    "//configs/tests/dependency-tracking:ubuntu1604_no_updates.bzl",
+    "//tests/config/dependency-tracking:ubuntu1604_no_updates.bzl",
     _ubuntu1604_bazel_no_updates = "bazel",
     _ubuntu1604_configs_version_no_updates = "configs_version",
     _ubuntu1604_digest_no_updates = "digest",
@@ -142,9 +142,10 @@ load(
     _ubuntu1604_repository_no_updates = "repository",
 )
 
-# Automatic config generation target for RBE Ubuntu 16.04
+# Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
+# not generate any new configs.
 rbe_autoconfig(
-    name = "rbe_autoconfig_autogen_ubuntu1604_test_no_updates",
+    name = "rbe_ubuntu1604_configs_no_update_test",
     bazel_version = _ubuntu1604_bazel_no_updates,
     digest = _ubuntu1604_digest_no_updates,
     output_base = "configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version_no_updates),
@@ -154,7 +155,7 @@ rbe_autoconfig(
 )
 
 load(
-    "//configs/tests/dependency-tracking:ubuntu1604_updates_exist.bzl",
+    "//tests/config/dependency-tracking:ubuntu1604_updates_exist.bzl",
     _ubuntu1604_bazel_updates_exist = "bazel",
     _ubuntu1604_configs_version_updates_exist = "configs_version",
     _ubuntu1604_digest_updates_exist = "digest",
@@ -162,9 +163,10 @@ load(
     _ubuntu1604_repository_updates_exist = "repository",
 )
 
-# Automatic config generation target for RBE Ubuntu 16.04
+# Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
+# generate new configs because dependencies have changed.
 rbe_autoconfig(
-    name = "rbe_autoconfig_autogen_ubuntu1604_test_updates_exist",
+    name = "rbe_ubuntu1604_trigger_config_gen_test",
     bazel_version = _ubuntu1604_bazel_updates_exist,
     digest = _ubuntu1604_digest_updates_exist,
     output_base = "configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version_updates_exist),
