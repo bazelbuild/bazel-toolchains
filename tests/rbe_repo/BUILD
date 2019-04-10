@@ -16,7 +16,6 @@ load(
     "@bazel_tools//tools/build_rules:test_rules.bzl",
     "file_test",
 )
-
 load(
     "//configs/ubuntu16_04_clang:versions.bzl",
     RBE_UBUNTU16_04_LATEST = "LATEST",
