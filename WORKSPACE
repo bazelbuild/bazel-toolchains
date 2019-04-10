@@ -131,6 +131,50 @@ rbe_autoconfig(
     use_checked_in_confs = False,
 )
 
+# RBE Autoconfig targets to do integration testing on the automatic toolchain
+# configs release process.
+load(
+    "//tests/config/dependency-tracking:trigger_config_gen.bzl",
+    _bazel_trigger_config_gen = "bazel",
+    _configs_version_trigger_config_gen = "configs_version",
+    _digest_trigger_config_gen = "digest",
+    _registry_trigger_config_gen = "registry",
+    _repository_trigger_config_gen = "repository",
+)
+
+# Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
+# generate new configs because dependencies have changed.
+rbe_autoconfig(
+    name = "rbe_ubuntu1604_trigger_config_gen_test",
+    bazel_version = _bazel_trigger_config_gen,
+    digest = _digest_trigger_config_gen,
+    output_base = "configs/ubuntu16_04_clang/{}".format(_configs_version_trigger_config_gen),
+    registry = _registry_trigger_config_gen,
+    repository = _repository_trigger_config_gen,
+    use_checked_in_confs = False,
+)
+
+load(
+    "//tests/config/dependency-tracking:no_updates.bzl",
+    _bazel_no_updates = "bazel",
+    _configs_version_no_updates = "configs_version",
+    _digest_no_updates = "digest",
+    _registry_no_updates = "registry",
+    _repository_no_updates = "repository",
+)
+
+# Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
+# not generate any new configs.
+rbe_autoconfig(
+    name = "rbe_ubuntu1604_configs_no_update_test",
+    bazel_version = _bazel_no_updates,
+    digest = _digest_no_updates,
+    output_base = "configs/ubuntu16_04_clang/{}".format(_configs_version_no_updates),
+    registry = _registry_no_updates,
+    repository = _repository_no_updates,
+    use_checked_in_confs = False,
+)
+
 load("//rules:environments.bzl", "clang_env")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 

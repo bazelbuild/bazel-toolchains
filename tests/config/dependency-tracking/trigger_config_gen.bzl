@@ -1,0 +1,6 @@
+"""Information tracking the latest published configs."""
+bazel = "0.24.0"
+registry = "gcr.io"
+repository = "asci-toolchain/toolchain-configs-e2e-test/rbe-ubuntu16-04"
+digest = "sha256:612d545c006f0dcaecee82ec18045f183a35a9192c260d866bef91b75af541f5"
+configs_version = "8.0.0"
