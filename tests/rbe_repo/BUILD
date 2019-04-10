@@ -77,6 +77,7 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_cc_confs",
         "assert_java_confs",
+        "assert_java_home",
     ],
     data = [
         "@rbe_autoconf_generate//test:empty",
@@ -93,6 +94,7 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_cc_confs",
         "assert_no_java_confs",
+        "assert_no_java_home",
     ],
     data = [
         "@rbe_autoconf_generate_no_java//test:empty",
@@ -111,10 +113,26 @@ sh_test(
         "assert_checked_in_confs",
         "assert_no_cc_confs",
         "assert_java_confs",
+        "assert_java_home",
     ],
     data = [
         "@rbe_autoconf_generate_no_cc//test:empty",
         "@rbe_autoconf_generate_no_cc//test:exported_testdata",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_custom_java_home_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rbe_autoconf_custom_java_home//test:empty)",
+        "assert_basic_cofig",
+        "assert_java_confs",
+        "assert_no_java_home",
+    ],
+    data = [
+        "@rbe_autoconf_custom_java_home//test:empty",
+        "@rbe_autoconf_custom_java_home//test:exported_testdata",
     ],
 )
 
