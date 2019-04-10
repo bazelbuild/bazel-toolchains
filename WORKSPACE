@@ -131,6 +131,49 @@ rbe_autoconfig(
     use_checked_in_confs = False,
 )
 
+# RBE Autoconfig targets to do integration testing on the automatic toolchain
+# configs release process.
+load(
+    "//configs/tests/dependency-tracking:ubuntu1604_no_updates.bzl",
+    _ubuntu1604_bazel_no_updates = "bazel",
+    _ubuntu1604_configs_version_no_updates = "configs_version",
+    _ubuntu1604_digest_no_updates = "digest",
+    _ubuntu1604_registry_no_updates = "registry",
+    _ubuntu1604_repository_no_updates = "repository",
+)
+
+# Automatic config generation target for RBE Ubuntu 16.04
+rbe_autoconfig(
+    name = "rbe_autoconfig_autogen_ubuntu1604_test_no_updates",
+    bazel_version = _ubuntu1604_bazel_no_updates,
+    digest = _ubuntu1604_digest_no_updates,
+    output_base = "configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version_no_updates),
+    registry = _ubuntu1604_registry_no_updates,
+    repository = _ubuntu1604_repository_no_updates,
+    use_checked_in_confs = False,
+)
+
+load(
+    "//configs/tests/dependency-tracking:ubuntu1604_updates_exist.bzl",
+    _ubuntu1604_bazel_updates_exist = "bazel",
+    _ubuntu1604_configs_version_updates_exist = "configs_version",
+    _ubuntu1604_digest_updates_exist = "digest",
+    _ubuntu1604_registry_updates_exist = "registry",
+    _ubuntu1604_repository_updates_exist = "repository",
+)
+
+# Automatic config generation target for RBE Ubuntu 16.04
+rbe_autoconfig(
+    name = "rbe_autoconfig_autogen_ubuntu1604_test_updates_exist",
+    bazel_version = _ubuntu1604_bazel_updates_exist,
+    digest = _ubuntu1604_digest_updates_exist,
+    output_base = "configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version_updates_exist),
+    registry = _ubuntu1604_registry_updates_exist,
+    repository = _ubuntu1604_repository_updates_exist,
+    use_checked_in_confs = False,
+)
+
+
 load("//rules:environments.bzl", "clang_env")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
