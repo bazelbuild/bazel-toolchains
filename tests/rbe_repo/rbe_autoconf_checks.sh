@@ -85,7 +85,7 @@ assert_cc_confs() {
   assert_file_exists ${DIR}/cc/cc_wrapper.sh
 }
 
-# Checks that cc config files were generated
+# Checks that checked in configs were selected
 assert_checked_in_cc_confs() {
   assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
@@ -99,6 +99,16 @@ assert_no_cc_confs() {
   assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
   assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
+}
+
+# Checks that java_home was read from container
+assert_java_home() {
+  assert_file_exists ${DIR}/get_java_home.sh
+}
+
+# Checks that java_home was not read from container
+assert_no_java_home() {
+  assert_file_not_exists ${DIR}/get_java_home.sh
 }
 
 EMPTY_FILE=$1
