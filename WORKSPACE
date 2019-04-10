@@ -173,7 +173,6 @@ rbe_autoconfig(
     use_checked_in_confs = False,
 )
 
-
 load("//rules:environments.bzl", "clang_env")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
