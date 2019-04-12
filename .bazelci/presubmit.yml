@@ -11,7 +11,7 @@ buildifier:
 platforms:
   rbe_ubuntu1604:
     test_targets:
-    - "//tests/config:ubuntu-xenial-autoconfig_test"
+    # rbe_autoconfig tests
     - "//tests/rbe_repo:rbe_autoconf_checked_in_test"
     - "//tests/rbe_repo:rbe_autoconf_checked_in_no_java_test"
     - "//tests/rbe_repo:rbe_autoconf_checked_in_no_cc_test"
@@ -20,6 +20,16 @@ platforms:
     - "//tests/rbe_repo:rbe_autoconf_checked_in_cc_alias_no_java_test"
     - "//tests/rbe_repo:rbe_autoconf_checked_in_java_alias_no_cc_test"
     - "//tests/rbe_repo:rbe_autoconf_checked_in_platform_test"
+    - "//tests/rbe_repo:rbe_autoconf_base_container_digest_file_structure_test"
+    - "//tests/rbe_repo:rbe_autoconf_base_container_digest_containersha_test"
+    - "//tests/rbe_repo:rbe_autoconf_base_container_digest_cc_alias_test"
+    - "//tests/rbe_repo:rbe_autoconf_base_container_digest_java_alias_test"
+    - "//tests/rbe_repo:rbe_autoconf_constraints_exec_compatible_with_test"
+    - "//tests/rbe_repo:rbe_autoconf_constraints_target_compatible_with_test"
+    # TODO(nlopezgi): add tests that require docker binary once supported on
+    # BuildKite
+    # docker_autoconfig tests
+    - "//tests/config:ubuntu-xenial-autoconfig_test"
     # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
     #- "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
     - "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"

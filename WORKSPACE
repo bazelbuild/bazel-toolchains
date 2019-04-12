@@ -325,3 +325,26 @@ rbe_autoconfig(
         "CC_TOOLCHAIN_NAME": "test_cc_toolchain_name_test",
     },
 )
+
+rbe_autoconfig(
+    name = "rbe_autoconf_base_container_digest",
+    base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
+    env = clang_env(),
+    registry = "gcr.io",
+    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_constraints",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    exec_compatible_with = [
+        "//constraints:support_docker",
+    ],
+    target_compatible_with = [
+        "//constraints:xenial",
+    ],
+)
