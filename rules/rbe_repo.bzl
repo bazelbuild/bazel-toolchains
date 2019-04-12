@@ -937,6 +937,7 @@ def rbe_autoconfig(
           the rbe-ubuntu16-04 container.
           Should be overriden if a custom container does not extend the
           rbe-ubuntu16-04 container.
+          Note: Do not pass a custom JAVA_HOME via env, use java_home attr instead.
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
