@@ -21,7 +21,7 @@ platforms:
     - "//tests/rbe_repo:rbe_autoconf_checked_in_java_alias_no_cc_test"
     - "//tests/rbe_repo:rbe_autoconf_checked_in_platform_test"
     - "//tests/rbe_repo:rbe_autoconf_base_container_digest_file_structure_test"
-    - "//tests/rbe_repo:rbe_autoconf_base_container_digest_containersha_test"
+    - "//tests/rbe_repo:rbe_autoconf_base_container_digest_container_sha_test"
     - "//tests/rbe_repo:rbe_autoconf_base_container_digest_cc_alias_test"
     - "//tests/rbe_repo:rbe_autoconf_base_container_digest_java_alias_test"
     - "//tests/rbe_repo:rbe_autoconf_constraints_exec_compatible_with_test"
