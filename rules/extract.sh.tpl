@@ -23,7 +23,8 @@ set -ex
 # scripts and project source code used for Bazel autoconfig to the container.
 %{copy_data_cmd}
 
-id=$(docker run -d %{docker_run_flags} %{image_name} %{commands})
+# Pass an empty entrypoint to override any set by default in the container.
+id=$(docker run -d --entrypoint "" %{docker_run_flags} %{image_name} %{commands})
 
 docker wait $id
 docker cp $id:%{extract_file} %{output}
