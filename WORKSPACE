@@ -299,3 +299,52 @@ rbe_autoconfig(
     registry = _ubuntu1604_registry,
     repository = _ubuntu1604_repository,
 )
+
+rbe_autoconfig(
+    name = "rbe_autoconf_custom_container",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    digest = "sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224",
+    registry = _ubuntu1604_registry,
+    repository = "google/rbe-debian8",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_custom_env",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    env = {
+        "ABI_LIBC_VERSION": "test_abi_libc_version_test",
+        "ABI_VERSION": "test_abi_version_test",
+        "BAZEL_COMPILER": "clang++",
+        "BAZEL_HOST_SYSTEM": "test_bazel_host_system_test",
+        "BAZEL_TARGET_CPU": "test_bazel_target_cpu_test",
+        "BAZEL_TARGET_LIBC": "test_bazel_target_libc_test",
+        "BAZEL_TARGET_SYSTEM": "test_bazel_target_system_test",
+        "CC": "clang++",
+        "CC_TOOLCHAIN_NAME": "test_cc_toolchain_name_test",
+    },
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_base_container_digest",
+    base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
+    env = clang_env(),
+    registry = "gcr.io",
+    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_constraints",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    exec_compatible_with = [
+        "//constraints:support_docker",
+    ],
+    target_compatible_with = [
+        "//constraints:xenial",
+    ],
+)
