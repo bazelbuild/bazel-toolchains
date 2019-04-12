@@ -259,6 +259,18 @@ file_test(
     regexp = "87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c",
 )
 
+file_test(
+    name = "rbe_autoconf_custom_container_platform_test",
+    file = "@rbe_autoconf_custom_container//test:config/test.BUILD",
+    regexp = "platform",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_containersha_test",
+    file = "@rbe_autoconf_custom_container//test:config/test.BUILD",
+    regexp = "cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224",
+)
+
 # Tests validate run_and_extract uses mount volumes (-v) vs
 # data volumes.
 file_test(
@@ -284,6 +296,79 @@ file_test(
     name = "rbe_autoconf_custom_java_home_java_runtime_value_test",
     file = "@rbe_autoconf_custom_java_home//test:java/test.BUILD",
     regexp = "test-case-java-home",
+)
+
+# Tests that verify rbe_autoconfig with custom env variables.
+# These tests verify that the env variables passed are present
+# in the resulting C/C++ config.
+# If any of the tests below fail after a new Bazel config is released
+# (tests are pineed to the _ubuntu1604_bazel version),
+# its possible that C/C++ config rules have changed and the tests
+# need to be updated accordingly.
+file_test(
+    name = "rbe_autoconf_custom_env_abi_libc_version_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "abi_libc_version = \"test_abi_libc_version_test\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_abi_version_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "abi_version = \"test_abi_version_test\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_bazel_host_system_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "host_system_name = \"test_bazel_host_system_test\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_bazel_target_cpu_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "target_cpu = \"test_bazel_target_cpu_test\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_bazel_target_libc_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "target_libc = \"test_bazel_target_libc_test\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_bazel_target_system_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "target_system_name = \"test_bazel_target_system_test\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_clang_toolchain_config_bzl_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "path= \"/usr/local/bin/clang++\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_clang_toolchain_config_bzl_2_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    regexp = "compiler = \"clang++\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_clang_cc_wrapper_sh_test",
+    file = "@rbe_autoconf_custom_env//test:cc/cc_wrapper.sh",
+    regexp = "/usr/local/bin/clang++",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_clang_build_test",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
+    regexp = "compiler = \"clang++\"",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_env_clang_build_2_test",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
+    regexp = "\"k8|clang++\": \":cc-compiler-k8\"",
 )
 
 # TODO(nlopezgi): Add tests that verify files were copied to output_folder
