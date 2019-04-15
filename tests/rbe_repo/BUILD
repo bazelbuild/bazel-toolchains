@@ -422,4 +422,11 @@ file_test(
     regexp = "//constraints:xenial",
 )
 
+# Test to verify tag is resolved to digest properly
+file_test(
+    name = "rbe_autoconf_resovle_tag_test",
+    file = "@rbe_autoconf_resovle_tag//test:config/test.BUILD",
+    regexp = "9596a8fbd6a6a77b2fe1272b145235b43f516b4f86eb470d5ee99b738ce37994",
+)
+
 # TODO(nlopezgi): Add tests that verify files were copied to output_folder

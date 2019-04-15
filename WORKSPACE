@@ -348,3 +348,12 @@ rbe_autoconfig(
         "//constraints:xenial",
     ],
 )
+
+rbe_autoconfig(
+    name = "rbe_autoconf_resovle_tag",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    registry = "marketplace.gcr.io",
+    repository = "google/bazel",
+    tag = "0.23.2",
+)
