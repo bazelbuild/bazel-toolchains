@@ -62,11 +62,11 @@ def repositories():
         )
 
     if "base_images_docker" not in excludes:
-        git_repository(
+        http_archive(
             name = "base_images_docker",
-            commit = base_images_docker_version,
-            remote = "https://github.com/GoogleContainerTools/base-images-docker.git",
-            # TODO (suvanjan): Add sha256 field once copybara supports it.
+            sha256 = "50d1d6f43a6422c7e566b8f6dc9316641506586375c8afd866bacbbd225113d5",
+            strip_prefix = "base-images-docker-38fc2c8e70ef5a478090484464aa667014bf877a",
+            urls = ["https://github.com/GoogleContainerTools/base-images-docker/archive/38fc2c8e70ef5a478090484464aa667014bf877a.tar.gz"],
         )
 
     # =============================== Repo rule deps ==========================
