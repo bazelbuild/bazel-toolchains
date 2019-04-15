@@ -29,4 +29,3 @@ LATEST = ""
 # versions.
 def container_to_config_version():
     return {}
-
