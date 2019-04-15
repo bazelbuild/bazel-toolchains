@@ -101,7 +101,7 @@ gcs_file(
     sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
 )
 
-load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig", "rbe_autoconfig_root")
 
 rbe_autoconfig(name = "rbe_default")
 
@@ -273,7 +273,7 @@ rbe_autoconfig(
     create_testdata = True,
     use_checked_in_confs = False,
 )
-
+  
 rbe_autoconfig(
     name = "rbe_autoconf_config_repos_no_cc_config",
     bazel_version = _ubuntu1604_bazel,
@@ -357,3 +357,27 @@ rbe_autoconfig(
     repository = "google/bazel",
     tag = "0.23.2",
 )
+
+rbe_autoconfig(
+    name = "rbe_autoconf_output_base",
+    bazel_version = _ubuntu1604_bazel,
+    create_testdata = True,
+    output_base = "tests/config/rbe_autoconf_output_base",
+    use_checked_in_confs = False,
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_config_repos_output_base",
+    bazel_version = _ubuntu1604_bazel,
+    config_repos = [
+        "local_config_sh", 
+        "bazel_skylib",
+    ],
+    create_testdata = True,
+    output_base = "tests/config/rbe_autoconf_config_repos_output_base",
+    use_checked_in_confs = False,
+)
+
+# Needed for testing purposes. Creates a file that exposes
+# the value of RBE_AUTOCONF_ROOT
+rbe_autoconfig_root(name = "rbe_autoconfig_root")

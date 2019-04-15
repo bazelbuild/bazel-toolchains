@@ -23,7 +23,7 @@
 # All remaining args are interpreted as calls to functions in this
 # file.
 
-set -e
+set -ex
 
 assert_file_not_exists() {
   FILE=$1
@@ -109,6 +109,46 @@ assert_java_home() {
 # Checks that java_home was not read from container
 assert_no_java_home() {
   assert_file_not_exists ${DIR}/get_java_home.sh
+}
+
+# Checks that cc config files were generated in the output_base
+assert_output_base_cc_confs() {
+  assert_file_exists ${DIR}/cc/BUILD
+  assert_file_exists ${DIR}/cc/cc_toolchain_config.bzl
+  assert_file_exists ${DIR}/cc/dummy_toolchain.bzl
+  assert_file_exists ${DIR}/cc/cc_wrapper.sh
+}
+
+# Checks that cc config files were not generated in the output_base
+assert_output_base_no_cc_confs() {
+  assert_file_not_exists ${DIR}/cc/BUILD
+  assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
+  assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
+  assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
+}
+
+# Checks that java config files were generated in the output_base
+assert_output_base_java_confs() {
+  assert_file_exists ${DIR}/java/BUILD
+}
+
+# Checks that java config files were not generated in the output_base
+assert_output_base_no_java_confs() {
+  assert_file_not_exists ${DIR}/java/BUILD
+}
+
+# Checks that platform config files were generated in the output_base
+assert_output_base_platform_confs() {
+  assert_file_exists ${DIR}/config/BUILD
+}
+
+# Checks that files for custom repos (bazel_skylib, local_config_sh) 
+# were generated in the output_base
+assert_output_base_custom_confs() {
+  assert_file_exists ${DIR}/local_config_sh/WORKSPACE
+  assert_file_exists ${DIR}/local_config_sh/BUILD
+  assert_file_exists ${DIR}/bazel_skylib/WORKSPACE
+  assert_file_exists ${DIR}/bazel_skylib/BUILD
 }
 
 EMPTY_FILE=$1
