@@ -26,8 +26,8 @@ platforms:
     - "//tests/rbe_repo:rbe_autoconf_base_container_digest_java_alias_test"
     - "//tests/rbe_repo:rbe_autoconf_constraints_exec_compatible_with_test"
     - "//tests/rbe_repo:rbe_autoconf_constraints_target_compatible_with_test"
-    # TODO(nlopezgi): add tests that require docker binary once supported on
-    # BuildKite
+    - "//tests/rbe_repo:rbe_autoconf_copy_run_and_extract_test"
+    # TODO(nlopezgi): add more tests that require docker binary
     # docker_autoconfig tests
     - "//tests/config:ubuntu-xenial-autoconfig_test"
     # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
