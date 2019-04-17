@@ -20,6 +20,10 @@ load(
     "//configs/ubuntu16_04_clang:versions.bzl",
     RBE_UBUNTU16_04_LATEST = "LATEST",
 )
+load(
+    "//configs/dependency-tracking:ubuntu1604.bzl",
+    _ubuntu1604_bazel = "bazel",
+)
 
 # sh_tests below verify that the rbe_autoconfig targets have the
 # right file structure in the external folder repo
@@ -429,4 +433,94 @@ file_test(
     regexp = "9596a8fbd6a6a77b2fe1272b145235b43f516b4f86eb470d5ee99b738ce37994",
 )
 
-# TODO(nlopezgi): Add tests that verify files were copied to output_folder
+# Tests for output_base. These require RBE_AUTOCONF_ROOT env variable to be set
+sh_test(
+    name = "rbe_autoconf_output_base_test",
+    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "tests/config/rbe_autoconf_output_base",
+        _ubuntu1604_bazel,
+        "assert_output_base_cc_confs",
+        "assert_output_base_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_output_base_no_java_test",
+    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "tests/config/rbe_autoconf_output_base_no_java",
+        _ubuntu1604_bazel,
+        "assert_output_base_cc_confs",
+        "assert_output_base_no_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_no_java//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_output_base_no_cc_test",
+    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "tests/config/rbe_autoconf_output_base_no_cc",
+        _ubuntu1604_bazel,
+        "assert_output_base_no_cc_confs",
+        "assert_output_base_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_no_cc//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_config_repos_output_base_test",
+    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "tests/config/rbe_autoconf_config_repos_output_base",
+        _ubuntu1604_bazel,
+        "assert_output_base_cc_confs",
+        "assert_output_base_java_confs",
+        "assert_output_base_platform_confs",
+        "assert_output_base_custom_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_config_repos_output_base//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_output_base_run_in_container_test",
+    file = "@rbe_autoconf_config_repos_output_base//test:container/run_in_container.sh",
+    regexp = "bazel build @local_config_cc//... @local_config_sh//... @bazel_skylib//...",
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_output_base_sh_toolchain_test",
+    file = "@rbe_autoconf_config_repos_output_base//test:local_config_sh/test.BUILD",
+    regexp = "sh_toolchain",
+)
+
+file_test(
+    name = "rbe_autoconf_config_repos_output_base_skilib_toolchain_test",
+    file = "@rbe_autoconf_config_repos_output_base//test:bazel_skylib/test.BUILD",
+    regexp = "bzl_library.bzl",
+)

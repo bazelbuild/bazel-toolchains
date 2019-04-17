@@ -212,7 +212,7 @@ _RBE_UBUNTU_TARGET_COMPAT_WITH = [
 ]
 _VERBOSE = False
 
-def _impl(ctx):
+def _rbe_autoconfig_impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
 
     bazel_version_debug = "Bazel %s" % ctx.attr.bazel_version
@@ -710,16 +710,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
         # Copy any additional external repos that were requested
         if ctx.attr.config_repos:
             for repo in ctx.attr.config_repos:
-                repo_dest = dest + repo + "/"
-                result = ctx.execute(["mkdir", "-p", repo_dest])
-                _print_exec_results("create %s output dir" % repo, result)
-
-                # Get the files that were created in the repo dir
-                ctx.file(repo + "_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % repo), True)
-                result = ctx.execute(["./" + repo + "_config_files.sh"])
-                _print_exec_results("resolve %s repo files" % repo, result)
-                repo_files = result.stdout.splitlines()[0].split(" ")
-                args = ["cp"] + repo_files + [repo_dest]
+                args = ["rsync", "-aR", "./%s" % repo, dest]
                 result = ctx.execute(args)
                 _print_exec_results("copy %s repo files" % repo, result, True, args)
 
@@ -751,6 +742,13 @@ filegroup(
     # This is needed for tests to reference the location
     # of all test outputs.
     ctx.file("test/empty", "", False)
+
+def rbe_autoconfig_root_impl(ctx):
+    """Core implementation of rbe_autoconfig_root repository rule."""
+    ctx.file("AUTOCONF_ROOT", ctx.os.environ.get(_AUTOCONF_ROOT, None), False)
+    ctx.file("BUILD", """package(default_visibility = ["//visibility:public"])
+exports_files(["AUTOCONF_ROOT"])
+""", False)
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
@@ -885,7 +883,18 @@ _rbe_autoconfig = repository_rule(
         _AUTOCONF_ROOT,
         _DOCKER_PATH,
     ],
-    implementation = _impl,
+    implementation = _rbe_autoconfig_impl,
+    local = True,
+)
+
+# Rule that exposes the location of _AUTOCONF_ROOT for test
+# rules to consume.
+rbe_autoconfig_root = repository_rule(
+    environ = [
+        _AUTOCONF_ROOT,
+    ],
+    implementation = rbe_autoconfig_root_impl,
+    local = True,
 )
 
 def rbe_autoconfig(
