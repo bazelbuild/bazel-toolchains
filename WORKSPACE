@@ -105,11 +105,6 @@ load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig", "rbe_autoconfig_
 
 rbe_autoconfig(name = "rbe_default")
 
-rbe_autoconfig(
-    name = "rbe_default_copy_resources",
-    copy_resources = True,
-)
-
 # Targets used by automatic config generation and release service.
 load(
     "//configs/dependency-tracking:ubuntu1604.bzl",
@@ -259,9 +254,9 @@ rbe_autoconfig(
 )
 
 rbe_autoconfig(
-    name = "rbe_autoconf_copy_resources",
+    name = "rbe_autoconf_no_copy_resources",
     bazel_version = _ubuntu1604_bazel,
-    copy_resources = True,
+    copy_resources = False,
     create_testdata = True,
     use_checked_in_confs = False,
 )
