@@ -26,7 +26,7 @@ platforms:
     - "//tests/rbe_repo:rbe_autoconf_base_container_digest_java_alias_test"
     - "//tests/rbe_repo:rbe_autoconf_constraints_exec_compatible_with_test"
     - "//tests/rbe_repo:rbe_autoconf_constraints_target_compatible_with_test"
-    - "//tests/rbe_repo:rbe_autoconf_copy_run_and_extract_test"
+    - "//tests/rbe_repo:rbe_autoconf_generate_run_and_extract_test"
     # TODO(nlopezgi): add more tests that require docker binary
     # docker_autoconfig tests
     - "//tests/config:ubuntu-xenial-autoconfig_test"
@@ -39,6 +39,7 @@ platforms:
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     test_flags:
+    - "--action_env=PATH"
     - "--test_output=errors"
     - "--verbose_failures"
     - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
