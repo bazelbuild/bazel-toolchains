@@ -359,7 +359,7 @@ def _validate_host(ctx):
         docker_tool_path = ctx.which("docker")
     if not docker_tool_path:
         fail("Cannot run rbe_autoconfig as 'docker' was not found on the " +
-             "path and environment variable _DOCKER_PATH was not set.")
+             "path and environment variable DOCKER_PATH was not set.")
     result = ctx.execute([docker_tool_path, "ps"])
     if result.return_code != 0:
         fail("Cannot run rbe_autoconfig as running '%s ps' returned a " +
