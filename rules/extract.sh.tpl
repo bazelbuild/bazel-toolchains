@@ -19,16 +19,24 @@ set -ex
 # This is a generated file that runs a docker container, waits for it to
 # finish running and copies a file to an output location.
 
+DOCKER="%{docker_tool_path}"
+
+ # Check docker tool is available
+if [[ -z "${DOCKER}" ]]; then
+    echo >&2 "error: docker not found; do you need to set DOCKER_PATH env var?"
+    exit 1
+fi
+
 # In system where bind mounting is not supported/allowed, we need to copy the
 # scripts and project source code used for Bazel autoconfig to the container.
 %{copy_data_cmd}
 
 # Pass an empty entrypoint to override any set by default in the container.
-id=$(docker run -d --entrypoint "" %{docker_run_flags} %{image_name} %{commands})
+id=$(${DOCKER} run -d --entrypoint "" %{docker_run_flags} %{image_name} %{commands})
 
-docker wait $id
-docker cp $id:%{extract_file} %{output}
-docker rm $id
+${DOCKER} wait $id
+${DOCKER} cp $id:%{extract_file} %{output}
+${DOCKER} rm $id
 
 # If a data volumn is created, delete it at the end.
 %{clean_data_volume_cmd}

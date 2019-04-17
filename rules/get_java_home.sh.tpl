@@ -19,4 +19,12 @@ set -ex
 # This is a generated file that gets the value of the JAVA_HOME env
 # var in a docker image.
 
-echo $(docker inspect -f '{{range $i, $v := .Config.Env}}{{println $v}}{{end}}' %{image_name} | grep JAVA_HOME | cut -d'=' -f2)
+DOCKER="%{docker_tool_path}"
+
+ # Check docker tool is available
+if [[ -z "${DOCKER}" ]]; then
+    echo >&2 "error: docker not found; do you need to set DOCKER_PATH env var?"
+    exit 1
+fi
+
+ echo $(${DOCKER} inspect -f '{{range $i, $v := .Config.Env}}{{println $v}}{{end}}' %{image_name} | grep JAVA_HOME | cut -d'=' -f2)

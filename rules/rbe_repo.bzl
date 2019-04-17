@@ -195,6 +195,7 @@ _PROJECT_REPO_DIR = "project_src"
 _OUTPUT_DIR = _ROOT_DIR + "/autoconf_out"
 _REPO_DIR = _ROOT_DIR + "/" + _PROJECT_REPO_DIR
 _AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
+_DOCKER_PATH = "DOCKER_PATH"
 _CC_CONFIG_DIR = "cc"
 _JAVA_CONFIG_DIR = "java"
 
@@ -236,7 +237,7 @@ def _impl(ctx):
         ctx.report_progress("validating host tools")
 
         # Perform some safety checks
-        _validate_host(ctx)
+        docker_tool_path = _validate_host(ctx)
         project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
 
         # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
@@ -264,12 +265,12 @@ def _impl(ctx):
         outputs_tar = ctx.attr.name + "_out.tar"
 
         # Pull the image using 'docker pull'
-        _pull_image(ctx, image_name)
+        _pull_image(ctx, docker_tool_path, image_name)
 
         # If tag is specified instead of digest, resolve it to digest in the
         # image_name as it will be used later on in the platform targets.
         if ctx.attr.tag:
-            result = ctx.execute(["docker", "inspect", "--format={{index .RepoDigests 0}}", image_name])
+            result = ctx.execute([docker_tool_path, "inspect", "--format={{index .RepoDigests 0}}", image_name])
             _print_exec_results("Resolve image digest", result, fail_on_error = True)
             image_name = result.stdout.splitlines()[0]
             print("Image with given tag `%s` is resolved to %s" %
@@ -298,7 +299,7 @@ def _impl(ctx):
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
     if ctx.attr.create_java_configs:
-        java_home = _get_java_home(ctx, image_name)
+        java_home = _get_java_home(ctx, docker_tool_path, image_name)
         _create_java_runtime(ctx, java_home)
 
     config_repos = []
@@ -313,6 +314,7 @@ def _impl(ctx):
             bazel_version = ctx.attr.bazel_version,
             bazel_rc_version = ctx.attr.bazel_rc_version,
             config_repos = config_repos,
+            docker_tool_path = docker_tool_path,
             image_name = image_name,
             outputs_tar = outputs_tar,
             project_root = project_root,
@@ -348,16 +350,25 @@ def _print_exec_results(prefix, exec_result, fail_on_error = False, args = None)
         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
 
 # Perform validations of host environment to be able to run the rule.
+# Returns the path to the docker tool binary
 def _validate_host(ctx):
     if ctx.os.name.lower() != "linux":
         fail("Not running on linux host, cannot run rbe_autoconfig.")
-    if not ctx.which("docker"):
-        fail("Cannot run rbe_autoconfig as 'docker' was not found on the path.")
-    if ctx.execute(["docker", "ps"]).return_code != 0:
-        fail("Cannot run rbe_autoconfig as running 'docker ps' returned a " +
-             "non 0 exit code, please check you have permissions to run docker.")
+    docker_tool_path = ctx.os.environ.get(_DOCKER_PATH, None)
+    if not docker_tool_path:
+        docker_tool_path = ctx.which("docker")
+    if not docker_tool_path:
+        fail("Cannot run rbe_autoconfig as 'docker' was not found on the " +
+             "path and environment variable DOCKER_PATH was not set.")
+    result = ctx.execute([docker_tool_path, "ps"])
+    if result.return_code != 0:
+        fail("Cannot run rbe_autoconfig as running '%s ps' returned a " +
+             "non 0 exit code, please check you have permissions to " +
+             "run docker. Error message: %s" % docker_tool_path, result.stderr)
     if not ctx.which("tar"):
         fail("Cannot run rbe_autoconfig as 'tar' was not found on the path.")
+    print("Found docker tool in %s" % docker_tool_path)
+    return str(docker_tool_path)
 
 # Produces BUILD files with alias for the C++/Java toolchain targets.
 def _use_standard_config(ctx):
@@ -399,15 +410,15 @@ def _use_standard_config(ctx):
         )
 
 # Pulls an image using 'docker pull'.
-def _pull_image(ctx, image_name):
+def _pull_image(ctx, docker_tool_path, image_name):
     ctx.report_progress("pulling image %s." % image_name)
-    result = ctx.execute(["docker", "pull", image_name])
+    result = ctx.execute([docker_tool_path, "pull", image_name])
     _print_exec_results("pull image", result, fail_on_error = True)
     ctx.report_progress("image pulled.")
 
 # Gets the value of java_home either from attr or
 # by running docker run image_name printenv JAVA_HOME.
-def _get_java_home(ctx, image_name):
+def _get_java_home(ctx, docker_tool_path, image_name):
     if ctx.attr.java_home:
         return ctx.attr.java_home
 
@@ -417,6 +428,7 @@ def _get_java_home(ctx, image_name):
         "get_java_home.sh",
         template,
         {
+            "%{docker_tool_path}": docker_tool_path,
             "%{image_name}": image_name,
         },
         True,
@@ -520,6 +532,7 @@ def _run_and_extract(
         bazel_version,
         bazel_rc_version,
         config_repos,
+        docker_tool_path,
         image_name,
         outputs_tar,
         project_root,
@@ -573,6 +586,7 @@ def _run_and_extract(
             "%{commands}": _ROOT_DIR + "/container/run_in_container.sh",
             "%{copy_data_cmd}": " && ".join(copy_data_cmd),
             "%{docker_run_flags}": " ".join(docker_run_flags),
+            "%{docker_tool_path}": docker_tool_path,
             "%{extract_file}": "/" + outputs_tar,
             "%{image_name}": image_name,
             "%{output}": str(ctx.path(".")) + "/output.tar",
@@ -780,13 +794,13 @@ _rbe_autoconfig = repository_rule(
                    "Used internally when use_checked_in_confs is true."),
         ),
         "copy_resources": attr.bool(
-            default = False,
+            default = True,
             doc = (
                 "Optional. Specifies whether to copy instead of mounting " +
                 "resources such as scripts and project source code to the " +
-                "container for Bazel autoconfig. Note that copy is more " +
-                "expensive and should only be enabled where mounting is not " +
-                "supported or allowed on the system."
+                "container for Bazel autoconfig. Note that copy_resources " +
+                "works out of the box when Bazel is run inside " +
+                "a docker container. "
             ),
         ),
         "create_cc_configs": attr.bool(
@@ -869,6 +883,7 @@ _rbe_autoconfig = repository_rule(
     },
     environ = [
         _AUTOCONF_ROOT,
+        _DOCKER_PATH,
     ],
     implementation = _impl,
 )
@@ -880,7 +895,7 @@ def rbe_autoconfig(
         bazel_rc_version = None,
         config_dir = None,
         config_repos = None,
-        copy_resources = False,
+        copy_resources = True,
         create_cc_configs = True,
         create_java_configs = True,
         create_testdata = False,
@@ -917,10 +932,10 @@ def rbe_autoconfig(
       config_repos: Optional. list of additional external repos corresponding to
           configure like repo rules that need to be produced in addition to
           local_config_cc
-      copy_resources: Optional. Default to False, if set to True, resources
-          such as scripts and project source code will be copied to the container
-          instead of bind mounted. This is useful in system where bind mounting
-          is not allowed or supported.
+      copy_resources: Optional. Default to True, if set to False, resources
+          such as scripts and project source code will be bind mounted onto the
+          container instead of copied. This is useful in system where bind mounting
+          is enabled and performance is critical.
       create_cc_configs: Optional. Specifies whether to generate C/C++ configs.
           Defauls to True.
       create_java_configs: Optional. Specifies whether to generate java configs.
