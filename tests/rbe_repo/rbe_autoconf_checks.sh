@@ -23,7 +23,7 @@
 # All remaining args are interpreted as calls to functions in this
 # file.
 
-set -ex
+set -e
 
 assert_file_not_exists() {
   FILE=$1
@@ -159,4 +159,3 @@ do
     $var
   fi
 done
-

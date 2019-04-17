@@ -45,5 +45,3 @@ platforms:
     - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
-    # TODO(nlopezgi): remove this flag once rbe_autoconfig can be run in parallel
-    - "--loading_phase_threads=1"

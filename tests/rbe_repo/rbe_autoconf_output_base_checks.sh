@@ -20,14 +20,14 @@
 # to resolve the directory where files are to be checked.
 # Usage: Use only from an sh_test target.
 # First argument is the location of the AUTOCONF_ROOT file which
-# has a single line with the absolute path to the root of the project
+# has a single line with the absolute path to the root of the project.
 # The second argument is the output_base declared in the rbe_autoconfig
 # rule that is tested.
-# The third argument is the Bazel version
+# The third argument is the Bazel version.
 # All remaining args are interpreted as calls to functions in th
 # rbe_autoconf_checks.
 
-set -ex
+set -e
 
 AUTOCONF_ROOT=$1
 OUTPUT_BASE=$2
@@ -37,5 +37,3 @@ OUTPUT_BASE_EMPTY=$(cat ${AUTOCONF_ROOT})/${OUTPUT_BASE}/bazel_${BAZEL_VERSION}/
 set -- ${OUTPUT_BASE_EMPTY} "${@:4}"
 
 source tests/rbe_repo/rbe_autoconf_checks.sh
-
-
