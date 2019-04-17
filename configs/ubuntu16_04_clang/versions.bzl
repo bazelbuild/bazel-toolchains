@@ -32,7 +32,7 @@ def bazel_to_config_versions():
     }
 
 # sha256 digest of the latest version of the toolchain container.
-LATEST = "sha256:823aa3cc811b40d8cd7a8df529553ceb8a49bf2adffcebedc4e49dbd8daafca0"
+LATEST = "sha256:fbd499b53a377fe2c6c5e65c33bdecd9393871e19a64eaf785fb6491f31849d3"
 
 # Map from sha256 of the toolchain container to corresponding major container
 # versions.
@@ -45,4 +45,5 @@ def container_to_config_version():
         "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798": "9.0.0",
         "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729": "9.0.0",
         "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": "8.0.0",
+        "sha256:fbd499b53a377fe2c6c5e65c33bdecd9393871e19a64eaf785fb6491f31849d3": "9.0.0",
     }
