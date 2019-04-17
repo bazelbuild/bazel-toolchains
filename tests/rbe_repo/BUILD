@@ -274,14 +274,14 @@ file_test(
 # Tests validate run_and_extract uses mount volumes (-v) vs
 # data volumes.
 file_test(
-    name = "rbe_autoconf_generate_run_and_extract_test",
-    file = "@rbe_autoconf_generate//test:run_and_extract.sh",
+    name = "rbe_autoconf_no_copy_resources_run_and_extract_test",
+    file = "@rbe_autoconf_no_copy_resources//test:run_and_extract.sh",
     regexp = "realpath",
 )
 
 file_test(
-    name = "rbe_autoconf_copy_run_and_extract_test",
-    file = "@rbe_autoconf_copy_resources//test:run_and_extract.sh",
+    name = "rbe_autoconf_generate_run_and_extract_test",
+    file = "@rbe_autoconf_generate//test:run_and_extract.sh",
     regexp = "data_volume",
 )
 
