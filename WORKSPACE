@@ -273,7 +273,7 @@ rbe_autoconfig(
     create_testdata = True,
     use_checked_in_confs = False,
 )
-  
+
 rbe_autoconfig(
     name = "rbe_autoconf_config_repos_no_cc_config",
     bazel_version = _ubuntu1604_bazel,
@@ -367,10 +367,28 @@ rbe_autoconfig(
 )
 
 rbe_autoconfig(
+    name = "rbe_autoconf_output_base_no_java",
+    bazel_version = _ubuntu1604_bazel,
+    create_java_configs = False,
+    create_testdata = True,
+    output_base = "tests/config/rbe_autoconf_output_base_no_java",
+    use_checked_in_confs = False,
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_output_base_no_cc",
+    bazel_version = _ubuntu1604_bazel,
+    create_cc_configs = False,
+    create_testdata = True,
+    output_base = "tests/config/rbe_autoconf_output_base_no_cc",
+    use_checked_in_confs = False,
+)
+
+rbe_autoconfig(
     name = "rbe_autoconf_config_repos_output_base",
     bazel_version = _ubuntu1604_bazel,
     config_repos = [
-        "local_config_sh", 
+        "local_config_sh",
         "bazel_skylib",
     ],
     create_testdata = True,

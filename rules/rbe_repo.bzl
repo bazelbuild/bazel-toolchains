@@ -869,7 +869,7 @@ _rbe_autoconfig = repository_rule(
         _AUTOCONF_ROOT,
     ],
     implementation = _rbe_autoconfig_impl,
-    local=True
+    local = True,
 )
 
 # Rule that exposes the location of _AUTOCONF_ROOT for test
@@ -878,8 +878,9 @@ rbe_autoconfig_root = repository_rule(
     environ = [
         _AUTOCONF_ROOT,
     ],
-    implementation=rbe_autoconfig_root_impl,
-    local=True)
+    implementation = rbe_autoconfig_root_impl,
+    local = True,
+)
 
 def rbe_autoconfig(
         name,

@@ -447,8 +447,44 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
         "@rbe_autoconf_output_base//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_output_base_no_java_test",
+    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "tests/config/rbe_autoconf_output_base_no_java",
+        _ubuntu1604_bazel,
+        "assert_output_base_cc_confs",
+        "assert_output_base_no_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_no_java//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_output_base_no_cc_test",
+    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "tests/config/rbe_autoconf_output_base_no_cc",
+        _ubuntu1604_bazel,
+        "assert_output_base_no_cc_confs",
+        "assert_output_base_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_no_cc//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
@@ -466,15 +502,15 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
         "@rbe_autoconf_config_repos_output_base//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
 file_test(
     name = "rbe_autoconf_config_repos_output_base_run_in_container_test",
     file = "@rbe_autoconf_config_repos_output_base//test:container/run_in_container.sh",
-    regexp = "bazel build @local_config_sh/",
+    regexp = "bazel build @local_config_cc//... @local_config_sh//... @bazel_skylib//...",
 )
 
 file_test(
@@ -488,4 +524,3 @@ file_test(
     file = "@rbe_autoconf_config_repos_output_base//test:bazel_skylib/test.BUILD",
     regexp = "bzl_library.bzl",
 )
-
