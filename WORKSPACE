@@ -402,7 +402,6 @@ rbe_autoconfig(
     digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
     env = clang_env(),
     java_home = "test-case-java-home",
-    output_base = "tests/config/rbe_autoconf_generate_no_docker_pull",
     registry = "gcr.io",
     repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
     use_checked_in_confs = False,
