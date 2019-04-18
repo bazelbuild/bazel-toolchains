@@ -264,7 +264,7 @@ def _rbe_autoconfig_impl(ctx):
 
     # If user picks rbe-ubuntu 16_04 container and
     # a config exists for the current version of Bazel, create aliases and return
-    if ctx.attr.config_version:
+    if ctx.attr.config_version and not config_repos:
         _use_standard_config(ctx)
 
         # Copy all outputs to the test directory
@@ -334,14 +334,14 @@ def _resolve_project_root(ctx):
     # using the env variable
     project_root = None
     use_default_project = None
-    if not ctx.attr.config_version and (ctx.attr.output_base or ctx.attr.config_repos):
+    if (not ctx.attr.config_version and ctx.attr.output_base) or ctx.attr.config_repos:
         project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
 
         # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
         use_default_project = False
         if not project_root:
             fail(("%s env variable must be set for rbe_autoconfig" +
-                  " to function properly when output_base is set") % _AUTOCONF_ROOT)
+                  " to function properly when output_base or config_repos are set") % _AUTOCONF_ROOT)
     elif not ctx.attr.config_version:
         # TODO(nlopezgi): consider using native.existing_rules() to validate
         # bazel_toolchains repo exists.

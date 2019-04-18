@@ -266,7 +266,6 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     config_repos = ["local_config_sh"],
     create_testdata = True,
-    use_checked_in_confs = False,
 )
 
 rbe_autoconfig(
@@ -275,7 +274,6 @@ rbe_autoconfig(
     config_repos = ["local_config_sh"],
     create_cc_configs = False,
     create_testdata = True,
-    use_checked_in_confs = False,
 )
 
 rbe_autoconfig(
@@ -388,7 +386,6 @@ rbe_autoconfig(
     ],
     create_testdata = True,
     output_base = "tests/config/rbe_autoconf_config_repos_output_base",
-    use_checked_in_confs = False,
 )
 
 # Test to validate no docker image is pulled when a custom container
@@ -404,7 +401,6 @@ rbe_autoconfig(
     java_home = "test-case-java-home",
     registry = "gcr.io",
     repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
-    use_checked_in_confs = False,
 )
 
 # Needed for testing purposes. Creates a file that exposes
