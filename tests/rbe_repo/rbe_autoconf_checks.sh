@@ -67,6 +67,16 @@ assert_no_checked_in_confs() {
   assert_file_exists ${DIR}/container/run_in_container.sh
 }
 
+# Checks the dummy file produced after image is pulled is present
+assert_image_pulled() {
+  assert_file_exists ${DIR}/image_name
+}
+
+# Checks the dummy file produced after image is pulled is not present
+assert_image_not_pulled() {
+  assert_file_not_exists ${DIR}/image_name
+}
+
 # Checks that java config files were generated
 assert_java_confs() {
   assert_file_exists ${DIR}/java/test.BUILD

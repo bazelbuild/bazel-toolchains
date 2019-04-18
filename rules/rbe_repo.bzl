@@ -230,39 +230,15 @@ def _rbe_autoconfig_impl(ctx):
     # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
     # issues for users who do not do gcloud login.
     image_name = image_name.replace("marketplace.gcr.io", "l.gcr.io")
+    docker_tool_path = None
 
-    # If not using checked-in configs we need to pull the container and resolve its tag to digest
-    # before we create the platform target.
-    if not ctx.attr.config_version:
+    # Resolve the project_root
+    project_root, use_default_project = _resolve_project_root(ctx)
+
+    # Check if pulling a container will be needed and pull it if so
+    if _pull_container_needed(ctx):
         ctx.report_progress("validating host tools")
-
-        # Perform some safety checks
         docker_tool_path = _validate_host(ctx)
-        project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
-
-        # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
-        use_default_project = False
-        if not project_root:
-            if ctx.attr.output_base:
-                fail(("%s env variable must be set for rbe_autoconfig" +
-                      " to function properly when output_base is set") % _AUTOCONF_ROOT)
-
-            # TODO(nlopezgi): consider using native.existing_rules() to validate
-            # bazel_toolchains repo exists.
-            # Try to use the default project
-            # This is Bazel black magic, we're traversing the directories in the output_base,
-            # assuming that the bazel_toolchains external repo will exist in the
-            # expected path.
-            project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
-            if not project_root.exists:
-                fail(("Could not find default autoconf project in %s, please make sure " +
-                      "the bazel-toolchains repo is imported in your workspace with name " +
-                      "'bazel_toolchains' and imported before the rbe_autoconfig target " +
-                      "declaration ") % str(project_root))
-            project_root = str(project_root)
-            use_default_project = True
-
-        outputs_tar = ctx.attr.name + "_out.tar"
 
         # Pull the image using 'docker pull'
         _pull_image(ctx, docker_tool_path, image_name)
@@ -316,7 +292,6 @@ def _rbe_autoconfig_impl(ctx):
             config_repos = config_repos,
             docker_tool_path = docker_tool_path,
             image_name = image_name,
-            outputs_tar = outputs_tar,
             project_root = project_root,
             use_default_project = use_default_project,
         )
@@ -324,11 +299,12 @@ def _rbe_autoconfig_impl(ctx):
     ctx.report_progress("expanding outputs")
 
     # Expand outputs to project dir if user requested it
-    _expand_outputs(
-        ctx,
-        bazel_version = ctx.attr.bazel_version,
-        project_root = project_root,
-    )
+    if ctx.attr.output_base:
+        _expand_outputs(
+            ctx,
+            bazel_version = ctx.attr.bazel_version,
+            project_root = project_root,
+        )
 
     # TODO(nlopezgi): refactor call to _copy_to_test_dir
     # so that its not needed to be duplicated here and
@@ -348,6 +324,50 @@ def _print_exec_results(prefix, exec_result, fail_on_error = False, args = None)
         if _VERBOSE and args:
             print("failed to run execute with the following args:" + str(args))
         fail("Failed to run:" + prefix + ":" + exec_result.stderr)
+
+# Returns the project_root that will be used to copy sources
+# to the container (if needed) and whether or not the default cc project
+# was selected.
+def _resolve_project_root(ctx):
+    # If not using checked-in configs and output_base was selected or
+    # config_repos were requested we need to resolve the project_root
+    # using the env variable
+    project_root = None
+    use_default_project = None
+    if not ctx.attr.config_version and (ctx.attr.output_base or ctx.attr.config_repos):
+        project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
+
+        # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
+        use_default_project = False
+        if not project_root:
+            fail(("%s env variable must be set for rbe_autoconfig" +
+                  " to function properly when output_base is set") % _AUTOCONF_ROOT)
+    elif not ctx.attr.config_version:
+        # TODO(nlopezgi): consider using native.existing_rules() to validate
+        # bazel_toolchains repo exists.
+        # Try to use the default project
+        # This is Bazel black magic, we're traversing the directories in the output_base,
+        # assuming that the bazel_toolchains external repo will exist in the
+        # expected path.
+        project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+        if not project_root.exists:
+            fail(("Could not find default autoconf project in %s, please make sure " +
+                  "the bazel-toolchains repo is imported in your workspace with name " +
+                  "'bazel_toolchains' and imported before the rbe_autoconfig target " +
+                  "declaration ") % str(project_root))
+        project_root = str(project_root)
+        use_default_project = True
+    return project_root, use_default_project
+
+# Verifies if we need to pull a container to resolve the configs.
+def _pull_container_needed(ctx):
+    if ctx.attr.tag:
+        return True
+    if ctx.attr.config_version:
+        return False
+    if not ctx.attr.create_cc_configs and ctx.attr.java_home and not ctx.attr.config_repos:
+        return False
+    return True
 
 # Perform validations of host environment to be able to run the rule.
 # Returns the path to the docker tool binary
@@ -415,6 +435,10 @@ def _pull_image(ctx, docker_tool_path, image_name):
     result = ctx.execute([docker_tool_path, "pull", image_name])
     _print_exec_results("pull image", result, fail_on_error = True)
     ctx.report_progress("image pulled.")
+
+    # Create a dummy file with the image name to enable testing
+    # if container was pulled
+    ctx.file("image_name", image_name, False)
 
 # Gets the value of java_home either from attr or
 # by running docker run image_name printenv JAVA_HOME.
@@ -534,9 +558,10 @@ def _run_and_extract(
         config_repos,
         docker_tool_path,
         image_name,
-        outputs_tar,
         project_root,
         use_default_project):
+    outputs_tar = ctx.attr.name + "_out.tar"
+
     # Create command to run inside docker container
     _create_docker_cmd(
         ctx,

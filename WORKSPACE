@@ -391,6 +391,23 @@ rbe_autoconfig(
     use_checked_in_confs = False,
 )
 
+# Test to validate no docker image is pulled when a custom container
+# is used where no cc_configs are needed and java_home is passed
+# explicitly.
+rbe_autoconfig(
+    name = "rbe_autoconf_generate_no_docker_pull",
+    bazel_version = _ubuntu1604_bazel,
+    create_cc_configs = False,
+    create_testdata = True,
+    digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
+    env = clang_env(),
+    java_home = "test-case-java-home",
+    output_base = "tests/config/rbe_autoconf_generate_no_docker_pull",
+    registry = "gcr.io",
+    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+    use_checked_in_confs = False,
+)
+
 # Needed for testing purposes. Creates a file that exposes
 # the value of RBE_AUTOCONF_ROOT
 rbe_autoconfig_root(name = "rbe_autoconfig_root")
