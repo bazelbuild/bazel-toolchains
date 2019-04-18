@@ -264,7 +264,7 @@ def _rbe_autoconfig_impl(ctx):
 
     # If user picks rbe-ubuntu 16_04 container and
     # a config exists for the current version of Bazel, create aliases and return
-    if ctx.attr.config_version and not config_repos:
+    if ctx.attr.config_version and not ctx.attr.config_repos:
         _use_standard_config(ctx)
 
         # Copy all outputs to the test directory
@@ -363,7 +363,7 @@ def _resolve_project_root(ctx):
 def _pull_container_needed(ctx):
     if ctx.attr.tag:
         return True
-    if ctx.attr.config_version:
+    if ctx.attr.config_version and not ctx.attr.config_repos:
         return False
     if not ctx.attr.create_cc_configs and ctx.attr.java_home and not ctx.attr.config_repos:
         return False
@@ -438,7 +438,8 @@ def _pull_image(ctx, docker_tool_path, image_name):
 
     # Create a dummy file with the image name to enable testing
     # if container was pulled
-    ctx.file("image_name", image_name, False)
+    ctx.file("image_name", """# Test file created to signal container was pulled
+%s""" % image_name, False)
 
 # Gets the value of java_home either from attr or
 # by running docker run image_name printenv JAVA_HOME.
