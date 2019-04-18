@@ -86,6 +86,7 @@ sh_test(
         "assert_cc_confs",
         "assert_java_confs",
         "assert_java_home",
+        "assert_image_pulled",
     ],
     data = [
         "@rbe_autoconf_generate//test:empty",
@@ -523,4 +524,28 @@ file_test(
     name = "rbe_autoconf_config_repos_output_base_skilib_toolchain_test",
     file = "@rbe_autoconf_config_repos_output_base//test:bazel_skylib/test.BUILD",
     regexp = "bzl_library.bzl",
+)
+
+# tests to validate docker image was / was not pulled
+sh_test(
+    name = "rbe_autoconf_generate_no_docker_pull_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rbe_autoconf_generate_no_docker_pull//test:empty)",
+        "assert_basic_cofig",
+        "assert_checked_in_confs",
+        "assert_java_confs",
+        "assert_no_java_home",
+        "assert_image_not_pulled",
+    ],
+    data = [
+        "@rbe_autoconf_generate_no_docker_pull//test:empty",
+        "@rbe_autoconf_generate_no_docker_pull//test:exported_testdata",
+    ],
+)
+
+file_test(
+    name = "rbe_autoconf_generate_image_name_test",
+    file = "@rbe_autoconf_generate//test:image_name",
+    regexp = RBE_UBUNTU16_04_LATEST,
 )
