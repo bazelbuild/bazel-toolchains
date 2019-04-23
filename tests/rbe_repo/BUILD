@@ -521,7 +521,7 @@ file_test(
 )
 
 file_test(
-    name = "rbe_autoconf_config_repos_output_base_skilib_toolchain_test",
+    name = "rbe_autoconf_config_repos_output_base_skylib_toolchain_test",
     file = "@rbe_autoconf_config_repos_output_base//test:bazel_skylib/test.BUILD",
     regexp = "bzl_library.bzl",
 )
