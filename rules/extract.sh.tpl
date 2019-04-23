@@ -21,7 +21,7 @@ set -ex
 
 DOCKER="%{docker_tool_path}"
 
- # Check docker tool is available
+# Check docker tool is available
 if [[ -z "${DOCKER}" ]]; then
     echo >&2 "error: docker not found; do you need to set DOCKER_PATH env var?"
     exit 1

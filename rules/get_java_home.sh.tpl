@@ -21,10 +21,10 @@ set -ex
 
 DOCKER="%{docker_tool_path}"
 
- # Check docker tool is available
+# Check docker tool is available
 if [[ -z "${DOCKER}" ]]; then
     echo >&2 "error: docker not found; do you need to set DOCKER_PATH env var?"
     exit 1
 fi
 
- echo $(${DOCKER} inspect -f '{{range $i, $v := .Config.Env}}{{println $v}}{{end}}' %{image_name} | grep JAVA_HOME | cut -d'=' -f2)
+echo $(${DOCKER} inspect -f '{{range $i, $v := .Config.Env}}{{println $v}}{{end}}' %{image_name} | grep JAVA_HOME | cut -d'=' -f2)
