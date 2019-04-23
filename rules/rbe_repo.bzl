@@ -336,6 +336,7 @@ def _resolve_project_root(ctx):
     use_default_project = None
     if (not ctx.attr.config_version and ctx.attr.output_base) or ctx.attr.config_repos:
         project_root = ctx.os.environ.get(_AUTOCONF_ROOT, None)
+        print("RBE_AUTOCONF_ROOT is %s" % project_root)
 
         # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
         use_default_project = False
