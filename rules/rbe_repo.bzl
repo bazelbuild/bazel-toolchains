@@ -517,6 +517,10 @@ def _create_docker_cmd(
     copy_cmd.append("tar -cf /" + outputs_tar + " -C " + _OUTPUT_DIR + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
 
+    # A success command to run after the output_copy_cmd finished.
+    # the contents of this echo line are checked for in extract.sh.tpl
+    success_echo_cmd = "echo 'created outputs_tar'"
+
     # if use_default_project was selected, we need to modify the WORKSPACE and BUILD file
     setup_default_project_cmd = ["cd ."]
     if use_default_project:
@@ -539,6 +543,7 @@ def _create_docker_cmd(
 
     docker_cmd = [
         "#!/bin/bash",
+        "set -ex",
         ctx.attr.setup_cmd,
     ]
     docker_cmd += install_bazel_cmd
@@ -547,6 +552,7 @@ def _create_docker_cmd(
         bazel_cmd,
         deref_symlinks_cmd,
         output_copy_cmd,
+        success_echo_cmd,
         clean_cmd,
     ]
     ctx.file("container/run_in_container.sh", "\n".join(docker_cmd), True)

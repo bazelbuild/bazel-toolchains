@@ -35,6 +35,14 @@ fi
 id=$(${DOCKER} run -d --entrypoint "" %{docker_run_flags} %{image_name} %{commands})
 
 ${DOCKER} wait $id
+# Check the docker logs contain the expected 'created outputs_tar' string
+if ${DOCKER} logs $id | grep -q 'created outputs_tar'; then
+   echo "Successfully created outputs_tar"
+else
+   echo "Could not create outputs_tar, see docker log for details:"
+   echo $(${DOCKER} logs $id)
+   exit 1
+fi
 ${DOCKER} cp $id:%{extract_file} %{output}
 ${DOCKER} rm $id
 
