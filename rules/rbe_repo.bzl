@@ -516,6 +516,7 @@ def _create_docker_cmd(
         copy_cmd.append("cp -dr " + src_dir + " " + _OUTPUT_DIR)
     copy_cmd.append("tar -cf /" + outputs_tar + " -C " + _OUTPUT_DIR + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
+
     # A success command to run after the output_copy_cmd finished.
     # the contents of this echo line are checked for in extract.sh.tpl
     success_echo_cmd = "echo 'created outputs_tar'"
