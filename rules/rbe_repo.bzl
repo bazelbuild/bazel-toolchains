@@ -670,8 +670,8 @@ def _create_platform(ctx, image_name, name):
     if ctx.attr.output_base:
         cc_toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + ctx.attr.bazel_version
         if ctx.attr.config_dir:
-            cc_toolchain_target += ctx.attr.config_dir
-        cc_toolchain_target += _CC_TOOLCHAIN
+            cc_toolchain_target += "/" + ctx.attr.config_dir
+        cc_toolchain_target += "/cc" + _CC_TOOLCHAIN
     template = ctx.path(Label("@bazel_toolchains//rules:BUILD.platform.tpl"))
     exec_compatible_with = ("\"" +
                             ("\",\n        \"").join(ctx.attr.exec_compatible_with) +
