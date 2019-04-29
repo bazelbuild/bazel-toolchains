@@ -103,7 +103,10 @@ gcs_file(
 
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig", "rbe_autoconfig_root")
 
-rbe_autoconfig(name = "rbe_default")
+rbe_autoconfig(
+    name = "rbe_default",
+    force_checked_in_confs = True,
+)
 
 # Targets used by automatic config generation and release service.
 load(

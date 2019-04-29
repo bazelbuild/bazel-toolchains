@@ -872,6 +872,13 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
+        "force_checked_in_confs": attr.bool(
+            default = False,
+            doc = (
+                "Optional. If set to true, error out if no checked-in configs " +
+                "were found. "
+            ),
+        ),
         "java_home": attr.string(
             doc = ("Optional. The location of java_home in the container. For " +
                    "example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only " +
@@ -944,6 +951,7 @@ def rbe_autoconfig(
         digest = None,
         env = None,
         exec_compatible_with = None,
+        force_checked_in_confs = False,
         java_home = None,
         output_base = None,
         tag = None,
@@ -998,6 +1006,8 @@ def rbe_autoconfig(
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
+      force_checked_in_confs: Optional. If set to true, error out if no checked-in
+          configs were found.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
           relevant if 'create_java_configs' is true. If 'create_java_configs' is
@@ -1076,6 +1086,11 @@ def rbe_autoconfig(
         tag = tag,
         use_checked_in_confs = use_checked_in_confs,
     )
+
+    if force_checked_in_confs and not config_version:
+        fail("force_checked_in_confs was selected but no checked-in configs" +
+             " were found. Please check your pin to bazel-toolchains is up" +
+             " to date, and that you are using a release version of Bazel.")
 
     _rbe_autoconfig(
         name = name,
