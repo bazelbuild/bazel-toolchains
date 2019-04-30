@@ -20,25 +20,6 @@ steps:
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
 
-- name: 'marketplace.gcr.io/google/bazel'
-  args:
-  - --bazelrc=bazelrc/.bazelrc.test
-  - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
-  - --config=remote
-  - --host_javabase=@rbe_autoconf_checked_in_no_java//java:jdk
-  - --javabase=@rbe_autoconf_checked_in_no_java//java:jdk
-  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=@rbe_autoconf_checked_in_no_java//cc:toolchain
-  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=@rbe_autoconf_checked_in_no_java//config:cc-toolchain
-  - --extra_execution_platforms=@rbe_autoconf_checked_in_no_java//config:platform
-  - --host_platform=@rbe_autoconf_checked_in_no_java//config:platform
-  - --platforms=@rbe_autoconf_checked_in_no_java//config:platform
-  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
-
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -66,26 +47,6 @@ steps:
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
-  - --host_javabase=@rbe_autoconf_generate_no_java//java:jdk
-  - --javabase=@rbe_autoconf_generate_no_java//java:jdk
-  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=@rbe_autoconf_generate_no_java//cc:toolchain
-  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=@rbe_autoconf_generate_no_java//config:cc-toolchain
-  - --extra_execution_platforms=@rbe_autoconf_generate_no_java//config:platform
-  - --host_platform=@rbe_autoconf_generate_no_java//config:platform
-  - --platforms=@rbe_autoconf_generate_no_java//config:platform
-  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
-
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
-  args:
-  - /usr/local/bin/bazel
-  - --bazelrc=bazelrc/.bazelrc.test
-  - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
-  - --config=remote
   - --host_javabase=@rbe_autoconf_config_repos//java:jdk
   - --javabase=@rbe_autoconf_config_repos//java:jdk
   - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
@@ -98,9 +59,11 @@ steps:
   - --platforms=@rbe_autoconf_config_repos//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
 
-- name: 'marketplace.gcr.io/google/bazel'
+- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
+  - /usr/local/bin/bazel
   - --bazelrc=bazelrc/.bazelrc.test
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
@@ -137,25 +100,6 @@ steps:
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
 
-- name: 'marketplace.gcr.io/google/bazel'
-  args:
-  - --bazelrc=bazelrc/.bazelrc.test
-  - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
-  - --config=remote
-  - --host_javabase=@rbe_autoconf_constraints//java:jdk
-  - --javabase=@rbe_autoconf_constraints//java:jdk
-  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=@rbe_autoconf_constraints//cc:toolchain
-  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=@rbe_autoconf_constraints//config:cc-toolchain
-  - --extra_execution_platforms=@rbe_autoconf_constraints//config:platform
-  - --host_platform=@rbe_autoconf_constraints//config:platform
-  - --platforms=@rbe_autoconf_constraints//config:platform
-  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
-
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -180,21 +124,9 @@ steps:
   args:
   - /usr/local/bin/bazel
   - --bazelrc=bazelrc/.bazelrc.test
-  - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - build
   - --config=remote
-  - --host_javabase=@rbe_autoconf_output_base//java:jdk
-  - --javabase=@rbe_autoconf_output_base//java:jdk
-  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=@rbe_autoconf_output_base//cc:toolchain
-  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=@rbe_autoconf_output_base//config:cc-toolchain
-  - --extra_execution_platforms=@rbe_autoconf_output_base//config:platform
-  - --host_platform=@rbe_autoconf_output_base//config:platform
-  - --platforms=@rbe_autoconf_output_base//config:platform
-  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
+  - "@rbe_autoconf_output_base//..."
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
@@ -204,18 +136,27 @@ steps:
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
-  - --host_javabase=@rbe_autoconf_output_base_no_java//java:jdk
-  - --javabase=@rbe_autoconf_output_base_no_java//java:jdk
+  - --host_javabase=//tests/config/rbe_autoconf_output_base/java:jdk
+  - --javabase=//tests/config/rbe_autoconf_output_base/java:jdk
   - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=@rbe_autoconf_output_base_no_java//cc:toolchain
+  - --crosstool_top=//tests/config/rbe_autoconf_output_base/cc:toolchain
   - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=@rbe_autoconf_output_base_no_java//config:cc-toolchain
-  - --extra_execution_platforms=@rbe_autoconf_output_base_no_java//config:platform
-  - --host_platform=@rbe_autoconf_output_base_no_java//config:platform
-  - --platforms=@rbe_autoconf_output_base_no_java//config:platform
+  - --extra_toolchains=//tests/config/rbe_autoconf_output_base/config:cc-toolchain
+  - --extra_execution_platforms=//tests/config/rbe_autoconf_output_base/config:platform
+  - --host_platform=//tests/config/rbe_autoconf_output_base/config:platform
+  - --platforms=//tests/config/rbe_autoconf_output_base/config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
+
+- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+  args:
+  - /usr/local/bin/bazel
+  - --bazelrc=bazelrc/.bazelrc.test
+  - build
+  - --config=remote
+  - "@rbe_autoconf_config_repos_output_base//..."
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
@@ -225,16 +166,16 @@ steps:
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
-  - --host_javabase=@rbe_autoconf_config_repos_output_base//java:jdk
-  - --javabase=@rbe_autoconf_config_repos_output_base//java:jdk
+  - --host_javabase=//tests/config/rbe_autoconf_config_repos_output_base/java:jdk
+  - --javabase=//tests/config/rbe_autoconf_config_repos_output_base/java:jdk
   - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=@rbe_autoconf_config_repos_output_base//cc:toolchain
+  - --crosstool_top=//tests/config/rbe_autoconf_config_repos_output_base/cc:toolchain
   - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=@rbe_autoconf_config_repos_output_base//config:cc-toolchain
-  - --extra_execution_platforms=@rbe_autoconf_config_repos_output_base//config:platform
-  - --host_platform=@rbe_autoconf_config_repos_output_base//config:platform
-  - --platforms=@rbe_autoconf_config_repos_output_base//config:platform
+  - --extra_toolchains=//tests/config/rbe_autoconf_config_repos_output_base/config:cc-toolchain
+  - --extra_execution_platforms=//tests/config/rbe_autoconf_config_repos_output_base/config:platform
+  - --host_platform=//tests/config/rbe_autoconf_config_repos_output_base/config:platform
+  - --platforms=//tests/config/rbe_autoconf_config_repos_output_base/config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
   env: ['RBE_AUTOCONF_ROOT=/workspace']
@@ -277,3 +218,4 @@ steps:
   - --platforms=@rbe_autoconf_custom_container//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+timeout: 2400s

@@ -754,7 +754,7 @@ def _expand_outputs(ctx, bazel_version, project_root):
         # Copy any additional external repos that were requested
         if ctx.attr.config_repos:
             for repo in ctx.attr.config_repos:
-                args = ["rsync", "-aR", "./%s" % repo, dest]
+                args = ["bash", "-c", "cp -r %s %s" % (repo, dest)]
                 result = ctx.execute(args)
                 _print_exec_results("copy %s repo files" % repo, result, True, args)
                 args = ["rm", "-dr", "./%s" % repo]
@@ -766,8 +766,8 @@ def _expand_outputs(ctx, bazel_version, project_root):
 # creates a root BUILD file in test directory with a filegroup that contains
 # all files.
 def _copy_to_test_dir(ctx):
-    # Copy all files with rsync
-    args = ["rsync", "-aR", "./", "./test"]
+    # Copy all files to the test directory
+    args = ["bash", "-c", "mkdir ./.test && cp -r ./* ./.test && mv ./.test ./test"]
     result = ctx.execute(args)
     _print_exec_results("copy test output files", result, True, args)
 
