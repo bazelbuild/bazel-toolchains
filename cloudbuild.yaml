@@ -110,6 +110,7 @@ steps:
   - --platforms=@rbe_autoconfig_autogen_ubuntu1604//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'marketplace.gcr.io/google/bazel'
   args:
@@ -319,6 +320,7 @@ steps:
   - --platforms=@rbe_autoconf_output_base//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'marketplace.gcr.io/google/bazel'
   args:
@@ -338,6 +340,7 @@ steps:
   - --platforms=@rbe_autoconf_output_base_no_java//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'marketplace.gcr.io/google/bazel'
   args:
@@ -357,6 +360,7 @@ steps:
   - --platforms=@rbe_autoconf_config_repos_output_base//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'marketplace.gcr.io/google/bazel'
   args:
