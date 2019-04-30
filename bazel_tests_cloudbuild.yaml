@@ -5,6 +5,7 @@
 
 # Test that runs with Bazel 0.24.1 and uses checked-in configs directly
 # w/o using rbe_autoconfig.
+steps:
 - name: 'marketplace.gcr.io/google/bazel:0.24.1'
   args:
   - --bazelrc=bazelrc/.bazelrc.test

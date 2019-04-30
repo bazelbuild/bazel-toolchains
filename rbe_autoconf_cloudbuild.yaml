@@ -1,5 +1,6 @@
 # Steps in this file use toolchain configs produced by rbe_autoconf**
 # targets. Their purpose is to verify the configs are usable on RBE.
+steps:
 - name: 'marketplace.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/.bazelrc.test

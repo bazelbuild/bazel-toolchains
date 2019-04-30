@@ -105,10 +105,10 @@ There are two modes of using this repo rules:
                 --javabase=//rbe-configs/bazel_{bazel_version}/java:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
-                --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
-                --host_platform=/rbe-configs/bazel_{bazel_version}/config:platform \
-                --platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
-                --extra_toolchains=/rbe-configs/bazel_{bazel_version}/config:cc-toolchain \
+                --extra_execution_platforms=//rbe-configs/bazel_{bazel_version}/config:platform \
+                --host_platform=//rbe-configs/bazel_{bazel_version}/config:platform \
+                --platforms=//rbe-configs/bazel_{bazel_version}/config:platform \
+                --extra_toolchains=//rbe-configs/bazel_{bazel_version}/config:cc-toolchain \
                 ... <other rbe flags> <build targets>
 
     We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
@@ -694,6 +694,8 @@ def _create_platform(ctx, image_name, name):
 def _expand_outputs(ctx, bazel_version, project_root):
     """
     Copies all outputs of the autoconfig rule to a directory in the project.
+    Also deletes the artifacts from the repo directory as they are only
+    meant to be used from the output_base.
 
     Args:
         ctx: The Bazel context.
@@ -726,6 +728,9 @@ def _expand_outputs(ctx, bazel_version, project_root):
             args = ["cp"] + autoconf_files + [cc_dest]
             result = ctx.execute(args)
             _print_exec_results("copy local_config_cc outputs", result, True, args)
+            args = ["rm"] + autoconf_files
+            result = ctx.execute(args)
+            _print_exec_results("remove local_config_cc outputs from repo dir", result, True, args)
 
         # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
         if ctx.attr.create_java_configs:
@@ -734,11 +739,17 @@ def _expand_outputs(ctx, bazel_version, project_root):
             args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
             result = ctx.execute(args)
             _print_exec_results("copy java_runtime BUILD", result, True, args)
+            args = ["rm", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD"))]
+            result = ctx.execute(args)
+            _print_exec_results("remove java_runtime BUILD from repo dir", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file
         args = ["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest]
         result = ctx.execute(args)
         _print_exec_results("copy platform BUILD", result, True, args)
+        args = ["rm", str(ctx.path(_PLATFORM_DIR + "/BUILD"))]
+        result = ctx.execute(args)
+        _print_exec_results("Remove platform BUILD from repo dir", result, True, args)
 
         # Copy any additional external repos that were requested
         if ctx.attr.config_repos:
@@ -746,6 +757,9 @@ def _expand_outputs(ctx, bazel_version, project_root):
                 args = ["rsync", "-aR", "./%s" % repo, dest]
                 result = ctx.execute(args)
                 _print_exec_results("copy %s repo files" % repo, result, True, args)
+                args = ["rm", "-dr", "./%s" % repo]
+                result = ctx.execute(args)
+                _print_exec_results("Remove %s repo files from repo dir" % repo, result, True, args)
 
 # Copies all contents of the external repo to a test directory,
 # modifies name of all BUILD files (to enable file_test to operate on them), and
