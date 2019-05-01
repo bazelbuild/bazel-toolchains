@@ -694,6 +694,7 @@ def _create_platform(ctx, image_name, name):
 def _expand_outputs(ctx, bazel_version, project_root):
     """
     Copies all outputs of the autoconfig rule to a directory in the project.
+
     Also deletes the artifacts from the repo directory as they are only
     meant to be used from the output_base.
 
