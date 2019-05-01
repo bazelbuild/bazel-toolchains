@@ -2,6 +2,12 @@
 # targets. Their purpose is to verify the configs are usable on RBE.
 # Tests below generate configs in the output_base and then 
 # use those for RBE builds.
+
+# Proper functioning of these tests requires the _LATEST_BAZEL_VERSION
+# substitution parameter to be assigned to the same value as
+# the bazel def in //configs/dependency-tracking/ubuntu1604.bzl
+# This value must be set in the trigger "Pull request to .* branch output_base"
+# in https://pantheon.corp.google.com/cloud-build/triggers?project=asci-toolchain
 steps:
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
