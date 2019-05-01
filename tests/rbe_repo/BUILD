@@ -514,18 +514,6 @@ file_test(
     regexp = "bazel build @local_config_cc//... @local_config_sh//... @bazel_skylib//...",
 )
 
-file_test(
-    name = "rbe_autoconf_config_repos_output_base_sh_toolchain_test",
-    file = "@rbe_autoconf_config_repos_output_base//test:local_config_sh/test.BUILD",
-    regexp = "sh_toolchain",
-)
-
-file_test(
-    name = "rbe_autoconf_config_repos_output_base_skylib_toolchain_test",
-    file = "@rbe_autoconf_config_repos_output_base//test:bazel_skylib/test.BUILD",
-    regexp = "bzl_library.bzl",
-)
-
 # tests to validate docker image was / was not pulled
 sh_test(
     name = "rbe_autoconf_generate_no_docker_pull_test",

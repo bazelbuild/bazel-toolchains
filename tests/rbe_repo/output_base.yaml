@@ -1,0 +1,65 @@
+# Steps in this file use toolchain configs produced by rbe_autoconf**
+# targets. Their purpose is to verify the configs are usable on RBE.
+# Tests below generate configs in the output_base and then 
+# use those for RBE builds.
+
+# Proper functioning of these tests requires the _LATEST_BAZEL_VERSION
+# substitution parameter to be assigned to the same value as
+# the bazel def in //configs/dependency-tracking/ubuntu1604.bzl
+# This value must be set in the trigger with name
+# "config: /tests/rbe_repo/output_base.yaml"
+# in https://pantheon.corp.google.com/cloud-build/triggers?project=asci-toolchain
+steps:
+# Builds rbe_autoconfig targets
+- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+  args:
+  - /usr/local/bin/bazel
+  - build
+  - --
+  - "@rbe_autoconf_output_base//..."
+  - "@rbe_autoconf_config_repos_output_base//..."
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
+
+# Tests rbe_autoconf when output_base is used produces outputs that are 
+# usable for an RBE build.
+- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+  args:
+  - /usr/local/bin/bazel
+  - --bazelrc=bazelrc/.bazelrc.test
+  - test
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - --config=remote
+  - --host_javabase=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
+  - --javabase=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
+  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --crosstool_top=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/cc:toolchain
+  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+  - --extra_toolchains=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:cc-toolchain
+  - --extra_execution_platforms=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --host_platform=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --platforms=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
+
+# Tests rbe_autoconf when output_base and config_repos are used
+# produces outputs that are usable for an RBE build.
+- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+  args:
+  - /usr/local/bin/bazel
+  - --bazelrc=bazelrc/.bazelrc.test
+  - test
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - --config=remote
+  - --host_javabase=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
+  - --javabase=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
+  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --crosstool_top=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/cc:toolchain
+  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+  - --extra_toolchains=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:cc-toolchain
+  - --extra_execution_platforms=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --host_platform=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --platforms=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  env: ['RBE_AUTOCONF_ROOT=/workspace']
