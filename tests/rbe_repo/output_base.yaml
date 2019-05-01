@@ -6,7 +6,8 @@
 # Proper functioning of these tests requires the _LATEST_BAZEL_VERSION
 # substitution parameter to be assigned to the same value as
 # the bazel def in //configs/dependency-tracking/ubuntu1604.bzl
-# This value must be set in the trigger "Pull request to .* branch output_base"
+# This value must be set in the trigger with name
+# "config: /tests/rbe_repo/output_base.yaml"
 # in https://pantheon.corp.google.com/cloud-build/triggers?project=asci-toolchain
 steps:
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
