@@ -30,7 +30,6 @@ steps:
   - --host_platform=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/config:platform
   - --platforms=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
@@ -51,5 +50,4 @@ steps:
   - --host_platform=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/config:platform
   - --platforms=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
   env: ['RBE_AUTOCONF_ROOT=/workspace']

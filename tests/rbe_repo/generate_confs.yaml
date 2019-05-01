@@ -21,7 +21,6 @@ steps:
   - --host_platform=@rbe_autoconf_generate//config:platform
   - --platforms=@rbe_autoconf_generate//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
@@ -41,7 +40,6 @@ steps:
   - --host_platform=@rbe_autoconf_config_repos//config:platform
   - --platforms=@rbe_autoconf_config_repos//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
@@ -62,7 +60,6 @@ steps:
   - --host_platform=@rbe_autoconf_old_container//config:platform
   - --platforms=@rbe_autoconf_old_container//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
@@ -82,7 +79,6 @@ steps:
   - --host_platform=@rbe_autoconf_resovle_tag//config:platform
   - --platforms=@rbe_autoconf_resovle_tag//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
@@ -102,5 +98,4 @@ steps:
   - --host_platform=@rbe_autoconf_custom_container//config:platform
   - --platforms=@rbe_autoconf_custom_container//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 

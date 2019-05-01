@@ -4,7 +4,7 @@
 # with several older versions of Bazel
 
 # Test that runs with Bazel 0.24.1 and uses checked-in configs directly
-# w/o using rbe_autoconfig.
+# w/o using rbe_autoconfig. This one runs w/o remote caching.
 steps:
 - name: 'marketplace.gcr.io/google/bazel:0.24.1'
   args:
@@ -33,7 +33,6 @@ steps:
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 # Test that runs with rbe_autoconfig with Bazel 0.24.0
 - name: 'marketplace.gcr.io/google/bazel:0.24.0'
@@ -43,7 +42,6 @@ steps:
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 # Test that runs with rbe_autoconfig with Bazel 0.23.2
 - name: 'marketplace.gcr.io/google/bazel:0.23.2'
@@ -53,7 +51,6 @@ steps:
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 # Test that runs with rbe_autoconfig with Bazel 0.23.1
 - name: 'marketplace.gcr.io/google/bazel:0.23.1'
@@ -73,7 +70,6 @@ steps:
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 # Test that runs with rbe_autoconfig with Bazel 0.22.0
 - name: 'marketplace.gcr.io/google/bazel:0.22.0'
@@ -83,4 +79,3 @@ steps:
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached

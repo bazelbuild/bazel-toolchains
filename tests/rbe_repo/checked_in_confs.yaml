@@ -19,7 +19,6 @@ steps:
   - --host_platform=@rbe_autoconf_checked_in//config:platform
   - --platforms=@rbe_autoconf_checked_in//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
 
 - name: 'marketplace.gcr.io/google/bazel'
   args:
@@ -38,4 +37,3 @@ steps:
   - --host_platform=@rbe_autoconf_base_container_digest//config:platform
   - --platforms=@rbe_autoconf_base_container_digest//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --noremote_accept_cached
