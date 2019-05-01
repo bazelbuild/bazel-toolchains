@@ -210,6 +210,14 @@ _RBE_UBUNTU_TARGET_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//platforms:x86_64",
 ]
+_CHECKED_IN_CONFS_TRY = "Try"
+_CHECKED_IN_CONFS_FORCE = "Force"
+_CHECKED_IN_CONFS_FALSE = "False"
+_CHECKED_IN_CONFS_VALUES = [
+    _CHECKED_IN_CONFS_TRY,
+    _CHECKED_IN_CONFS_FORCE,
+    _CHECKED_IN_CONFS_FALSE,
+]
 _VERBOSE = False
 
 def _rbe_autoconfig_impl(ctx):
@@ -887,13 +895,6 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
-        "force_checked_in_confs": attr.bool(
-            default = False,
-            doc = (
-                "Optional. If set to true, error out if no checked-in configs " +
-                "were found. "
-            ),
-        ),
         "java_home": attr.string(
             doc = ("Optional. The location of java_home in the container. For " +
                    "example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only " +
@@ -966,14 +967,13 @@ def rbe_autoconfig(
         digest = None,
         env = None,
         exec_compatible_with = None,
-        force_checked_in_confs = False,
         java_home = None,
         output_base = None,
         tag = None,
         registry = None,
         repository = None,
         target_compatible_with = None,
-        use_checked_in_confs = True):
+        use_checked_in_confs = _CHECKED_IN_CONFS_TRY):
     """ Creates a repository with toolchain configs generated for a container image.
 
     This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
@@ -1021,8 +1021,6 @@ def rbe_autoconfig(
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
-      force_checked_in_confs: Optional. If set to true, error out if no checked-in
-          configs were found.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
           relevant if 'create_java_configs' is true. If 'create_java_configs' is
@@ -1043,11 +1041,14 @@ def rbe_autoconfig(
       target_compatible_with: List of constraints to add to the produced
           toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
           target_compatible_with attr.
-      use_checked_in_confs: Default: True. Try to look for checked in configs
-          before generating them. If set to false the rule will allways attempt
-          to generate the configs by pulling a toolchain container and running
-          Bazel inside.
+      use_checked_in_confs: Default: "Try". Try to look for checked in configs
+          before generating them. If set to "False" (string) the rule will
+          allways attempt to generate the configs by pulling a toolchain
+          container and running Bazel inside. If set to "Force" rule will error
+          out if no checked-in configs were found.
     """
+    if not use_checked_in_confs in _CHECKED_IN_CONFS_VALUES:
+        fail("use_checked_in_confs must be one of %s." % _CHECKED_IN_CONFS_VALUES)
     if not output_base and config_dir:
         fail("config_dir can only be used when output_base is set.")
 
@@ -1102,10 +1103,11 @@ def rbe_autoconfig(
         use_checked_in_confs = use_checked_in_confs,
     )
 
-    if force_checked_in_confs and not config_version:
-        fail("force_checked_in_confs was selected but no checked-in configs" +
-             " were found. Please check your pin to bazel-toolchains is up" +
-             " to date, and that you are using a release version of Bazel.")
+    if use_checked_in_confs == _CHECKED_IN_CONFS_FORCE and not config_version:
+        fail("use_checked_in_confs was set to \"%s\" but no checked-in configs " +
+             "were found. Please check your pin to bazel-toolchains is up " +
+             "to date, and that you are using a release version of " +
+             "Bazel." % _CHECKED_IN_CONFS_FORCE)
 
     _rbe_autoconfig(
         name = name,
@@ -1166,7 +1168,7 @@ def validateUseOfCheckedInConfigs(
     Returns:
         None
     """
-    if not use_checked_in_confs:
+    if use_checked_in_confs == _CHECKED_IN_CONFS_FALSE:
         return None
     if not base_container_digest and registry and registry != _RBE_UBUNTU_REGISTRY:
         return None

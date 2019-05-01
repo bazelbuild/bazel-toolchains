@@ -3,6 +3,7 @@
 # Tests below generate configs and use them directly in an RBE
 # Build.
 steps:
+# Tests rbe_autoconf generated artifacts are usable for an RBE build.
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -22,6 +23,8 @@ steps:
   - --platforms=@rbe_autoconf_generate//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
 
+# Tests rbe_autoconf generated artifacts, when config_repos attr is used,
+# are usable for an RBE build.
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -42,6 +45,8 @@ steps:
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
+# Tests rbe_autoconf generated artifacts, when an older rbe container
+# is selected, are usable for an RBE build.
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -61,6 +66,8 @@ steps:
   - --platforms=@rbe_autoconf_old_container//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
 
+# Tests rbe_autoconf generated artifacts, when tag is used
+# to identify the container, are usable for an RBE build.
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -80,6 +87,8 @@ steps:
   - --platforms=@rbe_autoconf_resovle_tag//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
 
+# Tests rbe_autoconf generated artifacts, when a custom container is used,
+# are usable for an RBE build.
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel

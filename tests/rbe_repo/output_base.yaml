@@ -10,6 +10,7 @@
 # "config: /tests/rbe_repo/output_base.yaml"
 # in https://pantheon.corp.google.com/cloud-build/triggers?project=asci-toolchain
 steps:
+# Builds rbe_autoconfig targets
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -19,6 +20,8 @@ steps:
   - "@rbe_autoconf_config_repos_output_base//..."
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
+# Tests rbe_autoconf when output_base is used produces outputs that are 
+# usable for an RBE build.
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
@@ -39,6 +42,8 @@ steps:
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
+# Tests rbe_autoconf when output_base and config_repos are used
+# produces outputs that are usable for an RBE build.
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
