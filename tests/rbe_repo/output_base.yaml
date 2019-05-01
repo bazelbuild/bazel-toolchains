@@ -19,16 +19,16 @@ steps:
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
-  - --host_javabase=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/java:jdk
-  - --javabase=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/java:jdk
+  - --host_javabase=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
+  - --javabase=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
   - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/cc:toolchain
+  - --crosstool_top=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/cc:toolchain
   - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/config:cc-toolchain
-  - --extra_execution_platforms=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/config:platform
-  - --host_platform=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/config:platform
-  - --platforms=//tests/config/rbe_autoconf_output_base/bazel_0.24.1/config:platform
+  - --extra_toolchains=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:cc-toolchain
+  - --extra_execution_platforms=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --host_platform=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --platforms=//tests/config/rbe_autoconf_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
@@ -39,15 +39,15 @@ steps:
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
-  - --host_javabase=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/java:jdk
-  - --javabase=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/java:jdk
+  - --host_javabase=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
+  - --javabase=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/java:jdk
   - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/cc:toolchain
+  - --crosstool_top=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/cc:toolchain
   - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/config:cc-toolchain
-  - --extra_execution_platforms=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/config:platform
-  - --host_platform=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/config:platform
-  - --platforms=//tests/config/rbe_autoconf_config_repos_output_base/bazel_0.24.1/config:platform
+  - --extra_toolchains=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:cc-toolchain
+  - --extra_execution_platforms=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --host_platform=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
+  - --platforms=//tests/config/rbe_autoconf_config_repos_output_base/bazel_${_LATEST_BAZEL_VERSION}/config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   env: ['RBE_AUTOCONF_ROOT=/workspace']
