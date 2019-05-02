@@ -1104,10 +1104,10 @@ def rbe_autoconfig(
     )
 
     if use_checked_in_confs == _CHECKED_IN_CONFS_FORCE and not config_version:
-        fail("use_checked_in_confs was set to \"%s\" but no checked-in configs " +
+        fail(("use_checked_in_confs was set to \"%s\" but no checked-in configs " +
              "were found. Please check your pin to bazel-toolchains is up " +
              "to date, and that you are using a release version of " +
-             "Bazel." % _CHECKED_IN_CONFS_FORCE)
+             "Bazel.") % _CHECKED_IN_CONFS_FORCE)
 
     _rbe_autoconfig(
         name = name,
