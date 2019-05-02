@@ -103,7 +103,10 @@ gcs_file(
 
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig", "rbe_autoconfig_root")
 
-rbe_autoconfig(name = "rbe_default")
+rbe_autoconfig(
+    name = "rbe_default",
+    use_checked_in_confs = "Force",
+)
 
 # Targets used by automatic config generation and release service.
 load(
@@ -123,7 +126,7 @@ rbe_autoconfig(
     output_base = "configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version),
     registry = _ubuntu1604_registry,
     repository = _ubuntu1604_repository,
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 # RBE Autoconfig targets to do integration testing on the automatic toolchain
@@ -146,7 +149,7 @@ rbe_autoconfig(
     output_base = "tests/config/trigger_config_gen/{}".format(_configs_version_trigger_config_gen),
     registry = _registry_trigger_config_gen,
     repository = _repository_trigger_config_gen,
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 load(
@@ -167,7 +170,7 @@ rbe_autoconfig(
     output_base = "tests/config/no_updates/{}".format(_configs_version_no_updates),
     registry = _registry_no_updates,
     repository = _repository_no_updates,
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 load("//rules:environments.bzl", "clang_env")
@@ -234,7 +237,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_generate",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
@@ -242,7 +245,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
     create_testdata = True,
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
@@ -250,7 +253,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_cc_configs = False,
     create_testdata = True,
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
@@ -258,7 +261,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     copy_resources = False,
     create_testdata = True,
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
@@ -356,7 +359,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
     output_base = "tests/config/rbe_autoconf_output_base",
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
@@ -365,7 +368,7 @@ rbe_autoconfig(
     create_java_configs = False,
     create_testdata = True,
     output_base = "tests/config/rbe_autoconf_output_base_no_java",
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
@@ -374,7 +377,7 @@ rbe_autoconfig(
     create_cc_configs = False,
     create_testdata = True,
     output_base = "tests/config/rbe_autoconf_output_base_no_cc",
-    use_checked_in_confs = False,
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(

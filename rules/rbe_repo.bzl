@@ -105,10 +105,10 @@ There are two modes of using this repo rules:
                 --javabase=//rbe-configs/bazel_{bazel_version}/java:jdk \
                 --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
                 --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
-                --extra_execution_platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
-                --host_platform=/rbe-configs/bazel_{bazel_version}/config:platform \
-                --platforms=/rbe-configs/bazel_{bazel_version}/config:platform \
-                --extra_toolchains=/rbe-configs/bazel_{bazel_version}/config:cc-toolchain \
+                --extra_execution_platforms=//rbe-configs/bazel_{bazel_version}/config:platform \
+                --host_platform=//rbe-configs/bazel_{bazel_version}/config:platform \
+                --platforms=//rbe-configs/bazel_{bazel_version}/config:platform \
+                --extra_toolchains=//rbe-configs/bazel_{bazel_version}/config:cc-toolchain \
                 ... <other rbe flags> <build targets>
 
     We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
@@ -209,6 +209,14 @@ _RBE_UBUNTU_EXEC_COMPAT_WITH = [
 _RBE_UBUNTU_TARGET_COMPAT_WITH = [
     "@bazel_tools//platforms:linux",
     "@bazel_tools//platforms:x86_64",
+]
+_CHECKED_IN_CONFS_TRY = "Try"
+_CHECKED_IN_CONFS_FORCE = "Force"
+_CHECKED_IN_CONFS_FALSE = "False"
+_CHECKED_IN_CONFS_VALUES = [
+    _CHECKED_IN_CONFS_TRY,
+    _CHECKED_IN_CONFS_FORCE,
+    _CHECKED_IN_CONFS_FALSE,
 ]
 _VERBOSE = False
 
@@ -695,6 +703,9 @@ def _expand_outputs(ctx, bazel_version, project_root):
     """
     Copies all outputs of the autoconfig rule to a directory in the project.
 
+    Also deletes the artifacts from the repo directory as they are only
+    meant to be used from the output_base.
+
     Args:
         ctx: The Bazel context.
         bazel_version: The Bazel version string.
@@ -726,6 +737,9 @@ def _expand_outputs(ctx, bazel_version, project_root):
             args = ["cp"] + autoconf_files + [cc_dest]
             result = ctx.execute(args)
             _print_exec_results("copy local_config_cc outputs", result, True, args)
+            args = ["rm"] + autoconf_files
+            result = ctx.execute(args)
+            _print_exec_results("remove local_config_cc outputs from repo dir", result, True, args)
 
         # Copy the dest/{_JAVA_CONFIG_DIR}/BUILD file
         if ctx.attr.create_java_configs:
@@ -734,26 +748,35 @@ def _expand_outputs(ctx, bazel_version, project_root):
             args = ["cp", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD")), java_dest]
             result = ctx.execute(args)
             _print_exec_results("copy java_runtime BUILD", result, True, args)
+            args = ["rm", str(ctx.path(_JAVA_CONFIG_DIR + "/BUILD"))]
+            result = ctx.execute(args)
+            _print_exec_results("remove java_runtime BUILD from repo dir", result, True, args)
 
         # Copy the dest/{_PLATFORM_DIR}/BUILD file
         args = ["cp", str(ctx.path(_PLATFORM_DIR + "/BUILD")), platform_dest]
         result = ctx.execute(args)
         _print_exec_results("copy platform BUILD", result, True, args)
+        args = ["rm", str(ctx.path(_PLATFORM_DIR + "/BUILD"))]
+        result = ctx.execute(args)
+        _print_exec_results("Remove platform BUILD from repo dir", result, True, args)
 
         # Copy any additional external repos that were requested
         if ctx.attr.config_repos:
             for repo in ctx.attr.config_repos:
-                args = ["rsync", "-aR", "./%s" % repo, dest]
+                args = ["bash", "-c", "cp -r %s %s" % (repo, dest)]
                 result = ctx.execute(args)
                 _print_exec_results("copy %s repo files" % repo, result, True, args)
+                args = ["rm", "-dr", "./%s" % repo]
+                result = ctx.execute(args)
+                _print_exec_results("Remove %s repo files from repo dir" % repo, result, True, args)
 
 # Copies all contents of the external repo to a test directory,
 # modifies name of all BUILD files (to enable file_test to operate on them), and
 # creates a root BUILD file in test directory with a filegroup that contains
 # all files.
 def _copy_to_test_dir(ctx):
-    # Copy all files with rsync
-    args = ["rsync", "-aR", "./", "./test"]
+    # Copy all files to the test directory
+    args = ["bash", "-c", "mkdir ./.test && cp -r ./* ./.test && mv ./.test ./test"]
     result = ctx.execute(args)
     _print_exec_results("copy test output files", result, True, args)
 
@@ -950,7 +973,7 @@ def rbe_autoconfig(
         registry = None,
         repository = None,
         target_compatible_with = None,
-        use_checked_in_confs = True):
+        use_checked_in_confs = _CHECKED_IN_CONFS_TRY):
     """ Creates a repository with toolchain configs generated for a container image.
 
     This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
@@ -1018,11 +1041,14 @@ def rbe_autoconfig(
       target_compatible_with: List of constraints to add to the produced
           toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
           target_compatible_with attr.
-      use_checked_in_confs: Default: True. Try to look for checked in configs
-          before generating them. If set to false the rule will allways attempt
-          to generate the configs by pulling a toolchain container and running
-          Bazel inside.
+      use_checked_in_confs: Default: "Try". Try to look for checked in configs
+          before generating them. If set to "False" (string) the rule will
+          allways attempt to generate the configs by pulling a toolchain
+          container and running Bazel inside. If set to "Force" rule will error
+          out if no checked-in configs were found.
     """
+    if not use_checked_in_confs in _CHECKED_IN_CONFS_VALUES:
+        fail("use_checked_in_confs must be one of %s." % _CHECKED_IN_CONFS_VALUES)
     if not output_base and config_dir:
         fail("config_dir can only be used when output_base is set.")
 
@@ -1076,6 +1102,12 @@ def rbe_autoconfig(
         tag = tag,
         use_checked_in_confs = use_checked_in_confs,
     )
+
+    if use_checked_in_confs == _CHECKED_IN_CONFS_FORCE and not config_version:
+        fail("use_checked_in_confs was set to \"%s\" but no checked-in configs " +
+             "were found. Please check your pin to bazel-toolchains is up " +
+             "to date, and that you are using a release version of " +
+             "Bazel." % _CHECKED_IN_CONFS_FORCE)
 
     _rbe_autoconfig(
         name = name,
@@ -1136,7 +1168,7 @@ def validateUseOfCheckedInConfigs(
     Returns:
         None
     """
-    if not use_checked_in_confs:
+    if use_checked_in_confs == _CHECKED_IN_CONFS_FALSE:
         return None
     if not base_container_digest and registry and registry != _RBE_UBUNTU_REGISTRY:
         return None

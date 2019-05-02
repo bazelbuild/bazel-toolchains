@@ -21,8 +21,6 @@ platforms:
     - "-//tests/rbe_repo:rbe_autoconf_output_base_no_cc_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_output_base_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_output_base_run_in_container_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_output_base_sh_toolchain_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_output_base_skylib_toolchain_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_run_in_container_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_sh_toolchain_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_run_in_container_test"
