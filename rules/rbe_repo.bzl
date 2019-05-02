@@ -770,6 +770,10 @@ def _expand_outputs(ctx, bazel_version, project_root):
                 result = ctx.execute(args)
                 _print_exec_results("Remove %s repo files from repo dir" % repo, result, True, args)
 
+        # TODO(ngiraldo): Generate new BUILD files that point to checked in configs
+        # Create an empty BUILD file so the repo can be built
+        ctx.file("BUILD", "", False)
+
 # Copies all contents of the external repo to a test directory,
 # modifies name of all BUILD files (to enable file_test to operate on them), and
 # creates a root BUILD file in test directory with a filegroup that contains
@@ -1104,10 +1108,10 @@ def rbe_autoconfig(
     )
 
     if use_checked_in_confs == _CHECKED_IN_CONFS_FORCE and not config_version:
-        fail("use_checked_in_confs was set to \"%s\" but no checked-in configs " +
-             "were found. Please check your pin to bazel-toolchains is up " +
-             "to date, and that you are using a release version of " +
-             "Bazel." % _CHECKED_IN_CONFS_FORCE)
+        fail(("use_checked_in_confs was set to \"%s\" but no checked-in configs " +
+              "were found. Please check your pin to bazel-toolchains is up " +
+              "to date, and that you are using a release version of " +
+              "Bazel.") % _CHECKED_IN_CONFS_FORCE)
 
     _rbe_autoconfig(
         name = name,
