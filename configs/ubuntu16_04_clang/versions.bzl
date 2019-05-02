@@ -21,15 +21,15 @@ Contact repository owners if you wish to edit this file for instructions.
 # Returns a dict with suppported Bazel versions mapped to the config version to use.
 def bazel_to_config_versions():
     return {
-        "0.25.0": ["9.0.0"],
-        "0.21.0": ["8.0.0"],
-        "0.23.0": ["8.0.0", "9.0.0"],
-        "0.24.0": ["9.0.0"],
-        "0.24.1": ["9.0.0"],
         "0.20.0": ["8.0.0"],
+        "0.21.0": ["8.0.0"],
         "0.22.0": ["8.0.0", "9.0.0"],
+        "0.23.0": ["8.0.0", "9.0.0"],
         "0.23.1": ["8.0.0", "9.0.0"],
         "0.23.2": ["9.0.0"],
+        "0.24.0": ["9.0.0"],
+        "0.24.1": ["9.0.0"],
+        "0.25.0": ["9.0.0"],
     }
 
 # sha256 digest of the latest version of the toolchain container.
@@ -39,13 +39,13 @@ LATEST = "sha256:677c1317f14c6fd5eba2fd8ec645bfdc5119f64b3e5e944e13c89e0525cc8ad
 # versions.
 def container_to_config_version():
     return {
-        "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": "8.0.0",
-        "sha256:fbd499b53a377fe2c6c5e65c33bdecd9393871e19a64eaf785fb6491f31849d3": "9.0.0",
+        "sha256:677c1317f14c6fd5eba2fd8ec645bfdc5119f64b3e5e944e13c89e0525cc8ad1": "9.0.0",
         "sha256:69c9f1652941d64a46f6f7358a44c1718f25caa5cb1ced4a58ccc5281cd183b5": "9.0.0",
+        "sha256:823aa3cc811b40d8cd7a8df529553ceb8a49bf2adffcebedc4e49dbd8daafca0": "9.0.0",
         "sha256:87fe00c5c4d0e64ab3830f743e686716f49569dadb49f1b1b09966c1b36e153c": "8.0.0",
+        "sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928": "8.0.0",
         "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798": "9.0.0",
         "sha256:da0f21c71abce3bbb92c3a0c44c3737f007a82b60f8bd2930abc55fe64fc2729": "9.0.0",
-        "sha256:677c1317f14c6fd5eba2fd8ec645bfdc5119f64b3e5e944e13c89e0525cc8ad1": "9.0.0",
-        "sha256:823aa3cc811b40d8cd7a8df529553ceb8a49bf2adffcebedc4e49dbd8daafca0": "9.0.0",
-        "sha256:9bd8ba020af33edb5f11eff0af2f63b3bcb168cd6566d7b27c6685e717787928": "8.0.0",
+        "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": "8.0.0",
+        "sha256:fbd499b53a377fe2c6c5e65c33bdecd9393871e19a64eaf785fb6491f31849d3": "9.0.0",
     }
