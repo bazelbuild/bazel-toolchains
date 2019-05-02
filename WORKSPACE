@@ -105,7 +105,8 @@ load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig", "rbe_autoconfig_
 
 rbe_autoconfig(
     name = "rbe_default",
-    use_checked_in_confs = "Force",
+    # TODO(ngiraldo) reenable use_checked_in_confs after 0.25.0 configs are released
+    #use_checked_in_confs = "Force",
 )
 
 # Targets used by automatic config generation and release service.
