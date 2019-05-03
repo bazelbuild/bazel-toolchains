@@ -167,6 +167,10 @@ Known limitations (if any container other than rbe-ubuntu 16_04 is used):
 """
 
 load(
+    "//configs/dependency-tracking:ubuntu1604.bzl",
+    BAZEL_LATEST = "bazel",
+)
+load(
     "//configs/ubuntu16_04_clang:versions.bzl",
     "bazel_to_config_versions",
     RBE_UBUNTU16_04_LATEST = "LATEST",
@@ -180,7 +184,7 @@ load(
 )
 
 # Version to fallback to if not provided explicitly and local is non-release version.
-_BAZEL_VERSION_FALLBACK = "0.23.0"
+_BAZEL_VERSION_FALLBACK = BAZEL_LATEST
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring

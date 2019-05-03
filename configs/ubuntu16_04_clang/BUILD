@@ -573,3 +573,42 @@ docker_toolchain_autoconfig(
     tags = ["manual"],
     test = True,
 )
+
+# This target is auto-generated from release/default.tpl and should not be
+# modified directly.
+# Created on 2019.5.3
+# Container: marketplace.gcr.io/google/clang-ubuntu@sha256:ed21de14f213a6dfe55c50663ae5f95c545ae0f8fce065a70ffe6d8bb260d8d6
+# Clang revision: r352865
+docker_toolchain_autoconfig(
+    name = "default-ubuntu16_04-clang-1.2-bazel_0.25.0-autoconfig",
+    additional_repos = ubuntu16_04_clang_default_repos(),
+    base = "@ubuntu16_04-clang//image",
+    bazel_version = "0.25.0",
+    env = clang_env(),
+    keys = ubuntu16_04_clang_default_keys(),
+    packages = ubuntu16_04_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
+
+# This target is auto-generated from release/msan.tpl and should not be
+# modified directly.
+# Created on 2019.5.3
+# Container: marketplace.gcr.io/google/clang-ubuntu@sha256:ed21de14f213a6dfe55c50663ae5f95c545ae0f8fce065a70ffe6d8bb260d8d6
+# Clang revision: r352865
+docker_toolchain_autoconfig(
+    name = "msan-ubuntu16_04-clang-1.2-bazel_0.25.0-autoconfig",
+    additional_repos = ubuntu16_04_clang_default_repos(),
+    base = "@ubuntu16_04-clang//image",
+    bazel_version = "0.25.0",
+    env = dicts.add(
+        clang_env(),
+        {
+            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
+        },
+    ),
+    keys = ubuntu16_04_clang_default_keys(),
+    packages = ubuntu16_04_clang_default_packages(),
+    tags = ["manual"],
+    test = True,
+)
