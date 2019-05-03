@@ -13,5 +13,5 @@ def toolchain_container_sha256s():
         "debian8_clang": "sha256:e076c87e670f9a3c95e250268f160397d1cee482ec195d51e40b992b34198395",
 
         # marketplace.gcr.io/google/clang-ubuntu:latest
-        "ubuntu16_04_clang": "sha256:963ea21d047664257c91fb0e05d9a6e9acf1481ea1874736af4d4ceed1e02a0c",
+        "ubuntu16_04_clang": "sha256:ed21de14f213a6dfe55c50663ae5f95c545ae0f8fce065a70ffe6d8bb260d8d6",
     }

@@ -9,3 +9,16 @@ steps:
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
+
+
+# Launch a RBE hello world build + unit test using the manually produced
+# configs for Bazel 0.25.0
+steps:
+- name: 'marketplace.gcr.io/google/bazel'
+  args:
+  - --bazelrc=bazelrc/bazel-0.25.0.bazelrc
+  - test
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - --config=remote
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - --noremote_accept_cached
