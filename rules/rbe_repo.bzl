@@ -774,6 +774,22 @@ def _expand_outputs(ctx, bazel_version, project_root):
                 result = ctx.execute(args)
                 _print_exec_results("Remove %s repo files from repo dir" % repo, result, True, args)
 
+        dest_target = ctx.attr.output_base + "/bazel_" + bazel_version
+        if ctx.attr.config_dir:
+            dest_target += ctx.attr.config_dir + "/"
+        template = ctx.path(Label("@bazel_toolchains//rules:.latest.bazelrc.tpl"))
+        ctx.template(
+            ".latest.bazelrc",
+            template,
+            {
+                "%{dest_target}": dest_target,
+            },
+            False,
+        )
+        args = ["mv", str(ctx.path("./.latest.bazelrc")), project_root + "/" + ctx.attr.output_base + "/"]
+        result = ctx.execute(args)
+        _print_exec_results("Move .latest.bazelrc file to outputs", result, True, args)
+
         # TODO(ngiraldo): Generate new BUILD files that point to checked in configs
         # Create an empty BUILD file so the repo can be built
         ctx.file("BUILD", "", False)
