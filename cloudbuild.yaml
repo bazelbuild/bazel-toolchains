@@ -1,6 +1,6 @@
+steps:
 # Launch a RBE hello world build + unit test using the @rbe_default toolchain
 # configs.
-steps:
 - name: 'marketplace.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/.bazelrc
@@ -10,10 +10,8 @@ steps:
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   - --noremote_accept_cached
 
-
 # Launch a RBE hello world build + unit test using the manually produced
 # configs for Bazel 0.25.0
-steps:
 - name: 'marketplace.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/bazel-0.25.0.bazelrc
