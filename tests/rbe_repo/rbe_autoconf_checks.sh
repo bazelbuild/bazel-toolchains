@@ -150,9 +150,10 @@ assert_output_base_no_java_confs() {
 # Checks that platform config files were generated in the output_base
 assert_output_base_platform_confs() {
   assert_file_exists ${DIR}/config/BUILD
+  assert_file_exists ${DIR}/../.latest.bazelrc
 }
 
-# Checks that files for custom repos (bazel_skylib, local_config_sh) 
+# Checks that files for custom repos (bazel_skylib, local_config_sh)
 # were generated in the output_base
 assert_output_base_custom_confs() {
   assert_file_exists ${DIR}/local_config_sh/WORKSPACE
