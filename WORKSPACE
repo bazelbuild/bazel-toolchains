@@ -13,7 +13,7 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load(
     "//repositories:repositories.bzl",
     bazel_toolchains_repositories = "repositories",
@@ -410,3 +410,11 @@ rbe_autoconfig(
 # Needed for testing purposes. Creates a file that exposes
 # the value of RBE_AUTOCONF_ROOT
 rbe_autoconfig_root(name = "rbe_autoconfig_root")
+
+# Experiment with tags to see if renovate updates them correctly.
+# TODO (suvanjan): Remove this after experimentation is complete.
+http_archive(
+    name = "renovate_src",
+    sha256 = "9e3317713dcaef3c005238022896d3b9e796f2db28e07a3dbac2267a9aab655f",
+    url = "https://github.com/smukherj1/renovate-src/archive/0.24.1.1.tar.gz",
+)
