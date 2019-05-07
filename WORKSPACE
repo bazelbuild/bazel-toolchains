@@ -415,6 +415,6 @@ rbe_autoconfig_root(name = "rbe_autoconfig_root")
 # TODO (suvanjan): Remove this after experimentation is complete.
 http_archive(
     name = "renovate_src",
-    sha256 = "9e3317713dcaef3c005238022896d3b9e796f2db28e07a3dbac2267a9aab655f",
-    url = "https://github.com/smukherj1/renovate-src/archive/0.24.1.1.tar.gz",
+    sha256 = "2e4f7b71caad2daa8677e47a4234d5fbc934aa660ae50cd469bf34b676083640",
+    url = "https://github.com/smukherj1/renovate-src/archive/0.24.1-0.tar.gz",
 )
