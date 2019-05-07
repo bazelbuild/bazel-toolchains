@@ -13,4 +13,4 @@
 # limitations under the License.
 """Commit sha for GoogleContainerTools/base-images-docker."""
 
-version = "ecdd90a8da2c5b07af5e087d0d7b442e5311c5f0"
+version = "0bca96251fff209d58530bd725b04e2026e116c9"
