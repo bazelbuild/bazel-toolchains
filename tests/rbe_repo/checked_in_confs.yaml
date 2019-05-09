@@ -4,7 +4,7 @@
 steps:
 - name: 'marketplace.gcr.io/google/bazel'
   args:
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
@@ -22,7 +22,7 @@ steps:
 
 - name: 'marketplace.gcr.io/google/bazel'
   args:
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
