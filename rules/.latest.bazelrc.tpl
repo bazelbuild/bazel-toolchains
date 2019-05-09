@@ -30,4 +30,4 @@ build:remote --platforms=//%{dest_target}/config:platform
 # Import the default bazelrc file in bazel-toolchains repo.
 # This will only work for tests executed from bazel-toolchains
 # repo.
-try-import %workspace%/bazelrc/.bazelrc.test
+try-import %workspace%/bazelrc/.bazelrc.notoolchain

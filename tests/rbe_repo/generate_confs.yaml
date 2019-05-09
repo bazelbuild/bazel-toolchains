@@ -7,7 +7,7 @@ steps:
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
@@ -28,7 +28,7 @@ steps:
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
@@ -50,7 +50,7 @@ steps:
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
@@ -71,7 +71,7 @@ steps:
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
@@ -92,7 +92,7 @@ steps:
 - name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
   args:
   - /usr/local/bin/bazel
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote

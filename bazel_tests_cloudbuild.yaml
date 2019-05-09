@@ -18,7 +18,7 @@ steps:
 # for this test to pass.
 - name: 'marketplace.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
-  - --bazelrc=bazelrc/.bazelrc.test
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
