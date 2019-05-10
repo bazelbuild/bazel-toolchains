@@ -511,7 +511,7 @@ sh_test(
 file_test(
     name = "rbe_autoconf_config_repos_output_base_run_in_container_test",
     file = "@rbe_autoconf_config_repos_output_base//test:container/run_in_container.sh",
-    regexp = "bazel build @local_config_cc//... @local_config_sh//... @bazel_skylib//...",
+    regexp = "bazel build @local_config_cc//... @local_config_sh//...",
 )
 
 # tests to validate docker image was / was not pulled
