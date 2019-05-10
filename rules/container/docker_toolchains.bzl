@@ -19,6 +19,7 @@ load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "dow
 load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
+load("@io_bazel_rules_docker//container:providers.bzl", "ImageInfo")
 load(":debian_pkg_tar.bzl", _generate_deb_tar = "generate")
 
 LanguageToolLayerInfo = provider(fields = [
@@ -186,6 +187,11 @@ def _language_tool_layer_impl(
             keys = keys,
             installables_tar = ctx.file.installables_tar,
             installation_cleanup_commands = installation_cleanup_commands,
+        ),
+        ImageInfo(
+            container_parts = result[0].container_parts,
+            legacy_run_behavior = result[0].legacy_run_behavior,
+            docker_run_flags = result[0].docker_run_flags,
         ),
     ]
 
