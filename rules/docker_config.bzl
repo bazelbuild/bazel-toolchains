@@ -193,8 +193,12 @@ def _docker_toolchain_autoconfig_impl(ctx):
                           ctx.attr.bazel_rc_version)
         else:
             bazel_url += "/release/bazel-" + ctx.attr.bazel_version
-        bazel_url += "-installer-linux-x86_64.sh"
-        install_bazel_cmd = "/install_bazel_version.sh " + bazel_url
+        if not ctx.attr.build_bazel_src:
+            bazel_url += "-installer-linux-x86_64.sh"
+            install_bazel_cmd = "/install_bazel_version.sh " + bazel_url
+        else:
+            bazel_url += "-dist.zip"
+            install_bazel_cmd = "/build_bazel_version.sh " + bazel_url
 
     # Command to recursively convert soft links to hard links in the config_repos
     deref_symlinks_cmd = []
@@ -318,6 +322,7 @@ docker_toolchain_autoconfig_ = rule(
         "bazel_version": attr.string(),
         "config_repos": attr.string_list(default = ["local_config_cc"]),
         "git_repo": attr.string(),
+        "build_bazel_src": attr.bool(default = False),
         "keys": attr.string_list(),
         "mount_project": attr.string(),
         "packages": attr.string_list(),
@@ -441,6 +446,8 @@ def docker_toolchain_autoconfig(**kwargs):
                 generate toolchain configs. Input "2" if you would like to use rc2.
             use_bazel_head = Download bazel head from github, compile it and use it
                 to run autoconfigure targets.
+            build_bazel_src: Default False, if set to True Bazel will be built from
+                source as opposed to installed using pre-compiled binaries.
             setup_cmd: a customized command that will run as the very first command
                 inside the docker container.
             packages: list of packages to fetch and install in the base image.
@@ -463,9 +470,17 @@ def docker_toolchain_autoconfig(**kwargs):
             fail("required for docker_toolchain_autoconfig", attr = required)
 
     # Input validations
-    if "use_bazel_head" in kwargs and ("bazel_version" in kwargs or "bazel_rc_version" in kwargs):
+    use_bazel_head = "use_bazel_head" in kwargs and kwargs["use_bazel_head"]
+    build_bazel_src = "build_bazel_src" in kwargs and kwargs["build_bazel_src"]
+    if use_bazel_head and ("bazel_version" in kwargs or "bazel_rc_version" in kwargs):
         fail("Only one of use_bazel_head or a combination of bazel_version and" +
              "bazel_rc_version can be set at a time.")
+    if use_bazel_head and build_bazel_src:
+        fail("use_bazel_head cannot be set when build_bazel_src is set to True.")
+    if build_bazel_src and "bazel_rc_version" in kwargs:
+        fail("bazel_rc_version cannot be set when build_bazel_src is set to True.")
+    if build_bazel_src and not "bazel_version" in kwargs:
+        fail("bazel_version must be set when build_bazel_src is set to True.")
 
     packages_is_empty = "packages" not in kwargs or kwargs["packages"] == []
 
@@ -485,6 +500,7 @@ def docker_toolchain_autoconfig(**kwargs):
     kwargs["files"] = [
         _WORKSPACE_PREFIX + "rules:install_bazel_head.sh",
         _WORKSPACE_PREFIX + "rules:install_bazel_version.sh",
+        _WORKSPACE_PREFIX + "rules:build_bazel_version.sh",
     ]
 
     # Do not install packags if 'packages' is not specified or is an empty list.

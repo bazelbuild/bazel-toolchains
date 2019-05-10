@@ -36,6 +36,7 @@ platforms:
     - "//tests/config:ubuntu16_04_clang_autoconfig_test"
     - "//tests/config:external-repo-autoconfig_test"
     - "//tests/config:this-project-repo-autoconfig"
+    - "//tests/config:ubuntu-xenial-build-bazel-src"
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     test_flags:

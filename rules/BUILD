@@ -29,6 +29,7 @@ filegroup(
     srcs = [
         "install_bazel_head.sh",
         "install_bazel_version.sh",
+        "build_bazel_version.sh",
     ],
 )
 

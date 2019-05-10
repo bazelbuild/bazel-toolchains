@@ -46,6 +46,22 @@ toolchain_container(
     ],
 )
 
+toolchain_container(
+    name = "rbe-test-no-bazel",
+    base = "@official_xenial//image",
+    packages = [
+        "curl",
+        "gcc",
+        "git",
+        "g++",
+        "openjdk-8-jdk",
+        "python-dev",
+        "unzip",
+        "wget",
+        "zip",
+    ],
+)
+
 container_test(
     name = "test-rbe-test-xenial-with-pkgs",
     configs = [
