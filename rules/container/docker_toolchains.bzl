@@ -192,7 +192,7 @@ def _language_tool_layer_impl(
             container_parts = result[0].container_parts,
             legacy_run_behavior = result[0].legacy_run_behavior,
             docker_run_flags = result[0].docker_run_flags,
-        )
+        ),
     ]
 
 language_tool_layer_attrs = dicts.add(_container.image.attrs, _key.attrs, _download.attrs, _install.attrs, {
