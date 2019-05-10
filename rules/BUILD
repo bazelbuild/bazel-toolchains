@@ -27,6 +27,7 @@ exports_files([
 filegroup(
     name = "bazel_installers",
     srcs = [
+        "build_bazel_version.sh",
         "install_bazel_head.sh",
         "install_bazel_version.sh",
     ],
