@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("//rules/container:docker_toolchains.bzl", "toolchain_container")
+load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
 licenses(["notice"])  # Apache 2.0
 
@@ -43,4 +44,13 @@ toolchain_container(
         "wget",
         "zip",
     ],
+)
+
+container_test(
+    name = "test-rbe-test-xenial-with-pkgs",
+    configs = [
+        ":tests.yaml",
+    ],
+    image = ":rbe-test-xenial-with-pkgs",
+    verbose = True,
 )
