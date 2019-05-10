@@ -158,8 +158,6 @@ assert_output_base_platform_confs() {
 assert_output_base_custom_confs() {
   assert_file_exists ${DIR}/local_config_sh/WORKSPACE
   assert_file_exists ${DIR}/local_config_sh/BUILD
-  assert_file_exists ${DIR}/bazel_skylib/WORKSPACE
-  assert_file_exists ${DIR}/bazel_skylib/BUILD
 }
 
 EMPTY_FILE=$1

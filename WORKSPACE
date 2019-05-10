@@ -386,7 +386,6 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     config_repos = [
         "local_config_sh",
-        "bazel_skylib",
     ],
     create_testdata = True,
     output_base = "tests/config/rbe_autoconf_config_repos_output_base",
