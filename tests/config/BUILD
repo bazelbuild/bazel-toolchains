@@ -27,6 +27,8 @@ licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+bazel_latest_with_rc = "0.25.0"
+
 bazel_rc = "1"
 
 docker_toolchain_autoconfig(
@@ -81,7 +83,7 @@ docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
     base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
     bazel_rc_version = bazel_rc,
-    bazel_version = _latest_bazel,
+    bazel_version = bazel_latest_with_rc,
     env = gcc_env(),
     tags = ["manual"],
     test = True,

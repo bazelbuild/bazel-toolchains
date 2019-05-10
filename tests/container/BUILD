@@ -51,9 +51,9 @@ toolchain_container(
     base = "@official_xenial//image",
     packages = [
         "curl",
+        "g++",
         "gcc",
         "git",
-        "g++",
         "openjdk-8-jdk",
         "python-dev",
         "unzip",
