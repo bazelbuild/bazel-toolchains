@@ -179,3 +179,8 @@
   title: Toolchain configs for marketplace.gcr.io/google/rbe-ubuntu16-04, Bazel 0.25.1
     (2019/05/08) (#485)
   date: "2019-05-08"
+- commitSHA: 92dd8a7a518a2fb7ba992d47c8b38299fe0be825
+  digest: 88e818f9f03628eef609c8429c210ecf265ffe46c2af095f36c7ef8b1855fef5
+  title: Toolchain configs for marketplace.gcr.io/google/rbe-ubuntu16-04, Bazel 0.25.2
+    (2019/05/14) (#503)
+  date: "2019-05-14"
