@@ -279,17 +279,17 @@ def _toolchain_container_impl(ctx):
     # TODO(ngiraldo): we rewrite env and symlinks if there are conficts,
     # warn the user of conflicts or error out.
     for layer in ctx.attr.language_layers:
-        tars.extend(layer.tars)
-        files.extend(layer.input_files)
-        env.update(layer.env)
-        symlinks.update(layer.symlinks)
-        packages.extend(layer.packages)
-        additional_repos.extend(layer.additional_repos)
-        keys.extend(layer.keys)
-        if layer.installables_tar:
-            installables_tars.append(layer.installables_tar)
-        if layer.installation_cleanup_commands:
-            installation_cleanup_commands += (" && " + layer.installation_cleanup_commands)
+        tars.extend(layer[LanguageToolLayerInfo].tars)
+        files.extend(layer[LanguageToolLayerInfo].input_files)
+        env.update(layer[LanguageToolLayerInfo].env)
+        symlinks.update(layer[LanguageToolLayerInfo].symlinks)
+        packages.extend(layer[LanguageToolLayerInfo].packages)
+        additional_repos.extend(layer[LanguageToolLayerInfo].additional_repos)
+        keys.extend(layer[LanguageToolLayerInfo].keys)
+        if layer[LanguageToolLayerInfo].installables_tar:
+            installables_tars.append(layer[LanguageToolLayerInfo].installables_tar)
+        if layer[LanguageToolLayerInfo].installation_cleanup_commands:
+            installation_cleanup_commands += (" && " + layer[LanguageToolLayerInfo].installation_cleanup_commands)
     tars.extend(ctx.files.tars)
     env.update(ctx.attr.env)
     symlinks.update(ctx.attr.symlinks)

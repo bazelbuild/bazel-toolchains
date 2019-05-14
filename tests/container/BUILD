@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//rules/container:docker_toolchains.bzl", "toolchain_container")
+load("//rules/container:docker_toolchains.bzl", "language_tool_layer", "toolchain_container")
 load("@io_bazel_rules_docker//contrib:test.bzl", "container_test")
 
 licenses(["notice"])  # Apache 2.0
@@ -46,15 +46,23 @@ toolchain_container(
     ],
 )
 
+language_tool_layer(
+    name = "java-layer-test",
+    base = "@official_xenial//image",
+    packages = [
+        "openjdk-8-jdk",
+    ],
+)
+
 toolchain_container(
     name = "rbe-test-no-bazel",
     base = "@official_xenial//image",
+    language_layers = [":java-layer-test"],
     packages = [
         "curl",
         "g++",
         "gcc",
         "git",
-        "openjdk-8-jdk",
         "python-dev",
         "unzip",
         "wget",
