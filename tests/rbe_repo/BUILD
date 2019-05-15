@@ -514,6 +514,27 @@ file_test(
     regexp = "bazel build @local_config_cc//... @local_config_sh//...",
 )
 
+# Tests for output_base + config_dir. These require RBE_AUTOCONF_ROOT env
+# variable to be set
+sh_test(
+    name = "rbe_autoconf_output_base_config_dir_test",
+    srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "tests/config/rbe_autoconf_output_base",
+        "test_config_dir",
+        _ubuntu1604_bazel,
+        "assert_output_base_cc_confs",
+        "assert_output_base_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_config_dir//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
 # tests to validate docker image was / was not pulled
 sh_test(
     name = "rbe_autoconf_generate_no_docker_pull_test",

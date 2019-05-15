@@ -391,6 +391,15 @@ rbe_autoconfig(
     output_base = "tests/config/rbe_autoconf_config_repos_output_base",
 )
 
+rbe_autoconfig(
+    name = "rbe_autoconf_output_base_config_dir",
+    bazel_version = _ubuntu1604_bazel,
+    config_dir = "test_config_dir",
+    create_testdata = True,
+    output_base = "tests/config/rbe_autoconf_output_base",
+    use_checked_in_confs = "False",
+)
+
 # Test to validate no docker image is pulled when a custom container
 # is used where no cc_configs are needed and java_home is passed
 # explicitly.
