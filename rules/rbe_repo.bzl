@@ -392,7 +392,12 @@ def _validate_host(ctx):
         docker_tool_path = ctx.which("docker")
     if not docker_tool_path:
         fail("Cannot run rbe_autoconfig as 'docker' was not found on the " +
-             "path and environment variable DOCKER_PATH was not set.")
+             "path and environment variable DOCKER_PATH was not set. " +
+             "rbe_autoconfig attempts to pull a docker container if a " +
+             "toolchain config was not found for the version of Bazel " +
+             "(selected via attr or implicitly identified). If you do " +
+             "not want rbe_autoconfig to ever attempt to pull a docker " +
+             "container, please use attr 'use_checked_in_confs = \"Force\"'.")
     result = ctx.execute([docker_tool_path, "ps"])
     if result.return_code != 0:
         fail("Cannot run rbe_autoconfig as running '%s ps' returned a " +
