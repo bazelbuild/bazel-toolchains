@@ -1,7 +1,7 @@
 steps:
 # Launch a RBE hello world build + unit test using the @rbe_default toolchain
 # configs.
-- name: 'marketplace.gcr.io/google/bazel'
+- name: 'l.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/.bazelrc
   - test
@@ -12,7 +12,7 @@ steps:
 
 # Launch a RBE hello world build + unit test using the manually produced
 # configs for Bazel 0.25.0
-- name: 'marketplace.gcr.io/google/bazel'
+- name: 'l.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/bazel-0.25.0.bazelrc
   - test

@@ -4,9 +4,8 @@
 # use those for RBE builds.
 steps:
 # Builds rbe_autoconfig targets
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - build
   - --
   - "@rbe_autoconf_output_base//..."
@@ -15,9 +14,8 @@ steps:
 
 # Tests rbe_autoconf when output_base is used produces outputs that are
 # usable for an RBE build.
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - --bazelrc=tests/config/rbe_autoconf_output_base/.latest.bazelrc
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
@@ -29,9 +27,8 @@ steps:
 
 # Tests rbe_autoconf when output_base and config_repos are used
 # produces outputs that are usable for an RBE build.
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - --bazelrc=tests/config/rbe_autoconf_output_base/.latest.bazelrc
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
