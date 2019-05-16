@@ -4,9 +4,8 @@
 # Build.
 steps:
 # Tests rbe_autoconf generated artifacts are usable for an RBE build.
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
@@ -25,9 +24,8 @@ steps:
 
 # Tests rbe_autoconf generated artifacts, when config_repos attr is used,
 # are usable for an RBE build.
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
@@ -47,9 +45,8 @@ steps:
 
 # Tests rbe_autoconf generated artifacts, when an older rbe container
 # is selected, are usable for an RBE build.
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
@@ -68,9 +65,8 @@ steps:
 
 # Tests rbe_autoconf generated artifacts, when tag is used
 # to identify the container, are usable for an RBE build.
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
@@ -89,9 +85,8 @@ steps:
 
 # Tests rbe_autoconf generated artifacts, when a custom container is used,
 # are usable for an RBE build.
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - /usr/local/bin/bazel
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test

@@ -2,7 +2,7 @@
 # targets. Their purpose is to verify the configs are usable on RBE.
 # Tests below use checked in configs.
 steps:
-- name: 'marketplace.gcr.io/google/bazel'
+- name: 'l.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
@@ -20,7 +20,7 @@ steps:
   - --platforms=@rbe_autoconf_checked_in//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
 
-- name: 'marketplace.gcr.io/google/bazel'
+- name: 'l.gcr.io/google/bazel'
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
