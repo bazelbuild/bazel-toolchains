@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # This bash script provides an entry point for checks for
-# rbe_autoconfig that use output_base.
+# rbe_autoconfig that use output_base and config_dir.
 # It wraps around rbe_autoconf_checks in order
 # to resolve the directory where files are to be checked.
 # Usage: Use only from an sh_test target.
@@ -23,7 +23,9 @@
 # has a single line with the absolute path to the root of the project.
 # The second argument is the output_base declared in the rbe_autoconfig
 # rule that is tested.
-# The third argument is the Bazel version.
+# Third argument is the config_dir declared in the rbe_autoconfig
+# rule that is tested.
+# The fourth argument is the Bazel version.
 # All remaining args are interpreted as calls to functions in
 # rbe_autoconf_checks.
 
@@ -31,9 +33,8 @@ set -e
 
 AUTOCONF_ROOT=$1
 OUTPUT_BASE=$2
-BAZEL_VERSION=$3
+CONFIG_DIR=$3
+BAZEL_VERSION=$4
 
-OUTPUT_BASE_EMPTY=$(cat ${AUTOCONF_ROOT})/${OUTPUT_BASE}/bazel_${BAZEL_VERSION}/empty
-set -- ${OUTPUT_BASE_EMPTY} "${@:4}"
-
-source tests/rbe_repo/rbe_autoconf_checks.sh
+OUTPUT_BASE_EMPTY=$(cat ${AUTOCONF_ROOT})/${OUTPUT_BASE}/bazel_${BAZEL_VERSION}/CONFIG_DIR/empty
+set -- ${OUTPUT_BASE_EMPTY} "${@:5}"
