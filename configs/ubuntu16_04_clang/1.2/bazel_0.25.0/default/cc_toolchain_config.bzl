@@ -93,6 +93,7 @@ def _windows_msvc_impl(ctx):
 
     cxx_builtin_include_directories = [
         "/usr/local/include",
+        "/usr/local/lib/clang/8.0.0/include",
         "/usr/local/lib/clang/9.0.0/include",
         "/usr/include/x86_64-linux-gnu",
         "/usr/include",
@@ -1375,6 +1376,7 @@ def _impl(ctx):
 
     cxx_builtin_include_directories = [
         "/usr/local/include",
+        "/usr/local/lib/clang/8.0.0/include",
         "/usr/local/lib/clang/9.0.0/include",
         "/usr/include/x86_64-linux-gnu",
         "/usr/include",
