@@ -25,7 +25,7 @@ def parse_rc(bazel_version):
         bazel_version: The Bazel version string.
 
     Returns:
-        The integer RC number if the given bazel version was a RC version.
+        The integer RC number if the given bazel version was a RC version or None.
     """
     if bazel_version.find("rc") != -1:
         rc = ""
@@ -37,6 +37,7 @@ def parse_rc(bazel_version):
                 break
             rc += c
         return int(rc)
+    return None
 
 def _check_bazel_version(bazel_version_fallback):
     if "bazel_version" not in dir(native):
