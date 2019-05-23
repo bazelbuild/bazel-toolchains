@@ -101,7 +101,7 @@ gcs_file(
     sha256 = "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
 )
 
-load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig", "rbe_autoconfig_root")
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
 rbe_autoconfig(
     name = "rbe_default",
@@ -414,6 +414,8 @@ rbe_autoconfig(
     registry = "gcr.io",
     repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
 )
+
+load("//rules/rbe_repo:util.bzl", "rbe_autoconfig_root")
 
 # Needed for testing purposes. Creates a file that exposes
 # the value of RBE_AUTOCONF_ROOT
