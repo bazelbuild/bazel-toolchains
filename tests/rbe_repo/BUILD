@@ -278,10 +278,13 @@ file_test(
 
 # Tests validate run_and_extract uses mount volumes (-v) vs
 # data volumes.
+# Set with tag 'manual' as this test messes up others if the
+# external repos are pulled in parallel.
 file_test(
     name = "rbe_autoconf_no_copy_resources_run_and_extract_test",
     file = "@rbe_autoconf_no_copy_resources//test:run_and_extract.sh",
     regexp = "realpath",
+    tags = ["manual"],
 )
 
 file_test(
@@ -437,10 +440,11 @@ file_test(
 # Tests for output_base. These require RBE_AUTOCONF_ROOT env variable to be set
 sh_test(
     name = "rbe_autoconf_output_base_test",
-    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
         "tests/config/rbe_autoconf_output_base",
+        "9.0.0",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",
         "assert_output_base_java_confs",
@@ -454,8 +458,25 @@ sh_test(
 )
 
 sh_test(
+    name = "rbe_autoconf_output_base_external_repo_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rbe_autoconf_output_base//test:empty)",
+        "assert_basic_cofig",
+        "assert_no_checked_in_confs",
+        "assert_checked_in_cc_confs",
+        "assert_java_confs",
+        "assert_output_base_export_tar",
+    ],
+    data = [
+        "@rbe_autoconf_output_base//test:empty",
+        "@rbe_autoconf_output_base//test:exported_testdata",
+    ],
+)
+
+sh_test(
     name = "rbe_autoconf_output_base_no_java_test",
-    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
         "tests/config/rbe_autoconf_output_base_no_java",
@@ -473,10 +494,11 @@ sh_test(
 
 sh_test(
     name = "rbe_autoconf_output_base_no_cc_test",
-    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
         "tests/config/rbe_autoconf_output_base_no_cc",
+        "9.0.0",
         _ubuntu1604_bazel,
         "assert_output_base_no_cc_confs",
         "assert_output_base_java_confs",
@@ -491,10 +513,11 @@ sh_test(
 
 sh_test(
     name = "rbe_autoconf_config_repos_output_base_test",
-    srcs = [":rbe_autoconf_output_base_checks.sh"],
+    srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
         "tests/config/rbe_autoconf_config_repos_output_base",
+        "9.0.0",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",
         "assert_output_base_java_confs",

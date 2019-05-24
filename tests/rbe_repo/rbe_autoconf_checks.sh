@@ -155,6 +155,13 @@ assert_output_base_custom_confs() {
   assert_file_exists ${DIR}/local_config_sh/BUILD
 }
 
+# Checks that configs.tar file to export configs was generated in the remote repo
+# when output_base was used
+assert_output_base_export_tar() {
+  assert_file_exists ${DIR}/configs.tar
+  assert_file_exists ${DIR}/BUILD
+}
+
 EMPTY_FILE=$1
 DIR=$(dirname "${EMPTY_FILE}")
 for var in "$@"

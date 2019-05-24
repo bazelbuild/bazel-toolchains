@@ -20,10 +20,15 @@ load(
     "PLATFORM_DIR",
     "print_exec_results",
 )
+load(
+    "//rules/rbe_repo:repo_confs.bzl",
+    "string_lists_to_config",
+)
 
-def expand_outputs(ctx, bazel_version, project_root):
-    """
-    Copies all outputs of the autoconfig rule to a directory in the project.
+def expand_outputs(ctx, bazel_version, project_root, config_name):
+    """Copies all outputs of the autoconfig rule to a directory in the project.
+
+    Produces an output.zip file at the root of the repo with all contents.
 
     Also deletes the artifacts from the repo directory as they are only
     meant to be used from the output_base.
@@ -32,82 +37,145 @@ def expand_outputs(ctx, bazel_version, project_root):
         ctx: The Bazel context.
         bazel_version: The Bazel version string.
         project_root: The output directory where configs will be copied to.
+        config_name: provided/selected name for the configs
     """
-    if ctx.attr.output_base:
-        ctx.report_progress("copying outputs to project directory")
-        dest = project_root + "/" + ctx.attr.output_base + "/bazel_" + bazel_version + "/"
-        if ctx.attr.config_dir:
-            dest += ctx.attr.config_dir + "/"
-        platform_dest = dest + PLATFORM_DIR + "/"
-        java_dest = dest + JAVA_CONFIG_DIR + "/"
-        cc_dest = dest + CC_CONFIG_DIR + "/"
+    ctx.report_progress("copying outputs to project directory")
+    dest = project_root + "/" + ctx.attr.rbe_repo["output_base"]
+    if config_name:
+        dest += "/" + config_name
+    dest += "/bazel_" + bazel_version + "/"
+    platform_dest = dest + PLATFORM_DIR + "/"
+    java_dest = dest + JAVA_CONFIG_DIR + "/"
+    cc_dest = dest + CC_CONFIG_DIR + "/"
 
-        # Create the directories
-        result = ctx.execute(["mkdir", "-p", platform_dest])
-        print_exec_results("create platform output dir", result)
+    # Create the directories
+    result = ctx.execute(["mkdir", "-p", platform_dest])
+    print_exec_results("create platform output dir", result)
 
-        # Copy the local_config_cc files to dest/{CC_CONFIG_DIR}/
-        if ctx.attr.create_cc_configs:
-            result = ctx.execute(["mkdir", "-p", cc_dest])
-            print_exec_results("create cc output dir", result)
+    files_to_tar = []
 
-            # Get the files that were created in the CC_CONFIG_DIR
-            ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % CC_CONFIG_DIR), True)
-            result = ctx.execute(["./local_config_files.sh"])
-            print_exec_results("resolve autoconf files", result)
-            autoconf_files = result.stdout.splitlines()[0].split(" ")
-            args = ["cp"] + autoconf_files + [cc_dest]
-            result = ctx.execute(args)
-            print_exec_results("copy local_config_cc outputs", result, True, args)
-            args = ["rm"] + autoconf_files
-            result = ctx.execute(args)
-            print_exec_results("remove local_config_cc outputs from repo dir", result, True, args)
+    # Copy the local_config_cc files to dest/{CC_CONFIG_DIR}/
+    if ctx.attr.create_cc_configs:
+        result = ctx.execute(["mkdir", "-p", cc_dest])
+        print_exec_results("create cc output dir", result)
 
-        # Copy the dest/{JAVA_CONFIG_DIR}/BUILD file
-        if ctx.attr.create_java_configs:
-            result = ctx.execute(["mkdir", "-p", java_dest])
-            print_exec_results("create java output dir", result)
-            args = ["cp", str(ctx.path(JAVA_CONFIG_DIR + "/BUILD")), java_dest]
-            result = ctx.execute(args)
-            print_exec_results("copy java_runtime BUILD", result, True, args)
-            args = ["rm", str(ctx.path(JAVA_CONFIG_DIR + "/BUILD"))]
-            result = ctx.execute(args)
-            print_exec_results("remove java_runtime BUILD from repo dir", result, True, args)
-
-        # Copy the dest/{PLATFORM_DIR}/BUILD file
-        args = ["cp", str(ctx.path(PLATFORM_DIR + "/BUILD")), platform_dest]
+        # Get the files that were created in the CC_CONFIG_DIR
+        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % CC_CONFIG_DIR), True)
+        result = ctx.execute(["./local_config_files.sh"])
+        print_exec_results("resolve autoconf files", result)
+        autoconf_files = result.stdout.splitlines()[0].split(" ")
+        files_to_tar += autoconf_files
+        args = ["cp"] + autoconf_files + [cc_dest]
         result = ctx.execute(args)
-        print_exec_results("copy platform BUILD", result, True, args)
-        args = ["rm", str(ctx.path(PLATFORM_DIR + "/BUILD"))]
+        print_exec_results("copy local_config_cc outputs", result, True, args)
+
+    # Copy the dest/{JAVA_CONFIG_DIR}/BUILD file
+    if ctx.attr.create_java_configs:
+        result = ctx.execute(["mkdir", "-p", java_dest])
+        print_exec_results("create java output dir", result)
+        args = ["cp", str(ctx.path(JAVA_CONFIG_DIR + "/BUILD")), java_dest]
+        files_to_tar += ["./" + JAVA_CONFIG_DIR + "/BUILD"]
         result = ctx.execute(args)
-        print_exec_results("Remove platform BUILD from repo dir", result, True, args)
+        print_exec_results("copy java_runtime BUILD", result, True, args)
 
-        # Copy any additional external repos that were requested
-        if ctx.attr.config_repos:
-            for repo in ctx.attr.config_repos:
-                args = ["bash", "-c", "cp -r %s %s" % (repo, dest)]
-                result = ctx.execute(args)
-                print_exec_results("copy %s repo files" % repo, result, True, args)
-                args = ["rm", "-dr", "./%s" % repo]
-                result = ctx.execute(args)
-                print_exec_results("Remove %s repo files from repo dir" % repo, result, True, args)
+    # Copy the dest/{PLATFORM_DIR}/BUILD file
+    args = ["cp", str(ctx.path(PLATFORM_DIR + "/BUILD")), platform_dest]
+    result = ctx.execute(args)
+    print_exec_results("copy platform BUILD", result, True, args)
+    files_to_tar += ["./" + PLATFORM_DIR + "/BUILD"]
 
-        dest_target = ctx.attr.output_base + "/bazel_" + bazel_version
-        if ctx.attr.config_dir:
-            dest_target += ctx.attr.config_dir + "/"
-        template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:.latest.bazelrc.tpl"))
-        ctx.template(
-            ".latest.bazelrc",
-            template,
-            {
-                "%{dest_target}": dest_target,
-            },
-            False,
-        )
-        args = ["mv", str(ctx.path("./.latest.bazelrc")), project_root + "/" + ctx.attr.output_base + "/"]
-        result = ctx.execute(args)
-        print_exec_results("Move .latest.bazelrc file to outputs", result, True, args)
+    # Copy any additional external repos that were requested
+    if ctx.attr.config_repos:
+        for repo in ctx.attr.config_repos:
+            args = ["bash", "-c", "cp -r %s %s" % (repo, dest)]
+            result = ctx.execute(args)
+            print_exec_results("copy %s repo files" % repo, result, True, args)
+            files_to_tar += ["./" + repo + "/*"]
 
-        # TODO(ngiraldo): Generate new BUILD files that point to checked in configs
-        # Create an empty BUILD file so the repo can be built
-        ctx.file("BUILD", "", False)
+    # Create a tar file with all outputs and then delete the outputs
+    args = ["bash", "-c", "tar -cvf configs.tar " + " ".join(files_to_tar)]
+    result = ctx.execute(args)
+    print_exec_results("Create configs.tar with all generated files", result, True, args)
+    args = ["bash", "-c", "rm -dr " + " ".join(files_to_tar)]
+    result = ctx.execute(args)
+    print_exec_results("Remove generated files from repo dir", result, True, args)
+
+    dest_target = ctx.attr.rbe_repo["output_base"]
+    if config_name:
+        dest_target += "/" + config_name
+    dest_target += "/bazel_" + bazel_version
+    template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:.latest.bazelrc.tpl"))
+    ctx.template(
+        ".latest.bazelrc",
+        template,
+        {
+            "%{dest_target}": dest_target,
+        },
+        False,
+    )
+    args = ["mv", str(ctx.path("./.latest.bazelrc")), project_root + "/" + ctx.attr.rbe_repo["output_base"] + "/"]
+    result = ctx.execute(args)
+    print_exec_results("Move .latest.bazelrc file to outputs", result, True, args)
+
+    # Create an empty BUILD file so the repo can be built
+    ctx.file("BUILD", """package(default_visibility = ["//visibility:public"])
+exports_files(["configs.tar"])""", False)
+
+def create_versions_file(ctx, config_name, digest, java_home, project_root):
+    """Creates the versions.bzl file.
+
+    Args:
+        ctx: The Bazel context.
+        digest: The digest of the container that was pulled to generate configs.
+        project_root: The output directory where the versions.bzl file will be copied to.
+        config_name: provided/selected name for the configs
+        java_home: the provided/selected location for java_home
+    """
+
+    # un-flatten rbe_repo_configs
+    versions_output = ["# Generated file, do not modify by hand"]
+    versions_output += ["# Generated by '%s' rbe_autoconfig rule" % ctx.attr.name]
+    configs_list = []
+
+    # Create the list of config_repo structs
+    configs = string_lists_to_config(ctx, config_name, java_home)
+    index = 0
+    default_config = None
+    for config in configs:
+        if config.name == ctx.attr.rbe_repo["default_config"]:
+            default_config = "config%s" % str(index)
+        versions_output += ["config%s = %s" % (str(index), str(config))]
+        configs_list += ["config%s" % str(index)]
+        index += 1
+
+    # Update the ctx.attr.bazel_to_config_version_map and
+    # ctx.attr.container_to_config_version_map with the new generated
+    # config info
+    bazel_to_config_version_map = ctx.attr.bazel_to_config_version_map
+    if ctx.attr.bazel_version not in bazel_to_config_version_map.keys():
+        bazel_to_config_version_map = dict(ctx.attr.bazel_to_config_version_map)
+        bazel_to_config_version_map.update({ctx.attr.bazel_version: [config_name]})
+    if config_name not in bazel_to_config_version_map[ctx.attr.bazel_version]:
+        bazel_to_config_version_map = dict(bazel_to_config_version_map.items())
+        config_list = bazel_to_config_version_map.pop(ctx.attr.bazel_version) + [config_name]
+        bazel_to_config_version_map.update({ctx.attr.bazel_version: config_list})
+    container_to_config_version_map = ctx.attr.container_to_config_version_map
+    if digest not in container_to_config_version_map.keys():
+        container_to_config_version_map = dict(ctx.attr.container_to_config_version_map.items())
+        container_to_config_version_map.update({digest: config_name})
+    versions_output += ["def configs():"]
+    versions_output += ["    return [%s]" % ",".join(configs_list)]
+    versions_output += ["def bazel_to_config_versions():"]
+    versions_output += ["    return %s" % bazel_to_config_version_map]
+    versions_output += ["LATEST = \"%s\"" % digest]
+    versions_output += ["def container_to_config_version():"]
+    versions_output += ["    return %s" % container_to_config_version_map]
+    versions_output += ["DEFAULT_CONFIG = %s" % default_config]
+    ctx.file("versions.bzl", "\n".join(versions_output), False)
+
+    # Export the versions file (if requested)
+    result = ctx.execute(["mkdir", "-p", project_root + "/" + ctx.attr.rbe_repo["output_base"] + "/"])
+    print_exec_results("create output_base output dir", result)
+    args = ["mv", str(ctx.path("versions.bzl")), project_root + "/" + ctx.attr.rbe_repo["output_base"] + "/"]
+    result = ctx.execute(args)
+    print_exec_results("Move generated versions.bzl to output_base", result, True, args)

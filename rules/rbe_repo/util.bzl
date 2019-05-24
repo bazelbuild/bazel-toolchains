@@ -13,6 +13,12 @@
 # limitations under the License.
 """Utils for rbe_autoconfig."""
 
+load(
+    "//configs/ubuntu16_04_clang:versions.bzl",
+    RBE_UBUNTU16_04_DEFAULT_CONFIG = "DEFAULT_CONFIG",
+    RBE_UBUNTU16_04_LATEST = "LATEST",
+)
+
 _VERBOSE = False
 
 DOCKER_PATH = "DOCKER_PATH"
@@ -21,12 +27,22 @@ JAVA_CONFIG_DIR = "java"
 PLATFORM_DIR = "config"
 AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 
-def resolve_project_root(ctx):
-    """Returns the project_root . 
+def rbe_default_repo():
+    return {
+        "repo_name": "bazel_toolchains",
+        "output_base": "configs/ubuntu16_04_clang",
+        "container_repo": "google/rbe-ubuntu16-04",
+        "container_registry": "marketplace.gcr.io",
+        "latest_container": RBE_UBUNTU16_04_LATEST,
+        "default_config": RBE_UBUNTU16_04_DEFAULT_CONFIG,
+    }
 
-       Returns the project_root that will be used to copy sources
-       to the container (if needed) and whether or not the default cc project
-       was selected.
+def resolve_project_root(ctx):
+    """Returns the project_root .
+
+    Returns the project_root that will be used to copy sources
+    to the container (if needed) and whether or not the default cc project
+    was selected.
 
     Args:
       ctx: the Bazel context object.
@@ -35,20 +51,21 @@ def resolve_project_root(ctx):
         Returns the project_root.
     """
 
-    # If not using checked-in configs and output_base was selected or
+    # If not using checked-in configs and either export configs was selected or
     # config_repos were requested we need to resolve the project_root
-    # using the env variable
+    # using the env variable.
     project_root = None
     use_default_project = None
-    if (not ctx.attr.config_version and ctx.attr.output_base) or ctx.attr.config_repos:
+    if not ctx.attr.config_version and (ctx.attr.export_configs or ctx.attr.config_repos):
         project_root = ctx.os.environ.get(AUTOCONF_ROOT, None)
         print("RBE_AUTOCONF_ROOT is %s" % project_root)
 
-        # TODO (nlopezgi): validate AUTOCONF_ROOT points to a valid Bazel project
+        # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
         use_default_project = False
         if not project_root:
-            fail(("%s env variable must be set for rbe_autoconfig" +
-                  " to function properly when output_base or config_repos are set") % AUTOCONF_ROOT)
+            fail(("%s env variable must be set for rbe_autoconfig " +
+                  "to function properly when export_configs is True " +
+                  "or config_repos are set") % AUTOCONF_ROOT)
     elif not ctx.attr.config_version:
         # TODO(nlopezgi): consider using native.existing_rules() to validate
         # bazel_toolchains repo exists.
@@ -101,10 +118,10 @@ def validate_host(ctx):
 def print_exec_results(prefix, exec_result, fail_on_error = False, args = None):
     """Convenience method to print results of execute. 
 
-       Convenience method to print results of execute when Verbose logging
-       is enabled.
-       Also provides functionality to fail on errors if needed.
-       Verbose logging is enabled via a global var in this bzl file
+    Convenience method to print results of execute when Verbose logging
+    is enabled.
+    Also provides functionality to fail on errors if needed.
+    Verbose logging is enabled via a global var in this bzl file
 
     Args:
       prefix: A prefix to add to logs.
@@ -125,10 +142,10 @@ def print_exec_results(prefix, exec_result, fail_on_error = False, args = None):
 def copy_to_test_dir(ctx):
     """Copies  contents of  external repo test directory.
 
-       Copies all contents of the external repo to a test directory,
-       modifies name of all BUILD files (to enable file_test to operate on them), and
-       creates a root BUILD file in test directory with a filegroup that contains
-       all files.
+     Copies all contents of the external repo to a test directory,
+     modifies name of all BUILD files (to enable file_test to operate on them), and
+     creates a root BUILD file in test directory with a filegroup that contains
+     all files.
 
     Args:
       ctx: the Bazel context object.
