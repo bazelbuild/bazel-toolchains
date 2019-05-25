@@ -115,9 +115,14 @@ def validateUseOfCheckedInConfigs(
             return None, None
 
     if not bazel_to_config_version_map.get(bazel_version):
-        print(("%s not using checked in configs; Bazel version %s was picked/selected " +
-               "but no checked in config was found in map %s") % (name, bazel_version, str(bazel_to_config_version_map)))
-        return None, None
+        # if Bazel version is a minor version above .0, lets try to default to the .0 config
+        bazel_version_split = bazel_version.split(".")
+        if int(bazel_version_split[2]) > 0:
+            bazel_version = ("%s.%s.%s") % (bazel_version_split[0], bazel_version_split[1], "0")
+            if not bazel_to_config_version_map.get(bazel_version):
+                print(("%s not using checked in configs; Bazel version %s was picked/selected " +
+                       "but no checked in config was found in map %s") % (name, bazel_version, str(bazel_to_config_version_map)))
+                return None, None
 
     # Find a config for the given version of bazel
     bazel_compat_configs = bazel_to_config_version_map.get(bazel_version)

@@ -247,6 +247,20 @@ def _rbe_autoconfig_impl(ctx):
         bazel_version_debug += " rc%s" % ctx.attr.bazel_rc_version
     print("%s is used in %s." % (bazel_version_debug, ctx.attr.name))
 
+    if ctx.attr.use_checked_in_confs == CHECKED_IN_CONFS_FORCE and not ctx.attr.config_version:
+        fail(("Target '{name}' failed: use_checked_in_confs was set to '{force}' " +
+              "but no checked-in configs were found. " +
+              "Please check your pin to '@{rbe_repo_name}' is up " +
+              "to date, and that you are using a release version of " +
+              "Bazel. You can also explicitly set the version of Bazel to " +
+              "an older version in the '{name}' rbe_autoconfig target " +
+              "which may or may not work with the version you are currently " +
+              "running with.").format(
+            name = ctx.attr.name,
+            force = CHECKED_IN_CONFS_FORCE,
+            rbe_repo_name = ctx.attr.rbe_repo["repo_name"],
+        ))
+
     name = ctx.attr.name
     image_name = None
     if ctx.attr.digest:
@@ -557,6 +571,16 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
+        "use_checked_in_confs": attr.string(
+            default = CHECKED_IN_CONFS_TRY,
+            doc = ("Default: 'Try'. Try to look for checked in configs " +
+                   "before generating them. If set to 'False' (string) the " +
+                   "rule will allways attempt to generate the configs " +
+                   "by pulling a toolchain container and running Bazel inside. " +
+                   "If set to 'Force' rule will error out if no checked-in" +
+                   "configs were found."),
+            values = CHECKED_IN_CONFS_VALUES,
+        ),
     },
     environ = [
         AUTOCONF_ROOT,
@@ -768,12 +792,6 @@ Must point to configs() in versions.bzl
         use_checked_in_confs = use_checked_in_confs,
     )
 
-    if use_checked_in_confs == CHECKED_IN_CONFS_FORCE and not config_version:
-        fail(("use_checked_in_confs was set to \"%s\" but no checked-in configs " +
-              "were found. Please check your pin to bazel-toolchains is up " +
-              "to date, and that you are using a release version of " +
-              "Bazel.") % CHECKED_IN_CONFS_FORCE)
-
     # If the user selected no digest explicitly, and one was returned
     # by validateUseOfCheckedInConfigs, use that one.
     if not digest and selected_digest:
@@ -849,4 +867,5 @@ Must point to configs() in versions.bzl
         repository = repository,
         tag = tag,
         target_compatible_with = target_compatible_with,
+        use_checked_in_confs = use_checked_in_confs,
     )
