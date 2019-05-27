@@ -147,15 +147,23 @@ def validateUseOfCheckedInConfigs(
 
     # If a digest was provided/selected lets try to find a config that will work
     if digest:
-        config = container_to_config_version_map.get(digest)
-        if not config:
-            print(("%s not using checked in configs; digest %s was picked/selected " +
-                   "but no checked in config was found in map %s") % (name, digest, str(container_to_config_version_map)))
+        compatible_configs = container_to_config_version_map.get(digest)
+        if not compatible_configs:
+            print(("%s not using checked in configs; digest '%s' was picked/selected " +
+                   "but no compatible checked in config was found in " +
+                   "map '%s'") % (name, digest, str(container_to_config_version_map)))
             return None, None
-        if requested_config and config != requested_config:
-            print(("%s not using checked in configs; config with name %s was requested " +
-                   "but %s was found for the container with digest %s") % (name, requested_config, config, digest))
+        if requested_config and requested_config not in compatible_configs:
+            print(("%s not using checked in configs; config with name '%s' was requested " +
+                   "but was not found in '%s' compatible configs for the " +
+                   "container with digest '%s'") % (name, requested_config, compatible_configs, digest))
             return None, None
+
+        # pick a config: first try the default
+        if (rbe_repo["default_config"] != "" and rbe_repo["default_config"].name in compatible_configs):
+            config = rbe_repo["default_config"].name
+        else:
+            config = compatible_configs[0]
 
     # If a config was requested or found via digest, lets see if its compatible with
     # the selected Bazel version
@@ -208,23 +216,23 @@ def validateUseOfCheckedInConfigs(
                   (name, bazel_version, str(bazel_compat_configs), env, config_repos, create_java_configs, create_cc_configs))
             return None, None
 
-        # Resolve the digest, for now:
-        # Try to use latest if that works.
-        # If not, pick the first container that works.
-        if (config and rbe_repo.get("latest_container") and
-            container_to_config_version_map[rbe_repo["latest_container"]] == config):
-            digest = rbe_repo["latest_container"]
-        if not digest:
-            for key in container_to_config_version_map.keys():
-                if container_to_config_version_map[key] == config:
-                    digest = key
-                    break
+    # Resolve the digest:
+    # First, try to use latest if that works.
+    # If not, pick the first container that works.
+    if (config and rbe_repo.get("latest_container") and
+        config in container_to_config_version_map[rbe_repo["latest_container"]]):
+        digest = rbe_repo["latest_container"]
+    if not digest:
+        for key in container_to_config_version_map.keys():
+            if config in container_to_config_version_map[key]:
+                digest = key
+                break
     if not digest:
         print(("%s not using checked in configs; no digest was found " +
-               "for config %s in %s") % (name, config, container_to_config_version_map))
+               "for config '%s' in %s") % (name, config, container_to_config_version_map))
         return None, None
 
-    print("%s is using checked-in configs %s" % (name, config))
+    print("%s is using checked-in configs '%s'" % (name, config))
     return config, digest
 
 def _check_config(

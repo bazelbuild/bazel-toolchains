@@ -62,6 +62,6 @@ LATEST = "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07
 # versions.
 def container_to_config_version():
     return {
-        "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": "test024config",
-        "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b": "test025config",
+        "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": ["test024config"],
+        "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b": ["test025config"],
     }

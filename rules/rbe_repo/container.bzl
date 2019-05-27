@@ -214,7 +214,8 @@ def run_and_extract(
           local_config_cc
       docker_tool_path: path to the docker binary.
       image_name: name of the image to pull.
-      project_root: the absolute path to the root of the project
+      project_root: the absolute path to the root of the project that will
+          be mounted/copied to the container
       use_default_project: whether or not to use the default project to generate configs
     """
     outputs_tar = ctx.attr.name + "_out.tar"
@@ -241,10 +242,10 @@ def run_and_extract(
     clean_data_volume_cmd = ""
     if ctx.attr.copy_resources:
         copy_data_cmd.append("data_volume=$(docker create -v " + _ROOT_DIR + " " + image_name + ")")
-        copy_data_cmd.append("docker cp $(realpath " + project_root + ") $data_volume:" + _REPO_DIR)
-        copy_data_cmd.append("docker cp " + str(ctx.path("container")) + " $data_volume:" + _ROOT_DIR + "/container")
+        copy_data_cmd.append(docker_tool_path + " cp $(realpath " + project_root + ") $data_volume:" + _REPO_DIR)
+        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("container")) + " $data_volume:" + _ROOT_DIR + "/container")
         docker_run_flags += ["--volumes-from", "$data_volume"]
-        clean_data_volume_cmd = "docker rm $data_volume"
+        clean_data_volume_cmd = docker_tool_path + " rm $data_volume"
     else:
         mount_read_only_flag = ":ro"
         if use_default_project:

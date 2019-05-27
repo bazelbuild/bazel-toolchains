@@ -48,40 +48,51 @@ def resolve_project_root(ctx):
       ctx: the Bazel context object.
 
     Returns:
-        Returns the project_root.
+        mount_project_root - path to mount/copy to the container to execute command to generate external repos
+        export_project_root - path to export produced configs to
     """
 
+    if ctx.attr.config_version:
+        return None, None, None
+
+    export_project_root = None
+    mount_project_root = None
+    use_default_project = False
+
     # If not using checked-in configs and either export configs was selected or
-    # config_repos were requested we need to resolve the project_root
+    # config_repos were requested we need to resolve the path to the project root
     # using the env variable.
-    project_root = None
-    use_default_project = None
-    if not ctx.attr.config_version and (ctx.attr.export_configs or ctx.attr.config_repos):
+    if ctx.attr.export_configs or ctx.attr.config_repos:
+        # We need AUTOCONF_ROOT to be set to either export or copy to the container
         project_root = ctx.os.environ.get(AUTOCONF_ROOT, None)
-        print("RBE_AUTOCONF_ROOT is %s" % project_root)
 
         # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
-        use_default_project = False
         if not project_root:
             fail(("%s env variable must be set for rbe_autoconfig " +
                   "to function properly when export_configs is True " +
                   "or config_repos are set") % AUTOCONF_ROOT)
-    elif not ctx.attr.config_version:
+        if ctx.attr.export_configs:
+            export_project_root = project_root
+        if ctx.attr.config_repos:
+            mount_project_root = project_root
+    if not ctx.attr.config_repos:
+        # If no config repos, we can use the default sample project
         # TODO(nlopezgi): consider using native.existing_rules() to validate
         # bazel_toolchains repo exists.
         # Try to use the default project
         # This is Bazel black magic, we're traversing the directories in the output_base,
         # assuming that the bazel_toolchains external repo will exist in the
         # expected path.
-        project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
-        if not project_root.exists:
+        mount_project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+        if not mount_project_root.exists:
             fail(("Could not find default autoconf project in %s, please make sure " +
                   "the bazel-toolchains repo is imported in your workspace with name " +
                   "'bazel_toolchains' and imported before the rbe_autoconfig target " +
                   "declaration ") % str(project_root))
-        project_root = str(project_root)
+        mount_project_root = str(mount_project_root)
         use_default_project = True
-    return project_root, use_default_project
+
+    return mount_project_root, export_project_root, use_default_project
 
 def validate_host(ctx):
     """Perform validations of host environment to be able to run the rule.

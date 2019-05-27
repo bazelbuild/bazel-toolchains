@@ -149,6 +149,11 @@ def create_versions_file(ctx, config_name, digest, java_home, project_root):
         configs_list += ["config%s" % str(index)]
         index += 1
 
+    # If we did not find one, it probably was not set before, assign
+    # it to any conifg
+    if not default_config:
+        default_config = "config0"
+
     # Update the ctx.attr.bazel_to_config_version_map and
     # ctx.attr.container_to_config_version_map with the new generated
     # config info
@@ -163,7 +168,12 @@ def create_versions_file(ctx, config_name, digest, java_home, project_root):
     container_to_config_version_map = ctx.attr.container_to_config_version_map
     if digest not in container_to_config_version_map.keys():
         container_to_config_version_map = dict(ctx.attr.container_to_config_version_map.items())
-        container_to_config_version_map.update({digest: config_name})
+        container_to_config_version_map.update({digest: [config_name]})
+    elif config not in container_to_config_version_map[digest]:
+        configs = container_to_config_version_map[digest]
+        container_to_config_version_map = dict(ctx.attr.container_to_config_version_map.items())
+        container_to_config_version_map.update({digest: configs + [config_name]})
+
     versions_output += ["def configs():"]
     versions_output += ["    return [%s]" % ",".join(configs_list)]
     versions_output += ["def bazel_to_config_versions():"]

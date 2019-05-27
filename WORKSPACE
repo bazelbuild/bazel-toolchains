@@ -516,11 +516,11 @@ rbe_autoconfig(
 
 load(
     "//tests/rbe_repo:versions.bzl",
-    gcb_test_bazel_to_config_versions_test = "bazel_to_config_versions",
-    gcb_test_configs_test = "configs",
-    gcb_test_container_to_config_version_test = "container_to_config_version",
-    gcb_test_default_config_test = "DEFAULT_CONFIG",
-    gcb_test_latest_test = "LATEST",
+    gcb_test_bazel_to_config_versions = "bazel_to_config_versions",
+    gcb_test_configs = "configs",
+    gcb_test_container_to_config_version = "container_to_config_version",
+    gcb_test_default_config = "DEFAULT_CONFIG",
+    gcb_test_latest = "LATEST",
 )
 
 # TODO: move all tests above that use export_configs to use a
@@ -540,19 +540,19 @@ load(
 # (even when bazel cache is not maintained from one step to the next)
 rbe_autoconfig(
     name = "rbe_autoconf_gcb_test",
-    bazel_to_config_version_map = gcb_test_bazel_to_config_versions_test(),
-    container_to_config_version_map = gcb_test_container_to_config_version_test(),
+    bazel_to_config_version_map = gcb_test_bazel_to_config_versions(),
+    container_to_config_version_map = gcb_test_container_to_config_version(),
     create_testdata = True,
     export_configs = True,
     rbe_repo = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
         "output_base": "tests/rbe_repo",
-        "latest_container": gcb_test_latest_test,
-        "default_config": gcb_test_default_config_test,
+        "latest_container": gcb_test_latest,
+        "default_config": gcb_test_default_config,
         "repo_name": rbe_default_repo()["repo_name"],
     },
-    rbe_repo_configs = gcb_test_configs_test(),
+    rbe_repo_configs = gcb_test_configs(),
 )
 
 # Needed for testing purposes. Creates a file that exposes

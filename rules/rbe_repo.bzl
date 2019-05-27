@@ -163,6 +163,9 @@ the PATH (if any container other than rbe-ubuntu 16_04 is used):
 
 Known limitations:
   - This rule can only run in Linux if it needs to generate configs.
+  - This rule cannot generate configs if: 1) it needs to pull additional
+    config repos and 2) the project's WORKSPACE contains local_repository
+    rules pointing to directories above the project root.
 """
 
 load(
@@ -273,8 +276,9 @@ def _rbe_autoconfig_impl(ctx):
     image_name = image_name.replace("marketplace.gcr.io", "l.gcr.io")
     docker_tool_path = None
 
-    # Resolve the project_root
-    project_root, use_default_project = resolve_project_root(ctx)
+    # Resolve the paths to mount/copy srcs to teh container and to
+    # export configs.
+    mount_project_root, export_project_root, use_default_project = resolve_project_root(ctx)
 
     # Check if pulling a container will be needed and pull it if so
     digest = ctx.attr.digest
@@ -323,7 +327,7 @@ def _rbe_autoconfig_impl(ctx):
                 config_repos = config_repos,
                 docker_tool_path = docker_tool_path,
                 image_name = image_name,
-                project_root = project_root,
+                project_root = mount_project_root,
                 use_default_project = use_default_project,
             )
 
@@ -353,14 +357,14 @@ def _rbe_autoconfig_impl(ctx):
                 digest = digest,
                 config_name = config_name,
                 java_home = java_home,
-                project_root = project_root,
+                project_root = export_project_root,
             )
 
             # Expand outputs to project dir
             expand_outputs(
                 ctx,
                 bazel_version = ctx.attr.bazel_version,
-                project_root = project_root,
+                project_root = export_project_root,
                 config_name = config_name,
             )
         else:
@@ -409,8 +413,8 @@ _rbe_autoconfig = repository_rule(
         ),
         # TODO: set defaults / mandatory
         "bazel_to_config_version_map": attr.string_list_dict(
-            doc = ("A dict with keys corresponding to lists of bazel versions, " +
-                   "values corresponding to configs. SHould point to the " +
+            doc = ("A dict with keys corresponding to bazel versions, " +
+                   "values corresponding to lists of configs. Must point to the " +
                    "bazel_to_config_versions def in the versions.bzl file " +
                    "located in the 'output_base' of the 'rbe_repo'."),
         ),
@@ -462,9 +466,9 @@ _rbe_autoconfig = repository_rule(
                    "Used internally when use_checked_in_confs is true."),
         ),
         # TODO: set defaults / mandatory
-        "container_to_config_version_map": attr.string_dict(
+        "container_to_config_version_map": attr.string_list_dict(
             doc = ("A dict with keys corresponding to containers and " +
-                   "values corresponding to configs. Should point to the " +
+                   "values corresponding to lists of configs. Must point to the " +
                    "container_to_config_version def in the versions.bzl file " +
                    "located in the 'output_base' of the 'rbe_repo'."),
         ),
