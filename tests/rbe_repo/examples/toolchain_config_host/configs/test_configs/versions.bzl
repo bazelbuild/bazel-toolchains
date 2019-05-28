@@ -17,6 +17,15 @@ LATEST = ""
 
 # Map from sha256 of the toolchain container to corresponding major container
 # versions.
-def container_to_config_version():
+def container_to_config_versions():
     return {
     }
+
+def versions():
+    return struct(
+        latest_container = LATEST,
+        default_config = DEFAULT_CONFIG,
+        rbe_repo_configs = configs,
+        bazel_to_config_version_map = bazel_to_config_versions,
+        container_to_config_version_map = container_to_config_versions,
+    )

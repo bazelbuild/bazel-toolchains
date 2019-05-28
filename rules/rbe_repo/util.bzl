@@ -15,8 +15,7 @@
 
 load(
     "//configs/ubuntu16_04_clang:versions.bzl",
-    RBE_UBUNTU16_04_DEFAULT_CONFIG = "DEFAULT_CONFIG",
-    RBE_UBUNTU16_04_LATEST = "LATEST",
+    rbe_ubuntu_config_versions = "versions",
 )
 
 _VERBOSE = False
@@ -33,8 +32,7 @@ def rbe_default_repo():
         "output_base": "configs/ubuntu16_04_clang",
         "container_repo": "google/rbe-ubuntu16-04",
         "container_registry": "marketplace.gcr.io",
-        "latest_container": RBE_UBUNTU16_04_LATEST,
-        "default_config": RBE_UBUNTU16_04_DEFAULT_CONFIG,
+        "config_versions": rbe_ubuntu_config_versions(),
     }
 
 def resolve_project_root(ctx):

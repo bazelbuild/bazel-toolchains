@@ -12,9 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load(":rbe_config.bzl", "rbe_repo")
+licenses(["notice"])  # Apache 2.0
 
-rbe_repo(
-    name = "default_rbe_repo",
-    output_base = "configs/ubuntu16_04_clang",
+package(default_visibility = ["//visibility:public"])
+
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+bzl_library(
+    name = "rbe_repo",
+    srcs = [
+        "build_gen.bzl",
+        "checked_in.bzl",
+        "container.bzl",
+        "outputs.bzl",
+        "repo_confs.bzl",
+        "util.bzl",
+        "version_check.bzl",
+    ],
 )

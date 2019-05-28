@@ -179,9 +179,18 @@ def create_versions_file(ctx, config_name, digest, java_home, project_root):
     versions_output += ["def bazel_to_config_versions():"]
     versions_output += ["    return %s" % bazel_to_config_version_map]
     versions_output += ["LATEST = \"%s\"" % digest]
-    versions_output += ["def container_to_config_version():"]
+    versions_output += ["def container_to_config_versions():"]
     versions_output += ["    return %s" % container_to_config_version_map]
     versions_output += ["DEFAULT_CONFIG = %s" % default_config]
+    versions_output += ["def versions():"]
+    versions_output += ["    return struct("]
+    versions_output += ["        bazel_to_config_version_map = bazel_to_config_versions,"]
+    versions_output += ["        container_to_config_version_map = container_to_config_versions,"]
+    versions_output += ["        default_config = DEFAULT_CONFIG,"]
+    versions_output += ["        latest_container = LATEST,"]
+    versions_output += ["        rbe_repo_configs = configs,"]
+    versions_output += ["    )"]
+
     ctx.file("versions.bzl", "\n".join(versions_output), False)
 
     # Export the versions file (if requested)

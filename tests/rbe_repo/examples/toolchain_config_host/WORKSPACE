@@ -27,61 +27,40 @@ load(
     "CUSTOM_ENV3",
     "CUSTOM_RBE_REPO",
 )
-load(
-    "//configs/test_configs:versions.bzl",
-    rbe_custom_bazel_to_config_versions = "bazel_to_config_versions",
-    rbe_custom_configs = "configs",
-    rbe_custom_container_to_config_version = "container_to_config_version",
-)
 
 rbe_autoconfig(
     name = "rbe_custom",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
 )
 
 rbe_autoconfig(
     name = "rbe_custom_config_name",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_config_name",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env1",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_env1",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     env = CUSTOM_ENV1,
     export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env2",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_env2",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     env = CUSTOM_ENV2,
     export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env3",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_env3",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     env = CUSTOM_ENV3,
     export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
 )

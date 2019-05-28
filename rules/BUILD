@@ -72,3 +72,13 @@ bzl_library(
         "@io_bazel_rules_docker//container",
     ],
 )
+
+bzl_library(
+    name = "rbe_repo",
+    srcs = [
+        "rbe_repo.bzl",
+    ],
+    deps = [
+        "@bazel_toolchains//rules/rbe_repo:rbe_repo",
+    ],
+)

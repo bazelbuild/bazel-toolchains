@@ -28,7 +28,8 @@ load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
 rbe_autoconfig(
     name = "rbe_default",
-    use_checked_in_confs = "Force",
+    #TODO: reenable once 0.26.0 configs are out
+    #use_checked_in_confs = "Force",
 )
 
 load(
@@ -38,21 +39,12 @@ load(
     "CUSTOM_ENV3",
     "CUSTOM_RBE_REPO",
 )
-load(
-    "@toolchain_config_host//configs/test_configs:versions.bzl",
-    rbe_custom_bazel_to_config_versions = "bazel_to_config_versions",
-    rbe_custom_configs = "configs",
-    rbe_custom_container_to_config_version = "container_to_config_version",
-)
 
 # Basic test for rbe_custom, the corresponding GCB build should first
 # build the @toolchain_config_host so this one can use those.
 rbe_autoconfig(
     name = "rbe_custom",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
     use_checked_in_confs = "Force",
 )
 
@@ -60,10 +52,7 @@ rbe_autoconfig(
 # set as tag.
 rbe_autoconfig(
     name = "rbe_custom_tag_latest",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
     registry = CUSTOM_RBE_REPO["container_registry"],
     repository = CUSTOM_RBE_REPO["container_repo"],
     tag = "latest",
@@ -73,25 +62,20 @@ rbe_autoconfig(
 # This test should generate configs as we use a custom env.
 rbe_autoconfig(
     name = "rbe_custom_generate_env",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     env = {"CUSTOM_KEY": "CUSTOM_VALUE"},
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
 )
 
 # This test uses the custom rbe_repo. It should not generate configs as, even
 # though target overrides repository and digest (using rbe-ubuntu16-04
 # container), its setting the base container digest to point to a compatible
 # bazel one for which configs are pre-generated.
+# TODO: point this to use values from ubuntu config file in bazel_toolchains repo
 rbe_autoconfig(
     name = "rbe_custom_base_container_digest",
-    base_container_digest = CUSTOM_RBE_REPO["latest_container"],
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
+    base_container_digest = CUSTOM_RBE_REPO.get("config_versions").latest_container,
     digest = "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b",
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
     registry = "gcr.io",
     repository = "google/rbe-ubuntu16-04",
     use_checked_in_confs = "Force",
@@ -102,11 +86,8 @@ rbe_autoconfig(
 # @toolchain_config_host should generate the configs.
 rbe_autoconfig(
     name = "rbe_custom_config_name",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_config_name",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
     use_checked_in_confs = "Force",
 )
 
@@ -116,36 +97,24 @@ rbe_autoconfig(
 # several configs and remain valid.
 rbe_autoconfig(
     name = "rbe_custom_env1",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_env1",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     env = CUSTOM_ENV1,
-    export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
     use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env2",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_env2",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     env = CUSTOM_ENV2,
-    export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
     use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env3",
-    bazel_to_config_version_map = rbe_custom_bazel_to_config_versions(),
     config_name = "test_env3",
-    container_to_config_version_map = rbe_custom_container_to_config_version(),
     env = CUSTOM_ENV3,
-    export_configs = True,
     rbe_repo = CUSTOM_RBE_REPO,
-    rbe_repo_configs = rbe_custom_configs(),
     use_checked_in_confs = "Force",
 )

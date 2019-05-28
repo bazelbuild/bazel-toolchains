@@ -15,8 +15,7 @@
 
 load(
     ":versions.bzl",
-    rbe_custom_config = "DEFAULT_CONFIG",
-    rbe_custom_latest = "LATEST",
+    rbe_custom_config_versions = "versions",
 )
 
 CUSTOM_RBE_REPO = {
@@ -24,8 +23,7 @@ CUSTOM_RBE_REPO = {
     "output_base": "configs/test_configs",
     "container_repo": "google/bazel",
     "container_registry": "marketplace.gcr.io",
-    "latest_container": rbe_custom_latest,
-    "default_config": rbe_custom_config,
+    "config_versions": rbe_custom_config_versions(),
 }
 
 CUSTOM_ENV1 = {"KEY1": "VALUE1"}

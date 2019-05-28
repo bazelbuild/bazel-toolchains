@@ -60,8 +60,17 @@ LATEST = "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07
 
 # Map from sha256 of the toolchain container to corresponding major container
 # versions.
-def container_to_config_version():
+def container_to_config_versions():
     return {
         "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": ["test024config"],
         "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b": ["test025config"],
     }
+
+def versions():
+    return struct(
+        latest_container = LATEST,
+        default_config = DEFAULT_CONFIG,
+        rbe_repo_configs = configs,
+        bazel_to_config_version_map = bazel_to_config_versions,
+        container_to_config_version_map = container_to_config_versions,
+    )
