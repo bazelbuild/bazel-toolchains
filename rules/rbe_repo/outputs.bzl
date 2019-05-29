@@ -21,11 +21,11 @@ load(
     "print_exec_results",
 )
 load(
-    "//rules/rbe_repo:repo_confs.bzl",
+    "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
     "string_lists_to_config",
 )
 
-def expand_outputs(ctx, bazel_version, project_root, config_name):
+def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name):
     """Copies all outputs of the autoconfig rule to a directory in the project.
 
     Produces an output.zip file at the root of the repo with all contents.
@@ -37,12 +37,12 @@ def expand_outputs(ctx, bazel_version, project_root, config_name):
         ctx: The Bazel context.
         bazel_version: The Bazel version string.
         project_root: The output directory where configs will be copied to.
-        config_name: provided/selected name for the configs
+        toolchain_config_spec_name: provided/selected name for the toolchain config spec
     """
     ctx.report_progress("copying outputs to project directory")
-    dest = project_root + "/" + ctx.attr.rbe_repo["output_base"]
-    if config_name:
-        dest += "/" + config_name
+    dest = project_root + "/" + ctx.attr.toolchain_config_suite_spec["output_base"]
+    if toolchain_config_spec_name:
+        dest += "/" + toolchain_config_spec_name
     dest += "/bazel_" + bazel_version + "/"
     platform_dest = dest + PLATFORM_DIR + "/"
     java_dest = dest + JAVA_CONFIG_DIR + "/"
@@ -100,9 +100,9 @@ def expand_outputs(ctx, bazel_version, project_root, config_name):
     result = ctx.execute(args)
     print_exec_results("Remove generated files from repo dir", result, True, args)
 
-    dest_target = ctx.attr.rbe_repo["output_base"]
-    if config_name:
-        dest_target += "/" + config_name
+    dest_target = ctx.attr.toolchain_config_suite_spec["output_base"]
+    if toolchain_config_spec_name:
+        dest_target += "/" + toolchain_config_spec_name
     dest_target += "/bazel_" + bazel_version
     template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:.latest.bazelrc.tpl"))
     ctx.template(
@@ -113,7 +113,7 @@ def expand_outputs(ctx, bazel_version, project_root, config_name):
         },
         False,
     )
-    args = ["mv", str(ctx.path("./.latest.bazelrc")), project_root + "/" + ctx.attr.rbe_repo["output_base"] + "/"]
+    args = ["mv", str(ctx.path("./.latest.bazelrc")), project_root + "/" + ctx.attr.toolchain_config_suite_spec["output_base"] + "/"]
     result = ctx.execute(args)
     print_exec_results("Move .latest.bazelrc file to outputs", result, True, args)
 
@@ -121,14 +121,14 @@ def expand_outputs(ctx, bazel_version, project_root, config_name):
     ctx.file("BUILD", """package(default_visibility = ["//visibility:public"])
 exports_files(["configs.tar"])""", False)
 
-def create_versions_file(ctx, config_name, digest, java_home, project_root):
+def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, project_root):
     """Creates the versions.bzl file.
 
     Args:
         ctx: The Bazel context.
         digest: The digest of the container that was pulled to generate configs.
         project_root: The output directory where the versions.bzl file will be copied to.
-        config_name: provided/selected name for the configs
+        toolchain_config_spec_name: provided/selected name for the configs
         java_home: the provided/selected location for java_home
     """
 
@@ -139,63 +139,59 @@ def create_versions_file(ctx, config_name, digest, java_home, project_root):
     configs_list = []
 
     # Create the list of config_repo structs
-    configs = string_lists_to_config(ctx, config_name, java_home)
+    configs = string_lists_to_config(ctx, toolchain_config_spec_name, java_home)
     index = 0
-    default_config = None
+    default_toolchain_config_spec = None
     for config in configs:
-        if config.name == ctx.attr.rbe_repo["default_config"]:
-            default_config = "config%s" % str(index)
-        versions_output += ["config%s = %s" % (str(index), str(config))]
-        configs_list += ["config%s" % str(index)]
+        if config.name == ctx.attr.toolchain_config_suite_spec["default_toolchain_config_spec"]:
+            default_toolchain_config_spec = "toolchain_config_spec%s" % str(index)
+        versions_output += ["toolchain_config_spec%s = %s" % (str(index), str(config))]
+        configs_list += ["toolchain_config_spec%s" % str(index)]
         index += 1
 
     # If we did not find one, it probably was not set before, assign
-    # it to any conifg
-    if not default_config:
-        default_config = "config0"
+    # it to the first conifg
+    if not default_toolchain_config_spec:
+        default_toolchain_config_spec = "toolchain_config_spec0"
 
-    # Update the ctx.attr.bazel_to_config_version_map and
-    # ctx.attr.container_to_config_version_map with the new generated
+    # Update the ctx.attr.bazel_to_config_spec_names_map and
+    # ctx.attr.container_to_config_spec_names_map with the new generated
     # config info
-    bazel_to_config_version_map = ctx.attr.bazel_to_config_version_map
-    if ctx.attr.bazel_version not in bazel_to_config_version_map.keys():
-        bazel_to_config_version_map = dict(ctx.attr.bazel_to_config_version_map)
-        bazel_to_config_version_map.update({ctx.attr.bazel_version: [config_name]})
-    if config_name not in bazel_to_config_version_map[ctx.attr.bazel_version]:
-        bazel_to_config_version_map = dict(bazel_to_config_version_map.items())
-        config_list = bazel_to_config_version_map.pop(ctx.attr.bazel_version) + [config_name]
-        bazel_to_config_version_map.update({ctx.attr.bazel_version: config_list})
-    container_to_config_version_map = ctx.attr.container_to_config_version_map
-    if digest not in container_to_config_version_map.keys():
-        container_to_config_version_map = dict(ctx.attr.container_to_config_version_map.items())
-        container_to_config_version_map.update({digest: [config_name]})
-    elif config not in container_to_config_version_map[digest]:
-        configs = container_to_config_version_map[digest]
-        container_to_config_version_map = dict(ctx.attr.container_to_config_version_map.items())
-        container_to_config_version_map.update({digest: configs + [config_name]})
+    bazel_to_config_spec_names_map = ctx.attr.bazel_to_config_spec_names_map
+    if ctx.attr.bazel_version not in bazel_to_config_spec_names_map.keys():
+        bazel_to_config_spec_names_map = dict(ctx.attr.bazel_to_config_spec_names_map)
+        bazel_to_config_spec_names_map.update({ctx.attr.bazel_version: [toolchain_config_spec_name]})
+    if toolchain_config_spec_name not in bazel_to_config_spec_names_map[ctx.attr.bazel_version]:
+        bazel_to_config_spec_names_map = dict(bazel_to_config_spec_names_map.items())
+        config_list = bazel_to_config_spec_names_map.pop(ctx.attr.bazel_version) + [toolchain_config_spec_name]
+        bazel_to_config_spec_names_map.update({ctx.attr.bazel_version: config_list})
+    container_to_config_spec_names_map = ctx.attr.container_to_config_spec_names_map
+    if digest not in container_to_config_spec_names_map.keys():
+        container_to_config_spec_names_map = dict(ctx.attr.container_to_config_spec_names_map.items())
+        container_to_config_spec_names_map.update({digest: [toolchain_config_spec_name]})
+    elif config not in container_to_config_spec_names_map[digest]:
+        configs = container_to_config_spec_names_map[digest]
+        container_to_config_spec_names_map = dict(ctx.attr.container_to_config_spec_names_map.items())
+        container_to_config_spec_names_map.update({digest: configs + [toolchain_config_spec_name]})
 
-    versions_output += ["def configs():"]
-    versions_output += ["    return [%s]" % ",".join(configs_list)]
-    versions_output += ["def bazel_to_config_versions():"]
-    versions_output += ["    return %s" % bazel_to_config_version_map]
-    versions_output += ["LATEST = \"%s\"" % digest]
-    versions_output += ["def container_to_config_versions():"]
-    versions_output += ["    return %s" % container_to_config_version_map]
-    versions_output += ["DEFAULT_CONFIG = %s" % default_config]
-    versions_output += ["def versions():"]
-    versions_output += ["    return struct("]
-    versions_output += ["        bazel_to_config_version_map = bazel_to_config_versions,"]
-    versions_output += ["        container_to_config_version_map = container_to_config_versions,"]
-    versions_output += ["        default_config = DEFAULT_CONFIG,"]
-    versions_output += ["        latest_container = LATEST,"]
-    versions_output += ["        rbe_repo_configs = configs,"]
+    versions_output += ["_TOOLCHAIN_CONFIG_SPECS = [%s]" % ",".join(configs_list)]
+    versions_output += ["_BAZEL_TO_CONFIG_SPEC_NAMES = %s" % bazel_to_config_spec_names_map]
+    versions_output += ["_LATEST = \"%s\"" % digest]
+    versions_output += ["_CONTAINER_TO_CONFIG_SPEC_NAMES = %s" % container_to_config_spec_names_map]
+    versions_output += ["_DEFAULT_TOOLCHAIN_CONFIG_SPEC = %s" % default_toolchain_config_spec]
+    versions_output += ["TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct("]
+    versions_output += ["        bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,"]
+    versions_output += ["        container_to_config_spec_names_map = _CONTAINER_TO_CONFIG_SPEC_NAMES,"]
+    versions_output += ["        default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC,"]
+    versions_output += ["        latest_container = _LATEST,"]
+    versions_output += ["        toolchain_config_specs = _TOOLCHAIN_CONFIG_SPECS,"]
     versions_output += ["    )"]
 
     ctx.file("versions.bzl", "\n".join(versions_output), False)
 
     # Export the versions file (if requested)
-    result = ctx.execute(["mkdir", "-p", project_root + "/" + ctx.attr.rbe_repo["output_base"] + "/"])
+    result = ctx.execute(["mkdir", "-p", project_root + "/" + ctx.attr.toolchain_config_suite_spec["output_base"] + "/"])
     print_exec_results("create output_base output dir", result)
-    args = ["mv", str(ctx.path("versions.bzl")), project_root + "/" + ctx.attr.rbe_repo["output_base"] + "/"]
+    args = ["mv", str(ctx.path("versions.bzl")), project_root + "/" + ctx.attr.toolchain_config_suite_spec["output_base"] + "/"]
     result = ctx.execute(args)
     print_exec_results("Move generated versions.bzl to output_base", result, True, args)

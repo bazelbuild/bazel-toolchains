@@ -37,14 +37,14 @@ load(
     "CUSTOM_ENV1",
     "CUSTOM_ENV2",
     "CUSTOM_ENV3",
-    "CUSTOM_RBE_REPO",
+    "CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC",
 )
 
 # Basic test for rbe_custom, the corresponding GCB build should first
 # build the @toolchain_config_host so this one can use those.
 rbe_autoconfig(
     name = "rbe_custom",
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
 
@@ -52,10 +52,10 @@ rbe_autoconfig(
 # set as tag.
 rbe_autoconfig(
     name = "rbe_custom_tag_latest",
-    rbe_repo = CUSTOM_RBE_REPO,
-    registry = CUSTOM_RBE_REPO["container_registry"],
-    repository = CUSTOM_RBE_REPO["container_repo"],
+    registry = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_registry"],
+    repository = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_repo"],
     tag = "latest",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
 
@@ -63,31 +63,31 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "rbe_custom_generate_env",
     env = {"CUSTOM_KEY": "CUSTOM_VALUE"},
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
 )
 
-# This test uses the custom rbe_repo. It should not generate configs as, even
+# This test uses the custom toolchain_config_suite_spec. It should not generate configs as, even
 # though target overrides repository and digest (using rbe-ubuntu16-04
 # container), its setting the base container digest to point to a compatible
 # bazel one for which configs are pre-generated.
 # TODO: point this to use values from ubuntu config file in bazel_toolchains repo
 rbe_autoconfig(
     name = "rbe_custom_base_container_digest",
-    base_container_digest = CUSTOM_RBE_REPO.get("config_versions").latest_container,
+    base_container_digest = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC.get("toolchain_config_suite_autogen_spec").latest_container,
     digest = "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b",
-    rbe_repo = CUSTOM_RBE_REPO,
     registry = "gcr.io",
     repository = "google/rbe-ubuntu16-04",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
 
 # This one should not generate configs either, as, even though it uses a custom
-# config_name, the preeceding step which builds @rbe_custom_config_name in
+# toolchain_config_spec_name, the preeceding step which builds @rbe_custom_toolchain_config_spec_name in
 # @toolchain_config_host should generate the configs.
 rbe_autoconfig(
-    name = "rbe_custom_config_name",
-    config_name = "test_config_name",
-    rbe_repo = CUSTOM_RBE_REPO,
+    name = "rbe_custom_toolchain_config_spec_name",
+    toolchain_config_spec_name = "test_toolchain_config_spec_name",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
 
@@ -97,24 +97,24 @@ rbe_autoconfig(
 # several configs and remain valid.
 rbe_autoconfig(
     name = "rbe_custom_env1",
-    config_name = "test_env1",
     env = CUSTOM_ENV1,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_spec_name = "test_env1",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env2",
-    config_name = "test_env2",
     env = CUSTOM_ENV2,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_spec_name = "test_env2",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env3",
-    config_name = "test_env3",
     env = CUSTOM_ENV3,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_spec_name = "test_env3",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )

@@ -22,22 +22,22 @@ load(
 
 _CC_TOOLCHAIN = ":cc-compiler-k8"
 
-def create_config_aliases(ctx, config_name):
+def create_config_aliases(ctx, toolchain_config_spec_name):
     """Produces BUILD files with alias for the C++/Java toolchain targets.
 
     Args:
       ctx: the Bazel context object.
-      config_name: name of the config
+      toolchain_config_spec_name: name of the toolchain config spec
     """
     if ctx.attr.create_cc_configs:
         # Create the BUILD file with the alias for the cc_toolchain_suite
         template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.cc_alias.tpl"))
-        toolchain = ("@{toolchain_config_repo}//{config_output_base}/{config_name}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
-            config_name = config_name,
+        toolchain = ("@{toolchain_config_repo}//{config_output_base}/{toolchain_config_spec_name}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
+            toolchain_config_spec_name = toolchain_config_spec_name,
             bazel_version = ctx.attr.bazel_version,
             cc_dir = CC_CONFIG_DIR,
-            config_output_base = ctx.attr.rbe_repo["output_base"],
-            toolchain_config_repo = ctx.attr.rbe_repo["repo_name"],
+            config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
+            toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
         ))
         ctx.template(
             CC_CONFIG_DIR + "/BUILD",
@@ -51,12 +51,12 @@ def create_config_aliases(ctx, config_name):
     if ctx.attr.create_java_configs:
         # Create the BUILD file with the alias for the java_runtime
         template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.java_alias.tpl"))
-        java_runtime = ("@{toolchain_config_repo}//{config_output_base}/{config_name}/bazel_{bazel_version}/{java_dir}:jdk".format(
-            config_name = config_name,
+        java_runtime = ("@{toolchain_config_repo}//{config_output_base}/{toolchain_config_spec_name}/bazel_{bazel_version}/{java_dir}:jdk".format(
+            toolchain_config_spec_name = toolchain_config_spec_name,
             bazel_version = ctx.attr.bazel_version,
             java_dir = JAVA_CONFIG_DIR,
-            config_output_base = ctx.attr.rbe_repo["output_base"],
-            toolchain_config_repo = ctx.attr.rbe_repo["repo_name"],
+            config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
+            toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
         ))
 
         ctx.template(
@@ -85,18 +85,18 @@ def create_java_runtime(ctx, java_home):
         False,
     )
 
-def create_export_platform(ctx, image_name, name, config_name):
+def create_export_platform(ctx, image_name, name, toolchain_config_spec_name):
     """Creates a BUILD file (to be exported to output_base) with the cc_toolchain and platform targets.
 
     Args:
       ctx: the Bazel context object.
-      config_name: name of the config
+      toolchain_config_spec_name: name of the toolchain config spec
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
     """
-    cc_toolchain_target = "//" + ctx.attr.rbe_repo["output_base"]
-    if config_name:
-        cc_toolchain_target += "/" + config_name
+    cc_toolchain_target = "//" + ctx.attr.toolchain_config_suite_spec["output_base"]
+    if toolchain_config_spec_name:
+        cc_toolchain_target += "/" + toolchain_config_spec_name
     cc_toolchain_target += "/bazel_" + ctx.attr.bazel_version
     cc_toolchain_target += "/cc" + _CC_TOOLCHAIN
     _create_platform(ctx, image_name, name, cc_toolchain_target)
@@ -112,22 +112,22 @@ def create_external_repo_platform(ctx, image_name, name):
     cc_toolchain_target = "@" + ctx.attr.name + "//" + CC_CONFIG_DIR + _CC_TOOLCHAIN
     _create_platform(ctx, image_name, name, cc_toolchain_target)
 
-def create_alias_platform(ctx, config_name, image_name, name):
+def create_alias_platform(ctx, toolchain_config_spec_name, image_name, name):
     """Creates a BUILD file (pointing to checked in config) with the cc_toolchain and platform targets.
 
     Args:
       ctx: the Bazel context object.
-      config_name: name of the config.
+      toolchain_config_spec_name: name of the toolchain config spec.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
     """
-    cc_toolchain_target = ("@{toolchain_config_repo}//{config_output_base}/{config_name}/bazel_{bazel_version}/{cc_dir}{target}".format(
-        config_name = config_name,
+    cc_toolchain_target = ("@{toolchain_config_repo}//{config_output_base}/{toolchain_config_spec_name}/bazel_{bazel_version}/{cc_dir}{target}".format(
+        toolchain_config_spec_name = toolchain_config_spec_name,
         bazel_version = ctx.attr.bazel_version,
         cc_dir = CC_CONFIG_DIR,
-        config_output_base = ctx.attr.rbe_repo["output_base"],
+        config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
         target = _CC_TOOLCHAIN,
-        toolchain_config_repo = ctx.attr.rbe_repo["repo_name"],
+        toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
     ))
     _create_platform(ctx, image_name, name, cc_toolchain_target)
 

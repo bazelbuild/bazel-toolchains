@@ -25,7 +25,7 @@ bzl_library(
         "checked_in.bzl",
         "container.bzl",
         "outputs.bzl",
-        "repo_confs.bzl",
+        "toolchain_config_suite_spec.bzl",
         "util.bzl",
         "version_check.bzl",
     ],

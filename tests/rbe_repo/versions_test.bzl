@@ -17,60 +17,58 @@ Test file to validate behavior of rbe_autoconfig with export_configs
 when repo is different to bazel-toolchains
 """
 
-env1 = {
+_ENV1 = {
     "key1": "value1",
     "key2": "value2",
 }
-config1 = struct(
+
+_TOOLCHAIN_CONFIG_SPEC1 = struct(
     name = "test024config",
     java_home = "/usr/lib/jvm/java-8-openjdk-amd64",
     create_java_configs = True,
     create_cc_configs = True,
     config_repos = [],
-    env = env1,
+    env = _ENV1,
 )
 
-env2 = {
+_ENV2 = {
     "key3": "value3",
     "key4": "value4",
 }
-config2 = struct(
+
+_TOOLCHAIN_CONFIG_SPEC2 = struct(
     name = "test025config",
     java_home = "/usr/lib/jvm/java-8-openjdk-amd64",
     create_java_configs = True,
     create_cc_configs = True,
     config_repos = [],
-    env = env2,
+    env = _ENV2,
 )
 
-def configs():
-    return [config1, config2]
+_TOOLCHAIN_CONFIG_SPECS = [_TOOLCHAIN_CONFIG_SPEC1, _TOOLCHAIN_CONFIG_SPEC2]
 
-DEFAULT_CONFIG = config1
+_DEFAULT_TOOLCHAIN_CONFIG_SPEC = _TOOLCHAIN_CONFIG_SPEC1
 
-# Returns a dict with suppported Bazel versions mapped to the config version to use.
-def bazel_to_config_versions():
-    return {
-        "0.24.0": ["test024config"],
-        "0.25.0": ["test025config"],
-    }
+# A map from supported Bazel versions mapped to supported config_spec names.
+_BAZEL_TO_CONFIG_SPEC_NAMES = {
+    "0.24.0": ["test024config"],
+    "0.25.0": ["test025config"],
+}
 
 # sha256 digest of the latest version of the toolchain container.
-LATEST = "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b"
+_LATEST = "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b"
 
 # Map from sha256 of the toolchain container to corresponding major container
 # versions.
-def container_to_config_versions():
-    return {
-        "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": ["test024config"],
-        "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b": ["test025config"],
-    }
+_CONTAINER_TO_CONFIG_SPEC_NAMES = {
+    "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": ["test024config"],
+    "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b": ["test025config"],
+}
 
-def versions():
-    return struct(
-        latest_container = LATEST,
-        default_config = DEFAULT_CONFIG,
-        rbe_repo_configs = configs,
-        bazel_to_config_version_map = bazel_to_config_versions,
-        container_to_config_version_map = container_to_config_versions,
-    )
+TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
+    bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
+    container_to_config_spec_names_map = _CONTAINER_TO_CONFIG_SPEC_NAMES,
+    default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC,
+    latest_container = _LATEST,
+    toolchain_config_specs = _TOOLCHAIN_CONFIG_SPECS,
+)

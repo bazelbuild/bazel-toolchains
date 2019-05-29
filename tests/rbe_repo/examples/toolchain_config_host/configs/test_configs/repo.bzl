@@ -13,17 +13,14 @@
 # limitations under the License.
 """ Definitions for a custom rbe_repo."""
 
-load(
-    ":versions.bzl",
-    rbe_custom_config_versions = "versions",
-)
+load(":versions.bzl", "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 
-CUSTOM_RBE_REPO = {
+CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC = {
     "repo_name": "toolchain_config_host",
     "output_base": "configs/test_configs",
     "container_repo": "google/bazel",
     "container_registry": "marketplace.gcr.io",
-    "config_versions": rbe_custom_config_versions(),
+    "toolchain_config_suite_autogen_spec": TOOLCHAIN_CONFIG_AUTOGEN_SPEC,
 }
 
 CUSTOM_ENV1 = {"KEY1": "VALUE1"}

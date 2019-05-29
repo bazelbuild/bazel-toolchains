@@ -13,11 +13,6 @@
 # limitations under the License.
 """Utils for rbe_autoconfig."""
 
-load(
-    "//configs/ubuntu16_04_clang:versions.bzl",
-    rbe_ubuntu_config_versions = "versions",
-)
-
 _VERBOSE = False
 
 DOCKER_PATH = "DOCKER_PATH"
@@ -25,15 +20,6 @@ CC_CONFIG_DIR = "cc"
 JAVA_CONFIG_DIR = "java"
 PLATFORM_DIR = "config"
 AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
-
-def rbe_default_repo():
-    return {
-        "repo_name": "bazel_toolchains",
-        "output_base": "configs/ubuntu16_04_clang",
-        "container_repo": "google/rbe-ubuntu16-04",
-        "container_registry": "marketplace.gcr.io",
-        "config_versions": rbe_ubuntu_config_versions(),
-    }
 
 def resolve_project_root(ctx):
     """Returns the project_root .

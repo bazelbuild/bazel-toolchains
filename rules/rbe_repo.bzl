@@ -200,8 +200,10 @@ load(
     "expand_outputs",
 )
 load(
-    "//rules/rbe_repo:repo_confs.bzl",
+    "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
     "config_to_string_lists",
+    "default_toolchain_config_suite_spec",
+    "validate_toolchain_config_suite_spec",
 )
 load(
     "//rules/rbe_repo:util.bzl",
@@ -209,7 +211,6 @@ load(
     "DOCKER_PATH",
     "copy_to_test_dir",
     "print_exec_results",
-    "rbe_default_repo",
     "resolve_project_root",
     "validate_host",
 )
@@ -224,7 +225,7 @@ _BAZEL_VERSION_FALLBACK = BAZEL_LATEST
 
 _CONFIG_REPOS = ["local_config_cc"]
 
-_DEFAULT_CONFIG_NAME = "default_config"
+_DEFAULT_TOOLCHAIN_CONFIG_SPEC_NAME = "default_toolchain_config_spec_name"
 
 _RBE_UBUNTU_EXEC_COMPAT_WITH = [
     "@bazel_tools//platforms:x86_64",
@@ -247,7 +248,7 @@ def _rbe_autoconfig_impl(ctx):
     if ctx.attr.use_checked_in_confs == CHECKED_IN_CONFS_FORCE and not ctx.attr.config_version:
         fail(("Target '{name}' failed: use_checked_in_confs was set to '{force}' " +
               "but no checked-in configs were found. " +
-              "Please check your pin to '@{rbe_repo_name}' is up " +
+              "Please check your pin to '@{toolchain_config_suite_spec_repo_name}' is up " +
               "to date, and that you are using a release version of " +
               "Bazel. You can also explicitly set the version of Bazel to " +
               "an older version in the '{name}' rbe_autoconfig target " +
@@ -255,7 +256,7 @@ def _rbe_autoconfig_impl(ctx):
               "running with.").format(
             name = ctx.attr.name,
             force = CHECKED_IN_CONFS_FORCE,
-            rbe_repo_name = ctx.attr.rbe_repo["repo_name"],
+            toolchain_config_suite_spec_repo_name = ctx.attr.toolchain_config_suite_spec["repo_name"],
         ))
 
     name = ctx.attr.name
@@ -293,11 +294,11 @@ def _rbe_autoconfig_impl(ctx):
             print("Image with given tag `%s` is resolved to '%s', digest is '%s'" %
                   (ctx.attr.tag, image_name, digest))
 
-    config_name = ctx.attr.config_name
+    toolchain_config_spec_name = ctx.attr.toolchain_config_spec_name
     if ctx.attr.config_version:
-        # If we found a config assing that to the config_name so when
+        # If we found a config assing that to the toolchain_config_spec_name so when
         # we produce platform BUILD file we can use it.
-        config_name = ctx.attr.config_version
+        toolchain_config_spec_name = ctx.attr.config_version
     else:
         # If no config_version was found, generate configs
         # Get the value of JAVA_HOME to set in the produced
@@ -328,9 +329,9 @@ def _rbe_autoconfig_impl(ctx):
         if ctx.attr.export_configs:
             ctx.report_progress("expanding outputs")
 
-            # If the user requested exporting configs and did not set a config_name lets pick the default
-            if not config_name:
-                config_name = ctx.attr.rbe_repo["default_config"]
+            # If the user requested exporting configs and did not set a toolchain_config_spec_name lets pick the default
+            if not toolchain_config_spec_name:
+                toolchain_config_spec_name = ctx.attr.toolchain_config_suite_spec["default_toolchain_config_spec"]
 
             # Create a default BUILD file with the platform + toolchain targets that
             # will work with RBE with the produced toolchain (to be exported to
@@ -341,24 +342,25 @@ def _rbe_autoconfig_impl(ctx):
                 # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
                 image_name = image_name.replace("l.gcr.io", "marketplace.gcr.io"),
                 name = name,
-                config_name = config_name,
+                toolchain_config_spec_name = toolchain_config_spec_name,
             )
 
             # Create the versions.bzl file
-            create_versions_file(
-                ctx,
-                digest = digest,
-                config_name = config_name,
-                java_home = java_home,
-                project_root = export_project_root,
-            )
+            if ctx.attr.create_versions:
+                create_versions_file(
+                    ctx,
+                    digest = digest,
+                    toolchain_config_spec_name = toolchain_config_spec_name,
+                    java_home = java_home,
+                    project_root = export_project_root,
+                )
 
             # Expand outputs to project dir
             expand_outputs(
                 ctx,
                 bazel_version = ctx.attr.bazel_version,
                 project_root = export_project_root,
-                config_name = config_name,
+                toolchain_config_spec_name = toolchain_config_spec_name,
             )
         else:
             ctx.report_progress("creating external repo platform")
@@ -372,10 +374,10 @@ def _rbe_autoconfig_impl(ctx):
     # If we found checked in confs or if outputs were moved
     # to output_base create the alisases.
     if ctx.attr.config_version or ctx.attr.export_configs:
-        create_config_aliases(ctx, config_name)
+        create_config_aliases(ctx, toolchain_config_spec_name)
         create_alias_platform(
             ctx,
-            config_name = config_name,
+            toolchain_config_spec_name = toolchain_config_spec_name,
             # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
             image_name = image_name.replace("l.gcr.io", "marketplace.gcr.io"),
             name = name,
@@ -384,76 +386,6 @@ def _rbe_autoconfig_impl(ctx):
     # Copy all outputs to the test directory
     if ctx.attr.create_testdata:
         copy_to_test_dir(ctx)
-
-def _validate_config_version_spec(name, config_version_spec):
-    """Validates a single config_version_spec """
-    if type(config_version_spec) != "struct":
-        fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-              "includes '%s' that is not a valid config_version_spec " +
-              "of type 'struct'. ") %
-             (name, config_version_spec))
-    required_fields = [
-        "name",
-        "java_home",
-        "create_java_configs",
-        "create_cc_configs",
-        "config_repos",
-        "env",
-    ]
-    for field in required_fields:
-        if not hasattr(config_version_spec, field):
-            fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-                  "includes '%s' that is not a valid config_version_spec " +
-                  "as its missing field '%s'. ") %
-                 (name, config_version_spec, field))
-    if (type(config_version_spec.name) != "string"):
-        fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-              "includes '%s' that is not a valid config_version_spec " +
-              "as has a name that is not a string. ") %
-             (name, config_version_spec))
-    if type(config_version_spec.java_home) != "string":
-        fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-              "includes '%s' that is not a valid config_version_spec " +
-              "as has a java_home that is not a string. ") %
-             (name, config_version_spec))
-    if type(config_version_spec.create_java_configs) != "bool":
-        fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-              "includes '%s' that is not a valid config_version_spec " +
-              "as has a create_java_configs that is not a bool.") %
-             (name, config_version_spec))
-    if type(config_version_spec.create_cc_configs) != "bool":
-        fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-              "includes '%s' that is not a valid config_version_spec " +
-              "as has a create_cc_configs that is not a bool.") %
-             (name, config_version_spec))
-    if type(config_version_spec.config_repos) != "list":
-        fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-              "includes '%s' that is not a valid config_version_spec " +
-              "as has a config_repos that is not a list.") %
-             (name, config_version_spec))
-    for config_repo_entry in config_version_spec.config_repos:
-        if type(config_repo_entry) != "string":
-            fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-                  "includes '%s' that is not a valid config_version_spec " +
-                  "as has a config_repos that has an item that is not a string.") %
-                 (name, config_version_spec))
-    if type(config_version_spec.env) != "dict":
-        fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-              "includes '%s' that is not a valid config_version_spec " +
-              "as has an env that is not a dict.") %
-             (name, config_version_spec))
-    for key in config_version_spec.env.keys():
-        if type(key) != "string":
-            fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-                  "includes '%s' that is not a valid config_version_spec " +
-                  "as has an env that has a key that is not a string.") %
-                 (name, config_version_spec))
-    for value in config_version_spec.env.values():
-        if type(value) != "string":
-            fail(("%s has a rbe_repo[\"config_versions\"] field that " +
-                  "includes '%s' that is not a valid config_version_spec " +
-                  "as has an env that has a value that is not a string.") %
-                 (name, config_version_spec))
 
 # Private declaration of _rbe_autoconfig repository rule. Do not use this
 # rule directly, use rbe_autoconfig macro declared below.
@@ -474,11 +406,11 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. An rc version to use. Note an installer for " +
                    "the rc must be available in https://releases.bazel.build."),
         ),
-        "bazel_to_config_version_map": attr.string_list_dict(
+        "bazel_to_config_spec_names_map": attr.string_list_dict(
             doc = ("Optional. A dict with keys corresponding to bazel versions, " +
                    "values corresponding to lists of configs. Must point to the " +
                    "bazel_to_config_versions def in the versions.bzl file " +
-                   "located in the 'output_base' of the 'rbe_repo'."),
+                   "located in the 'output_base' of the 'toolchain_config_suite_spec'."),
         ),
         "bazel_version": attr.string(
             default = "local",
@@ -486,36 +418,36 @@ _rbe_autoconfig = repository_rule(
                    "Use only (major, minor, patch), e.g., '0.20.0'."),
             mandatory = True,
         ),
-        "config_name": attr.string(
-            doc = ("The name of the config name to be generated."),
+        "toolchain_config_spec_name": attr.string(
+            doc = ("The name of the toolchain config spec to be generated."),
         ),
         "configs_obj_config_repos": attr.string_list(
             doc = ("Optional. Set to list 'config_repos' generated by config_to_string_lists def in " +
-                   "//rules/rbe_repo/repo_confs.bzl."),
+                   "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_create_cc_configs": attr.string_list(
             doc = ("Optional. Set to list 'cc_configs' generated by config_to_string_lists def in " +
-                   "//rules/rbe_repo/repo_confs.bzl."),
+                   "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_create_java_configs": attr.string_list(
             doc = ("Optional. Set to list 'java_configs' generated by config_to_string_lists def in " +
-                   "//rules/rbe_repo/repo_confs.bzl."),
+                   "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_env_keys": attr.string_list(
             doc = ("Optional. Set to list 'env_keys' generated by config_to_string_lists def in " +
-                   "//rules/rbe_repo/repo_confs.bzl."),
+                   "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_env_values": attr.string_list(
             doc = ("Optional. Set to list 'env_values' generated by config_to_string_lists def in " +
-                   "//rules/rbe_repo/repo_confs.bzl."),
+                   "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_java_home": attr.string_list(
             doc = ("Optional. Set to list 'java_home' generated by config_to_string_lists def in " +
-                   "//rules/rbe_repo/repo_confs.bzl."),
+                   "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_names": attr.string_list(
             doc = ("Optional. Set to list 'names' generated by config_to_string_lists def in " +
-                   "//rules/rbe_repo/repo_confs.bzl."),
+                   "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "config_repos": attr.string_list(
             doc = ("Optional. list of additional external repos corresponding to " +
@@ -527,11 +459,11 @@ _rbe_autoconfig = repository_rule(
                    "Bazel version. " +
                    "Used internally when use_checked_in_confs is true."),
         ),
-        "container_to_config_version_map": attr.string_list_dict(
+        "container_to_config_spec_names_map": attr.string_list_dict(
             doc = ("Optional. A dict with keys corresponding to containers and " +
                    "values corresponding to lists of configs. Must point to the " +
                    "container_to_config_version def in the versions.bzl file " +
-                   "located in the 'output_base' of the 'rbe_repo'."),
+                   "located in the 'output_base' of the 'toolchain_config_suite_spec'."),
         ),
         "copy_resources": attr.bool(
             default = True,
@@ -570,7 +502,7 @@ _rbe_autoconfig = repository_rule(
         "create_versions": attr.bool(
             doc = (
                 "Specifies whether to generate versions.bzl " +
-                "file in output_base of the rbe_repo. " +
+                "file in output_base of the toolchain_config_suite_spec. " +
                 "This option is temporary while migration to use. " +
                 "generated file by this rule is taking place. " +
                 "Defauls to True."
@@ -615,16 +547,16 @@ _rbe_autoconfig = repository_rule(
         "registry": attr.string(
             doc = ("Optional. The registry to pull the container from. For example, " +
                    "marketplace.gcr.io. The default is the value for the selected " +
-                   "rbe_repo (rbe-ubuntu16-04 image for " +
-                   "rbe_default_repo, if no rbe_repo was selected)."),
+                   "toolchain_config_suite_spec (rbe-ubuntu16-04 image for " +
+                   "default_toolchain_config_suite_spec, if no toolchain_config_suite_spec was selected)."),
         ),
         "repository": attr.string(
             doc = ("Optional. The repository to pull the container from. For example, " +
                    "google/ubuntu. The default is the " +
-                   "value for the selected rbe_repo (rbe-ubuntu16-04 image for " +
-                   "rbe_default_repo, if no rbe_repo was selected)."),
+                   "value for the selected toolchain_config_suite_spec (rbe-ubuntu16-04 image for " +
+                   "default_toolchain_config_suite_spec, if no toolchain_config_suite_spec was selected)."),
         ),
-        "rbe_repo": attr.string_dict(
+        "toolchain_config_suite_spec": attr.string_dict(
             doc = ("Mandatory. Dict containing values to identify a " +
                    "toolchain container + GitHub repo where configs are " +
                    "stored. Must include keys: 'repo_name' (name of the " +
@@ -676,7 +608,7 @@ def rbe_autoconfig(
         base_container_digest = None,
         bazel_version = None,
         bazel_rc_version = None,
-        config_name = None,
+        toolchain_config_spec_name = None,
         config_repos = None,
         copy_resources = True,
         create_cc_configs = True,
@@ -689,7 +621,7 @@ def rbe_autoconfig(
         export_configs = False,
         java_home = None,
         tag = None,
-        rbe_repo = rbe_default_repo(),
+        toolchain_config_suite_spec = default_toolchain_config_suite_spec(),
         registry = None,
         repository = None,
         target_compatible_with = None,
@@ -712,8 +644,8 @@ def rbe_autoconfig(
           to using the latest release version (see _BAZEL_VERSION_FALLBACK).
       bazel_rc_version: The rc (for the given version of Bazel) to use.
           Must be published in https://releases.bazel.build. E.g. 2.
-      config_name: Optional. Override default config defined in rbe_repo.
-                   Also used for the name of the config to be generated.
+      toolchain_config_spec_name: Optional. Override default config defined in toolchain_config_suite_spec.
+                   Also used for the name of the toolchain config spec to be generated.
       config_repos: Optional. list of additional external repos corresponding to
           configure like repo rules that need to be produced in addition to
           local_config_cc.
@@ -728,7 +660,7 @@ def rbe_autoconfig(
       create_testdata: Optional. Specifies whether to generate additional testing
           only outputs. Defauls to False.
       create_versions: Specifies whether to generate versions.bzl
-          file in output_base of the rbe_repo.
+          file in output_base of the toolchain_config_suite_spec.
           This option is temporary while migration to use.
           generated file by this rule is taking place.
           Defauls to True."
@@ -747,7 +679,7 @@ def rbe_autoconfig(
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
       export_configs: Optional, default False. Whether to copy generated configs
-          (if they are generated) to the output_base defined in rbe_repo.
+          (if they are generated) to the output_base defined in toolchain_config_suite_spec.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
           relevant if 'create_java_configs' is true. If 'create_java_configs' is
@@ -757,49 +689,12 @@ def rbe_autoconfig(
       tag: Optional. The tag of the container to use.
           Should not be set if digest is used.
           Must be set together with registry and repository.
-      # TODO: update this doc after performing validations
-      rbe_repo: Optional. Defaults to using @bazel_toolchains as rbe_repo.
+      toolchain_config_suite_spec: Optional. Defaults to using @bazel_toolchains as
+          source for toolchain_config_suite_spec.
           Should only be set differently if you are using a diferent repo
           as source for your toolchain configs.
-          Dict containing values to identify a toolchain
-          container + GitHub repo where configs are stored. Must
-          include keys:
-              'repo_name': name of the Bazel external repo containing
-                  configs
-              'output_base': relative location of the output base in the
-                  GitHub repo where configs are located)
-              'container_repo': repo for the base toolchain container
-              'container_registry': registry for the base toolchain container
-              'latest_container': sha of the latest container
-              # TODO: update this doc after performing validations
-              'rbe_repo_configs': Optional. Set to point by default to using repo
-                  configs for @bazel_toolchains repo. Only required when export_configs
-                  is set or using a different repo than @bazel_toolchains.
-                  Must point to a list containing structs, each struct represents
-                  a repo config with 'name' (str), 'java_home'(str),
-                 'create_java_configs' (bool), 'create_cc_configs' (bool),
-                 'config_repos' (string list) and 'env' (dict).
-                  defined in the versions.bzl file generated in the output_base defined
-                  in the rbe_repo.
-                  generated by this rule. configs() returns a list of structs.
-                  Each represents a repo config
-                  with 'name' (str), 'java_home'(str), 'create_java_configs' (bool),
-                  'create_cc_configs' (bool). 'config_repos' (string list) and
-                  'env' (dict).
-              # TODO: update this doc after performing validations
-              bazel_to_config_version_map: Optional. Set to point by default to using
-                  map for @bazel_toolchains repo. Only required when export_configs
-                  is set or using a different repo than @bazel_toolchains.
-                  Set it to point to def bazel_to_config_versions()
-                  defined in the versions.bzl file generated in the output_base defined
-                  in the rbe_repo.
-              # TODO: update this doc after performing validations
-              container_to_config_version_map: Optional. Set to point by default to using
-                  map for @bazel_toolchains repo.Only required when export_configs
-                  is set or using a different repo than @bazel_toolchains.
-                  Set it to point to def container_to_config_versions()
-                  defined in the versions.bzl file generated in the output_base defined
-                  in the rbe_repo.
+          For details of the expected structure of toolchain_config_suite_spec dict please see
+          //rules/rbe_repo:toolchain_config_suite_spec.bzl
       registry: Optional. The registry from which to pull the base image.
           Should only be set if a custom container is required.
           Must be set together with digest and repository.
@@ -824,113 +719,7 @@ def rbe_autoconfig(
     if not create_java_configs and java_home != None:
         fail("java_home should not be set when create_java_configs is false.")
 
-    # Verify rbe_repo has all required keys
-    required_keys = [
-        "config_versions",
-        "container_repo",
-        "container_registry",
-        "output_base",
-        "repo_name",
-    ]
-    for key in required_keys:
-        if not rbe_repo.get(key):
-            fail("rbe_repo in %s does not contain required key '%s'" % (name, key))
-    for key in rbe_repo.keys():
-        if key not in required_keys:
-            fail("rbe_repo in %s contain unnecessary key '%s'" % (name, key))
-
-    if str(type(rbe_repo["config_versions"])) != "struct":
-        fail(("%s has a rbe_repo[\"config_versions\"] that is not a struct " +
-              "'%s' was passed as value.") %
-             (name, rbe_repo["config_versions"]))
-
-    # validate the config_versions object is a struct with all required elements
-    required_fields = [
-        "bazel_to_config_version_map",
-        "container_to_config_version_map",
-        "default_config",
-        "latest_container",
-        "rbe_repo_configs",
-    ]
-    for field in required_fields:
-        if not hasattr(rbe_repo["config_versions"], field):
-            fail(("rbe_repo[\"config_versions\"] in %s does not contain " +
-                  "required field '%s'") % (name, field))
-
-    # Check the fields in config_versions have valid types
-    if type(rbe_repo["config_versions"].bazel_to_config_version_map) != "function":
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'bazel_to_config_version_map' " +
-              "that is not a function. '%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].bazel_to_config_version_map))
-    if type(rbe_repo["config_versions"].bazel_to_config_version_map()) != "dict":
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'bazel_to_config_version_map' " +
-              "that does not return a map. '%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].bazel_to_config_version_map))
-    for value in rbe_repo["config_versions"].bazel_to_config_version_map().values():
-        if type(value) != "list":
-            fail(("%s has a rbe_repo[\"config_versions\"] field 'bazel_to_config_version_map' " +
-                  "that has a value that is not a list. '%s' was passed as value.") %
-                 (name, rbe_repo["config_versions"].bazel_to_config_version_map()))
-    if type(rbe_repo["config_versions"].container_to_config_version_map) != "function":
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'container_to_config_version_map' " +
-              "that is not a function. '%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].container_to_config_version_map))
-    if type(rbe_repo["config_versions"].container_to_config_version_map()) != "dict":
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'container_to_config_version_map' " +
-              "that does not return a map. '%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].container_to_config_version_map()))
-    for value in rbe_repo["config_versions"].container_to_config_version_map().values():
-        if type(value) != "list":
-            fail(("%s has a rbe_repo[\"config_versions\"] field 'container_to_config_version_map' " +
-                  "that has a value that is not a list. '%s' was passed as value.") %
-                 (name, rbe_repo["config_versions"].container_to_config_version_map()))
-    for key in rbe_repo["config_versions"].container_to_config_version_map().keys():
-        if not key.startswith("sha256:"):
-            fail(("%s has a rbe_repo[\"config_versions\"] field 'container_to_config_version_map' " +
-                  "that has a key that is not a valid image sha that starts with 'sha256:'. " +
-                  "'%s' was passed as value.") %
-                 (name, rbe_repo["config_versions"].container_to_config_version_map()))
-    if (rbe_repo["config_versions"].latest_container != "" and
-        not rbe_repo["config_versions"].latest_container.startswith("sha256:")):
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'latest_container' " +
-              "that is not either an empty string or a valid sha of an image that " +
-              "starts with 'sha256:'. '%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].latest_container))
-    if (rbe_repo["config_versions"].latest_container != "" and
-        rbe_repo["config_versions"].container_to_config_version_map() != {} and
-        rbe_repo["config_versions"].latest_container not in rbe_repo["config_versions"].container_to_config_version_map().keys()):
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'latest_container' " +
-              "with value '%s', which is not a key in the " +
-              "container_to_config_version_map '%s'") %
-             (name, rbe_repo["config_versions"].latest_container, rbe_repo["config_versions"].container_to_config_version_map()))
-    if (rbe_repo["config_versions"].default_config != "" and
-        type(rbe_repo["config_versions"].default_config) != "struct"):
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'default_config' " +
-              "that is not either an empty string or a 'struct'. " +
-              "'%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].default_config))
-    if rbe_repo["config_versions"].default_config != "":
-        _validate_config_version_spec(name, rbe_repo["config_versions"].default_config)
-
-    # Validate all configs in rbe_repo_configs
-    if type(rbe_repo["config_versions"].rbe_repo_configs) != "function":
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'rbe_repo_configs' " +
-              "that is not a function. '%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].rbe_repo_configs))
-    if type(rbe_repo["config_versions"].rbe_repo_configs()) != "list":
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'rbe_repo_configs' " +
-              "that does not return a list. '%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].rbe_repo_configs))
-
-    # Check the default config is in the list
-    if (rbe_repo["config_versions"].default_config != "" and
-        rbe_repo["config_versions"].default_config not in rbe_repo["config_versions"].rbe_repo_configs()):
-        fail(("%s has a rbe_repo[\"config_versions\"] field 'default_config' " +
-              "with value '%s' that is not in the 'rbe_repo_configs' list: '%s'. " +
-              "'%s' was passed as value.") %
-             (name, rbe_repo["config_versions"].default_config, rbe_repo["config_versions"].rbe_repo_configs()))
-    for config_version_spec in rbe_repo["config_versions"].rbe_repo_configs():
-        _validate_config_version_spec(name, config_version_spec)
+    validate_toolchain_config_suite_spec(name, toolchain_config_suite_spec)
 
     # Resolve the Bazel version to use.
     if not bazel_version or bazel_version == "local":
@@ -950,8 +739,8 @@ def rbe_autoconfig(
 
     # Set to defaults only if all are unset.
     if not repository and not registry and not tag and not digest:
-        repository = rbe_repo["container_repo"]
-        registry = rbe_repo["container_registry"]
+        repository = toolchain_config_suite_spec["container_repo"]
+        registry = toolchain_config_suite_spec["container_registry"]
 
     config_version, selected_digest = validateUseOfCheckedInConfigs(
         name = name,
@@ -964,10 +753,10 @@ def rbe_autoconfig(
         digest = digest,
         env = env,
         java_home = java_home,
-        rbe_repo = rbe_repo,
+        toolchain_config_suite_spec = toolchain_config_suite_spec,
         registry = registry,
         repository = repository,
-        requested_config = config_name,
+        requested_toolchain_config_spec_name = toolchain_config_spec_name,
         tag = tag,
         use_checked_in_confs = use_checked_in_confs,
     )
@@ -976,34 +765,34 @@ def rbe_autoconfig(
     # by validateUseOfCheckedInConfigs, use that one.
     if not digest and selected_digest:
         digest = selected_digest
-    default_config_set = rbe_repo.get("config_versions").default_config != ""
+    default_toolchain_config_spec_set = toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec != ""
 
-    # If using the registry and repo defined in the rbe_repo struct then
-    # set the env if its not set (if defined in rbe_repo).
+    # If using the registry and repo defined in the toolchain_config_suite_spec struct then
+    # set the env if its not set (if defined in toolchain_config_suite_spec).
     # Also try to set the digest (preferably to avoid pulling container),
     # default to setting the tag to 'latest'
-    if ((registry and registry == rbe_repo["container_registry"]) and
-        (repository and repository == rbe_repo["container_repo"])):
-        if not env and default_config_set:
-            env = rbe_repo.get("config_versions").default_config.env
-        if tag == "latest" and rbe_repo["config_versions"].latest_container != "":
+    if ((registry and registry == toolchain_config_suite_spec["container_registry"]) and
+        (repository and repository == toolchain_config_suite_spec["container_repo"])):
+        if not env and default_toolchain_config_spec_set:
+            env = toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec.env
+        if tag == "latest" and toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container != "":
             tag = None
-            digest = rbe_repo["config_versions"].latest_container
-        if not digest and not tag and rbe_repo["config_versions"].latest_container != "":
-            digest = rbe_repo["config_versions"].latest_container
+            digest = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container
+        if not digest and not tag and toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container != "":
+            digest = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container
         if not digest and not tag:
             tag = "latest"
-    default_config = _DEFAULT_CONFIG_NAME if not default_config_set else rbe_repo.get("config_versions").default_config.name
+    default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC_NAME if not default_toolchain_config_spec_set else toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec.name
 
-    # Replace the default_config struct for its name, as the rule expects a string dict.
+    # Replace the default_toolchain_config_spec struct for its name, as the rule expects a string dict.
     # also, dont include the config_versions attr as its a struct (which we flatten below)
-    rbe_repo_stripped = {
-        "default_config": default_config,
-        "repo_name": rbe_repo["repo_name"],
-        "output_base": rbe_repo["output_base"],
-        "container_repo": rbe_repo["container_repo"],
-        "container_registry": rbe_repo["container_registry"],
-        "latest_container": rbe_repo["config_versions"].latest_container,
+    toolchain_config_suite_spec_stripped = {
+        "default_toolchain_config_spec": default_toolchain_config_spec,
+        "repo_name": toolchain_config_suite_spec["repo_name"],
+        "output_base": toolchain_config_suite_spec["output_base"],
+        "container_repo": toolchain_config_suite_spec["container_repo"],
+        "container_registry": toolchain_config_suite_spec["container_registry"],
+        "latest_container": toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container,
     }
 
     config_objs = struct(
@@ -1016,21 +805,21 @@ def rbe_autoconfig(
         env_values = None,
     )
 
-    bazel_to_config_version_map = None
-    container_to_config_version_map = None
+    bazel_to_config_spec_names_map = None
+    container_to_config_spec_names_map = None
     if export_configs:
-        # Flatten rbe_repo_configs structs to pass configs to rule
-        config_objs = config_to_string_lists(rbe_repo["config_versions"].rbe_repo_configs())
-        bazel_to_config_version_map = rbe_repo["config_versions"].bazel_to_config_version_map()
-        container_to_config_version_map = rbe_repo["config_versions"].container_to_config_version_map()
+        # Flatten toolchain_config_specs structs to pass configs to rule
+        config_objs = config_to_string_lists(toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].toolchain_config_specs)
+        bazel_to_config_spec_names_map = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].bazel_to_config_spec_names_map
+        container_to_config_spec_names_map = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].container_to_config_spec_names_map
 
     _rbe_autoconfig(
         name = name,
         base_container_digest = base_container_digest,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
-        bazel_to_config_version_map = bazel_to_config_version_map,
-        config_name = config_name,
+        bazel_to_config_spec_names_map = bazel_to_config_spec_names_map,
+        toolchain_config_spec_name = toolchain_config_spec_name,
         configs_obj_names = config_objs.names,
         configs_obj_java_home = config_objs.java_home,
         configs_obj_create_java_configs = config_objs.create_java_configs,
@@ -1040,7 +829,7 @@ def rbe_autoconfig(
         configs_obj_env_values = config_objs.env_values,
         config_repos = config_repos,
         config_version = config_version,
-        container_to_config_version_map = container_to_config_version_map,
+        container_to_config_spec_names_map = container_to_config_spec_names_map,
         copy_resources = copy_resources,
         create_cc_configs = create_cc_configs,
         create_java_configs = create_java_configs,
@@ -1051,7 +840,7 @@ def rbe_autoconfig(
         exec_compatible_with = exec_compatible_with,
         export_configs = export_configs,
         java_home = java_home,
-        rbe_repo = rbe_repo_stripped,
+        toolchain_config_suite_spec = toolchain_config_suite_spec_stripped,
         registry = registry,
         repository = repository,
         tag = tag,

@@ -25,42 +25,42 @@ load(
     "CUSTOM_ENV1",
     "CUSTOM_ENV2",
     "CUSTOM_ENV3",
-    "CUSTOM_RBE_REPO",
+    "CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC",
 )
 
 rbe_autoconfig(
     name = "rbe_custom",
     export_configs = True,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
 )
 
 rbe_autoconfig(
-    name = "rbe_custom_config_name",
-    config_name = "test_config_name",
+    name = "rbe_custom_toolchain_config_spec_name",
     export_configs = True,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_spec_name = "test_toolchain_config_spec_name",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env1",
-    config_name = "test_env1",
     env = CUSTOM_ENV1,
     export_configs = True,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_spec_name = "test_env1",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env2",
-    config_name = "test_env2",
     env = CUSTOM_ENV2,
     export_configs = True,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_spec_name = "test_env2",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
 )
 
 rbe_autoconfig(
     name = "rbe_custom_env3",
-    config_name = "test_env3",
     env = CUSTOM_ENV3,
     export_configs = True,
-    rbe_repo = CUSTOM_RBE_REPO,
+    toolchain_config_spec_name = "test_env3",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
 )

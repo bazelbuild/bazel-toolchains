@@ -79,6 +79,6 @@ bzl_library(
         "rbe_repo.bzl",
     ],
     deps = [
-        "@bazel_toolchains//rules/rbe_repo:rbe_repo",
+        "@bazel_toolchains//rules/rbe_repo",
     ],
 )

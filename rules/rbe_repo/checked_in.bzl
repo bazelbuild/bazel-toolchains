@@ -27,19 +27,16 @@ def validateUseOfCheckedInConfigs(
         base_container_digest,
         bazel_version,
         bazel_rc_version,
-        #bazel_to_config_version_map,
         config_repos,
-        #container_to_config_version_map,
         create_cc_configs,
         create_java_configs,
         digest,
         env,
         java_home,
-        rbe_repo,
-        #rbe_repo_configs,
+        toolchain_config_suite_spec,
         registry,
         repository,
-        requested_config,
+        requested_toolchain_config_spec_name,
         tag,
         use_checked_in_confs):
     """Check if checked-in configs are available and should be used.
@@ -64,7 +61,7 @@ def validateUseOfCheckedInConfigs(
       env: The environment dict.
       java_home: Path to the Java home.
       registry: The registry where the toolchain container can be found.
-      rbe_repo: Dict containing values to identify a toolchain
+      toolchain_config_suite_spec: Dict containing values to identify a toolchain
           container + GitHub repo where configs are stored. Must
           include keys:
               'repo_name': name of the Bazel external repo containing
@@ -75,19 +72,19 @@ def validateUseOfCheckedInConfigs(
               'container_registry': registry for the base toolchain container
               'latest_container': sha of the latest container
       #TODO: update docs. This is now part of 'config_versions' attr
-          container_to_config_version_map: Optional. Only required when export_configs
-              is set. Set to point to def container_to_config_versions()
+          container_to_config_spec_names_map: Optional. Only required when export_configs
+              is set. Set to point to def container_to_config_spec_names()
               defined in the versions.bzl file generated in the output_base defined
-              in the rbe_repo.
-          rbe_repo_configs: Must point to a list containing structs,
+              in the toolchain_config_suite_spec.
+          toolchain_config_specs: Must point to a list containing structs,
               each struct represents a repo config with 'name' (str),
              'java_home'(str), 'create_java_configs' (bool), 'create_cc_configs' (bool),
              'config_repos' (string list) and 'env' (dict).
-          bazel_to_config_version_map: Set to point to def bazel_to_config_versions()
+          bazel_to_config_spec_names_map: Set to point to def bazel_to_config_versions()
               defined in the versions.bzl file generated in the output_base defined
-              in the rbe_repo.
+              in the toolchain_config_suite_spec.
       repository: The path to the toolchain container on the registry.
-      requested_config: the config_name of the config requested by the user.
+      requested_toolchain_config_spec_name: the toolchain_config_spec_name of the config requested by the user.
       tag: The tag on the toolchain container.
       use_checked_in_confs: Whether to use checked in configs.
 
@@ -103,44 +100,44 @@ def validateUseOfCheckedInConfigs(
 
     if not base_container_digest:
         # If no base_container_digest was set we only use checked-in confs if
-        # the registry and repo match the rbe_repo
-        if registry and registry != rbe_repo["container_registry"]:
+        # the registry and repo match the toolchain_config_suite_spec
+        if registry and registry != toolchain_config_suite_spec["container_registry"]:
             print(("%s not using checked in configs; registry was set to '%s' " +
-                   "and rbe_repo is configured for '%s'") %
-                  (name, registry, rbe_repo["container_registry"]))
+                   "and toolchain_config_suite_spec is configured for '%s'") %
+                  (name, registry, toolchain_config_suite_spec["container_registry"]))
             return None, None
-        if repository and repository != rbe_repo["container_repo"]:
+        if repository and repository != toolchain_config_suite_spec["container_repo"]:
             print(("%s not using checked in configs; repository was set to '%s' " +
-                   "and rbe_repo is configured for '%s'") %
-                  (name, repository, rbe_repo["container_repo"]))
+                   "and toolchain_config_suite_spec is configured for '%s'") %
+                  (name, repository, toolchain_config_suite_spec["container_repo"]))
             return None, None
-    bazel_to_config_version_map = rbe_repo["config_versions"].bazel_to_config_version_map()
-    if not bazel_to_config_version_map.get(bazel_version):
+    bazel_to_config_spec_names_map = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].bazel_to_config_spec_names_map
+    if not bazel_to_config_spec_names_map.get(bazel_version):
         # if Bazel version is a minor version above .0, lets try to default to the .0 config
         bazel_version_split = bazel_version.split(".")
         if int(bazel_version_split[2]) > 0:
             bazel_version = ("%s.%s.%s") % (bazel_version_split[0], bazel_version_split[1], "0")
-            if not bazel_to_config_version_map.get(bazel_version):
+            if not bazel_to_config_spec_names_map.get(bazel_version):
                 print(("%s not using checked in configs; Bazel version %s " +
                        "was picked/selected but no checked in config was " +
                        "found in map %s") %
-                      (name, bazel_version, str(bazel_to_config_version_map)))
+                      (name, bazel_version, str(bazel_to_config_spec_names_map)))
                 return None, None
 
     # Find a config for the given version of bazel
-    bazel_compat_configs = bazel_to_config_version_map.get(bazel_version)
-    if not bazel_to_config_version_map.get(bazel_version):
+    bazel_compat_configs = bazel_to_config_spec_names_map.get(bazel_version)
+    if not bazel_to_config_spec_names_map.get(bazel_version):
         print(("%s not using checked in configs; Bazel version %s was " +
                "picked/selected but no checked in config was found in map %s") %
-              (name, bazel_version, str(bazel_to_config_version_map)))
+              (name, bazel_version, str(bazel_to_config_spec_names_map)))
         return None, None
 
     # Try to resolve the digest with the base_container_digest or if latest was set as tag
     if base_container_digest:
         digest = base_container_digest
     if tag:  # Implies `digest` is not specified.
-        if tag == "latest" and rbe_repo["config_versions"].latest_container != "":
-            digest = rbe_repo["config_versions"].latest_container
+        if tag == "latest" and toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container != "":
+            digest = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container
             # if any tag other than latest is used we will not use checked-in configs
             # (to not hardcode tag info anywhere in these rules)
 
@@ -149,53 +146,53 @@ def validateUseOfCheckedInConfigs(
                    "latest) was selected") % name)
             return None, None
     config = None
-    container_to_config_version_map = rbe_repo["config_versions"].container_to_config_version_map()
+    container_to_config_spec_names_map = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].container_to_config_spec_names_map
 
     # If a digest was provided/selected lets try to find a config that will work
     if digest:
-        compatible_configs = container_to_config_version_map.get(digest)
+        compatible_configs = container_to_config_spec_names_map.get(digest)
         if not compatible_configs:
             print(("%s not using checked in configs; digest '%s' was picked/selected " +
                    "but no compatible checked in config was found in " +
-                   "map '%s'") % (name, digest, str(container_to_config_version_map)))
+                   "map '%s'") % (name, digest, str(container_to_config_spec_names_map)))
             return None, None
-        if requested_config and requested_config not in compatible_configs:
+        if requested_toolchain_config_spec_name and requested_toolchain_config_spec_name not in compatible_configs:
             print(("%s not using checked in configs; config with name '%s' was requested " +
                    "but was not found in '%s' compatible configs for the " +
                    "container with digest '%s'") %
-                  (name, requested_config, compatible_configs, digest))
+                  (name, requested_toolchain_config_spec_name, compatible_configs, digest))
             return None, None
 
         # pick a config: first try the default
-        if (rbe_repo.get("config_versions").default_config != "" and
-            rbe_repo.get("config_versions").default_config.name in compatible_configs):
-            config = rbe_repo.get("config_versions").default_config.name
+        if (toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec != "" and
+            toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec.name in compatible_configs):
+            config = toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec.name
         else:
             config = compatible_configs[0]
 
     # If a config was requested or found via digest, lets see if its compatible with
     # the selected Bazel version
-    if requested_config or config:
+    if requested_toolchain_config_spec_name or config:
         if not config:
-            config = requested_config
+            config = requested_toolchain_config_spec_name
         if config not in bazel_compat_configs:
             print(("%s not using checked in configs; config %s was " +
                    "picked/selected, Bazel version %s was picked/selected " +
                    "but no checked in config was found in %s") %
                   (name, config, bazel_version, str(bazel_compat_configs)))
             return None, None
-    rbe_repo_configs = rbe_repo["config_versions"].rbe_repo_configs()
+    toolchain_config_specs = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].toolchain_config_specs
 
     # We have found a canidadate config, lets check if env / config_repos match
     if config and not _check_config(
-        candidate_config_name = config,
+        candidate_toolchain_config_spec_name = config,
         config_repos = config_repos,
         create_java_configs = create_java_configs,
         create_cc_configs = create_cc_configs,
         env = env,
         java_home = java_home,
         name = name,
-        rbe_repo_configs = rbe_repo_configs,
+        toolchain_config_specs = toolchain_config_specs,
     ):
         print(("%s not using checked in configs; '%s' was picked/selected " +
                "as a candidate matching config but it does not match " +
@@ -217,14 +214,14 @@ def validateUseOfCheckedInConfigs(
     if not config:
         for candidate_config in bazel_compat_configs:
             if _check_config(
-                candidate_config_name = candidate_config,
+                candidate_toolchain_config_spec_name = candidate_config,
                 config_repos = config_repos,
                 create_java_configs = create_java_configs,
                 create_cc_configs = create_cc_configs,
                 env = env,
                 java_home = java_home,
                 name = name,
-                rbe_repo_configs = rbe_repo_configs,
+                toolchain_config_specs = toolchain_config_specs,
             ):
                 config = candidate_config
         if not config:
@@ -246,40 +243,40 @@ def validateUseOfCheckedInConfigs(
     # Resolve the digest:
     # First, try to use latest if that works.
     # If not, pick the first container that works.
-    if (config and rbe_repo["config_versions"].latest_container != "" and
-        config in container_to_config_version_map[rbe_repo["config_versions"].latest_container]):
-        digest = rbe_repo["config_versions"].latest_container
+    if (config and toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container != "" and
+        config in container_to_config_spec_names_map[toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container]):
+        digest = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container
     if not digest:
-        for key in container_to_config_version_map.keys():
-            if config in container_to_config_version_map[key]:
+        for key in container_to_config_spec_names_map.keys():
+            if config in container_to_config_spec_names_map[key]:
                 digest = key
                 break
     if not digest:
         print(("%s not using checked in configs; no digest was found " +
-               "for config '%s' in %s") % (name, config, container_to_config_version_map))
+               "for config '%s' in %s") % (name, config, container_to_config_spec_names_map))
         return None, None
 
     print("%s is using checked-in configs '%s'" % (name, config))
     return config, digest
 
 def _check_config(
-        candidate_config_name,
+        candidate_toolchain_config_spec_name,
         config_repos,
         create_java_configs,
         create_cc_configs,
         env,
         java_home,
         name,
-        rbe_repo_configs):
+        toolchain_config_specs):
     candidate_config = None
-    for repo_conf in rbe_repo_configs:
-        if repo_conf.name == candidate_config_name:
+    for repo_conf in toolchain_config_specs:
+        if repo_conf.name == candidate_toolchain_config_spec_name:
             candidate_config = repo_conf
     if not candidate_config:
         # This is a hard failure as it means the versions.bzl file or
         # rbe_autoconfig rule is not properly set up.
         fail("%s failed. Config %s was selected but is not present in %s" %
-             (name, config, str(rbe_repo_configs)))
+             (name, config, str(toolchain_config_specs)))
     if config_repos and config_repos != candidate_config.config_repos:
         return False
     if env and env != candidate_config.env:
