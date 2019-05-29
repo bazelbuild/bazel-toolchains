@@ -278,10 +278,13 @@ file_test(
 
 # Tests validate run_and_extract uses mount volumes (-v) vs
 # data volumes.
+# Set with tag 'manual' as this test messes up others if the
+# external repos are pulled in parallel.
 file_test(
     name = "rbe_autoconf_no_copy_resources_run_and_extract_test",
     file = "@rbe_autoconf_no_copy_resources//test:run_and_extract.sh",
     regexp = "realpath",
+    tags = ["manual"],
 )
 
 file_test(
