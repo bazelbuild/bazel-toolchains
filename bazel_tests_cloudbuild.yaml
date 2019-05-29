@@ -12,32 +12,12 @@
 # for which a toolchain config was published for the given bazel version.
 
 steps:
-# Test that runs with _BAZEL_VERSION and uses checked-in configs
-# directly w/o using rbe_autoconfig. This one runs w/o remote caching.
-# Configs must exist in this repo for the _CONTAINER_MAJOR_VERSION used
-# for this test to pass.
-- name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
-  args:
-  - --bazelrc=bazelrc/.bazelrc.notoolchain
-  - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
-  - --config=remote
-  - --host_javabase=//configs/ubuntu16_04_clang/${_CONTAINER_MAJOR_VERSION}/bazel_${_BAZEL_VERSION}/java:jdk
-  - --javabase=//configs/ubuntu16_04_clang/${_CONTAINER_MAJOR_VERSION}/bazel_${_BAZEL_VERSION}/java:jdk
-  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
-  - --crosstool_top=//configs/ubuntu16_04_clang/${_CONTAINER_MAJOR_VERSION}/bazel_${_BAZEL_VERSION}/cc:toolchain
-  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-  - --extra_toolchains=//configs/ubuntu16_04_clang/${_CONTAINER_MAJOR_VERSION}/bazel_${_BAZEL_VERSION}/config:cc-toolchain
-  - --extra_execution_platforms=//configs/ubuntu16_04_clang/${_CONTAINER_MAJOR_VERSION}/bazel_${_BAZEL_VERSION}/config:platform
-  - --host_platform=//configs/ubuntu16_04_clang/${_CONTAINER_MAJOR_VERSION}/bazel_${_BAZEL_VERSION}/config:platform
-  - --platforms=//configs/ubuntu16_04_clang/${_CONTAINER_MAJOR_VERSION}/bazel_${_BAZEL_VERSION}/config:platform
-  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-
 # Test that runs with rbe_autoconfig with Bazel ${_BAZEL_VERSION}
+# This test can only run with Bazel versions that have x.x.0 format
+# as we only maintain bazelrc files for these.
 - name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
-  - --bazelrc=bazelrc/.bazelrc
+  - --bazelrc=bazelrc/bazel-${_BAZEL_VERSION}.bazelrc
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
