@@ -12,6 +12,7 @@
 # for which a toolchain config was published for the given bazel version.
 
 steps:
+# TODO(nlopezgi): DO NOT SUBMIT THIS, JUST KICKING OFF PRESUBMIT
 # Test that runs with rbe_autoconfig with Bazel ${_BAZEL_VERSION}
 # This test can only run with Bazel versions that have x.x.0 format
 # as we only maintain bazelrc files for these.
