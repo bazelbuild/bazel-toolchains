@@ -91,7 +91,6 @@ assert_no_java_confs() {
 assert_cc_confs() {
   assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_exists ${DIR}/cc/cc_toolchain_config.bzl
-  assert_file_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_exists ${DIR}/cc/cc_wrapper.sh
 }
 
@@ -99,7 +98,6 @@ assert_cc_confs() {
 assert_checked_in_cc_confs() {
   assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
-  assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
 }
 
@@ -107,7 +105,6 @@ assert_checked_in_cc_confs() {
 assert_no_cc_confs() {
   assert_file_not_exists ${DIR}/cc/test.BUILD
   assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
-  assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
 }
 
@@ -125,7 +122,6 @@ assert_no_java_home() {
 assert_output_base_cc_confs() {
   assert_file_exists ${DIR}/cc/BUILD
   assert_file_exists ${DIR}/cc/cc_toolchain_config.bzl
-  assert_file_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_exists ${DIR}/cc/cc_wrapper.sh
 }
 
@@ -133,7 +129,6 @@ assert_output_base_cc_confs() {
 assert_output_base_no_cc_confs() {
   assert_file_not_exists ${DIR}/cc/BUILD
   assert_file_not_exists ${DIR}/cc/cc_toolchain_config.bzl
-  assert_file_not_exists ${DIR}/cc/dummy_toolchain.bzl
   assert_file_not_exists ${DIR}/cc/cc_wrapper.sh
 }
 
