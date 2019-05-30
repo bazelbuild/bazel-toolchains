@@ -116,7 +116,6 @@ def _create_docker_cmd(
     ]
     ctx.file("container/run_in_container.sh", "\n".join(docker_cmd), True)
 
-# Verifies if we need to pull a container to resolve the configs.
 def pull_container_needed(ctx):
     """Returns whether or not pulling a container is needed.
 
@@ -155,8 +154,8 @@ def pull_image(ctx, docker_tool_path, image_name):
 def get_java_home(ctx, docker_tool_path, image_name):
     """Gets the value of java_home.
 
-      Gets the value of java_home either from attr or
-      by running docker run image_name printenv JAVA_HOME.
+    Gets the value of java_home either from attr or
+    by running docker run image_name printenv JAVA_HOME.
 
     Args:
       ctx: the Bazel context object.
@@ -191,8 +190,6 @@ def get_java_home(ctx, docker_tool_path, image_name):
              "create_java_configs is set to True")
     return java_home
 
-# Runs the container (creates command to run inside container) and extracts the
-# toolchain configs.
 def run_and_extract(
         ctx,
         bazel_version,
@@ -204,8 +201,8 @@ def run_and_extract(
         use_default_project):
     """Runs the container and extracts the toolchain configs.
 
-       Runs the container (creates command to run inside container) and extracts the
-       toolchain configs.
+    Runs the container (creates command to run inside container) and extracts the
+    toolchain configs.
 
     Args:
         ctx: the Bazel context object.
@@ -217,7 +214,8 @@ def run_and_extract(
           local_config_cc
       docker_tool_path: path to the docker binary.
       image_name: name of the image to pull.
-      project_root: the absolute path to the root of the project
+      project_root: the absolute path to the root of the project that will
+          be mounted/copied to the container
       use_default_project: whether or not to use the default project to generate configs
     """
     outputs_tar = ctx.attr.name + "_out.tar"
@@ -244,10 +242,10 @@ def run_and_extract(
     clean_data_volume_cmd = ""
     if ctx.attr.copy_resources:
         copy_data_cmd.append("data_volume=$(docker create -v " + _ROOT_DIR + " " + image_name + ")")
-        copy_data_cmd.append("docker cp $(realpath " + project_root + ") $data_volume:" + _REPO_DIR)
-        copy_data_cmd.append("docker cp " + str(ctx.path("container")) + " $data_volume:" + _ROOT_DIR + "/container")
+        copy_data_cmd.append(docker_tool_path + " cp $(realpath " + project_root + ") $data_volume:" + _REPO_DIR)
+        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("container")) + " $data_volume:" + _ROOT_DIR + "/container")
         docker_run_flags += ["--volumes-from", "$data_volume"]
-        clean_data_volume_cmd = "docker rm $data_volume"
+        clean_data_volume_cmd = docker_tool_path + " rm $data_volume"
     else:
         mount_read_only_flag = ":ro"
         if use_default_project:
