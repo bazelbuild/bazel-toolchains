@@ -415,21 +415,21 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home)
 # Fail if the config defined by the user in the ctx/selected by default
 # does not match details of the one in versions.bzl
 def _check_config(ctx, config):
-    if not ctx.attr.env == config.env:
+    if ctx.attr.env != config.env:
         fail(("%s failed. '%s' was passed as env and '%s' was " +
               "provided/selected as toolchain_config_spec_name but the provided/selected " +
               "toolchain_config_specs had set '%s' as env. Either set the env attr " +
               "properly in the rule or set a different toolchain_config_spec_name " +
               "explicitly") % (ctx.attr.name, str(ctx.attr.env), config.name, str(config.env)))
 
-    if not ctx.attr.config_repos == config.config_repos:
+    if ctx.attr.config_repos != config.config_repos:
         fail(("%s failed. '%s' was passed as config_repos and '%s' was " +
               "provided/selected as toolchain_config_spec_name but the provided/selected " +
               "toolchain_config_specs had set '%s' as config_repos. Either set " +
               "the config_repos attr properly in the rule or set a different " +
               "toolchain_config_spec_name explicitly") % (ctx.attr.name, str(ctx.attr.config_repos), config.name, str(config.config_repos)))
 
-    if not ctx.attr.create_java_configs == config.create_java_configs:
+    if ctx.attr.create_java_configs != config.create_java_configs:
         fail(("%s failed. '%s' was passed as create_java_configs and '%s' was " +
               "provided/selected as toolchain_config_spec_name but the provided/selected " +
               "toolchain_config_specs had set '%s' as create_java_configs. " +
@@ -437,7 +437,7 @@ def _check_config(ctx, config):
               "properly in the rule or set a different toolchain_config_spec_name " +
               "explicitly") % (ctx.attr.name, str(ctx.attr.create_java_configs), config.name, str(config.create_java_configs)))
 
-    if not ctx.attr.create_cc_configs == config.create_cc_configs:
+    if ctx.attr.create_cc_configs != config.create_cc_configs:
         fail(("%s failed. '%s' was passed as create_cc_configs and '%s' was " +
               "provided/selected as toolchain_config_spec_name but the provided/selected " +
               "toolchain_config_specs had set '%s' as create_cc_configs. " +
