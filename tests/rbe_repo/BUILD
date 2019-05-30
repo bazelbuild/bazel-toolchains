@@ -445,7 +445,7 @@ sh_test(
     srcs = [":rbe_autoconf_output_base_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
-        "bazel-rbe-tests/config/rbe_autoconf_output_base",
+        "rbe-test-output/config/rbe_autoconf_output_base",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",
         "assert_output_base_java_confs",
@@ -463,7 +463,7 @@ sh_test(
     srcs = [":rbe_autoconf_output_base_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
-        "bazel-rbe-tests/config/rbe_autoconf_output_base_no_java",
+        "rbe-test-output/config/rbe_autoconf_output_base_no_java",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",
         "assert_output_base_no_java_confs",
@@ -481,7 +481,7 @@ sh_test(
     srcs = [":rbe_autoconf_output_base_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
-        "bazel-rbe-tests/config/rbe_autoconf_output_base_no_cc",
+        "rbe-test-output/config/rbe_autoconf_output_base_no_cc",
         _ubuntu1604_bazel,
         "assert_output_base_no_cc_confs",
         "assert_output_base_java_confs",
@@ -499,7 +499,7 @@ sh_test(
     srcs = [":rbe_autoconf_output_base_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
-        "bazel-rbe-tests/config/rbe_autoconf_config_repos_output_base",
+        "rbe-test-output/config/rbe_autoconf_config_repos_output_base",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",
         "assert_output_base_java_confs",
@@ -526,7 +526,7 @@ sh_test(
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
         "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
-        "bazel-rbe-tests/config/rbe_autoconf_output_base",
+        "rbe-test-output/config/rbe_autoconf_output_base",
         "test_config_dir",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",

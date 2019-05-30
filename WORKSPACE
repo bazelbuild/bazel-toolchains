@@ -359,7 +359,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_output_base",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    output_base = "bazel-rbe-tests/config/rbe_autoconf_output_base",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base",
     use_checked_in_confs = "False",
 )
 
@@ -368,7 +368,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
     create_testdata = True,
-    output_base = "bazel-rbe-tests/config/rbe_autoconf_output_base_no_java",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base_no_java",
     use_checked_in_confs = "False",
 )
 
@@ -377,7 +377,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_cc_configs = False,
     create_testdata = True,
-    output_base = "bazel-rbe-tests/config/rbe_autoconf_output_base_no_cc",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base_no_cc",
     use_checked_in_confs = "False",
 )
 
@@ -388,7 +388,7 @@ rbe_autoconfig(
         "local_config_sh",
     ],
     create_testdata = True,
-    output_base = "bazel-rbe-tests/config/rbe_autoconf_config_repos_output_base",
+    output_base = "rbe-test-output/config/rbe_autoconf_config_repos_output_base",
 )
 
 rbe_autoconfig(
@@ -396,7 +396,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     config_dir = "test_config_dir",
     create_testdata = True,
-    output_base = "bazel-rbe-tests/config/rbe_autoconf_output_base",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base",
     use_checked_in_confs = "False",
 )
 
