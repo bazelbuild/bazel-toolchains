@@ -16,7 +16,7 @@ steps:
 # usable for an RBE build.
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=tests/config/rbe_autoconf_output_base/.latest.bazelrc
+  - --bazelrc=bazel-rbe-tests/config/rbe_autoconf_output_base/.latest.bazelrc
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
@@ -29,7 +29,7 @@ steps:
 # produces outputs that are usable for an RBE build.
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=tests/config/rbe_autoconf_output_base/.latest.bazelrc
+  - --bazelrc=bazel-rbe-tests/config/rbe_autoconf_output_base/.latest.bazelrc
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
