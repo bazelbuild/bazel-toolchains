@@ -280,6 +280,8 @@ file_test(
 # data volumes.
 # Set with tag 'manual' as this test messes up others if the
 # external repos are pulled in parallel.
+# This is because when sources are mounted race conditions can
+# occur when the sample project is used.
 file_test(
     name = "rbe_autoconf_no_copy_resources_run_and_extract_test",
     file = "@rbe_autoconf_no_copy_resources//test:run_and_extract.sh",

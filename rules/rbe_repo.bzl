@@ -202,10 +202,10 @@ load(
     "expand_outputs",
 )
 load(
-    "//rules/rbe_repo:rbe_repo_spec.bzl",
+    "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
     "config_to_string_lists",
-    "validate_rbe_repo_spec",
-    rbe_default_repo = "default_rbe_repo_spec",
+    "validate_toolchain_config_suite_spec",
+    rbe_default_toolchain_config_suite_spec = "default_toolchain_config_suite_spec",
 )
 load(
     "//rules/rbe_repo:util.bzl",
@@ -580,11 +580,11 @@ def rbe_autoconfig(
     if not create_java_configs and java_home != None:
         fail("java_home should not be set when create_java_configs is false.")
 
-    # This is a temporary call to verify the default rbe_repo stucture.
+    # This is a temporary call to verify the default toolchain_config_suite_spec stucture.
     # Will be removed as part of https://github.com/bazelbuild/bazel-toolchains/pull/526
     # TODO(nlopezgi): remove this
-    validate_rbe_repo_spec(name, rbe_default_repo())
-    config_to_string_lists(rbe_default_repo()["rbe_repo_gen_spec"].toolchain_config_specs())
+    validate_toolchain_config_suite_spec(name, rbe_default_toolchain_config_suite_spec())
+    config_to_string_lists(rbe_default_toolchain_config_suite_spec()["toolchain_config_suite_autogen_spec"].toolchain_config_specs)
 
     # Resolve the Bazel version to use.
     if not bazel_version or bazel_version == "local":
