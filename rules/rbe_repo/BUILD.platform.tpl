@@ -40,5 +40,9 @@ platform(
           name: "container-image"
           value:"docker://%{image_name}"
         }
-        """,
+        properties {
+           name: "OSFamily"
+           value:  "Linux"
+        }
+        """, 
 )
