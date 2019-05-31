@@ -13,3 +13,10 @@
   date: "2019-05-29"
   bazelVersion: 0.26.0
   configVersion: 0
+- commitSHA: 38f8a35f58e496ea67f86617f0b1081093f9ab93
+  digest: c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d
+  title: Toolchain configs for marketplace.gcr.io/google/rbe-ubuntu16-04, Bazel 0.26.0
+    (2019/05/31) (#542)
+  date: "2019-05-31"
+  bazelVersion: 0.26.0
+  configVersion: 1
