@@ -16,7 +16,7 @@ steps:
 # This test uses the configs via their path in the output_base
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=tests/rbe_repo/.latest.bazelrc
+  - --bazelrc=rbe-test-output/config/rbe_autoconf_output_base/.latest.bazelrc
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
@@ -30,7 +30,7 @@ steps:
 # This test uses the configs via their path in the external repo
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=bazelrc/.bazelrc.notoolchain
+  - --bazelrc=rbe-test-output/config/rbe_autoconf_output_base/.latest.bazelrc
   - test
   - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote

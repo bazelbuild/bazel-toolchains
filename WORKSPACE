@@ -369,7 +369,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "bazel-rbe-tests/config/rbe_autoconf_output_base",
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
     },
@@ -386,7 +386,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "bazel-rbe-tests/config/rbe_autoconf_output_base_no_java",
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base_no_java",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
     },
@@ -403,7 +403,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "bazel-rbe-tests/config/rbe_autoconf_output_base_no_cc",
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base_no_cc",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
     },
@@ -422,7 +422,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "bazel-rbe-tests/config/rbe_autoconf_config_repos_output_base",
+        "output_base": "rbe-test-output/config/rbe_autoconf_config_repos_output_base",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
     },
@@ -437,7 +437,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "bazel-rbe-tests/config/rbe_autoconf_output_base",
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
     },
@@ -474,7 +474,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "bazel-rbe-tests/config/rbe_autoconf_custom_rbe_repo",
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_rbe_repo",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": test_toolchain_config_suite_autogen_spec,
     },
@@ -493,7 +493,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "bazel-rbe-tests/config/rbe_autoconf_custom_rbe_repo_blank",
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_rbe_repo_blank",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": blank_toolchain_config_suite_autogen_spec,
     },
