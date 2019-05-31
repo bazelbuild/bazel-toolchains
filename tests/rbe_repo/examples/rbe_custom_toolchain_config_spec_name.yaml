@@ -30,7 +30,3 @@ steps:
   - --host_platform=@rbe_custom_toolchain_config_spec_name//config:platform
   - --platforms=@rbe_custom_toolchain_config_spec_name//config:platform
   dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
-
-
-
-

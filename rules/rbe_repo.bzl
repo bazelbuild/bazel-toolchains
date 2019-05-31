@@ -18,24 +18,63 @@ The toolchain configs (+ platform) produced/selected by this rule can be used
 to, e.g., run a remote build in which remote actions will run inside a
 container image.
 
-Exposes the rbe_autoconfig macro that does the following:
-- If users selects the standard rbe-ubuntu 16_04 image, create aliases to
-  the appropriate toolchain / platform targets for the current version of Bazel
-- Otherwise, pull the selected toolchain container image (using 'docker pull').
-- Starts up a container using the pulled image, mounting either a small sample
+Exposes the rbe_autoconfig macro that encapsulates all functionality to
+create and use toolchain configs. The main use cases for this rule are
+  1. If you use the rbe-ubuntu 16_04 image in your RBE builds: This macro
+    enables automatic selection of toolchain configs for your RBE build.
+    As long as you are using a release version of Bazel and have your pin
+    to the bazel-toolchains repo up to date, this rule should "just work"
+    to select toolchain configs that have been generated for you before hand.
+
+  2. If you use a container that extends from the rbe-ubuntu 16_04 image
+    in your RBE builds: This macro allows you to define which version of
+    the rbe-ubuntu 16_04 image you built yours from, and then it will either
+    pick toolchain configs in the bazel-toolchains repo that work for you,
+    or will generate them on the fly by pulling the rbe-ubuntu 16_04
+    container you used as base and running some commands inside the container.
+    The main reason for having to generate a toolchain config (as opposed to
+    using one that is checked-in the bazel-toolchains repo) is due to your
+    base rbe-ubuntu 16_04 image not being compatible with the latest one,
+    for the given version of Bazel you are using.
+    If you want to make sure you can use checked-in configs, you should
+    rebuild your container, using the latest rbe-ubuntu 16_04 image as base,
+    whenever you udpate Bazel versions.
+
+  3. If you use a custom container that does not extend from the rbe-ubuntu 16_04
+    image (or your project has custom configure like repo rules, or you
+    need to run your configure like repo rules with different environment
+    settings):
+
+    3.1. If you dont mind having to generate configs each time you run Bazel from
+      a clean client, then this rule can do just that, by simply specifying the
+      relevant information about which container to use.
+
+    3.2. If you don't want to generate configs every time, you can use
+      rbe_autoconfig to setup a "toolchain_config_repo" from which anyone
+      that builds on RBE with your container can pull pre-generated configs from.
+      To do this, rbe_autoconfig allows specification of a toolchain_config_suite_spec.
+      A toolchain_config_suite_spec specifies all details of an external repo
+      that will be used to both export to and read from toolchain configs.
+
+    More about configure like repo rules: https://docs.bazel.build/versions/master/remote-execution-rules.html#managing-configure-style-workspace-rules
+
+If rbe_autoconfig needs to generate toolchain configs, the process is as follows:
+- Pull the selected toolchain container image (using 'docker pull').
+- Start up a container using the pulled image, mounting either a small sample
   project or the current project (if output_base is set).
-- Installs the current version of Bazel (one currently running) on the container
+- Install the current version of Bazel (one currently running) on the container
   (or the one passed in with optional attr). Container must have tools required to install
   and run Bazel (i.e., a jdk, a C/C++ compiler, a python interpreter).
-- Runs a bazel command to build the local_config_cc remote repository inside the container.
-- Extracts local_config_cc produced files (inside the container) to the produced
+- Run a bazel command to build the local_config_cc remote repository inside the container.
+- Extract local_config_cc produced files (inside the container) to the produced
   remote repository.
-- Produces a default BUILD file with platform and toolchain targets to use the container
+- Produce a default BUILD file with platform and toolchain targets to use the container
   in a remote build.
 - Optionally copies the local_config_cc produced files to the project srcs under the
   given output_base directory.
 
-Add to your WORKSPACE file the following:
+For use case 1. If you use the rbe-ubuntu 16_04 image in your RBE builds,
+add to your WORKSPACE file the following:
 
   load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
@@ -63,65 +102,154 @@ Add to your WORKSPACE file the following:
   # only need one single rbe_autoconfig target
   rbe_autoconfig(
     name = "rbe_default",
+    # If you want your rbe_autoconfig rule to never pull a container
+    # and fail fast if toolchain configs are not available, uncomment the
+    # following line:
+    # use_checked_in_confs = "Force",
   )
 
-  # You can pass an optional output_base if you want the produced
-  # toolchain configs to be copied to your source tree (recommended).
-  rbe_autoconfig(
-    name = "rbe_default_with_output_base",
-    output_base = "rbe-configs"
-  )
+For the recommended value of <latest_release> please see
+https://releases.bazel.build/bazel-toolchains.html
 
-  # If you are using a custom container for remote builds, just
-  # set some extra args (see also about env variables)
+For use case 2. If you use a container that extends from the rbe-ubuntu 16_04
+image, add to your WORKSPACE file the following:
+
+  <Add the bazel-toolchains repo http_archive, same as above>
+
   rbe_autoconfig(
-    name = "rbe_my_custom_container",
+    name = "rbe_default",
+    base_container_digest = <SHA of rbe-ubuntu 16_04 you used as base>
     registry = "gcr.io",
-    repository = "my-project/my-base",
+    repository = "your-project/your-image-name",
     # Digest is recommended for any use case other than testing.
     digest = "sha256:deadbeef",
   )
 
-For values of <latest_release> and other placeholders above, please see
-the WORKSPACE file in this repo.
+For use case 3.1. If you are using a custom container, and dont mind
+having to generate configs each time, add to your WORKSPACE file
+the following:
 
-This rule depends on the value of the environment variable "RBEAUTOCONF_ROOT"
-when output_base is used.
-This env var should be set to point to the absolute path root of your project.
-Use the full absolute path to the project root (i.e., no '~', '../', or
-other special chars).
+  <Add the bazel-toolchains repo http_archive, same as above>
 
-There are two modes of using this repo rules:# Creates a BUILD file with the java_runtime target
-  1 - When output_base set (recommended if using a custom toolchain container
-    image; env var "RBEAUTOCONF_ROOT" is required), running the repo rule
-    target will copy the toolchain config files to the output_base folder in
-    the project sources.
-    After that, you can run an RBE build pointing your crosstool_top flag to the
-    produced files. If output_base is set to "rbe-configs" (recommended):
+  rbe_autoconfig(
+    name = "rbe_your_custom_container",
+    registry = "gcr.io",
+    repository = "your-project/your-image-name",
+    # Digest is recommended for any use case other than testing.
+    digest = "sha256:deadbeef",
+  )
 
-      bazel build ... \
-                --crosstool_top=//rbe-configs/bazel_{bazel_version}/cc:toolchain \
-                --host_javabase=//rbe-configs/bazel_{bazel_version}/java:jdk \
-                --javabase=//rbe-configs/bazel_{bazel_version}/java:jdk \
-                --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
-                --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8 \
-                --extra_execution_platforms=//rbe-configs/bazel_{bazel_version}/config:platform \
-                --host_platform=//rbe-configs/bazel_{bazel_version}/config:platform \
-                --platforms=//rbe-configs/bazel_{bazel_version}/config:platform \
-                --extra_toolchains=//rbe-configs/bazel_{bazel_version}/config:cc-toolchain \
-                ... <other rbe flags> <build targets>
 
-    We recommend you check in the code in //rbe-configs/bazel_{bazel_version}
-    so that most devs/your CI typically do not need to run this repo rule
-    in order to do a remote build (i.e., once files are checked in,
-    you do not need to run this rule until there is a new version of Bazel
-    you want to support running with, or you need to update your container).
+For use case 3.2. If you are using a custom container, and don't
+want to generate configs every time. The setup is as follows:
 
-  2 - When output_base is not set (recommended for users of the
-    rbe-ubuntu 16_04 images - env var "RBEAUTOCONF_ROOT" is not required),
-    running this rule will create targets in the
-    external repository (e.g., rbe_default) which can be used to point your
-    flags to:
+Define a repo (can be the same where you host the sources you want
+to build on RBE or a separate one) which will host your published
+toolchain configs. We call this the "toolchain-config-repo" in the
+below
+
+Define a toolchain_config_suite_spec, which specifies a container
+(repo + registry) and an output_base, the relative path, within
+the toolchain-config-repo where toolchain configs will be published to.
+You can only have one toolchain_config_suite_spec per container for which
+you will be producing toolchain configs for, but multiple versions of the same
+container (i.e., with different sha / tags) can share the same
+toolchain_config_suite_spec.
+Also, the same toolchain_config_suite_spec can also be used to host
+multiple toolchain configs that vary in environment variables, and
+additional config repos (i.e., repos corresponding to configure like
+repository rules) that are needed for different types of builds. For example,
+a configuration for msan (which needs specific env variables) and one for
+default C++ builds can share an output_base.
+Lastly, a toolchain_config_suite_spec will store configs for several
+versions of Bazel (any that you specify).
+
+For detailed instructions of how to set up a toolchain_config_suite_spec
+please see //rules/rbe_repo/toolchain_config_suite_spec.bzl
+
+Once you have set up the toolchain_config_suite_spec you can add to your
+WORKSPACE the following:
+
+  <Add the bazel-toolchains repo http_archive, same as above>
+
+  load("//path/to_your/toolchain_config_suite_spec.bzl", "your_toolchain_config_suite_spec_stuct")
+
+  rbe_autoconfig(
+    name = "rbe_your_custom_toolchain_config_suite_spec",
+    export_configs = True,
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+  )
+
+You can then run:
+
+bazel build @rbe_your_custom_toolchain_config_suite_spec//...
+
+This will create the toolchain configs in the output_base defined in the
+toolchain_config_suite_spec. It will generate configs for the current version
+of bazel you are running with (overridable via attr).
+This will also (abusing Bazel hermeticity principles) modify the versions.bzl
+file in the output_base. This is so that subsequent executions of the rule
+(by you, or by any of your users after you have checked-in these generated files)
+will be able to directly use them without having to generate them again.
+
+For users of your toolchain_config_suite_spec all that they need to do is
+add to their WORKSPACE:
+
+  <Add the bazel-toolchains repo http_archive, same as above>
+
+  load("//path/to_your/toolchain_config_suite_spec.bzl", "your_toolchain_config_suite_spec_stuct")
+
+  rbe_autoconfig(
+    name = "rbe_your_custom_toolchain_config_suite_spec",
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+  )
+
+And that's it! They should be able to get checked-in configs every time,
+as long as:
+  - Whenever there is a new Bazel version that is needed for RBE builds,
+    you, the owner of the toolchain_config_suite_spec generates and
+    publishes the new toolchain configs to your repo (this is because
+    new Bazel versions can only be guaranteed to work with toolchain
+    configs that were generated for the specific version of Bazel used)
+  - Whenever there is a new Bazel version that is needed for RBE builds,
+    the users of your toolchain_config_suite_spec update their pin to
+    your repo.
+
+If you want to create (more) different sets of toolchain configurations (a toolchain_config_spec)
+with a different set of env variables, you can do so by reusing the
+toolchain_config_suite_spec, and providing a distinct toolchain_config_spec_name. Example:
+
+rbe_autoconfig(
+    name = "rbe_custom_env2",
+    env = {<dict declaring env variables>},
+    export_configs = True,
+    toolchain_config_spec_name = "<unique name to assign this toolchain_config_spec>",
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+)
+
+rbe_autoconfig(
+    name = "rbe_custom_env2",
+    env = {<dict declaring env variables>},
+    export_configs = True,
+    toolchain_config_spec_name = "<unique name to assign this toolchain_config_spec>",
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+)
+
+NOTES:
+
+READ CAREFULLY THROUGH THESE NOTES, NO MATTER YOUR USE CASE:
+
+NOTE 1: SETTING TOOLCHAIN FLAGS
+
+This is not an up to date source for flags, and just provides general guidance
+please see //bazelrc/.latest.bazelrc for the most up to date flags.
+
+Once you have added the rbe_autoconfig rule to your WORKSPACE, you will
+need to set up toolchain flags that select the appropriate toolchain configs.
+The flags below, show an sample of those flags, which was last reviewed
+with Bazel 0.25.0 and for a rbe_autoconfig rule with name 'rbe_default'.
+If you are using a later version of Bazel or your target has a different
+name, please adjust accordingly.
 
       bazel build ... \
                 --crosstool_top=@rbe_default//cc:toolchain \
@@ -134,35 +262,75 @@ There are two modes of using this repo rules:# Creates a BUILD file with the jav
                 --platforms=@rbe_default//config:platform \
                 --extra_toolchains=@rbe_default//config:cc-toolchain \
 
-    Note running bazel clean --expunge_async, or otherwise modifying attrs or
-    env variables used by this rule will trigger it to re-execute. Running this
-    repo rule can take some time (if you are not using the rbe-ubuntu 16_04 container)
-    as it needs to pull a container, run it, and then run some commands inside.
-    We recommend you use output_base and check in the produced
-    files so you dont need to run this rule with every clean build.
+NOTE 2: WHEN DOES THIS RULE PULL A CONTAINER
 
-The {bazel_version} above corresponds to the version of bazel installed locally.
-Note you can override this version and pass an optional rc # if desired.
-Running this rule with a non release version (e.g., built from source) will result in
-picking as bazel version _BAZEL_VERSION_FALLBACK. Note the bazel_version / bazel_rc_version
-must be published in https://releases.bazel.build/...
+Most users of rbe_autoconfig do not expect their target to pull a container.
+If your rbe_autoconfig rule nevertheless pulls a container its because it
+could not find checked-in configs that match:
+1- The Bazel version you are currently using
+2- The container you selected (if you are setting also base_container_digest)
+3- The environment or config repos you requested
 
-Note this is a very not hermetic repository rule that can actually change the
-contents of your project sources. While this is generally not recommended by
-Bazel, its the only reasonable way to get a rule that can produce valid
-toolchains / platforms that need to be made available to Bazel before execution
-of any build actions.
+The simplest fix for 1 is to update your pin to the bazel-toolchains repo (and
+to the source of your custom toolchain_config_suite_spec). If that does not
+fix the issue, you can try to use an older toolchain cofig by passing
+an older version in the bazel_version 'attr' (which may or may not work with
+the current version you are running). You should also contact the owners of
+bazel-toolchains (or the custom toolchain_config_suite_spec repo) to have them
+publish configs for any new version if they have not done so.
 
-Note: this rule expects the following utilities to be installed and available on
-the PATH (if any container other than rbe-ubuntu 16_04 is used):
+The simplest fix for 2, is to rebuild your custom container using as base
+the latest version of the base_container_digest. If that does not work, contact
+the owners of the bazel-toolchains repo (i.e., create an issue in this repo)
+or the owners of custom toolchain_config_suite_spec repo if you are using one.
+
+The only possible fix for 3, if you want this custom config spec to be supported
+with checked-in configs, is to contact the owners of the bazel-toolchains repo
+(or the custom toolchain_config_suite_spec repo), to ask them to add this spec
+to their WORKSPACE and generate configs for it.
+
+NOTE 3: USE OF PROJECT ROOT
+
+When this rule needs to export toolchain configs, or when it needs
+to generate configs for custom config repos (i.e., corresponding to
+configure like repo rules needed in your RBE build), This rule depends
+on the value of the environment variable "RBEAUTOCONF_ROOT".
+
+This env var should be set to point to the absolute path root of your project.
+Use the full absolute path to the project root (i.e., no '~', '../', or
+other special chars).
+
+NOTE 4: PREREQUISITES FOR RUNNING THIS RULE
+
+If this rule needs to generate configs, it expects the following
+utilities to be installed and available on the PATH:
   - docker
   - tar
   - bash utilities (e.g., cp, mv, rm, etc)
   - docker authentication to pull the desired container should be set up
     (rbe-ubuntu16-04 does not require any auth setup currently).
 
-Known limitations:
+NOTE 5: HERMETICITY AND THIS RULE
+
+Note this is a very not hermetic repository rule that can actually change the
+contents of your project sources. While this is generally not recommended by
+Bazel, its the only reasonable way to get a rule that can produce valid
+toolchains / platforms that need to be made available to Bazel before execution
+of any build actions, AND at the same time, make them available to other
+users so they do not need to be regenerated again. This can be done, safely,
+to a certain extent, because these containers are pulled and dealt with by
+SHA, all the outputs produced should be completely independent of where they
+were built and can be leveraged by all users of a container.
+
+NOTE 6: KNOWN LIMITATIONS
+
   - This rule can only run in Linux if it needs to generate configs.
+  - Use of copy_resources = False, is experimental and can be problematic
+    if more than 1 rbe_autoconfig rule is executed in parallel.
+  - If using export_configs, and you have multiple rbe_autoconfig targets
+    pointing to the same toolchain_config_suite_spec, these rules should not
+    be executed together in the same bazel command, as they all depend on
+    reading/writing to the same versions.bzl file.
   - This rule cannot generate configs if: 1) it needs to pull additional
     config repos and 2) the project's WORKSPACE contains local_repository
     rules pointing to directories above the project root.
@@ -336,7 +504,7 @@ def _rbe_autoconfig_impl(ctx):
             # Create a default BUILD file with the platform + toolchain targets that
             # will work with RBE with the produced toolchain (to be exported to
             # output_dir)
-            ctx.report_progress("creating output_base platform")
+            ctx.report_progress("creating export platform")
             create_export_platform(
                 ctx,
                 # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
@@ -393,7 +561,8 @@ _rbe_autoconfig = repository_rule(
     attrs = {
         "base_container_digest": attr.string(
             doc = ("Optional. If the container to use for the RBE build " +
-                   "extends from the rbe-ubuntu16-04 image, you can " +
+                   "extends from the one defined in the 'toolchain_config_suite_spec' " +
+                   "(defaults to rbe-ubuntu16-04 image), you can " +
                    "pass the digest (sha256 sum) of the base container here " +
                    "and this rule will attempt to use checked-in " +
                    "configs if possible." +
@@ -407,7 +576,7 @@ _rbe_autoconfig = repository_rule(
                    "the rc must be available in https://releases.bazel.build."),
         ),
         "bazel_to_config_spec_names_map": attr.string_list_dict(
-            doc = ("Optional. A dict with keys corresponding to bazel versions, " +
+            doc = ("Internal. A dict with keys corresponding to bazel versions, " +
                    "values corresponding to lists of configs. Must point to the " +
                    "bazel_to_config_versions def in the versions.bzl file " +
                    "located in the 'output_base' of the 'toolchain_config_suite_spec'."),
@@ -422,35 +591,35 @@ _rbe_autoconfig = repository_rule(
             doc = ("The name of the toolchain config spec to be generated."),
         ),
         "configs_obj_config_repos": attr.string_list(
-            doc = ("Optional. Set to list 'config_repos' generated by config_to_string_lists def in " +
+            doc = ("Internal. Set to list 'config_repos' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_create_cc_configs": attr.string_list(
-            doc = ("Optional. Set to list 'cc_configs' generated by config_to_string_lists def in " +
+            doc = ("Internal. Set to list 'cc_configs' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_create_java_configs": attr.string_list(
-            doc = ("Optional. Set to list 'java_configs' generated by config_to_string_lists def in " +
+            doc = ("Internal. Set to list 'java_configs' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_env_keys": attr.string_list(
-            doc = ("Optional. Set to list 'env_keys' generated by config_to_string_lists def in " +
+            doc = ("Internal. Set to list 'env_keys' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_env_values": attr.string_list(
-            doc = ("Optional. Set to list 'env_values' generated by config_to_string_lists def in " +
+            doc = ("Internal. Set to list 'env_values' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_java_home": attr.string_list(
-            doc = ("Optional. Set to list 'java_home' generated by config_to_string_lists def in " +
+            doc = ("Internal. Set to list 'java_home' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_names": attr.string_list(
-            doc = ("Optional. Set to list 'names' generated by config_to_string_lists def in " +
+            doc = ("Internal. Set to list 'names' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "config_repos": attr.string_list(
-            doc = ("Optional. list of additional external repos corresponding to " +
+            doc = ("Internal. list of additional external repos corresponding to " +
                    "configure like repo rules that need to be produced in addition to " +
                    "local_config_cc."),
         ),
@@ -460,7 +629,7 @@ _rbe_autoconfig = repository_rule(
                    "Used internally when use_checked_in_confs is true."),
         ),
         "container_to_config_spec_names_map": attr.string_list_dict(
-            doc = ("Optional. A dict with keys corresponding to containers and " +
+            doc = ("Internal. A dict with keys corresponding to containers and " +
                    "values corresponding to lists of configs. Must point to the " +
                    "container_to_config_version def in the versions.bzl file " +
                    "located in the 'output_base' of the 'toolchain_config_suite_spec'."),
@@ -540,7 +709,8 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. The location of java_home in the container. For " +
                    "example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only " +
                    "relevant if 'create_java_configs' is true. If 'create_java_configs' is " +
-                   "true and this attribute is not set, the rule will attempt to read the " +
+                   "true, the execution of the rule generates configs, and this attribute " +
+                   "is not set, the rule will attempt to read the " +
                    "JAVA_HOME env var from the container. If that is not set, the rule " +
                    "will fail."),
         ),
@@ -557,7 +727,7 @@ _rbe_autoconfig = repository_rule(
                    "default_toolchain_config_suite_spec, if no toolchain_config_suite_spec was selected)."),
         ),
         "toolchain_config_suite_spec": attr.string_dict(
-            doc = ("Mandatory. Dict containing values to identify a " +
+            doc = ("Internal. Dict containing values to identify a " +
                    "toolchain container + GitHub repo where configs are " +
                    "stored. Must include keys: 'repo_name' (name of the " +
                    "external repo, 'output_base' (relative location of " +
@@ -637,24 +807,24 @@ def rbe_autoconfig(
           extends from the container defined in the toolchain_config_suite_spec
           (by default, the rbe-ubuntu16-04 image), you can pass the digest
           (sha256 sum) of the base container using this attr.
-          The rule will enable use of checked-in configs, if possible.
+          The rule will try to use of checked-in configs, if possible.
       bazel_version: The version of Bazel to use to generate toolchain configs.
           `Use only (major, minor, patch), e.g., '0.20.0'. Default is "local"
           which means the same version of Bazel that is currently running will
           be used. If local is a non release version, rbe_autoconfig will fallback
           to using the latest release version (see _BAZEL_VERSION_FALLBACK).
           Note, if configs are not found for a patch version, rule will attempt
-          to find ones for the corresponding .0 version. So if you are using
+          to find ones for the corresponding x.x.0 version. So if you are using
           Bazel 0.25.2, and configs are not found for that version, but are
           available for 0.25.0, those will be used instead. Note: this is only
           the case if use_checked_in_confs != "False" (string 'False').
       bazel_rc_version: The rc (for the given version of Bazel) to use.
           Must be published in https://releases.bazel.build. E.g. 2.
-      toolchain_config_spec_name: Optional. Override default config defined in
-          toolchain_config_suite_spec.
-          If export_configs is true, this value is used to set the name of the
+      toolchain_config_spec_name: Optional. String. Override default config
+          defined in toolchain_config_suite_spec.
+          If export_configs is True, this value is used to set the name of the
           toolchain config spec to be generated.
-      config_repos: Optional. list of additional external repos corresponding to
+      config_repos: Optional. List of additional external repos corresponding to
           configure like repo rules that need to be produced in addition to
           local_config_cc.
       copy_resources: Optional. Default to True, if set to False, resources
@@ -670,26 +840,23 @@ def rbe_autoconfig(
       create_testdata: Optional. Specifies whether to generate additional testing
           only outputs. Defauls to False.
       create_versions: Specifies whether to generate versions.bzl
-          file in output_base of the toolchain_config_suite_spec.
+          file in 'output_base' of the 'toolchain_config_suite_spec'.
           This option is temporary while migration to use.
           generated file by this rule is taking place.
-          Defauls to True."
+          Defauls to True.
       digest: Optional. The digest of the image to pull.
-          Should not be set if tag is used.
-          Must be set together with registry and repository.
-      env: dict. Optional. Additional env variables that will be set when
+          Should not be set if 'tag' is used.
+          Must be set together with 'registry' and 'repository'.
+      env: dict. Optional. Additional environment variables that will be set when
           running the Bazel command to generate the toolchain configs.
           Set to values for marketplace.gcr.io/google/rbe-ubuntu16-04 container.
-          Does not need to be set if your custom container extends
-          the rbe-ubuntu16-04 container.
-          Should be overriden if a custom container does not extend the
-          rbe-ubuntu16-04 container.
           Note: Do not pass a custom JAVA_HOME via env, use java_home attr instead.
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
       export_configs: Optional, default False. Whether to copy generated configs
-          (if they are generated) to the output_base defined in toolchain_config_suite_spec.
+          (if they are generated) to the 'output_base' defined in 
+          'toolchain_config_suite_spec'.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
           relevant if 'create_java_configs' is true. If 'create_java_configs' is
@@ -697,10 +864,12 @@ def rbe_autoconfig(
           JAVA_HOME env var from the container. If that is not set, the rule
           will fail.
       tag: Optional. The tag of the container to use.
-          Should not be set if digest is used.
-          Must be set together with registry and repository.
-          Note if you use any tag other than latest (w/o specifiyng base_image_digest)
+          Should not be set if 'digest' is used.
+          Must be set together with 'registry' and 'repository'.
+          Note if you use any tag other than 'latest' (w/o specifiyng 'base_container_digest')
           configs will need to be generaed, and a container will need to be pulled.
+          Note using 'latest' will default to the 'latest_container'
+          defined in the 'toolchain_config_suite_spec'
       toolchain_config_suite_spec: Optional. Defaults to using @bazel_toolchains as
           source for toolchain_config_suite_spec.
           Should only be set differently if you are using a diferent repo

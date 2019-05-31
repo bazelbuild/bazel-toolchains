@@ -113,11 +113,14 @@ load(
     _ubuntu1604_repository = "repository",
 )
 
-# Automatic config generation target for RBE Ubuntu 16.04
-# Do not copy this, as is, to any other projects as this target generates
-# and exports configs to the project root.
+# Default target used in tests that run with several Bazel versions
 rbe_autoconfig(
     name = "rbe_default",
+)
+
+# Automatic config generation target for RBE Ubuntu 16.04
+rbe_autoconfig(
+    name = "rbe_default_gen",
     digest = _ubuntu1604_digest,
     export_configs = True,
     registry = _ubuntu1604_registry,

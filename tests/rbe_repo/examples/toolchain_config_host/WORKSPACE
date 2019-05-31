@@ -98,8 +98,8 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "rbe_custom_containers1",
     bazel_version = CUSTOM_BAZEL_VERSION1,
-    export_configs = True,
     digest = CUSTOM_BAZEL_DIGEST1,
+    export_configs = True,
     registry = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_registry"],
     repository = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_repo"],
     toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
@@ -108,8 +108,8 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "rbe_custom_containers2",
     bazel_version = CUSTOM_BAZEL_VERSION2,
-    export_configs = True,
     digest = CUSTOM_BAZEL_DIGEST2,
+    export_configs = True,
     registry = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_registry"],
     repository = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_repo"],
     toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
@@ -118,8 +118,8 @@ rbe_autoconfig(
 rbe_autoconfig(
     name = "rbe_custom_containers3",
     bazel_version = CUSTOM_BAZEL_VERSION3,
-    export_configs = True,
     digest = CUSTOM_BAZEL_DIGEST3,
+    export_configs = True,
     registry = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_registry"],
     repository = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_repo"],
     toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,

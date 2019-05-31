@@ -87,3 +87,7 @@ steps:
   - --host_platform=@rbe_custom_containers3//config:platform
   - --platforms=@rbe_custom_containers3//config:platform
   dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
+
+# These builds might take a bit more time as they are generating
+# several toolchain configs.
+timeout: 1200s

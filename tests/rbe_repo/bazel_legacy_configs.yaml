@@ -13,9 +13,10 @@
 
 steps:
 # Test that runs with _BAZEL_VERSION and uses checked-in configs
-# directly w/o using rbe_autoconfig. This one runs w/o remote caching.
+# directly w/o using rbe_autoconfig.
 # Configs must exist in this repo for the _CONTAINER_MAJOR_VERSION used
 # for this test to pass.
+# These tests should only be run for versions of Bazel < 0.25.0
 - name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain

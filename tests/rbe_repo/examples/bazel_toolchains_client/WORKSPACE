@@ -76,11 +76,6 @@ load(
     toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
 
-load(
-    "@bazel_toolchains//rules/rbe_repo:toolchain_config_suite_spec.bzl",
-    "default_toolchain_config_suite_spec",
-)
-
 # This test uses the custom toolchain_config_suite_spec. It should not generate configs as, even
 # though target overrides repository and digest (using rbe-ubuntu16-04
 # container), its setting the base container digest to point to a compatible
