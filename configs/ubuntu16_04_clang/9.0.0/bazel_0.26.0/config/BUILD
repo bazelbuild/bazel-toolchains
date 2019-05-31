@@ -45,5 +45,9 @@ platform(
           name: "container-image"
           value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b"
         }
+        properties {
+           name: "OSFamily"
+           value:  "Linux"
+        }
         """,
 )
