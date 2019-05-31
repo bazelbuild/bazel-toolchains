@@ -53,6 +53,7 @@ _DEFAULT_TOOLCHAIN_CONFIG_SPEC = _TOOLCHAIN_CONFIG_SPEC1
 _BAZEL_TO_CONFIG_SPEC_NAMES = {
     "0.24.0": ["test024config"],
     "0.25.0": ["test025config"],
+    "0.26.0": ["test025config", "test024config"],
 }
 
 # sha256 digest of the latest version of the toolchain container.
@@ -62,7 +63,7 @@ _LATEST = "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b0
 # versions.
 _CONTAINER_TO_CONFIG_SPEC_NAMES = {
     "sha256:f3120a030a19d67626ababdac79cc787e699a1aa924081431285118f87e7b375": ["test024config"],
-    "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b": ["test025config"],
+    "sha256:94d7d8552902d228c32c8c148cc13f0effc2b4837757a6e95b73fdc5c5e4b07b": ["test025config", "test024config"],
 }
 
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(

@@ -24,6 +24,10 @@ load(
     "//configs/dependency-tracking:ubuntu1604.bzl",
     _ubuntu1604_bazel = "bazel",
 )
+load(
+    "//tests/rbe_repo:versions_test.bzl",
+    test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
 
 # sh_tests below verify that the rbe_autoconfig targets have the
 # right file structure in the external folder repo
@@ -582,4 +586,128 @@ file_test(
     name = "rbe_autoconf_generate_image_name_test",
     file = "@rbe_autoconf_generate//test:image_name",
     regexp = RBE_UBUNTU16_04_LATEST,
+)
+
+# Tests for rbe_autoconfig when using a custom
+# toolchain_config_suite_spec.
+
+# tests that use rbe_autoconf_custom_toolchain_config_suite_spec
+# validate it uses checked in configs when a custom versions.bzl
+# file is used.
+sh_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rbe_autoconf_custom_toolchain_config_suite_spec//test:empty)",
+        "assert_basic_cofig",
+        "assert_checked_in_confs",
+        "assert_checked_in_cc_confs",
+        "assert_java_confs",
+    ],
+    data = [
+        "@rbe_autoconf_custom_toolchain_config_suite_spec//test:empty",
+        "@rbe_autoconf_custom_toolchain_config_suite_spec//test:exported_testdata",
+    ],
+)
+
+file_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_cc_alias_test",
+    file = "@rbe_autoconf_custom_toolchain_config_suite_spec//test:cc/test.BUILD",
+    regexp = "alias",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_java_alias_test",
+    file = "@rbe_autoconf_custom_toolchain_config_suite_spec//test:java/test.BUILD",
+    regexp = "alias",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_platform_test",
+    file = "@rbe_autoconf_custom_toolchain_config_suite_spec//test:config/test.BUILD",
+    regexp = "platform",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_platform_container_sha_test",
+    file = "@rbe_autoconf_custom_toolchain_config_suite_spec//test:config/test.BUILD",
+    regexp = test_toolchain_config_suite_autogen_spec.latest_container,
+)
+
+# tests that use rbe_autoconf_custom_toolchain_config_suite_spec_export
+# validate it generates configs when a custom versions.bzl
+# file is used.
+sh_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_export_test",
+    srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_export",
+        "test_config_dir",
+        _ubuntu1604_bazel,
+        "assert_output_base_cc_confs",
+        "assert_output_base_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_export//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_export_external_repo_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rbe_autoconf_custom_toolchain_config_suite_spec_export//test:empty)",
+        "assert_basic_cofig",
+        "assert_no_checked_in_confs",
+        "assert_checked_in_cc_confs",
+        "assert_java_confs",
+        "assert_output_base_export_tar",
+    ],
+    data = [
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_export//test:empty",
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_export//test:exported_testdata",
+    ],
+)
+
+# tests that use rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions
+# validate it generates configs when a blank versions.bzl
+# file is used.
+sh_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions_test",
+    srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
+    args = [
+        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions",
+        "default_toolchain_config_spec_name",
+        _ubuntu1604_bazel,
+        "assert_output_base_cc_confs",
+        "assert_output_base_java_confs",
+        "assert_output_base_platform_confs",
+    ],
+    data = [
+        ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:exported_testdata",
+        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions_external_repo_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:empty)",
+        "assert_basic_cofig",
+        "assert_no_checked_in_confs",
+        "assert_checked_in_cc_confs",
+        "assert_java_confs",
+        "assert_output_base_export_tar",
+    ],
+    data = [
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:empty",
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:exported_testdata",
+    ],
 )

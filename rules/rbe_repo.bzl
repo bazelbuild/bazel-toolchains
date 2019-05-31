@@ -634,18 +634,26 @@ def rbe_autoconfig(
     Args:
       name: Name of the rbe_autoconfig repository target.
       base_container_digest: Optional. If the container to use for the RBE build
-          extends from the rbe-ubuntu16-04 image, you can pass the digest
+          extends from the container defined in the toolchain_config_suite_spec
+          (by default, the rbe-ubuntu16-04 image), you can pass the digest
           (sha256 sum) of the base container using this attr.
-          The rule will enable use of checked-in configs if possible.
+          The rule will enable use of checked-in configs, if possible.
       bazel_version: The version of Bazel to use to generate toolchain configs.
           `Use only (major, minor, patch), e.g., '0.20.0'. Default is "local"
           which means the same version of Bazel that is currently running will
           be used. If local is a non release version, rbe_autoconfig will fallback
           to using the latest release version (see _BAZEL_VERSION_FALLBACK).
+          Note, if configs are not found for a patch version, rule will attempt
+          to find ones for the corresponding .0 version. So if you are using
+          Bazel 0.25.2, and configs are not found for that version, but are
+          available for 0.25.0, those will be used instead. Note: this is only
+          the case if use_checked_in_confs != "False" (string 'False').
       bazel_rc_version: The rc (for the given version of Bazel) to use.
           Must be published in https://releases.bazel.build. E.g. 2.
-      toolchain_config_spec_name: Optional. Override default config defined in toolchain_config_suite_spec.
-                   Also used for the name of the toolchain config spec to be generated.
+      toolchain_config_spec_name: Optional. Override default config defined in
+          toolchain_config_suite_spec.
+          If export_configs is true, this value is used to set the name of the
+          toolchain config spec to be generated.
       config_repos: Optional. list of additional external repos corresponding to
           configure like repo rules that need to be produced in addition to
           local_config_cc.
@@ -653,6 +661,8 @@ def rbe_autoconfig(
           such as scripts and project source code will be bind mounted onto the
           container instead of copied. This is useful in system where bind mounting
           is enabled and performance is critical.
+          Note: mounting of resources is experimental and may result in issues if
+          more than one rbe_autoconfig rule runs in parallel.
       create_cc_configs: Optional. Specifies whether to generate C/C++ configs.
           Defauls to True.
       create_java_configs: Optional. Specifies whether to generate java configs.
@@ -689,6 +699,8 @@ def rbe_autoconfig(
       tag: Optional. The tag of the container to use.
           Should not be set if digest is used.
           Must be set together with registry and repository.
+          Note if you use any tag other than latest (w/o specifiyng base_image_digest)
+          configs will need to be generaed, and a container will need to be pulled.
       toolchain_config_suite_spec: Optional. Defaults to using @bazel_toolchains as
           source for toolchain_config_suite_spec.
           Should only be set differently if you are using a diferent repo

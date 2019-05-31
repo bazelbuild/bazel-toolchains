@@ -464,17 +464,30 @@ load(
     test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
 
-# TODO: test should evaluate this does not pull a container (once env is setup
-# or if toolchain_config_spec_name is removed?)
 rbe_autoconfig(
-    name = "rbe_autoconf_custom_rbe_repo",
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec",
+    bazel_version = "0.26.0",
     create_testdata = True,
-    export_configs = True,
     toolchain_config_spec_name = "test024config",
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "rbe-test-output/config/rbe_autoconf_custom_rbe_repo",
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": test_toolchain_config_suite_autogen_spec,
+    },
+    use_checked_in_confs = "Force",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_export",
+    create_testdata = True,
+    export_configs = True,
+    toolchain_config_spec_name = "test_config_dir",
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_export",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": test_toolchain_config_suite_autogen_spec,
     },
@@ -485,15 +498,14 @@ load(
     blank_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
 
-# TODO: test this
 rbe_autoconfig(
-    name = "rbe_autoconf_custom_rbe_repo_blank",
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions",
     create_testdata = True,
     export_configs = True,
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "rbe-test-output/config/rbe_autoconf_custom_rbe_repo_blank",
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": blank_toolchain_config_suite_autogen_spec,
     },
@@ -506,7 +518,7 @@ load(
 
 # This repo should only be used for GCB tests.
 # It relies on location of //tests/rbe_repo:blank_versions_test.bzl
-# and output_base in rbe_repo below to match so that 1st build
+# and output_base in toolchain_config_suite_spec to match so that 1st build
 # should create configs, and subsequent ones should reuse them
 # (even when bazel cache is not maintained from one step to the next)
 rbe_autoconfig(

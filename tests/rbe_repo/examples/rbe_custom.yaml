@@ -13,7 +13,7 @@ steps:
 # configs.
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=../../../../bazelrc/.bazelrc
+  - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
   - test
   - //:say_hello_test
   - --config=remote
