@@ -241,6 +241,12 @@ file_test(
 )
 
 file_test(
+    name = "rbe_autoconf_checked_in_platform_os_family_test",
+    file = "@rbe_autoconf_checked_in//test:config/test.BUILD",
+    regexp = "OSFamily",
+)
+
+file_test(
     name = "rbe_autoconf_generate_platform_test",
     file = "@rbe_autoconf_generate//test:config/test.BUILD",
     regexp = "platform",
@@ -250,6 +256,12 @@ file_test(
     name = "rbe_autoconf_checked_generate_container_sha_test",
     file = "@rbe_autoconf_generate//test:config/test.BUILD",
     regexp = RBE_UBUNTU16_04_LATEST,
+)
+
+file_test(
+    name = "rbe_autoconf_checked_generate_os_family_test",
+    file = "@rbe_autoconf_generate//test:config/test.BUILD",
+    regexp = "OSFamily",
 )
 
 file_test(
@@ -265,6 +277,12 @@ file_test(
 )
 
 file_test(
+    name = "rbe_autoconf_old_container_os_family_test",
+    file = "@rbe_autoconf_old_container//test:config/test.BUILD",
+    regexp = "OSFamily",
+)
+
+file_test(
     name = "rbe_autoconf_custom_container_platform_test",
     file = "@rbe_autoconf_custom_container//test:config/test.BUILD",
     regexp = "platform",
@@ -274,6 +292,12 @@ file_test(
     name = "rbe_autoconf_custom_container_sha_test",
     file = "@rbe_autoconf_custom_container//test:config/test.BUILD",
     regexp = "cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224",
+)
+
+file_test(
+    name = "rbe_autoconf_custom_os_family_test",
+    file = "@rbe_autoconf_custom_container//test:config/test.BUILD",
+    regexp = "OSFamily",
 )
 
 # Tests validate run_and_extract uses mount volumes (-v) vs
@@ -404,6 +428,12 @@ file_test(
     name = "rbe_autoconf_base_container_digest_container_sha_test",
     file = "@rbe_autoconf_base_container_digest//test:config/test.BUILD",
     regexp = "ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
+)
+
+file_test(
+    name = "rbe_autoconf_base_container_digest_os_family_test",
+    file = "@rbe_autoconf_base_container_digest//test:config/test.BUILD",
+    regexp = "OSFamily",
 )
 
 file_test(
