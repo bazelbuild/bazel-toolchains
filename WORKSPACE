@@ -13,7 +13,7 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load(
     "//repositories:repositories.bzl",
     bazel_toolchains_repositories = "repositories",
@@ -359,7 +359,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_output_base",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    output_base = "tests/config/rbe_autoconf_output_base",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base",
     use_checked_in_confs = "False",
 )
 
@@ -368,7 +368,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
     create_testdata = True,
-    output_base = "tests/config/rbe_autoconf_output_base_no_java",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base_no_java",
     use_checked_in_confs = "False",
 )
 
@@ -377,7 +377,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_cc_configs = False,
     create_testdata = True,
-    output_base = "tests/config/rbe_autoconf_output_base_no_cc",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base_no_cc",
     use_checked_in_confs = "False",
 )
 
@@ -388,7 +388,7 @@ rbe_autoconfig(
         "local_config_sh",
     ],
     create_testdata = True,
-    output_base = "tests/config/rbe_autoconf_config_repos_output_base",
+    output_base = "rbe-test-output/config/rbe_autoconf_config_repos_output_base",
 )
 
 rbe_autoconfig(
@@ -396,7 +396,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     config_dir = "test_config_dir",
     create_testdata = True,
-    output_base = "tests/config/rbe_autoconf_output_base",
+    output_base = "rbe-test-output/config/rbe_autoconf_output_base",
     use_checked_in_confs = "False",
 )
 
@@ -420,11 +420,3 @@ load("//rules/rbe_repo:util.bzl", "rbe_autoconfig_root")
 # Needed for testing purposes. Creates a file that exposes
 # the value of RBE_AUTOCONF_ROOT
 rbe_autoconfig_root(name = "rbe_autoconfig_root")
-
-# Experiment with tags to see if renovate updates them correctly.
-# TODO (suvanjan): Remove this after experimentation is complete.
-http_archive(
-    name = "renovate_src",
-    sha256 = "3e9c7dcc3ab602dde9656d7ce1c8969f56dd1480b881f272d5d6ad8a713bddcc",
-    url = "https://github.com/smukherj1/renovate-src/archive/0.24.1-1.tar.gz",
-)
