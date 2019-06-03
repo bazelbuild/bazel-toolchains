@@ -423,13 +423,18 @@ rbe_autoconfig_root(name = "rbe_autoconfig_root")
 
 # Pull in dependencies of base_images_docker.
 load("@base_images_docker//package_managers:repositories.bzl", package_manager_deps = "deps")
+
 package_manager_deps()
+
 load("@io_bazel_rules_python//python:pip.bzl", "pip_import", "pip_repositories")
+
 pip_repositories()
+
 pip_import(
     name = "pip_deps",
     requirements = "@base_images_docker//package_managers:requirements-pip.txt",
 )
-load("@pip_deps//:requirements.bzl", "pip_install")
-pip_install()
 
+load("@pip_deps//:requirements.bzl", "pip_install")
+
+pip_install()
