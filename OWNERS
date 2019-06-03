@@ -7,6 +7,7 @@ reviewers:
 - smukherj1
 - xingao267
 - alex1545
+- rbe-toolchains-pr-bot
 
 # Approvers can /approve changes to files within this directory tree.
 approvers:
@@ -14,4 +15,5 @@ approvers:
 - smukherj1
 - xingao267
 - alex1545
+- rbe-toolchains-pr-bot
 
