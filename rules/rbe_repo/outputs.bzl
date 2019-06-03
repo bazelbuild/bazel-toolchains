@@ -92,10 +92,9 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
             print_exec_results("copy %s repo files" % repo, result, True, args)
             files_to_tar += ["./" + repo + "/*"]
 
-    # Create a tar file with all outputs and then delete the outputs
-    args = ["bash", "-c", "tar -cvf configs.tar " + " ".join(files_to_tar)]
-    result = ctx.execute(args)
-    print_exec_results("Create configs.tar with all generated files", result, True, args)
+    # TODO(nlopezgi): create a tar with all the produced artifacts which can
+    # be exported and then use via e.g., http_file
+    # Delete the outputs
     args = ["bash", "-c", "rm -dr " + " ".join(files_to_tar)]
     result = ctx.execute(args)
     print_exec_results("Remove generated files from repo dir", result, True, args)

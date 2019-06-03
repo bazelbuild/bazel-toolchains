@@ -855,7 +855,7 @@ def rbe_autoconfig(
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
       export_configs: Optional, default False. Whether to copy generated configs
-          (if they are generated) to the 'output_base' defined in 
+          (if they are generated) to the 'output_base' defined in
           'toolchain_config_suite_spec'.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only

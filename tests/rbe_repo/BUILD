@@ -502,7 +502,6 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
-        "assert_output_base_export_tar",
     ],
     data = [
         "@rbe_autoconf_output_base//test:empty",
@@ -695,7 +694,6 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
-        "assert_output_base_export_tar",
     ],
     data = [
         "@rbe_autoconf_custom_toolchain_config_suite_spec_export//test:empty",
@@ -734,7 +732,6 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
-        "assert_output_base_export_tar",
     ],
     data = [
         "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:empty",

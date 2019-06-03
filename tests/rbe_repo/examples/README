@@ -1,0 +1,6 @@
+This folder contains examples that exercise use of rbe_autoconfig.
+Examples are defined in two sub-repos that declare rbe_autoconfig
+targets to either export configs (toolchain_config_host) or
+to use them as a client (bazel_toolchains_client).
+
+The yaml describe GCB tests for these targets.
