@@ -46,22 +46,23 @@ create and use toolchain configs. The main use cases for this rule are
     need to run your configure like repo rules with different environment
     settings):
 
-    3.1. If you dont mind having to generate configs each time you run Bazel from
+    3.1. If you don't mind having to generate configs each time you run Bazel from
       a clean client, then this rule can do just that, by simply specifying the
       relevant information about which container to use.
 
     3.2. If you don't want to generate configs every time, you can use
       rbe_autoconfig to setup a "toolchain_config_repo" from which anyone
       that builds on RBE with your container can pull pre-generated configs from.
-      To do this, rbe_autoconfig allows specification of a toolchain_config_suite_spec.
-      A toolchain_config_suite_spec specifies all details of an external repo
+      To do this, rbe_autoconfig allows specification of a 'toolchain_config_suite_spec'.
+      A 'toolchain_config_suite_spec' specifies all details of an external repo
       that will be used to both export to and read from toolchain configs.
+      Details for setting up a "toolchain_config_repo" are below.
 
     More about configure like repo rules: https://docs.bazel.build/versions/master/remote-execution-rules.html#managing-configure-style-workspace-rules
 
 If rbe_autoconfig needs to generate toolchain configs, the process is as follows:
 - Pull the selected toolchain container image (using 'docker pull').
-- Start up a container using the pulled image, mounting either a small sample
+- Start up a container using the pulled image, copying either a small sample
   project or the current project (if output_base is set).
 - Install the current version of Bazel (one currently running) on the container
   (or the one passed in with optional attr). Container must have tools required to install
@@ -126,7 +127,7 @@ image, add to your WORKSPACE file the following:
     digest = "sha256:deadbeef",
   )
 
-For use case 3.1. If you are using a custom container, and dont mind
+For use case 3.1. If you are using a custom container, and don't mind
 having to generate configs each time, add to your WORKSPACE file
 the following:
 
@@ -149,23 +150,23 @@ to build on RBE or a separate one) which will host your published
 toolchain configs. We call this the "toolchain-config-repo" in the
 below
 
-Define a toolchain_config_suite_spec, which specifies a container
+Define a 'toolchain_config_suite_spec', which specifies a container
 (repo + registry) and an output_base, the relative path, within
 the toolchain-config-repo where toolchain configs will be published to.
-You can only have one toolchain_config_suite_spec per container for which
+You can only have one 'toolchain_config_suite_spec' per container for which
 you will be producing toolchain configs for, but multiple versions of the same
 container (i.e., with different sha / tags) can share the same
-toolchain_config_suite_spec.
-Also, the same toolchain_config_suite_spec can also be used to host
+'toolchain_config_suite_spec'.
+Also, the same 'toolchain_config_suite_spec' can also be used to host
 multiple toolchain configs that vary in environment variables, and
 additional config repos (i.e., repos corresponding to configure like
 repository rules) that are needed for different types of builds. For example,
 a configuration for msan (which needs specific env variables) and one for
 default C++ builds can share an output_base.
-Lastly, a toolchain_config_suite_spec will store configs for several
+Lastly, a 'toolchain_config_suite_spec' will store configs for several
 versions of Bazel (any that you specify).
 
-For detailed instructions of how to set up a toolchain_config_suite_spec
+For detailed instructions of how to set up a 'toolchain_config_suite_spec'
 please see //rules/rbe_repo/toolchain_config_suite_spec.bzl
 
 Once you have set up the toolchain_config_suite_spec you can add to your
@@ -173,59 +174,59 @@ WORKSPACE the following:
 
   <Add the bazel-toolchains repo http_archive, same as above>
 
-  load("//path/to_your/toolchain_config_suite_spec.bzl", "your_toolchain_config_suite_spec_stuct")
+  load("//path/to_your/toolchain_config_suite_spec.bzl", "your_toolchain_config_suite_spec_struct")
 
   rbe_autoconfig(
     name = "rbe_your_custom_toolchain_config_suite_spec",
     export_configs = True,
-    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_struct,
   )
 
 You can then run:
 
 bazel build @rbe_your_custom_toolchain_config_suite_spec//...
 
-This will create the toolchain configs in the output_base defined in the
-toolchain_config_suite_spec. It will generate configs for the current version
+This will create the toolchain configs in the 'output_base' defined in the
+'toolchain_config_suite_spec'. It will generate configs for the current version
 of bazel you are running with (overridable via attr).
 This will also (abusing Bazel hermeticity principles) modify the versions.bzl
-file in the output_base. This is so that subsequent executions of the rule
+file in the 'output_base'. This is so that subsequent executions of the target
 (by you, or by any of your users after you have checked-in these generated files)
 will be able to directly use them without having to generate them again.
+You should check-in your repo these changes so that the generated configs
+are available to all other users of your repo.
 
-For users of your toolchain_config_suite_spec all that they need to do is
+For users of your 'toolchain_config_suite_spec' all that they need to do is
 add to their WORKSPACE:
 
   <Add the bazel-toolchains repo http_archive, same as above>
 
-  load("//path/to_your/toolchain_config_suite_spec.bzl", "your_toolchain_config_suite_spec_stuct")
+  load("//path/to_your/toolchain_config_suite_spec.bzl", "your_toolchain_config_suite_spec_struct")
 
   rbe_autoconfig(
     name = "rbe_your_custom_toolchain_config_suite_spec",
-    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_struct,
   )
 
 And that's it! They should be able to get checked-in configs every time,
-as long as:
-  - Whenever there is a new Bazel version that is needed for RBE builds,
-    you, the owner of the toolchain_config_suite_spec generates and
-    publishes the new toolchain configs to your repo (this is because
+as long as, whenever there is a new Bazel needed for RBE builds:
+  - You, the owner of the 'toolchain_config_suite_spec' generates and
+    publishes the new toolchain configs to your repo. This is needed because
     new Bazel versions can only be guaranteed to work with toolchain
-    configs that were generated for the specific version of Bazel used)
-  - Whenever there is a new Bazel version that is needed for RBE builds,
-    the users of your toolchain_config_suite_spec update their pin to
+    configs that were generated for the specific version of Bazel used.
+  - The users of your 'toolchain_config_suite_spec' update their pin to
     your repo.
 
 If you want to create (more) different sets of toolchain configurations (a toolchain_config_spec)
 with a different set of env variables, you can do so by reusing the
-toolchain_config_suite_spec, and providing a distinct toolchain_config_spec_name. Example:
+'toolchain_config_suite_spec', and providing a distinct toolchain_config_spec_name. Example:
 
 rbe_autoconfig(
     name = "rbe_custom_env2",
     env = {<dict declaring env variables>},
     export_configs = True,
     toolchain_config_spec_name = "<unique name to assign this toolchain_config_spec>",
-    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_struct,
 )
 
 rbe_autoconfig(
@@ -233,7 +234,7 @@ rbe_autoconfig(
     env = {<dict declaring env variables>},
     export_configs = True,
     toolchain_config_spec_name = "<unique name to assign this toolchain_config_spec>",
-    toolchain_config_suite_spec = your_toolchain_config_suite_spec_stuct,
+    toolchain_config_suite_spec = your_toolchain_config_suite_spec_struct,
 )
 
 NOTES:
@@ -273,21 +274,21 @@ could not find checked-in configs that match:
 3- The environment or config repos you requested
 
 The simplest fix for 1 is to update your pin to the bazel-toolchains repo (and
-to the source of your custom toolchain_config_suite_spec). If that does not
+to the source of your custom 'toolchain_config_suite_spec'). If that does not
 fix the issue, you can try to use an older toolchain cofig by passing
 an older version in the bazel_version 'attr' (which may or may not work with
 the current version you are running). You should also contact the owners of
-bazel-toolchains (or the custom toolchain_config_suite_spec repo) to have them
+bazel-toolchains (or the custom 'toolchain_config_suite_spec' repo) to have them
 publish configs for any new version if they have not done so.
 
 The simplest fix for 2, is to rebuild your custom container using as base
 the latest version of the base_container_digest. If that does not work, contact
 the owners of the bazel-toolchains repo (i.e., create an issue in this repo)
-or the owners of custom toolchain_config_suite_spec repo if you are using one.
+or the owners of custom 'toolchain_config_suite_spec' repo if you are using one.
 
 The only possible fix for 3, if you want this custom config spec to be supported
 with checked-in configs, is to contact the owners of the bazel-toolchains repo
-(or the custom toolchain_config_suite_spec repo), to ask them to add this spec
+(or the custom 'toolchain_config_suite_spec' repo), to ask them to add this spec
 to their WORKSPACE and generate configs for it.
 
 NOTE 3: USE OF PROJECT ROOT
@@ -380,8 +381,8 @@ load(
     "DOCKER_PATH",
     "copy_to_test_dir",
     "print_exec_results",
-    "resolve_project_root",
     "resolve_image_name",
+    "resolve_project_root",
     "resolve_rbe_original_image_name",
     "validate_host",
 )
@@ -568,7 +569,7 @@ _rbe_autoconfig = repository_rule(
                    "the rc must be available in https://releases.bazel.build."),
         ),
         "bazel_to_config_spec_names_map": attr.string_list_dict(
-            doc = ("Internal. A dict with keys corresponding to bazel versions, " +
+            doc = ("Set by rbe_autoconfig macro. A dict with keys corresponding to bazel versions, " +
                    "values corresponding to lists of configs. Must point to the " +
                    "bazel_to_config_versions def in the versions.bzl file " +
                    "located in the 'output_base' of the 'toolchain_config_suite_spec'."),
@@ -583,35 +584,35 @@ _rbe_autoconfig = repository_rule(
             doc = ("The name of the toolchain config spec to be generated."),
         ),
         "configs_obj_config_repos": attr.string_list(
-            doc = ("Internal. Set to list 'config_repos' generated by config_to_string_lists def in " +
+            doc = ("Set by rbe_autoconfig macro. Set to list 'config_repos' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_create_cc_configs": attr.string_list(
-            doc = ("Internal. Set to list 'cc_configs' generated by config_to_string_lists def in " +
+            doc = ("Set by rbe_autoconfig macro. Set to list 'cc_configs' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_create_java_configs": attr.string_list(
-            doc = ("Internal. Set to list 'java_configs' generated by config_to_string_lists def in " +
+            doc = ("Set by rbe_autoconfig macro. Set to list 'java_configs' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_env_keys": attr.string_list(
-            doc = ("Internal. Set to list 'env_keys' generated by config_to_string_lists def in " +
+            doc = ("Set by rbe_autoconfig macro. Set to list 'env_keys' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_env_values": attr.string_list(
-            doc = ("Internal. Set to list 'env_values' generated by config_to_string_lists def in " +
+            doc = ("Set by rbe_autoconfig macro. Set to list 'env_values' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_java_home": attr.string_list(
-            doc = ("Internal. Set to list 'java_home' generated by config_to_string_lists def in " +
+            doc = ("Set by rbe_autoconfig macro. Set to list 'java_home' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "configs_obj_names": attr.string_list(
-            doc = ("Internal. Set to list 'names' generated by config_to_string_lists def in " +
+            doc = ("Set by rbe_autoconfig macro. Set to list 'names' generated by config_to_string_lists def in " +
                    "//rules/rbe_repo/toolchain_config_suite_spec.bzl."),
         ),
         "config_repos": attr.string_list(
-            doc = ("Internal. list of additional external repos corresponding to " +
+            doc = ("Set by rbe_autoconfig macro. list of additional external repos corresponding to " +
                    "configure like repo rules that need to be produced in addition to " +
                    "local_config_cc."),
         ),
@@ -621,7 +622,7 @@ _rbe_autoconfig = repository_rule(
                    "Used internally when use_checked_in_confs is true."),
         ),
         "container_to_config_spec_names_map": attr.string_list_dict(
-            doc = ("Internal. A dict with keys corresponding to containers and " +
+            doc = ("Set by rbe_autoconfig macro. A dict with keys corresponding to containers and " +
                    "values corresponding to lists of configs. Must point to the " +
                    "container_to_config_version def in the versions.bzl file " +
                    "located in the 'output_base' of the 'toolchain_config_suite_spec'."),
@@ -719,7 +720,7 @@ _rbe_autoconfig = repository_rule(
                    "default_toolchain_config_suite_spec, if no toolchain_config_suite_spec was selected)."),
         ),
         "toolchain_config_suite_spec": attr.string_dict(
-            doc = ("Internal. Dict containing values to identify a " +
+            doc = ("Set by rbe_autoconfig macro. Dict containing values to identify a " +
                    "toolchain container + GitHub repo where configs are " +
                    "stored. Must include keys: 'repo_name' (name of the " +
                    "external repo, 'output_base' (relative location of " +

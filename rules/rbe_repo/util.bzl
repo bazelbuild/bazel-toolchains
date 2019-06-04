@@ -28,7 +28,7 @@ AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 
 def resolve_image_name(ctx):
     """
-    Gets the image name. 
+    Gets the image name.
 
     If the image corresponds to the
     one in the default_toolchain_config_suite_spec, replaces
