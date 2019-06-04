@@ -25,6 +25,7 @@ create and use toolchain configs. The main use cases for this rule are
     As long as you are using a release version of Bazel and have your pin
     to the bazel-toolchains repo up to date, this rule should "just work"
     to select toolchain configs that have been generated for you before hand.
+    More details about the rbe-ubuntu 16_04 image: https://console.cloud.google.com/marketplace/details/google/rbe-ubuntu16-04
 
   2. If you use a container that extends from the rbe-ubuntu 16_04 image
     in your RBE builds: This macro allows you to define which version of
@@ -248,8 +249,8 @@ Once you have added the rbe_autoconfig rule to your WORKSPACE, you will
 need to set up toolchain flags that select the appropriate toolchain configs.
 The flags below, show an sample of those flags, which was last reviewed
 with Bazel 0.25.0 and for a rbe_autoconfig rule with name 'rbe_default'.
-If you are using a later version of Bazel or your target has a different
-name, please adjust accordingly.
+If you are using a later version of Bazel or your rbe_autoconfig target
+has a different name, please adjust accordingly.
 
       bazel build ... \
                 --crosstool_top=@rbe_default//cc:toolchain \
@@ -268,7 +269,7 @@ Most users of rbe_autoconfig do not expect their target to pull a container.
 If your rbe_autoconfig rule nevertheless pulls a container its because it
 could not find checked-in configs that match:
 1- The Bazel version you are currently using
-2- The container you selected (if you are setting also base_container_digest)
+2- The container you selected (if you are not setting base_container_digest)
 3- The environment or config repos you requested
 
 The simplest fix for 1 is to update your pin to the bazel-toolchains repo (and
@@ -380,6 +381,8 @@ load(
     "copy_to_test_dir",
     "print_exec_results",
     "resolve_project_root",
+    "resolve_image_name",
+    "resolve_rbe_original_image_name",
     "validate_host",
 )
 load(
@@ -428,15 +431,7 @@ def _rbe_autoconfig_impl(ctx):
         ))
 
     name = ctx.attr.name
-    image_name = None
-    if ctx.attr.digest:
-        image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
-    else:
-        image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
-
-    # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
-    # issues for users who do not do gcloud login.
-    image_name = image_name.replace("marketplace.gcr.io", "l.gcr.io")
+    image_name = resolve_image_name(ctx)
     docker_tool_path = None
 
     # Resolve the paths to mount/copy srcs to teh container and to
@@ -507,8 +502,7 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating export platform")
             create_export_platform(
                 ctx,
-                # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
-                image_name = image_name.replace("l.gcr.io", "marketplace.gcr.io"),
+                image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 toolchain_config_spec_name = toolchain_config_spec_name,
             )
@@ -534,8 +528,7 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating external repo platform")
             create_external_repo_platform(
                 ctx,
-                # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
-                image_name = image_name.replace("l.gcr.io", "marketplace.gcr.io"),
+                image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
             )
 
@@ -546,8 +539,7 @@ def _rbe_autoconfig_impl(ctx):
         create_alias_platform(
             ctx,
             toolchain_config_spec_name = toolchain_config_spec_name,
-            # Use "marketplace.gcr.io" instead of "l.gcr.io" in platform targets.
-            image_name = image_name.replace("l.gcr.io", "marketplace.gcr.io"),
+            image_name = resolve_rbe_original_image_name(ctx, image_name),
             name = name,
         )
 
