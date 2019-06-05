@@ -198,7 +198,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "tests/config/trigger_config_gen/{}".format(_configs_version_no_updates),
+        "output_base": "tests/config/no_updates/{}".format(_configs_version_no_updates),
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
     },
