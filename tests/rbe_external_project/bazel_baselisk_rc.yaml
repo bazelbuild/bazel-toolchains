@@ -1,0 +1,45 @@
+steps:
+# pull the abseil-cpp project
+- name: 'gcr.io/cloud-builders/git'
+  args:
+  - clone
+  - https://github.com/bazelbuild/bazel.git
+  - external-src
+
+# Install bazelisk
+- name: 'gcr.io/cloud-builders/wget'
+  entrypoint: bash
+  args:
+  - ./tests/rbe_external_project/baselisk.sh
+
+# modify the WORKSPACE file & delete the existing .bazelrc file
+- name: 'gcr.io/gcp-runtimes/ubuntu_16_0_4'
+  args:
+  - ../tests/rbe_external_project/add_rbe_default.sh
+  dir: 'external-src'
+
+# Launch an RBE test command using the @rbe_default toolchain
+# configs.
+- name: 'l.gcr.io/google/bazel'
+  entrypoint: ../bazelisk
+  env: ['USE_BAZEL_VERSION=${_BAZEL_VERSION}']
+  args:
+  - --bazelrc=../bazelrc/bazel-${_BAZELRC_FILE_VERSION}.bazelrc
+  - test
+  - --config=remote
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - --
+  - //src/test/java/...
+  - -//src/test/java/com/google/devtools/build/android/...
+  - -//src/test/java/com/google/devtools/build/lib:sandbox-tests
+  - -//src/test/java/com/google/devtools/build/lib/shell:CommandUsingLinuxSandboxTest
+  - -//src/test/java/com/google/devtools/build/lib:vfs_inmemoryfs_test
+  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests:PythonBlackBoxTest
+  - -//src/test/java/com/google/devtools/build/lib/rules/objc:ObjcRulesTests
+  - -//src/test/java/com/google/devtools/build/lib:worker-tests
+  - -//src/test/java/com/google/devtools/build/lib/buildeventstream/transports:BuildEventTransportTest
+  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:BazelEmbeddedSkylarkBlackBoxTest
+  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:WorkspaceBlackBoxTest
+  dir: 'external-src'
+
+timeout: 1200s
