@@ -113,16 +113,12 @@ def validateUseOfCheckedInConfigs(
             return None, None
     bazel_to_config_spec_names_map = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].bazel_to_config_spec_names_map
     if not bazel_to_config_spec_names_map.get(bazel_version):
-        # if Bazel version is a minor version above .0, lets try to default to the .0 config
-        bazel_version_split = bazel_version.split(".")
-        if int(bazel_version_split[2]) > 0:
-            bazel_version = ("%s.%s.%s") % (bazel_version_split[0], bazel_version_split[1], "0")
-            if not bazel_to_config_spec_names_map.get(bazel_version):
-                print(("%s not using checked in configs; Bazel version %s " +
-                       "was picked/selected but no checked in config was " +
-                       "found in map %s") %
-                      (name, bazel_version, str(bazel_to_config_spec_names_map)))
-                return None, None
+        # TODO(nlopezgi): consider trying to fall back to 0.x.0 version if 0.x.y (y>0)
+        print(("%s not using checked in configs; Bazel version %s " +
+               "was picked/selected but no checked in config was " +
+               "found in map %s") %
+              (name, bazel_version, str(bazel_to_config_spec_names_map)))
+        return None, None
 
     # Find a config for the given version of bazel
     bazel_compat_configs = bazel_to_config_spec_names_map.get(bazel_version)
@@ -183,7 +179,7 @@ def validateUseOfCheckedInConfigs(
             return None, None
     toolchain_config_specs = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].toolchain_config_specs
 
-    # We have found a canidadate config, lets check if env / config_repos match
+    # We have found a candiadate config, lets check if env / config_repos match
     if config and not _check_config(
         candidate_toolchain_config_spec_name = config,
         config_repos = config_repos,

@@ -33,7 +33,7 @@ def resolve_image_name(ctx):
     If the image corresponds to the
     one in the default_toolchain_config_suite_spec, replaces
     the login required endpoint (marketplace.gcr.io)
-    for the public access endpoint (l.gcr.io)
+    with the public access endpoint (l.gcr.io)
 
     Args:
       ctx: the Bazel context object.
