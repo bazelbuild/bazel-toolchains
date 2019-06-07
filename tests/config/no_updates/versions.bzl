@@ -30,7 +30,7 @@ _ENV1 = {
     "CC_TOOLCHAIN_NAME": "linux_gnu_x86",
 }
 
- _TOOLCHAIN_CONFIG_SPEC1 = struct(
+_TOOLCHAIN_CONFIG_SPEC1 = struct(
     name = "9.0.0",
     java_home = "/usr/lib/jvm/java-8-openjdk-amd64",
     create_java_configs = True,
@@ -39,7 +39,7 @@ _ENV1 = {
     env = _ENV1,
 )
 
- _ENV2 = {
+_ENV2 = {
     "ABI_LIBC_VERSION": "glibc_2.19",
     "ABI_VERSION": "clang",
     "BAZEL_COMPILER": "clang",
@@ -64,18 +64,17 @@ _TOOLCHAIN_CONFIG_SPECS = [_TOOLCHAIN_CONFIG_SPEC1, _TOOLCHAIN_CONFIG_SPEC2]
 
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC = _TOOLCHAIN_CONFIG_SPEC1
 
-
 # Returns a dict with suppported Bazel versions mapped to the config version to use.
 _BAZEL_TO_CONFIG_SPEC_NAMES = {
-        "0.24.1": ["9.0.0"],
-    }
+    "0.24.1": ["9.0.0"],
+}
 
 # sha256 digest of the latest version of the toolchain container.
 _LATEST = "sha256:671d8b28e99c8a0a7aa2aaae072bf8e92c19def082b218ae46e209274cdd476e"
 
 _CONTAINER_TO_CONFIG_SPEC_NAMES = {
-        "sha256:671d8b28e99c8a0a7aa2aaae072bf8e92c19def082b218ae46e209274cdd476e": ["9.0.0"],
-    }
+    "sha256:671d8b28e99c8a0a7aa2aaae072bf8e92c19def082b218ae46e209274cdd476e": ["9.0.0"],
+}
 
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
     bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,

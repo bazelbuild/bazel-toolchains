@@ -219,7 +219,7 @@ as long as, whenever there is a new Bazel needed for RBE builds:
 
 If you want to create (more) different sets of toolchain configurations (a toolchain_config_spec)
 with a different set of env variables, you can do so by reusing the
-'toolchain_config_suite_spec', and providing a distinct toolchain_config_spec_name. Example:
+'toolchain_config_suite_spec', and providing a distinct 'toolchain_config_spec_name'. Example:
 
 rbe_autoconfig(
     name = "rbe_custom_env2",
