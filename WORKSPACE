@@ -337,10 +337,10 @@ rbe_autoconfig(
     base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
+    digest = "sha256:1fcb66b2d451b453aa7e9ef0798823c657fa0f5b3a6b52f607cc6da1e68a11ca",
     env = clang_env(),
-    registry = "gcr.io",
-    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+    registry = "marketplace.gcr.io",
+    repository = "google/bazel",
 )
 
 rbe_autoconfig(

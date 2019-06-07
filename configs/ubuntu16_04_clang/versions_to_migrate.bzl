@@ -82,6 +82,7 @@ _BAZEL_TO_CONFIG_SPEC_NAMES = {
     "0.25.1": ["9.0.0"],
     "0.25.2": ["9.0.0"],
     "0.26.0": ["9.0.0"],
+    "0.26.1": ["9.0.0"],
 }
 
 # sha256 digest of the latest version of the toolchain container.
