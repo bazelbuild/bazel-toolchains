@@ -471,7 +471,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_custom_toolchain_config_suite_spec",
     bazel_version = "0.26.0",
     create_testdata = True,
-    toolchain_config_spec_name = "test024config",
+    toolchain_config_spec_name = "testConfigSpecName1",
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
