@@ -72,7 +72,7 @@ rbe_autoconfig(
 )
 
 load(
-    "@bazel_toolchains//configs/ubuntu16_04_clang:versions_to_migrate.bzl",
+    "@bazel_toolchains//configs/ubuntu16_04_clang:versions.bzl",
     toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
 
