@@ -103,12 +103,6 @@ gcs_file(
 
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
-rbe_autoconfig(
-    name = "rbe_default",
-    # TODO(ngiraldo) reenable use_checked_in_confs after 0.25.0 configs are released
-    #use_checked_in_confs = "Force",
-)
-
 # Targets used by automatic config generation and release service.
 load(
     "//configs/dependency-tracking:ubuntu1604.bzl",
@@ -119,14 +113,32 @@ load(
     _ubuntu1604_repository = "repository",
 )
 
+# Default target used in tests that run with several Bazel versions
+rbe_autoconfig(
+    name = "rbe_default",
+)
+
 # Automatic config generation target for RBE Ubuntu 16.04
 rbe_autoconfig(
-    name = "rbe_autoconfig_autogen_ubuntu1604",
-    bazel_version = _ubuntu1604_bazel,
+    name = "rbe_default_gen",
     digest = _ubuntu1604_digest,
-    output_base = "configs/ubuntu16_04_clang/{}".format(_ubuntu1604_configs_version),
+    export_configs = True,
     registry = _ubuntu1604_registry,
     repository = _ubuntu1604_repository,
+    toolchain_config_spec_name = _ubuntu1604_configs_version,
+)
+
+# Legacy config generation target. To be removed once toolchain config service
+# is updated.
+# TODO(nlopezgi): remove this target after migration.
+rbe_autoconfig(
+    name = "rbe_autoconfig_autogen_ubuntu1604",
+    create_versions = False,
+    digest = _ubuntu1604_digest,
+    export_configs = True,
+    registry = _ubuntu1604_registry,
+    repository = _ubuntu1604_repository,
+    toolchain_config_spec_name = _ubuntu1604_configs_version,
     use_checked_in_confs = "False",
 )
 
@@ -140,16 +152,34 @@ load(
     _registry_trigger_config_gen = "registry",
     _repository_trigger_config_gen = "repository",
 )
+load("//rules/rbe_repo:util.bzl", "rbe_autoconfig_root")
+load(
+    "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
+    rbe_default_repo = "default_toolchain_config_suite_spec",
+)
+load(
+    "//tests/config:trigger_config_gen/versions.bzl",
+    _toolchain_config_suite_autogen_spec_trigger_config_gen = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
 
 # Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
 # generate new configs because dependencies have changed.
 rbe_autoconfig(
     name = "rbe_ubuntu1604_trigger_config_gen_test",
     bazel_version = _bazel_trigger_config_gen,
+    create_versions = False,
     digest = _digest_trigger_config_gen,
-    output_base = "tests/config/trigger_config_gen/{}".format(_configs_version_trigger_config_gen),
+    export_configs = True,
     registry = _registry_trigger_config_gen,
     repository = _repository_trigger_config_gen,
+    toolchain_config_spec_name = _configs_version_trigger_config_gen,
+    toolchain_config_suite_spec = {
+        "container_registry": _registry_trigger_config_gen,
+        "container_repo": _repository_trigger_config_gen,
+        "output_base": "tests/config/trigger_config_gen",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": _toolchain_config_suite_autogen_spec_trigger_config_gen,
+    },
     use_checked_in_confs = "False",
 )
 
@@ -161,33 +191,33 @@ load(
     _registry_no_updates = "registry",
     _repository_no_updates = "repository",
 )
+load(
+    "//tests/config:no_updates/versions.bzl",
+    _toolchain_config_suite_autogen_spec_no_updates = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
 
 # Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
 # not generate any new configs.
 rbe_autoconfig(
     name = "rbe_ubuntu1604_configs_no_update_test",
     bazel_version = _bazel_no_updates,
+    create_versions = False,
     digest = _digest_no_updates,
-    output_base = "tests/config/no_updates/{}".format(_configs_version_no_updates),
+    export_configs = True,
     registry = _registry_no_updates,
     repository = _repository_no_updates,
-    use_checked_in_confs = "False",
+    toolchain_config_spec_name = _configs_version_no_updates,
+    toolchain_config_suite_spec = {
+        "container_registry": _registry_no_updates,
+        "container_repo": _repository_no_updates,
+        "output_base": "tests/config/no_updates",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": _toolchain_config_suite_autogen_spec_no_updates,
+    },
+    use_checked_in_confs = "Force",
 )
 
 load("//rules:environments.bzl", "clang_env")
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
-
-rbe_autoconfig(
-    name = "rbe_msan_with_output_base",
-    config_dir = "msan",
-    env = dicts.add(
-        clang_env(),
-        {
-            "BAZEL_LINKOPTS": "-lc++:-lc++abi:-lm",
-        },
-    ),
-    output_base = "configs/ubuntu16_04_clang/1.1",
-)
 
 # Use in the RBE Ubuntu1604 container release.
 rbe_autoconfig(
@@ -201,15 +231,6 @@ rbe_autoconfig(
 # Use in the BazelCI.
 rbe_autoconfig(
     name = "buildkite_config",
-    base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
-    # Note that if you change the `digest`, you might also need to update the
-    # `base_container_digest` to make sure asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud:<digest>
-    # and marketplace.gcr.io/google/rbe-ubuntu16-04:<base_container_digest> have the
-    # same Clang and JDK installed.
-    digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
-    env = clang_env(),
-    registry = "gcr.io",
-    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
 )
 
 # Targets below for purposes of testing of rbe_autoconfig rule only
@@ -328,10 +349,10 @@ rbe_autoconfig(
     base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
+    digest = "sha256:1fcb66b2d451b453aa7e9ef0798823c657fa0f5b3a6b52f607cc6da1e68a11ca",
     env = clang_env(),
-    registry = "gcr.io",
-    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+    registry = "marketplace.gcr.io",
+    repository = "google/bazel",
 )
 
 rbe_autoconfig(
@@ -359,7 +380,14 @@ rbe_autoconfig(
     name = "rbe_autoconf_output_base",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    output_base = "rbe-test-output/config/rbe_autoconf_output_base",
+    export_configs = True,
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+    },
     use_checked_in_confs = "False",
 )
 
@@ -368,7 +396,15 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
     create_testdata = True,
-    output_base = "rbe-test-output/config/rbe_autoconf_output_base_no_java",
+    export_configs = True,
+    toolchain_config_spec_name = "rbe_autoconf_output_base_no_java",
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base_no_java",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+    },
     use_checked_in_confs = "False",
 )
 
@@ -377,7 +413,15 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_cc_configs = False,
     create_testdata = True,
-    output_base = "rbe-test-output/config/rbe_autoconf_output_base_no_cc",
+    export_configs = True,
+    toolchain_config_spec_name = "rbe_autoconf_output_base_no_cc",
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base_no_cc",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+    },
     use_checked_in_confs = "False",
 )
 
@@ -388,15 +432,30 @@ rbe_autoconfig(
         "local_config_sh",
     ],
     create_testdata = True,
-    output_base = "rbe-test-output/config/rbe_autoconf_config_repos_output_base",
+    export_configs = True,
+    toolchain_config_spec_name = "rbe_autoconf_config_repos_output_base",
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_config_repos_output_base",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+    },
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
     name = "rbe_autoconf_output_base_config_dir",
     bazel_version = _ubuntu1604_bazel,
-    config_dir = "test_config_dir",
     create_testdata = True,
-    output_base = "rbe-test-output/config/rbe_autoconf_output_base",
+    toolchain_config_spec_name = "test_config_dir",
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+    },
     use_checked_in_confs = "False",
 )
 
@@ -415,7 +474,80 @@ rbe_autoconfig(
     repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
 )
 
-load("//rules/rbe_repo:util.bzl", "rbe_autoconfig_root")
+load(
+    "//tests/rbe_repo:versions_test.bzl",
+    test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec",
+    bazel_version = "0.26.0",
+    create_testdata = True,
+    toolchain_config_spec_name = "testConfigSpecName1",
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": test_toolchain_config_suite_autogen_spec,
+    },
+    use_checked_in_confs = "Force",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_export",
+    create_testdata = True,
+    export_configs = True,
+    toolchain_config_spec_name = "test_config_dir",
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_export",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": test_toolchain_config_suite_autogen_spec,
+    },
+)
+
+load(
+    "//tests/rbe_repo:blank_versions_test.bzl",
+    blank_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions",
+    create_testdata = True,
+    export_configs = True,
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": blank_toolchain_config_suite_autogen_spec,
+    },
+)
+
+load(
+    "//tests/rbe_repo:versions.bzl",
+    gcb_test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
+
+# This repo should only be used for GCB tests.
+# It relies on location of //tests/rbe_repo:blank_versions_test.bzl
+# and output_base in toolchain_config_suite_spec to match so that 1st build
+# should create configs, and subsequent ones should reuse them
+# (even when bazel cache is not maintained from one step to the next)
+rbe_autoconfig(
+    name = "rbe_autoconf_gcb_test",
+    create_testdata = True,
+    export_configs = True,
+    toolchain_config_suite_spec = {
+        "container_registry": rbe_default_repo()["container_registry"],
+        "container_repo": rbe_default_repo()["container_repo"],
+        "output_base": "tests/rbe_repo",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": gcb_test_toolchain_config_suite_autogen_spec,
+    },
+)
 
 # Needed for testing purposes. Creates a file that exposes
 # the value of RBE_AUTOCONF_ROOT

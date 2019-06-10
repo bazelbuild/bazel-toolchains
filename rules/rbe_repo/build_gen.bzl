@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Definitions to create BUILD files for rbe_autoconfig"""
+""" Definitions to create BUILD files for rbe_autoconfig."""
 
 load(
     "//rules/rbe_repo:util.bzl",
@@ -22,21 +22,22 @@ load(
 
 _CC_TOOLCHAIN = ":cc-compiler-k8"
 
-def use_standard_config(ctx):
-    """Produces BUILD files with alias for the C++/Java toolchain targets. 
+def create_config_aliases(ctx, toolchain_config_spec_name):
+    """Produces BUILD files with alias for the C++/Java toolchain targets.
 
     Args:
       ctx: the Bazel context object.
+      toolchain_config_spec_name: name of the toolchain config spec
     """
-    print("Using checked-in configs.")
-
     if ctx.attr.create_cc_configs:
         # Create the BUILD file with the alias for the cc_toolchain_suite
         template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.cc_alias.tpl"))
-        toolchain = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
-            version = ctx.attr.config_version,
+        toolchain = ("@{toolchain_config_repo}//{config_output_base}/{toolchain_config_spec_name}/bazel_{bazel_version}/{cc_dir}:toolchain".format(
+            toolchain_config_spec_name = toolchain_config_spec_name,
             bazel_version = ctx.attr.bazel_version,
             cc_dir = CC_CONFIG_DIR,
+            config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
+            toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
         ))
         ctx.template(
             CC_CONFIG_DIR + "/BUILD",
@@ -50,10 +51,12 @@ def use_standard_config(ctx):
     if ctx.attr.create_java_configs:
         # Create the BUILD file with the alias for the java_runtime
         template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.java_alias.tpl"))
-        java_runtime = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{java_dir}:jdk".format(
-            version = ctx.attr.config_version,
+        java_runtime = ("@{toolchain_config_repo}//{config_output_base}/{toolchain_config_spec_name}/bazel_{bazel_version}/{java_dir}:jdk".format(
+            toolchain_config_spec_name = toolchain_config_spec_name,
             bazel_version = ctx.attr.bazel_version,
             java_dir = JAVA_CONFIG_DIR,
+            config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
+            toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
         ))
 
         ctx.template(
@@ -82,30 +85,54 @@ def create_java_runtime(ctx, java_home):
         False,
     )
 
-def create_platform(ctx, image_name, name):
-    """Creates a BUILD file with the cc_toolchain and platform targets. 
+def create_export_platform(ctx, image_name, name, toolchain_config_spec_name):
+    """Creates a BUILD file (to be exported to output_base) with the cc_toolchain and platform targets.
+
+    Args:
+      ctx: the Bazel context object.
+      toolchain_config_spec_name: name of the toolchain config spec
+      image_name: the name of the image.
+      name: name of rbe_autoconfig repo rule.
+    """
+    cc_toolchain_target = "//" + ctx.attr.toolchain_config_suite_spec["output_base"]
+    if toolchain_config_spec_name:
+        cc_toolchain_target += "/" + toolchain_config_spec_name
+    cc_toolchain_target += "/bazel_" + ctx.attr.bazel_version
+    cc_toolchain_target += "/cc" + _CC_TOOLCHAIN
+    _create_platform(ctx, image_name, name, cc_toolchain_target)
+
+def create_external_repo_platform(ctx, image_name, name):
+    """Creates a BUILD file (to be used with configs in the external repo) with the cc_toolchain and platform targets.
 
     Args:
       ctx: the Bazel context object.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
     """
+    cc_toolchain_target = "@" + ctx.attr.name + "//" + CC_CONFIG_DIR + _CC_TOOLCHAIN
+    _create_platform(ctx, image_name, name, cc_toolchain_target)
 
-    cc_toolchain_target = "@" + name + "//" + CC_CONFIG_DIR + _CC_TOOLCHAIN
+def create_alias_platform(ctx, toolchain_config_spec_name, image_name, name):
+    """Creates a BUILD file (pointing to checked in config) with the cc_toolchain and platform targets.
 
-    # A checked in config was found
-    if ctx.attr.config_version:
-        cc_toolchain_target = ("@bazel_toolchains//configs/ubuntu16_04_clang/{version}/bazel_{bazel_version}/{cc_dir}{target}".format(
-            version = ctx.attr.config_version,
-            bazel_version = ctx.attr.bazel_version,
-            cc_dir = CC_CONFIG_DIR,
-            target = _CC_TOOLCHAIN,
-        ))
-    if ctx.attr.output_base:
-        cc_toolchain_target = "//" + ctx.attr.output_base + "/bazel_" + ctx.attr.bazel_version
-        if ctx.attr.config_dir:
-            cc_toolchain_target += "/" + ctx.attr.config_dir
-        cc_toolchain_target += "/cc" + _CC_TOOLCHAIN
+    Args:
+      ctx: the Bazel context object.
+      toolchain_config_spec_name: name of the toolchain config spec.
+      image_name: the name of the image.
+      name: name of rbe_autoconfig repo rule.
+    """
+    cc_toolchain_target = ("@{toolchain_config_repo}//{config_output_base}/{toolchain_config_spec_name}/bazel_{bazel_version}/{cc_dir}{target}".format(
+        toolchain_config_spec_name = toolchain_config_spec_name,
+        bazel_version = ctx.attr.bazel_version,
+        cc_dir = CC_CONFIG_DIR,
+        config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
+        target = _CC_TOOLCHAIN,
+        toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
+    ))
+    _create_platform(ctx, image_name, name, cc_toolchain_target)
+
+# Creates a BUILD file with the cc_toolchain and platform targets
+def _create_platform(ctx, image_name, name, cc_toolchain_target):
     template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.platform.tpl"))
     exec_compatible_with = ("\"" +
                             ("\",\n        \"").join(ctx.attr.exec_compatible_with) +

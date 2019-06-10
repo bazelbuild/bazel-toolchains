@@ -13,7 +13,9 @@
 # limitations under the License.
 
 # This .bazelrc file contains all of the flags required for the provided
-# toolchain with Remote Build Execution.
+# toolchain with Remote Build Execution for Bazel 0.20.0 - 0.25.0
+# with use of rbe_autoconfig
+#
 # Note your WORKSPACE must contain an rbe_autoconfig target with
 # name="rbe_default" to use these flags as-is.
 

@@ -13,6 +13,11 @@
 # limitations under the License.
 """Utils for rbe_autoconfig."""
 
+load(
+    "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
+    "default_toolchain_config_suite_spec",
+)
+
 _VERBOSE = False
 
 DOCKER_PATH = "DOCKER_PATH"
@@ -21,50 +26,113 @@ JAVA_CONFIG_DIR = "java"
 PLATFORM_DIR = "config"
 AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
 
-def resolve_project_root(ctx):
-    """Returns the project_root . 
+def resolve_image_name(ctx):
+    """
+    Gets the image name.
 
-       Returns the project_root that will be used to copy sources
-       to the container (if needed) and whether or not the default cc project
-       was selected.
+    If the image corresponds to the
+    one in the default_toolchain_config_suite_spec, replaces
+    the login required endpoint (marketplace.gcr.io)
+    with the public access endpoint (l.gcr.io)
 
     Args:
       ctx: the Bazel context object.
 
     Returns:
-        Returns the project_root.
+        the name of the image
     """
 
-    # If not using checked-in configs and output_base was selected or
-    # config_repos were requested we need to resolve the project_root
-    # using the env variable
-    project_root = None
-    use_default_project = None
-    if (not ctx.attr.config_version and ctx.attr.output_base) or ctx.attr.config_repos:
-        project_root = ctx.os.environ.get(AUTOCONF_ROOT, None)
-        print("RBE_AUTOCONF_ROOT is %s" % project_root)
+    image_name = None
+    if ctx.attr.digest:
+        image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
+    else:
+        image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
 
-        # TODO (nlopezgi): validate AUTOCONF_ROOT points to a valid Bazel project
-        use_default_project = False
+    if (ctx.attr.repository == default_toolchain_config_suite_spec()["container_repo"] and
+        ctx.attr.registry == default_toolchain_config_suite_spec()["container_registry"]):
+        # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
+        # issues for users who do not do gcloud login.
+        image_name = image_name.replace("marketplace.gcr.io", "l.gcr.io")
+
+    return image_name
+
+def resolve_rbe_original_image_name(ctx, image_name):
+    """
+    Resolves the original image name
+
+    If the image corresponds to the one in the
+    default_toolchain_config_suite_spec, converts its name from using public
+    access endpoint (marketplace.gcr.io) to its login required endpoint
+    (l.gcr.io)
+
+    Args:
+      ctx: the Bazel context object.
+      image_name: the name of the image.
+
+    Returns:
+        the modified name of the image
+    """
+    if (ctx.attr.repository == default_toolchain_config_suite_spec()["container_repo"] and
+        ctx.attr.registry == default_toolchain_config_suite_spec()["container_registry"]):
+        return image_name.replace("l.gcr.io", "marketplace.gcr.io")
+    return image_name
+
+def resolve_project_root(ctx):
+    """Returns the project_root .
+
+    Returns the project_root that will be used to copy sources
+    to the container (if needed) and whether or not the default cc project
+    was selected.
+
+    Args:
+      ctx: the Bazel context object.
+
+    Returns:
+        mount_project_root - path to mount/copy to the container to execute command to generate external repos
+        export_project_root - path to export produced configs to
+    """
+
+    if ctx.attr.config_version:
+        return None, None, None
+
+    export_project_root = None
+    mount_project_root = None
+    use_default_project = False
+
+    # If not using checked-in configs and either export configs was selected or
+    # config_repos were requested we need to resolve the path to the project root
+    # using the env variable.
+    if ctx.attr.export_configs or ctx.attr.config_repos:
+        # We need AUTOCONF_ROOT to be set to either export or copy to the container
+        project_root = ctx.os.environ.get(AUTOCONF_ROOT, None)
+
+        # TODO (nlopezgi): validate _AUTOCONF_ROOT points to a valid Bazel project
         if not project_root:
-            fail(("%s env variable must be set for rbe_autoconfig" +
-                  " to function properly when output_base or config_repos are set") % AUTOCONF_ROOT)
-    elif not ctx.attr.config_version:
+            fail(("%s env variable must be set for rbe_autoconfig " +
+                  "to function properly when export_configs is True " +
+                  "or config_repos are set") % AUTOCONF_ROOT)
+        if ctx.attr.export_configs:
+            export_project_root = project_root
+        if ctx.attr.config_repos:
+            mount_project_root = project_root
+    if not ctx.attr.config_repos:
+        # If no config repos, we can use the default sample project
         # TODO(nlopezgi): consider using native.existing_rules() to validate
         # bazel_toolchains repo exists.
         # Try to use the default project
         # This is Bazel black magic, we're traversing the directories in the output_base,
         # assuming that the bazel_toolchains external repo will exist in the
         # expected path.
-        project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
-        if not project_root.exists:
+        mount_project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+        if not mount_project_root.exists:
             fail(("Could not find default autoconf project in %s, please make sure " +
                   "the bazel-toolchains repo is imported in your workspace with name " +
                   "'bazel_toolchains' and imported before the rbe_autoconfig target " +
                   "declaration ") % str(project_root))
-        project_root = str(project_root)
+        mount_project_root = str(mount_project_root)
         use_default_project = True
-    return project_root, use_default_project
+
+    return mount_project_root, export_project_root, use_default_project
 
 def validate_host(ctx):
     """Perform validations of host environment to be able to run the rule.
@@ -101,10 +169,10 @@ def validate_host(ctx):
 def print_exec_results(prefix, exec_result, fail_on_error = False, args = None):
     """Convenience method to print results of execute. 
 
-       Convenience method to print results of execute when Verbose logging
-       is enabled.
-       Also provides functionality to fail on errors if needed.
-       Verbose logging is enabled via a global var in this bzl file
+    Convenience method to print results of execute when Verbose logging
+    is enabled.
+    Also provides functionality to fail on errors if needed.
+    Verbose logging is enabled via a global var in this bzl file
 
     Args:
       prefix: A prefix to add to logs.
@@ -125,10 +193,10 @@ def print_exec_results(prefix, exec_result, fail_on_error = False, args = None):
 def copy_to_test_dir(ctx):
     """Copies  contents of  external repo test directory.
 
-       Copies all contents of the external repo to a test directory,
-       modifies name of all BUILD files (to enable file_test to operate on them), and
-       creates a root BUILD file in test directory with a filegroup that contains
-       all files.
+     Copies all contents of the external repo to a test directory,
+     modifies name of all BUILD files (to enable file_test to operate on them), and
+     creates a root BUILD file in test directory with a filegroup that contains
+     all files.
 
     Args:
       ctx: the Bazel context object.
