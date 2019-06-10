@@ -120,26 +120,12 @@ rbe_autoconfig(
 
 # Automatic config generation target for RBE Ubuntu 16.04
 rbe_autoconfig(
-    name = "rbe_default_gen",
-    digest = _ubuntu1604_digest,
-    export_configs = True,
-    registry = _ubuntu1604_registry,
-    repository = _ubuntu1604_repository,
-    toolchain_config_spec_name = _ubuntu1604_configs_version,
-)
-
-# Legacy config generation target. To be removed once toolchain config service
-# is updated.
-# TODO(nlopezgi): remove this target after migration.
-rbe_autoconfig(
     name = "rbe_autoconfig_autogen_ubuntu1604",
-    create_versions = False,
     digest = _ubuntu1604_digest,
     export_configs = True,
     registry = _ubuntu1604_registry,
     repository = _ubuntu1604_repository,
     toolchain_config_spec_name = _ubuntu1604_configs_version,
-    use_checked_in_confs = "False",
 )
 
 # RBE Autoconfig targets to do integration testing on the automatic toolchain
