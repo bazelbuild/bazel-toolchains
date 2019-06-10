@@ -70,7 +70,7 @@ _BAZEL_TO_CONFIG_SPEC_NAMES = {
 }
 
 # sha256 digest of the latest version of the toolchain container.
-_LATEST = "sha256:671d8b28e99c8a0a7aa2aaae072bf8e92c19def082b218ae46e209274cdd476e"
+LATEST = "sha256:671d8b28e99c8a0a7aa2aaae072bf8e92c19def082b218ae46e209274cdd476e"
 
 _CONTAINER_TO_CONFIG_SPEC_NAMES = {
     "sha256:671d8b28e99c8a0a7aa2aaae072bf8e92c19def082b218ae46e209274cdd476e": ["9.0.0"],
@@ -80,6 +80,6 @@ TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
     bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
     container_to_config_spec_names_map = _CONTAINER_TO_CONFIG_SPEC_NAMES,
     default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC,
-    latest_container = _LATEST,
+    latest_container = LATEST,
     toolchain_config_specs = _TOOLCHAIN_CONFIG_SPECS,
 )
