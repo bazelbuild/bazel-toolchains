@@ -92,10 +92,12 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
             print_exec_results("copy %s repo files" % repo, result, True, args)
             files_to_tar += ["./" + repo + "/*"]
 
-    # Create a tar file with all outputs and then delete the outputs
+    # Create a tar file with all outputs
     args = ["bash", "-c", "tar -cvf configs.tar " + " ".join(files_to_tar)]
     result = ctx.execute(args)
     print_exec_results("Create configs.tar with all generated files", result, True, args)
+    
+    # Delete the outputs
     args = ["bash", "-c", "rm -dr " + " ".join(files_to_tar)]
     result = ctx.execute(args)
     print_exec_results("Remove generated files from repo dir", result, True, args)
@@ -176,14 +178,14 @@ def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, pro
 
     versions_output += ["_TOOLCHAIN_CONFIG_SPECS = [%s]" % ",".join(configs_list)]
     versions_output += ["_BAZEL_TO_CONFIG_SPEC_NAMES = %s" % bazel_to_config_spec_names_map]
-    versions_output += ["_LATEST = \"%s\"" % digest]
+    versions_output += ["LATEST = \"%s\"" % digest]
     versions_output += ["_CONTAINER_TO_CONFIG_SPEC_NAMES = %s" % container_to_config_spec_names_map]
     versions_output += ["_DEFAULT_TOOLCHAIN_CONFIG_SPEC = %s" % default_toolchain_config_spec]
     versions_output += ["TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct("]
     versions_output += ["        bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,"]
     versions_output += ["        container_to_config_spec_names_map = _CONTAINER_TO_CONFIG_SPEC_NAMES,"]
     versions_output += ["        default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC,"]
-    versions_output += ["        latest_container = _LATEST,"]
+    versions_output += ["        latest_container = LATEST,"]
     versions_output += ["        toolchain_config_specs = _TOOLCHAIN_CONFIG_SPECS,"]
     versions_output += ["    )"]
 

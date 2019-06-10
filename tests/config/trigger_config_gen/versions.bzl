@@ -19,13 +19,21 @@ Contact repository owners if you wish to edit this file for instructions.
 """
 
 # Returns a dict with suppported Bazel versions mapped to the config version to use.
-def bazel_to_config_versions():
-    return {}
+_BAZEL_TO_CONFIG_SPEC_NAMES = {}
 
 # sha256 digest of the latest version of the toolchain container.
 LATEST = ""
 
-# Map from sha256 of the toolchain container to corresponding major container
-# versions.
-def container_to_config_version():
-    return {}
+_CONTAINER_TO_CONFIG_SPEC_NAMES = {}
+
+_DEFAULT_TOOLCHAIN_CONFIG_SPEC = ""
+
+_TOOLCHAIN_CONFIG_SPECS = []
+
+TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
+    bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
+    container_to_config_spec_names_map = _CONTAINER_TO_CONFIG_SPEC_NAMES,
+    default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC,
+    latest_container = LATEST,
+    toolchain_config_specs = _TOOLCHAIN_CONFIG_SPECS,
+)

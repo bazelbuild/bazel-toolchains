@@ -13,6 +13,11 @@
 # limitations under the License.
 """Utils for rbe_autoconfig."""
 
+load(
+    "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
+    "default_toolchain_config_suite_spec",
+)
+
 _VERBOSE = False
 
 DOCKER_PATH = "DOCKER_PATH"
@@ -20,6 +25,57 @@ CC_CONFIG_DIR = "cc"
 JAVA_CONFIG_DIR = "java"
 PLATFORM_DIR = "config"
 AUTOCONF_ROOT = "RBE_AUTOCONF_ROOT"
+
+def resolve_image_name(ctx):
+    """
+    Gets the image name.
+
+    If the image corresponds to the
+    one in the default_toolchain_config_suite_spec, replaces
+    the login required endpoint (marketplace.gcr.io)
+    with the public access endpoint (l.gcr.io)
+
+    Args:
+      ctx: the Bazel context object.
+
+    Returns:
+        the name of the image
+    """
+
+    image_name = None
+    if ctx.attr.digest:
+        image_name = ctx.attr.registry + "/" + ctx.attr.repository + "@" + ctx.attr.digest
+    else:
+        image_name = ctx.attr.registry + "/" + ctx.attr.repository + ":" + ctx.attr.tag
+
+    if (ctx.attr.repository == default_toolchain_config_suite_spec()["container_repo"] and
+        ctx.attr.registry == default_toolchain_config_suite_spec()["container_registry"]):
+        # Use l.gcr.io registry to pull marketplace.gcr.io images to avoid auth
+        # issues for users who do not do gcloud login.
+        image_name = image_name.replace("marketplace.gcr.io", "l.gcr.io")
+
+    return image_name
+
+def resolve_rbe_original_image_name(ctx, image_name):
+    """
+    Resolves the original image name
+
+    If the image corresponds to the one in the
+    default_toolchain_config_suite_spec, converts its name from using public
+    access endpoint (marketplace.gcr.io) to its login required endpoint
+    (l.gcr.io)
+
+    Args:
+      ctx: the Bazel context object.
+      image_name: the name of the image.
+
+    Returns:
+        the modified name of the image
+    """
+    if (ctx.attr.repository == default_toolchain_config_suite_spec()["container_repo"] and
+        ctx.attr.registry == default_toolchain_config_suite_spec()["container_registry"]):
+        return image_name.replace("l.gcr.io", "marketplace.gcr.io")
+    return image_name
 
 def resolve_project_root(ctx):
     """Returns the project_root .

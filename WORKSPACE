@@ -158,21 +158,28 @@ load(
     rbe_default_repo = "default_toolchain_config_suite_spec",
 )
 
+load(
+    "//tests/config:trigger_config_gen/versions.bzl",
+    _toolchain_config_suite_autogen_spec_trigger_config_gen = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
+
 # Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
 # generate new configs because dependencies have changed.
 rbe_autoconfig(
     name = "rbe_ubuntu1604_trigger_config_gen_test",
     bazel_version = _bazel_trigger_config_gen,
+    create_versions = False,
     digest = _digest_trigger_config_gen,
     export_configs = True,
     registry = _registry_trigger_config_gen,
     repository = _repository_trigger_config_gen,
+    toolchain_config_spec_name = _configs_version_trigger_config_gen,
     toolchain_config_suite_spec = {
-        "container_registry": rbe_default_repo()["container_registry"],
-        "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "tests/config/trigger_config_gen/{}".format(_configs_version_trigger_config_gen),
+        "container_registry": _registry_trigger_config_gen,
+        "container_repo": _repository_trigger_config_gen,
+        "output_base": "tests/config/trigger_config_gen",
         "repo_name": rbe_default_repo()["repo_name"],
-        "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+        "toolchain_config_suite_autogen_spec": _toolchain_config_suite_autogen_spec_trigger_config_gen,
     },
     use_checked_in_confs = "False",
 )
@@ -185,24 +192,30 @@ load(
     _registry_no_updates = "registry",
     _repository_no_updates = "repository",
 )
+load(
+    "//tests/config:no_updates/versions.bzl",
+    _toolchain_config_suite_autogen_spec_no_updates = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
 
 # Automatic E2E test config generation target for RBE Ubuntu 16.04 that should
 # not generate any new configs.
 rbe_autoconfig(
     name = "rbe_ubuntu1604_configs_no_update_test",
     bazel_version = _bazel_no_updates,
+    create_versions = False,
     digest = _digest_no_updates,
     export_configs = True,
     registry = _registry_no_updates,
     repository = _repository_no_updates,
+    toolchain_config_spec_name = _configs_version_no_updates,
     toolchain_config_suite_spec = {
-        "container_registry": rbe_default_repo()["container_registry"],
-        "container_repo": rbe_default_repo()["container_repo"],
-        "output_base": "tests/config/trigger_config_gen/{}".format(_configs_version_no_updates),
+        "container_registry": _registry_no_updates,
+        "container_repo": _repository_no_updates,
+        "output_base": "tests/config/no_updates",
         "repo_name": rbe_default_repo()["repo_name"],
-        "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+        "toolchain_config_suite_autogen_spec": _toolchain_config_suite_autogen_spec_no_updates,
     },
-    use_checked_in_confs = "False",
+    use_checked_in_confs = "Force",
 )
 
 load("//rules:environments.bzl", "clang_env")
@@ -337,10 +350,10 @@ rbe_autoconfig(
     base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    digest = "sha256:ab88c40463d782acc4289948fe0b1577de0b143a753cea35cac34535203f8ca7",
+    digest = "sha256:1fcb66b2d451b453aa7e9ef0798823c657fa0f5b3a6b52f607cc6da1e68a11ca",
     env = clang_env(),
-    registry = "gcr.io",
-    repository = "asci-toolchain/nosla-ubuntu16_04-bazel-docker-gcloud",
+    registry = "marketplace.gcr.io",
+    repository = "google/bazel",
 )
 
 rbe_autoconfig(
@@ -471,7 +484,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_custom_toolchain_config_suite_spec",
     bazel_version = "0.26.0",
     create_testdata = True,
-    toolchain_config_spec_name = "test024config",
+    toolchain_config_spec_name = "testConfigSpecName1",
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
         "container_repo": rbe_default_repo()["container_repo"],
