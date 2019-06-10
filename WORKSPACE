@@ -157,7 +157,6 @@ load(
     "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
     rbe_default_repo = "default_toolchain_config_suite_spec",
 )
-
 load(
     "//tests/config:trigger_config_gen/versions.bzl",
     _toolchain_config_suite_autogen_spec_trigger_config_gen = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
