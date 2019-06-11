@@ -125,10 +125,14 @@ def pull_container_needed(ctx):
     Returns:
         Returns true if its necesary to pull a container to generate configs.
     """
-    if ctx.attr.tag:
-        return True
-    if ctx.attr.config_version and not ctx.attr.config_repos:
+
+    # We dont pull a container if we have found a config_version to use
+    # and there was no tag and no request to detect java home
+    if ctx.attr.config_version and not ctx.attr.detect_java_home and not ctx.attr.tag:
         return False
+
+    # No need to pull if no cc configs or custom repos were requested and
+    # java_home is set
     if not ctx.attr.create_cc_configs and ctx.attr.java_home and not ctx.attr.config_repos:
         return False
     return True
@@ -167,28 +171,33 @@ def get_java_home(ctx, docker_tool_path, image_name):
     """
     if ctx.attr.java_home:
         return ctx.attr.java_home
+    elif ctx.attr.detect_java_home:
+        # Create the template to run
+        template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:get_java_home.sh.tpl"))
+        ctx.template(
+            "get_java_home.sh",
+            template,
+            {
+                "%{docker_tool_path}": docker_tool_path,
+                "%{image_name}": image_name,
+            },
+            True,
+        )
 
-    # Create the template to run
-    template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:get_java_home.sh.tpl"))
-    ctx.template(
-        "get_java_home.sh",
-        template,
-        {
-            "%{docker_tool_path}": docker_tool_path,
-            "%{image_name}": image_name,
-        },
-        True,
-    )
-
-    # run get_java_home.sh
-    result = ctx.execute(["./get_java_home.sh"])
-    print_exec_results("get java_home", result, fail_on_error = True)
-    java_home = result.stdout.splitlines()[0]
-    if java_home == "":
-        fail("Could not find JAVA_HOME in the container and one was not " +
-             "passed to rbe_autoconfig rule. JAVA_HOME is required because " +
-             "create_java_configs is set to True")
-    return java_home
+        # run get_java_home.sh
+        result = ctx.execute(["./get_java_home.sh"])
+        print_exec_results("get java_home", result, fail_on_error = True)
+        java_home = result.stdout.splitlines()[0]
+        if java_home == "":
+            fail("Could not find JAVA_HOME in the container and one was not " +
+                 "passed to rbe_autoconfig rule. JAVA_HOME is required because " +
+                 "create_java_configs is set to True")
+        return java_home
+    elif ctx.attr.export_configs:
+        fail(("%s failed: export_configs was set but neither java_home nor " +
+              "detect_java_home was set.") % ctx.attr.name)
+    else:
+        return None
 
 def run_and_extract(
         ctx,

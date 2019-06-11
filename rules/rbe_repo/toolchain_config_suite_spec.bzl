@@ -22,6 +22,7 @@ YOUR_TOOLCHAIN_CONFIG_SUITE_SPEC = {
                                            # toolchain configs are hosted
     "container_repo": "google/bazel",      # The repo where container for this config is pulled from
     "container_registry": "marketplace.gcr.io", # The registry where container for this config is pulled from
+    "default_java_home": "/usr/lib/jvm/java-8-openjdk-amd64" # Optional. The default java_home to use
     "toolchain_config_suite_autogen_spec": TOOLCHAIN_CONFIG_AUTOGEN_SPEC,
 }
 
@@ -78,13 +79,16 @@ load(
 
 _SEPARATOR = ":::"
 
-REPO_SPEC_KEYS = [
+REPO_SPEC_STRING_KEYS = [
     "container_repo",
     "container_registry",
     "output_base",
     "repo_name",
-    "toolchain_config_suite_autogen_spec",
 ]
+
+REPO_SPEC_KEYS = REPO_SPEC_STRING_KEYS + ["toolchain_config_suite_autogen_spec"]
+
+REPO_SPEC_ALL_KEYS = REPO_SPEC_KEYS + ["default_java_home"]
 
 CONFIG_SPEC_FIELDS = [
     "bazel_to_config_spec_names_map",
@@ -100,6 +104,7 @@ def default_toolchain_config_suite_spec():
         "output_base": "configs/ubuntu16_04_clang",
         "container_repo": "google/rbe-ubuntu16-04",
         "container_registry": "marketplace.gcr.io",
+        "default_java_home": "/usr/lib/jvm/java-8-openjdk-amd64",
         "toolchain_config_suite_autogen_spec": toolchain_config_suite_autogen_spec,
     }
 
@@ -125,8 +130,23 @@ def _validate_repo_spec_keys(name, toolchain_config_suite_spec):
         if not toolchain_config_suite_spec.get(key):
             fail("toolchain_config_suite_spec in %s does not contain required key '%s'" % (name, key))
     for key in toolchain_config_suite_spec.keys():
-        if key not in REPO_SPEC_KEYS:
+        if key not in REPO_SPEC_ALL_KEYS:
             fail("toolchain_config_suite_spec in %s contain unnecessary key '%s'" % (name, key))
+
+    for key in REPO_SPEC_STRING_KEYS:
+        _check_type(
+            name = name,
+            expected_type = "string",
+            error_detail = ("It declares a '%s'" % key),
+            object_to_check = toolchain_config_suite_spec[key],
+        )
+    if toolchain_config_suite_spec.get("default_toolchain_config_spec"):
+        _check_type(
+            name = name,
+            expected_type = "string",
+            error_detail = "It declares a 'default_toolchain_config_spec'",
+            object_to_check = toolchain_config_suite_spec["default_toolchain_config_spec"],
+        )
 
 def _validate_toolchain_config_suite_autogen_spec(name, toolchain_config_suite_spec):
     _check_type(
