@@ -110,7 +110,7 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
     print_exec_results("Move .latest.bazelrc file to outputs", result, True, args)
 
     # Create an empty BUILD file so the repo can be built
-    ctx.file("BUILD", """package(default_visibility = ["//visibility:public"]""", False)
+    ctx.file("BUILD", """package(default_visibility = ["//visibility:public"])""", False)
 
 def create_configs_tar(ctx):
     """Copies all outputs of the autoconfig rule to a tar file.

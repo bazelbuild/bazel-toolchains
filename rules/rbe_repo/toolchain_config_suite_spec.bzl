@@ -59,22 +59,20 @@ TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
 
 --- END OF COPY LINES BELOW TO YOUR EMPTY versions.bzl FILE ----
 
-You can then load the versions.bzl file into the location where 
+You can then load the versions.bzl file into the location where
 you are declaring YOUR_RBE_REPO.
 
 This bzl file also provides utils to convert fields of the
 toolchain_config_suite_autogen_spec structs in the versions.bzl to a format that can be passed
 to the _rbe_autoconfig_impl. This is because we cannot pass
-structs to _rbe_autoconfig_impl. 
+structs to _rbe_autoconfig_impl.
 Defs 'config_to_string_lists' and 'string_lists_to_config' in this file
 provide a way to convert an toolchain_config_specs in the toolchain_config_suite_autogen_spec
 from structs to lists and from lists to structs.
 """
 
-# TODO(nlopezgi): move to using versions.bzl
-# once migration for toolchain config release process is complete
 load(
-    "//configs/ubuntu16_04_clang:versions_to_migrate.bzl",
+    "//configs/ubuntu16_04_clang:versions.bzl",
     toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
 
