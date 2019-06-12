@@ -366,6 +366,7 @@ load(
 )
 load(
     "//rules/rbe_repo:outputs.bzl",
+    "create_configs_tar",
     "create_versions_file",
     "expand_outputs",
 )
@@ -532,6 +533,7 @@ def _rbe_autoconfig_impl(ctx):
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
             )
+            create_configs_tar(ctx)
 
     # If we found checked in confs or if outputs were moved
     # to output_base create the alisases.
@@ -692,9 +694,12 @@ _rbe_autoconfig = repository_rule(
         ),
         "export_configs": attr.bool(
             doc = (
-                "Specifies whether to copy " +
-                "generated configs to the output base. " +
-                "Default is False."
+                "Specifies whether to copy generated configs to the 'output_base' " +
+                "of the 'toolchain_config_suite_spec' (if configs are generated) " +
+                "If set to False, a configs.tar file will also be produced in the " +
+                ("external repo. This tar file can be then published to a URL and " +
+                 " e.g., be  used via an 'http_archive' rule from an arbitrary repo." +
+                 "Default is False.")
             ),
             mandatory = True,
         ),
@@ -849,7 +854,10 @@ def rbe_autoconfig(
           exec_compatible_with/constraint_values attrs, respectively.
       export_configs: Optional, default False. Whether to copy generated configs
           (if they are generated) to the 'output_base' defined in
-          'toolchain_config_suite_spec'.
+          'toolchain_config_suite_spec'. If set to False, a configs.tar file
+          will also be produced in the external repo. This tar file can be then
+          published to a URL and e.g., be used via an 'http_archive' rule
+          from an arbitrary repo.
       java_home: Optional. The location of java_home in the container. For
           example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
           relevant if 'create_java_configs' is true. If 'create_java_configs' is
