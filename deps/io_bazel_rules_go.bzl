@@ -13,4 +13,4 @@
 # limitations under the License.
 """Commit sha for bazelbuild/rules_go."""
 
-version = "e284e9dafc99aac881970edf760549f5f9daf1e5"
+version = "82d76fe3226bd7a216f9b11f6178b647d1ba5390"
