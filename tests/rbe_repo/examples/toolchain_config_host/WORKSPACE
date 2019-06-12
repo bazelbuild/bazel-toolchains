@@ -124,3 +124,8 @@ rbe_autoconfig(
     repository = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC["container_repo"],
     toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
 )
+
+rbe_autoconfig(
+    name = "rbe_custom_config_tar",
+    toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
+)
