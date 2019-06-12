@@ -64,7 +64,7 @@ _TOOLCHAIN_CONFIG_SPECS = [_TOOLCHAIN_CONFIG_SPEC1, _TOOLCHAIN_CONFIG_SPEC2]
 
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC = _TOOLCHAIN_CONFIG_SPEC1
 
-# A map from supported Bazel versions mapped to supported config_spec names.
+# Returns a dict with suppported Bazel versions mapped to the config version to use.
 _BAZEL_TO_CONFIG_SPEC_NAMES = {
     "0.20.0": ["8.0.0"],
     "0.21.0": ["8.0.0"],

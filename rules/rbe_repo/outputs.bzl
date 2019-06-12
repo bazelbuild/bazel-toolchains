@@ -28,8 +28,6 @@ load(
 def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name):
     """Copies all outputs of the autoconfig rule to a directory in the project.
 
-    Produces an output.zip file at the root of the repo with all contents.
-
     Also deletes the artifacts from the repo directory as they are only
     meant to be used from the output_base.
 
@@ -52,7 +50,7 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
     result = ctx.execute(["mkdir", "-p", platform_dest])
     print_exec_results("create platform output dir", result)
 
-    files_to_tar = []
+    files_to_clean = []
 
     # Copy the local_config_cc files to dest/{CC_CONFIG_DIR}/
     if ctx.attr.create_cc_configs:
@@ -60,12 +58,9 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
         print_exec_results("create cc output dir", result)
 
         # Get the files that were created in the CC_CONFIG_DIR
-        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % CC_CONFIG_DIR), True)
-        result = ctx.execute(["./local_config_files.sh"])
-        print_exec_results("resolve autoconf files", result)
-        autoconf_files = result.stdout.splitlines()[0].split(" ")
-        files_to_tar += autoconf_files
-        args = ["cp"] + autoconf_files + [cc_dest]
+        cc_conf_files = _get_cc_conf_files(ctx)
+        files_to_clean += cc_conf_files
+        args = ["cp"] + cc_conf_files + [cc_dest]
         result = ctx.execute(args)
         print_exec_results("copy local_config_cc outputs", result, True, args)
 
@@ -81,7 +76,7 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
     args = ["cp", str(ctx.path(PLATFORM_DIR + "/BUILD")), platform_dest]
     result = ctx.execute(args)
     print_exec_results("copy platform BUILD", result, True, args)
-    files_to_tar += ["./" + PLATFORM_DIR + "/BUILD"]
+    files_to_clean += ["./" + PLATFORM_DIR + "/BUILD"]
 
     # Copy any additional external repos that were requested
     if ctx.attr.config_repos:
@@ -89,12 +84,10 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
             args = ["bash", "-c", "cp -r %s %s" % (repo, dest)]
             result = ctx.execute(args)
             print_exec_results("copy %s repo files" % repo, result, True, args)
-            files_to_tar += ["./" + repo + "/*"]
+            files_to_clean += ["./" + repo + "/*"]
 
-    # TODO(nlopezgi): create a tar with all the produced artifacts which can
-    # be exported and then use via e.g., http_file
     # Delete the outputs
-    args = ["bash", "-c", "rm -dr " + " ".join(files_to_tar)]
+    args = ["bash", "-c", "rm -dr " + " ".join(files_to_clean)]
     result = ctx.execute(args)
     print_exec_results("Remove generated files from repo dir", result, True, args)
 
@@ -116,8 +109,52 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
     print_exec_results("Move .latest.bazelrc file to outputs", result, True, args)
 
     # Create an empty BUILD file so the repo can be built
+    ctx.file("BUILD", """package(default_visibility = ["//visibility:public"])""", False)
+
+def create_configs_tar(ctx):
+    """Copies all outputs of the autoconfig rule to a tar file.
+
+    Produces an configs.tar file at the root of the external repo with all contents.
+
+    Args:
+        ctx: The Bazel context.
+    """
+    files_to_tar = []
+    if ctx.attr.create_cc_configs:
+        files_to_tar += _get_cc_conf_files(ctx)
+    if ctx.attr.create_java_configs:
+        files_to_tar += ["./" + JAVA_CONFIG_DIR + "/BUILD"]
+    files_to_tar += ["./" + PLATFORM_DIR + "/BUILD"]
+    if ctx.attr.config_repos:
+        for repo in ctx.attr.config_repos:
+            files_to_tar += ["./" + repo + "/*"]
+
+    # Create a tar file with all outputs
+    args = ["bash", "-c", "tar -cvf configs.tar " + " ".join(files_to_tar)]
+    result = ctx.execute(args)
+    print_exec_results("Create configs.tar with all generated files", result, True, args)
+
+    # Create an empty BUILD file so the repo can be built
     ctx.file("BUILD", """package(default_visibility = ["//visibility:public"])
 exports_files(["configs.tar"])""", False)
+
+def _get_cc_conf_files(ctx):
+    """Gets the paths for all C/C++ toolchain config files
+
+    Args:
+        ctx: The Bazel context.
+
+    Returns:
+        List with paths to all C/C++ toolchain config files
+    """
+    cc_conf_files = None
+    if ctx.attr.create_cc_configs:
+        # Get the files that were created in the CC_CONFIG_DIR
+        ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % CC_CONFIG_DIR), True)
+        result = ctx.execute(["./local_config_files.sh"])
+        print_exec_results("resolve autoconf files", result)
+        cc_conf_files = result.stdout.splitlines()[0].split(" ")
+    return cc_conf_files
 
 def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, project_root):
     """Creates the versions.bzl file.

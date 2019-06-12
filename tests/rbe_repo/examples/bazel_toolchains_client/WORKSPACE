@@ -196,3 +196,12 @@ rbe_autoconfig(
     toolchain_config_suite_spec = CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
+
+# Test that validates files in a local repo (should have been extracted
+# by build_and_extract_configs_tar from a configs.tar output
+# produced by @rbe_custom.
+new_local_repository(
+    name = "rbe_custom_config_tar",
+    build_file = "BUILD.config_tar_test",
+    path = "../config_out",
+)

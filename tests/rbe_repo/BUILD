@@ -90,6 +90,7 @@ sh_test(
         "assert_cc_confs",
         "assert_java_confs",
         "assert_image_pulled",
+        "assert_configs_tar",
     ],
     data = [
         "@rbe_autoconf_generate//test:empty",
@@ -107,6 +108,7 @@ sh_test(
         "assert_cc_confs",
         "assert_no_java_confs",
         "assert_no_java_home",
+        "assert_configs_tar",
     ],
     data = [
         "@rbe_autoconf_generate_no_java//test:empty",
@@ -125,6 +127,7 @@ sh_test(
         "assert_checked_in_confs",
         "assert_no_cc_confs",
         "assert_java_confs",
+        "assert_configs_tar",
     ],
     data = [
         "@rbe_autoconf_generate_no_cc//test:empty",
@@ -142,6 +145,7 @@ sh_test(
         "assert_java_confs",
         "assert_no_cc_confs",
         "assert_no_java_home",
+        "assert_configs_tar",
     ],
     data = [
         "@rbe_autoconf_custom_java_home//test:empty",
@@ -531,6 +535,7 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
+        "assert_no_configs_tar",
     ],
     data = [
         "@rbe_autoconf_output_base//test:empty",
@@ -725,6 +730,7 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
+        "assert_no_configs_tar",
     ],
     data = [
         "@rbe_autoconf_custom_toolchain_config_suite_spec_export//test:empty",
@@ -763,6 +769,7 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
+        "assert_no_configs_tar",
     ],
     data = [
         "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:empty",
