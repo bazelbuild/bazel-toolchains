@@ -1,0 +1,30 @@
+steps:
+# Build the @rbe_custom toolchain configs using
+# the script that also extracts the config.tar file produced
+- name: 'l.gcr.io/google/bazel'
+  entrypoint: '../build_and_extract_configs_tar.sh'
+  dir: 'tests/rbe_repo/examples/toolchain_config_host'
+  env: ['RBE_AUTOCONF_ROOT=/workspace/tests/rbe_repo/examples/toolchain_config_host']
+
+
+# Launch a RBE hello world build + unit test using the @rbe_custom_config_tar toolchain
+# configs.
+- name: 'l.gcr.io/google/bazel'
+  args:
+  - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
+  - test
+  - //:say_hello_test
+  - --config=remote
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  # toolchain flags to use @rbe_custom_config_tar
+  - --host_javabase=@rbe_custom_config_tar//java:jdk
+  - --javabase=@rbe_custom_config_tar//java:jdk
+  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --crosstool_top=@rbe_custom_config_tar//cc:toolchain
+  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+  - --extra_toolchains=@rbe_custom_config_tar//config:cc-toolchain
+  - --extra_execution_platforms=@rbe_custom_config_tar//config:platform
+  - --host_platform=@rbe_custom_config_tar//config:platform
+  - --platforms=@rbe_custom_config_tar//config:platform
+  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
