@@ -21,9 +21,9 @@ set -ex
 mv WORKSPACE WORKSPACE.bak
 
 if grep -q rbe_default "WORKSPACE.bak"; then
-  sed '0,/load/{s/load/local_repository(\n    name = \"bazel_toolchains\",\n    path = \"..\/\",\n)\nload/}' WORKSPACE.bak > WORKSPACE
+  sed '/workspace/ r ../tests/rbe_external_project/rbe_autoconf_default_targets_no_rbe_default.txt' WORKSPACE.bak > WORKSPACE
 else
-  sed '0,/load/{s/load/local_repository(\n    name = \"bazel_toolchains\",\n    path = \"..\/\",\n)\nload(\"@bazel_toolchains\/\/rules:rbe_repo.bzl\", \"rbe_autoconfig\")\nrbe_autoconfig(name = \"rbe_default\")\nload/}' WORKSPACE.bak > WORKSPACE
+  sed '/workspace/ r ../tests/rbe_external_project/rbe_autoconf_default_targets.txt' WORKSPACE.bak > WORKSPACE
 fi
 
 if [ -f ".bazelrc" ]; then
