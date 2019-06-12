@@ -181,7 +181,7 @@ def validateUseOfCheckedInConfigs(
     if requested_toolchain_config_spec_name or config:
         if not config:
             config = _get_config(requested_toolchain_config_spec_name, toolchain_config_specs)
-        if config.name not in bazel_compat_configs:
+        if config and config.name not in bazel_compat_configs:
             print(("%s not using checked in configs; config %s was " +
                    "picked/selected, Bazel version %s was picked/selected " +
                    "but no checked in config was found in %s") %
@@ -245,7 +245,7 @@ def validateUseOfCheckedInConfigs(
         digest = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container
     if not digest:
         for key in container_to_config_spec_names_map.keys():
-            if config.name in container_to_config_spec_names_map[key]:
+            if config and config.name in container_to_config_spec_names_map[key]:
                 digest = key
                 break
     if not digest:
