@@ -18,14 +18,5 @@
 # This script should be executed from the root of an external project's srcs
 
 set -ex
-mv WORKSPACE WORKSPACE.bak
-
-if grep -q rbe_default "WORKSPACE.bak"; then
-  sed '/workspace/ r ../tests/rbe_external_project/rbe_autoconf_default_targets_no_rbe_default.txt' WORKSPACE.bak > WORKSPACE
-else
-  sed '/workspace/ r ../tests/rbe_external_project/rbe_autoconf_default_targets.txt' WORKSPACE.bak > WORKSPACE
-fi
-
-if [ -f ".bazelrc" ]; then
-    rm .bazelrc
-fi
+mkdir rbe-asan
+cp ../tests/rbe_external_project/BUILD.ptrace_platform rbe-asan/BUILD

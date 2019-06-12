@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Copyright 2017 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Simple script to use bazel-toolchains srcs in the current client
-# and add the rbe_default repo to WORKSPACE if it does not exist
-# This script should be executed from the root of an external project's srcs
+licenses(["notice"])  # Apache 2.0
 
-set -ex
-mv WORKSPACE WORKSPACE.bak
+package(default_visibility = ["//visibility:public"])
 
-if grep -q rbe_default "WORKSPACE.bak"; then
-  sed '/workspace/ r ../tests/rbe_external_project/rbe_autoconf_default_targets_no_rbe_default.txt' WORKSPACE.bak > WORKSPACE
-else
-  sed '/workspace/ r ../tests/rbe_external_project/rbe_autoconf_default_targets.txt' WORKSPACE.bak > WORKSPACE
-fi
-
-if [ -f ".bazelrc" ]; then
-    rm .bazelrc
-fi
+platform(
+    name = "platform",
+    parents = ["@rbe_default//config:platform"],
+    remote_execution_properties = """
+        {PARENT_REMOTE_EXECUTION_PROPERTIES}
+        properties: {
+          name: "dockerAddCapabilities"
+          value: "SYS_PTRACE"
+        }
+        """,
+)
