@@ -16,7 +16,7 @@ steps:
 # that verifies that @rbe_default works for Bazel 0.20.0 - 0.25.0
 # These tests are separate from bazel_tests_cloudbuild.yaml as those
 # tests depend on the bazelrc files numbered by versions.
-# However, tests covered by this file have a bazerc file that did
+# However, tests covered by this file have a bazelrc file that did
 # not use @rbe_default.
 # Starting with Bazel 0.26.0, @rbe_default is used in all bazelrc
 # files, so bazel_tests_cloudbuild.yaml covers it.
