@@ -29,3 +29,5 @@ fi
 if [ -f ".bazelrc" ]; then
     rm .bazelrc
 fi
+
+cat WORKSPACE
