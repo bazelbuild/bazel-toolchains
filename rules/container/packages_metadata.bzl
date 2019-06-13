@@ -11,6 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+packages_metadata accepts a csv file with the columns "Name" & "Version" where
+Name is the name of the software package and Version is the version string
+of the package. The rule will produce a YAML output with the information from
+the CSV organized as follows:
+packages:
+    - name: package1
+      version: version1
+    - name: package2
+      version: version2
+    ...
+"""
 
 def _impl(ctx):
     ctx.actions.run(
@@ -26,18 +38,6 @@ def _impl(ctx):
         mnemonic = "PackagesMetadataYAML",
     )
 
-"""
-packages_metadata accepts a csv file with the columns "Name" & "Version" where
-Name is the name of the software package and Version is the version string
-of the package. The rule will produce a YAML output with the information from
-the CSV organized as follows:
-packages:
-    - name: package1
-      version: version1
-    - name: package2
-      version: version2
-    ...
-"""
 packages_metadata = rule(
     attrs = {
         "metadata_csv": attr.label(
