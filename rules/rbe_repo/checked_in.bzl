@@ -29,7 +29,7 @@ def validateUseOfCheckedInConfigs(
         bazel_rc_version,
         config_repos,
         create_cc_configs,
-        create_java_configs,
+        detect_java_home,
         digest,
         env,
         java_home,
@@ -41,7 +41,12 @@ def validateUseOfCheckedInConfigs(
         use_checked_in_confs):
     """Check if checked-in configs are available and should be used.
 
-    If so, return the config version. Otherwise return None.
+    Finds if a C/C++ toolchain config has already been checked-in to
+    the external repo defined by the toolchain_config_suite_spec. Configs
+    are matched by Bazel version, container used to build the configs,
+    and env variables for C/C++ toolchain configuration.
+    If configs are found, return the toolchain_config_spec, and the digest
+    of a container compatible with that config.
 
     Args:
       name: Name of the rule target.
@@ -54,8 +59,7 @@ def validateUseOfCheckedInConfigs(
           local_config_cc.
       create_cc_configs: Optional. Specifies whether to generate C/C++ configs.
           Defauls to True.
-      create_java_configs: Optional. Specifies whether to generate java configs.
-          Defauls to True.
+      detect_java_home: if set to True checked-in configs will not be used
       digest: The digest of the container in which the configs are goings to
           be used.
       env: The environment dict.
@@ -71,7 +75,6 @@ def validateUseOfCheckedInConfigs(
               'container_repo': repo for the base toolchain container
               'container_registry': registry for the base toolchain container
               'latest_container': sha of the latest container
-      #TODO: update docs. This is now part of 'config_versions' attr
           container_to_config_spec_names_map: Optional. Only required when export_configs
               is set. Set to point to def container_to_config_spec_names()
               defined in the versions.bzl file generated in the output_base defined
@@ -89,10 +92,15 @@ def validateUseOfCheckedInConfigs(
       use_checked_in_confs: Whether to use checked in configs.
 
     Returns:
-      None
+      The toolchain_config_spec if one was found
+      The recommended digest for this toolchain_config_spec (might be
+      overriden by rbe_repo if user if user requested a different one)
     """
     if use_checked_in_confs == CHECKED_IN_CONFS_FALSE:
-        print("%s not using checked in configs as user set attr to false " % name)
+        print("%s not using checked in configs as user set attr to 'False' " % name)
+        return None, None
+    if detect_java_home:
+        print("%s not using checked in configs as detect_java_home was set to True " % name)
         return None, None
     if bazel_rc_version:
         print("%s not using checked in configs as hazel rc version was used " % name)
@@ -144,6 +152,8 @@ def validateUseOfCheckedInConfigs(
     config = None
     container_to_config_spec_names_map = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].container_to_config_spec_names_map
 
+    toolchain_config_specs = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].toolchain_config_specs
+
     # If a digest was provided/selected lets try to find a config that will work
     if digest:
         compatible_configs = container_to_config_spec_names_map.get(digest)
@@ -162,45 +172,40 @@ def validateUseOfCheckedInConfigs(
         # pick a config: first try the default
         if (toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec != "" and
             toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec.name in compatible_configs):
-            config = toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec.name
+            config = toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec
         else:
-            config = compatible_configs[0]
+            config = _get_config(compatible_configs[0], toolchain_config_specs)
 
     # If a config was requested or found via digest, lets see if its compatible with
     # the selected Bazel version
     if requested_toolchain_config_spec_name or config:
         if not config:
-            config = requested_toolchain_config_spec_name
-        if config not in bazel_compat_configs:
+            config = _get_config(requested_toolchain_config_spec_name, toolchain_config_specs)
+        if config and config.name not in bazel_compat_configs:
             print(("%s not using checked in configs; config %s was " +
                    "picked/selected, Bazel version %s was picked/selected " +
                    "but no checked in config was found in %s") %
                   (name, config, bazel_version, str(bazel_compat_configs)))
             return None, None
-    toolchain_config_specs = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].toolchain_config_specs
 
     # We have found a candiadate config, lets check if env / config_repos match
     if config and not _check_config(
-        candidate_toolchain_config_spec_name = config,
+        candidate_config = config,
         config_repos = config_repos,
-        create_java_configs = create_java_configs,
         create_cc_configs = create_cc_configs,
         env = env,
-        java_home = java_home,
         name = name,
-        toolchain_config_specs = toolchain_config_specs,
     ):
         print(("%s not using checked in configs; '%s' was picked/selected " +
                "as a candidate matching config but it does not match " +
-               "the 'env = %s', 'config_repos = %s', 'create_java_configs " +
-               "= %s', and/or 'create_cc_configs = %s' passed as attrs") %
+               "the 'env = %s', 'config_repos = %s', " +
+               "and/or 'create_cc_configs = %s' passed as attrs") %
               (
                   name,
                   bazel_version,
                   str(bazel_compat_configs),
                   env,
                   config_repos,
-                  create_java_configs,
                   create_cc_configs,
               ))
         return None, None
@@ -210,28 +215,24 @@ def validateUseOfCheckedInConfigs(
     if not config:
         for candidate_config in bazel_compat_configs:
             if _check_config(
-                candidate_toolchain_config_spec_name = candidate_config,
+                candidate_config = _get_config(candidate_config, toolchain_config_specs),
                 config_repos = config_repos,
-                create_java_configs = create_java_configs,
                 create_cc_configs = create_cc_configs,
                 env = env,
-                java_home = java_home,
                 name = name,
-                toolchain_config_specs = toolchain_config_specs,
             ):
-                config = candidate_config
+                config = _get_config(candidate_config, toolchain_config_specs)
         if not config:
             print(("%s not using checked in configs; Bazel version %s was " +
                    "picked/selected with '%s' compatible configs but none match " +
-                   "the 'env = %s', 'config_repos = %s', 'create_java_configs " +
-                   "= %s', and/or 'create_cc_configs = %s' passed as attrs") %
+                   "the 'env = %s', 'config_repos = %s'," +
+                   "and/or 'create_cc_configs = %s' passed as attrs") %
                   (
                       name,
                       bazel_version,
                       str(bazel_compat_configs),
                       env,
                       config_repos,
-                      create_java_configs,
                       create_cc_configs,
                   ))
             return None, None
@@ -240,11 +241,11 @@ def validateUseOfCheckedInConfigs(
     # First, try to use latest if that works.
     # If not, pick the first container that works.
     if (config and toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container != "" and
-        config in container_to_config_spec_names_map[toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container]):
+        config.name in container_to_config_spec_names_map[toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container]):
         digest = toolchain_config_suite_spec["toolchain_config_suite_autogen_spec"].latest_container
     if not digest:
         for key in container_to_config_spec_names_map.keys():
-            if config in container_to_config_spec_names_map[key]:
+            if config and config.name in container_to_config_spec_names_map[key]:
                 digest = key
                 break
     if not digest:
@@ -255,31 +256,21 @@ def validateUseOfCheckedInConfigs(
     print("%s is using checked-in configs '%s'" % (name, config))
     return config, digest
 
+def _get_config(toolchain_config_spec_name, toolchain_config_specs):
+    for spec in toolchain_config_specs:
+        if spec.name == toolchain_config_spec_name:
+            return spec
+    return None
+
 def _check_config(
-        candidate_toolchain_config_spec_name,
+        candidate_config,
         config_repos,
-        create_java_configs,
         create_cc_configs,
         env,
-        java_home,
-        name,
-        toolchain_config_specs):
-    candidate_config = None
-    for repo_conf in toolchain_config_specs:
-        if repo_conf.name == candidate_toolchain_config_spec_name:
-            candidate_config = repo_conf
-    if not candidate_config:
-        # This is a hard failure as it means the versions.bzl file or
-        # rbe_autoconfig rule is not properly set up.
-        fail("%s failed. Config %s was selected but is not present in %s" %
-             (name, config, str(toolchain_config_specs)))
+        name):
     if config_repos and config_repos != candidate_config.config_repos:
         return False
     if env and env != candidate_config.env:
-        return False
-    if create_java_configs and not candidate_config.create_java_configs:
-        return False
-    if create_java_configs and candidate_config.create_java_configs and java_home and java_home != candidate_config.java_home:
         return False
     if create_cc_configs and not candidate_config.create_cc_configs:
         return False

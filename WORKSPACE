@@ -238,6 +238,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_checked_in",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -245,6 +246,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
     create_testdata = True,
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -252,6 +254,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_cc_configs = False,
     create_testdata = True,
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -306,6 +309,15 @@ rbe_autoconfig(
     create_cc_configs = False,
     create_testdata = True,
     java_home = "test-case-java-home",
+    use_checked_in_confs = "Force",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_detect_java_home",
+    bazel_version = _ubuntu1604_bazel,
+    create_cc_configs = False,
+    create_testdata = True,
+    detect_java_home = True,
 )
 
 rbe_autoconfig(
@@ -352,6 +364,7 @@ rbe_autoconfig(
     env = clang_env(),
     registry = "marketplace.gcr.io",
     repository = "google/bazel",
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -364,6 +377,7 @@ rbe_autoconfig(
     target_compatible_with = [
         "//constraints:xenial",
     ],
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(

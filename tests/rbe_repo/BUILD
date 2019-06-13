@@ -89,7 +89,6 @@ sh_test(
         "assert_no_checked_in_confs",
         "assert_cc_confs",
         "assert_java_confs",
-        "assert_java_home",
         "assert_image_pulled",
         "assert_configs_tar",
     ],
@@ -128,7 +127,6 @@ sh_test(
         "assert_checked_in_confs",
         "assert_no_cc_confs",
         "assert_java_confs",
-        "assert_java_home",
         "assert_configs_tar",
     ],
     data = [
@@ -143,13 +141,31 @@ sh_test(
     args = [
         "$(location @rbe_autoconf_custom_java_home//test:empty)",
         "assert_basic_cofig",
+        "assert_checked_in_confs",
         "assert_java_confs",
+        "assert_no_cc_confs",
         "assert_no_java_home",
-        "assert_configs_tar",
     ],
     data = [
         "@rbe_autoconf_custom_java_home//test:empty",
         "@rbe_autoconf_custom_java_home//test:exported_testdata",
+    ],
+)
+
+sh_test(
+    name = "rbe_autoconf_detect_java_home_test",
+    srcs = [":rbe_autoconf_checks.sh"],
+    args = [
+        "$(location @rbe_autoconf_detect_java_home//test:empty)",
+        "assert_basic_cofig",
+        "assert_checked_in_confs",
+        "assert_java_confs",
+        "assert_no_cc_confs",
+        "assert_java_home",
+    ],
+    data = [
+        "@rbe_autoconf_detect_java_home//test:empty",
+        "@rbe_autoconf_detect_java_home//test:exported_testdata",
     ],
 )
 
@@ -162,9 +178,9 @@ file_test(
 )
 
 file_test(
-    name = "rbe_autoconf_checked_in_java_alias_test",
+    name = "rbe_autoconf_checked_in_java_runtime_test",
     file = "@rbe_autoconf_checked_in//test:java/test.BUILD",
-    regexp = "alias",
+    regexp = "java_runtime",
 )
 
 file_test(
@@ -174,9 +190,9 @@ file_test(
 )
 
 file_test(
-    name = "rbe_autoconf_checked_in_java_alias_no_cc_test",
+    name = "rbe_autoconf_checked_in_java_runtime_no_cc_test",
     file = "@rbe_autoconf_checked_in_no_cc//test:java/test.BUILD",
-    regexp = "alias",
+    regexp = "java_runtime",
 )
 
 file_test(
@@ -451,9 +467,9 @@ file_test(
 )
 
 file_test(
-    name = "rbe_autoconf_base_container_digest_java_alias_test",
+    name = "rbe_autoconf_base_container_digest_java_runtime_test",
     file = "@rbe_autoconf_base_container_digest//test:java/test.BUILD",
-    regexp = "alias",
+    regexp = "java_runtime",
 )
 
 # Tests that verify rbe_autoconfig with custom exec_compatible_with
@@ -495,6 +511,18 @@ sh_test(
         "@rbe_autoconf_output_base//test:exported_testdata",
         "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
+)
+
+file_test(
+    name = "rbe_autoconf_output_base_test_cc_alias_test",
+    file = "@rbe_autoconf_output_base//test:cc/test.BUILD",
+    regexp = "alias",
+)
+
+file_test(
+    name = "rbe_autoconf_output_base_test_java_alias_test",
+    file = "@rbe_autoconf_output_base//test:java/test.BUILD",
+    regexp = "alias",
 )
 
 sh_test(
@@ -637,6 +665,7 @@ sh_test(
         "assert_checked_in_confs",
         "assert_checked_in_cc_confs",
         "assert_java_confs",
+        "assert_no_java_home",
     ],
     data = [
         "@rbe_autoconf_custom_toolchain_config_suite_spec//test:empty",
@@ -653,7 +682,7 @@ file_test(
 file_test(
     name = "rbe_autoconf_custom_toolchain_config_suite_spec_java_alias_test",
     file = "@rbe_autoconf_custom_toolchain_config_suite_spec//test:java/test.BUILD",
-    regexp = "alias",
+    regexp = "java_runtime",
 )
 
 file_test(
@@ -682,6 +711,7 @@ sh_test(
         "assert_output_base_cc_confs",
         "assert_output_base_java_confs",
         "assert_output_base_platform_confs",
+        "assert_java_home",
     ],
     data = [
         ":rbe_autoconf_checks.sh",
