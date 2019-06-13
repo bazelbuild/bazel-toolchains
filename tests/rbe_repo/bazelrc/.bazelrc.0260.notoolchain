@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This .bazelrc file contains some  of the flags required for the provided
+# This .bazelrc file contains some of the flags required for the provided
 # toolchain with Remote Build Execution. Specifically, it includes all flags
 
 build:remote --jobs=50
