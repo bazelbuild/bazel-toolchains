@@ -32,6 +32,11 @@ rbe_autoconfig(
 )
 
 rbe_autoconfig(
+    name = "rbe_default_generate",
+    use_checked_in_confs = "False",
+)
+
+rbe_autoconfig(
     name = "rbe_jdk11",
     java_home = "/usr/lib/jvm/11.29.3-ca-jdk11.0.2/reduced",
     use_checked_in_confs = "Force",

@@ -22,7 +22,7 @@ steps:
 # files, so bazel_tests_cloudbuild.yaml covers it.
 - name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
-  - --bazelrc=../../bazelrc/pre0260.bazelrc
+  - --bazelrc=../../bazelrc/.bazelrc.pre0260
   - test
   - //:say_hello_test
   - --config=remote
