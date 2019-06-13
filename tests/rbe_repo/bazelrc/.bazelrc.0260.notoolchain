@@ -14,7 +14,6 @@
 
 # This .bazelrc file contains some  of the flags required for the provided
 # toolchain with Remote Build Execution. Specifically, it includes all flags
-# except toolchain/platform flags for 0.26.0.
 
 build:remote --jobs=50
 
@@ -29,3 +28,4 @@ build:remote --remote_executor=remotebuildexecution.googleapis.com
 build:remote --remote_timeout=3600
 
 build:remote --google_default_credentials=true
+
