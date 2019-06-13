@@ -133,7 +133,6 @@ rbe_autoconfig(
 # TODO(nlopezgi): remove this target after migration.
 rbe_autoconfig(
     name = "rbe_autoconfig_autogen_ubuntu1604",
-    create_versions = False,
     digest = _ubuntu1604_digest,
     export_configs = True,
     registry = _ubuntu1604_registry,
