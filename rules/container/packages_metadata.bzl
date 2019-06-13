@@ -17,10 +17,14 @@ def _impl(ctx):
         inputs = [ctx.file.metadata_csv],
         outputs = [ctx.outputs.yaml],
         executable = ctx.executable._converter,
-        arguments = ["-inputCSV", ctx.file.metadata_csv.path, "-outputYAML", ctx.outputs.yaml.path],
+        arguments = [
+            "-inputCSV",
+            ctx.file.metadata_csv.path,
+            "-outputYAML",
+            ctx.outputs.yaml.path,
+        ],
         mnemonic = "PackagesMetadataYAML",
     )
-    return
 
 """
 packages_metadata accepts a csv file with the columns "Name" & "Version" where
@@ -38,7 +42,7 @@ packages_metadata = rule(
     attrs = {
         "metadata_csv": attr.label(allow_single_file = True),
         "_converter": attr.label(
-            default = "@bazel_toolchains//tools/go/cmd/packages_metadata",
+            default = "@bazel_toolchains//src/go/cmd/packages_metadata",
             cfg = "host",
             executable = True,
         ),

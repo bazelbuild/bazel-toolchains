@@ -89,7 +89,7 @@ func newPackagesMetadataFromCSV(csvFile string) (*packagesMetadata, error) {
 
 func main() {
 	flag.Parse()
-	log.Println("Running the download_pkgs metadata CSV to YAML converter.")
+	log.Println("Running the package metadata CSV to YAML converter.")
 	log.Printf("-inputCSV %q", *inputCSV)
 	log.Printf("-outputYAML %q", *outputYAML)
 	if *inputCSV == "" {
