@@ -16,14 +16,15 @@ steps:
 # that verifies that @rbe_default works for Bazel 0.20.0 - 0.25.0
 # These tests are separate from bazel_tests_cloudbuild.yaml as those
 # tests depend on the bazelrc files numbered by versions.
-# However, tests covered by this file have a bazerc file that did 
-# not use @rbe_default. 
+# However, tests covered by this file have a bazelrc file that did
+# not use @rbe_default.
 # Starting with Bazel 0.26.0, @rbe_default is used in all bazelrc
 # files, so bazel_tests_cloudbuild.yaml covers it.
 - name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
-  - --bazelrc=tests/rbe_repo/bazelrc/pre0260.bazelrc
+  - --bazelrc=../../bazelrc/pre0260.bazelrc
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - //:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
