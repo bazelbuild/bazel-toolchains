@@ -40,7 +40,10 @@ packages:
 """
 packages_metadata = rule(
     attrs = {
-        "metadata_csv": attr.label(allow_single_file = True),
+        "metadata_csv": attr.label(
+            mandatory = True,
+            allow_single_file = True,
+        ),
         "_converter": attr.label(
             default = "@bazel_toolchains//src/go/cmd/packages_metadata",
             cfg = "host",
