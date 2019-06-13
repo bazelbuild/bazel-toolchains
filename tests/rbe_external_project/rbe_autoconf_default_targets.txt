@@ -1,3 +1,5 @@
+# Targets below will be added to the WORKSPACE file for
+# all tests in this folder
 local_repository(
     name = "bazel_toolchains",
     path = "../",
@@ -15,4 +17,3 @@ rbe_autoconfig(
     java_home = "/usr/lib/jvm/11.29.3-ca-jdk11.0.2/reduced",
     use_checked_in_confs = "Force",
 )
-
