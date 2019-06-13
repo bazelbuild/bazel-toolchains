@@ -69,7 +69,6 @@ def expand_outputs(ctx, bazel_version, project_root, toolchain_config_spec_name)
         result = ctx.execute(["mkdir", "-p", java_dest])
         print_exec_results("create java output dir", result)
         args = ["cp", str(ctx.path(JAVA_CONFIG_DIR + "/BUILD")), java_dest]
-        files_to_clean += ["./" + JAVA_CONFIG_DIR + "/BUILD"]
         result = ctx.execute(args)
         print_exec_results("copy java_runtime BUILD", result, True, args)
 
