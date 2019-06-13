@@ -17,8 +17,9 @@ steps:
 # as we only maintain bazelrc files for these.
 - name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
-  - --bazelrc=bazelrc/bazel-${_BAZEL_VERSION}.bazelrc
+  - --bazelrc=../../../../bazelrc/bazel-${_BAZEL_VERSION}.bazelrc
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - //:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
