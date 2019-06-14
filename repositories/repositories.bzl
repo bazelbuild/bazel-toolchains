@@ -61,6 +61,13 @@ def repositories():
             # TODO (suvanjan): Add sha256 field once copybara supports it.
         )
 
+    if "bazel_gazelle" not in excludes:
+        http_archive(
+            name = "bazel_gazelle",
+            sha256 = "3c681998538231a2d24d0c07ed5a7658cb72bfb5fd4bf9911157c0e9ac6a2687",
+            urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.17.0/bazel-gazelle-0.17.0.tar.gz"],
+        )
+
     if "base_images_docker" not in excludes:
         git_repository(
             name = "base_images_docker",

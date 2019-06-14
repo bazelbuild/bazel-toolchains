@@ -55,6 +55,14 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
+# The following comment is needed to let Gazelle know that "bazel_gazelle"
+# is being imported from a *.bzl file.
+# gazelle:repo bazel_gazelle
+
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+
+gazelle_dependencies()
+
 container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
@@ -238,6 +246,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_checked_in",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -245,6 +254,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
     create_testdata = True,
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -252,6 +262,7 @@ rbe_autoconfig(
     bazel_version = _ubuntu1604_bazel,
     create_cc_configs = False,
     create_testdata = True,
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -306,6 +317,15 @@ rbe_autoconfig(
     create_cc_configs = False,
     create_testdata = True,
     java_home = "test-case-java-home",
+    use_checked_in_confs = "Force",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_detect_java_home",
+    bazel_version = _ubuntu1604_bazel,
+    create_cc_configs = False,
+    create_testdata = True,
+    detect_java_home = True,
 )
 
 rbe_autoconfig(
@@ -352,6 +372,7 @@ rbe_autoconfig(
     env = clang_env(),
     registry = "marketplace.gcr.io",
     repository = "google/bazel",
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -364,6 +385,7 @@ rbe_autoconfig(
     target_compatible_with = [
         "//constraints:xenial",
     ],
+    use_checked_in_confs = "Force",
 )
 
 rbe_autoconfig(
@@ -569,3 +591,15 @@ pip_import(
 load("@pip_deps//:requirements.bzl", "pip_install")
 
 pip_install()
+
+go_repository(
+    name = "in_gopkg_yaml_v2",
+    commit = "51d6538a90f86fe93ac480b35f37b2be17fef232",  # v2.2.2
+    importpath = "gopkg.in/yaml.v2",
+)
+
+go_repository(
+    name = "com_github_pkg_errors",
+    commit = "27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7",
+    importpath = "github.com/pkg/errors",
+)

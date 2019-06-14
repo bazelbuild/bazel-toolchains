@@ -23,7 +23,9 @@ load(
 _CC_TOOLCHAIN = ":cc-compiler-k8"
 
 def create_config_aliases(ctx, toolchain_config_spec_name):
-    """Produces BUILD files with alias for the C++/Java toolchain targets.
+    """Produces BUILD files with alias for the C++ and Java toolchain targets.
+
+    Java toolchain aliases are only created if configs are exported.
 
     Args:
       ctx: the Bazel context object.
@@ -47,8 +49,7 @@ def create_config_aliases(ctx, toolchain_config_spec_name):
             },
             False,
         )
-
-    if ctx.attr.create_java_configs:
+    if ctx.attr.create_java_configs and ctx.attr.export_configs:
         # Create the BUILD file with the alias for the java_runtime
         template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.java_alias.tpl"))
         java_runtime = ("@{toolchain_config_repo}//{config_output_base}/{toolchain_config_spec_name}/bazel_{bazel_version}/{java_dir}:jdk".format(
@@ -58,7 +59,6 @@ def create_config_aliases(ctx, toolchain_config_spec_name):
             config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
             toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
         ))
-
         ctx.template(
             JAVA_CONFIG_DIR + "/BUILD",
             template,

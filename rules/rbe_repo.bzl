@@ -459,19 +459,21 @@ def _rbe_autoconfig_impl(ctx):
             print("Image with given tag `%s` is resolved to '%s', digest is '%s'" %
                   (ctx.attr.tag, image_name, digest))
 
+    # Get the value of JAVA_HOME to set in the produced
+    # java_runtime
+    java_home = None
+    if ctx.attr.create_java_configs:
+        java_home = get_java_home(ctx, docker_tool_path, image_name)
+        if java_home:
+            create_java_runtime(ctx, java_home)
+
     toolchain_config_spec_name = ctx.attr.toolchain_config_spec_name
     if ctx.attr.config_version:
-        # If we found a config assing that to the toolchain_config_spec_name so when
+        # If we found a config we pass it to the toolchain_config_spec_name so when
         # we produce platform BUILD file we can use it.
         toolchain_config_spec_name = ctx.attr.config_version
     else:
         # If no config_version was found, generate configs
-        # Get the value of JAVA_HOME to set in the produced
-        # java_runtime
-        java_home = ctx.attr.java_home
-        if ctx.attr.create_java_configs:
-            java_home = get_java_home(ctx, docker_tool_path, image_name)
-            create_java_runtime(ctx, java_home)
 
         config_repos = []
         if ctx.attr.create_cc_configs:
@@ -673,6 +675,14 @@ _rbe_autoconfig = repository_rule(
             ),
             mandatory = True,
         ),
+        "detect_java_home": attr.bool(
+            doc = (
+                "Specifies whether to find the JAVA_HOME as set in the" +
+                "container. " +
+                "Defauls to False."
+            ),
+            mandatory = True,
+        ),
         "digest": attr.string(
             doc = ("Optional. The digest (sha256 sum) of the image to pull. " +
                    "For example, " +
@@ -783,6 +793,7 @@ def rbe_autoconfig(
         create_java_configs = True,
         create_testdata = False,
         create_versions = True,
+        detect_java_home = False,
         digest = None,
         env = None,
         exec_compatible_with = None,
@@ -845,6 +856,15 @@ def rbe_autoconfig(
       digest: Optional. The digest of the image to pull.
           Should not be set if 'tag' is used.
           Must be set together with 'registry' and 'repository'.
+      detect_java_home: Optional. Default False. Should only be set
+          to True if 'create_java_configs' is also True. If set to True the rule
+          will attempt to read the JAVA_HOME env var from the container.
+          Note if java_home is not set and this is set to False, the rule will
+          attempt to find a value of java_home in a compatible
+          'toolchain_config_spec', fallback to using the 'default_java_home' in
+          the 'toolchain_config_suite_spec', fallback to turning on 'detect_java_home,
+          (unless use_checked_in_confs = Force was set), or otherwise fail with an
+          informative error.
       env: dict. Optional. Additional environment variables that will be set when
           running the Bazel command to generate the toolchain configs.
           Set to values for marketplace.gcr.io/google/rbe-ubuntu16-04 container.
@@ -859,11 +879,15 @@ def rbe_autoconfig(
           published to a URL and e.g., be used via an 'http_archive' rule
           from an arbitrary repo.
       java_home: Optional. The location of java_home in the container. For
-          example , '/usr/lib/jvm/java-8-openjdk-amd64'. Only
-          relevant if 'create_java_configs' is true. If 'create_java_configs' is
-          true and this attribute is not set, the rule will attempt to read the
-          JAVA_HOME env var from the container. If that is not set, the rule
-          will fail.
+          example , '/usr/lib/jvm/java-8-openjdk-amd64'. Should only be set
+          if 'create_java_configs' is True. Cannot be set if detect_java_home
+          is set to True.
+          Note if detect_java_home is set to False and this is not set, the
+          rule will attempt to find a value of java_home in a compatible
+          'toolchain_config_spec', fallback to using the 'default_java_home' in
+          the 'toolchain_config_suite_spec', fallback to turning on 'detect_java_home'
+          (unless use_checked_in_confs = Force was set), or otherwise fail with an
+          informative error.
       tag: Optional. The tag of the container to use.
           Should not be set if 'digest' is used.
           Must be set together with 'registry' and 'repository'.
@@ -898,8 +922,11 @@ def rbe_autoconfig(
     if bazel_rc_version and not bazel_version:
         fail("bazel_rc_version can only be used with bazel_version.")
 
-    if not create_java_configs and java_home != None:
-        fail("java_home should not be set when create_java_configs is false.")
+    if not create_java_configs and (java_home or detect_java_home):
+        fail("java_home / detect_java_home should not be set when " +
+             "create_java_configs is False.")
+    if java_home and detect_java_home:
+        fail("java_home should not be set when detect_java_home is True.")
 
     validate_toolchain_config_suite_spec(name, toolchain_config_suite_spec)
 
@@ -924,14 +951,14 @@ def rbe_autoconfig(
         repository = toolchain_config_suite_spec["container_repo"]
         registry = toolchain_config_suite_spec["container_registry"]
 
-    config_version, selected_digest = validateUseOfCheckedInConfigs(
+    toolchain_config_spec, selected_digest = validateUseOfCheckedInConfigs(
         name = name,
         base_container_digest = base_container_digest,
         bazel_version = bazel_version,
         bazel_rc_version = bazel_rc_version,
         config_repos = config_repos,
         create_cc_configs = create_cc_configs,
-        create_java_configs = create_java_configs,
+        detect_java_home = detect_java_home,
         digest = digest,
         env = env,
         java_home = java_home,
@@ -942,6 +969,35 @@ def rbe_autoconfig(
         tag = tag,
         use_checked_in_confs = use_checked_in_confs,
     )
+
+    # If create_java_configs was requested but no java_home or detect_java_home was
+    # set, we try to resolve a java_home
+    if create_java_configs and not java_home and not detect_java_home:
+        # If a spec was found and that has a java_home, use it
+        if toolchain_config_spec and toolchain_config_spec.create_java_configs:
+            java_home = toolchain_config_spec.java_home
+
+        elif toolchain_config_suite_spec.get("default_java_home"):
+            # Fallback to try to using the default_java_home set in the
+            # toolchain_config_suite_spec
+            java_home = toolchain_config_suite_spec.get("default_java_home")
+
+        elif use_checked_in_confs != CHECKED_IN_CONFS_FORCE:
+            # Fallback to detecting the java_home if CHECKED_IN_CONFS_FORCE
+            # was not passed
+            detect_java_home = True
+
+        elif toolchain_config_spec and use_checked_in_confs == CHECKED_IN_CONFS_FORCE:
+            # If we get here, the toolchain_config_spec we found does not
+            # provide a java_home that we can use, and the toolchain_config_suite_spec
+            # does not have a default one either, so just fail early.
+            fail(("Target '{name}' failed: use_checked_in_confs was set to '{force}' " +
+                  "but no checked-in configs were found which provide a value for java_home. " +
+                  "This may be solved by defining a 'default_java_home' in the " +
+                  "toolchain_config_spec or by explicitly setting 'java_home' in '{name}'").format(
+                name = name,
+                force = CHECKED_IN_CONFS_FORCE,
+            ))
 
     # If the user selected no digest explicitly, and one was returned
     # by validateUseOfCheckedInConfigs, use that one.
@@ -967,7 +1023,7 @@ def rbe_autoconfig(
     default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC_NAME if not default_toolchain_config_spec_set else toolchain_config_suite_spec.get("toolchain_config_suite_autogen_spec").default_toolchain_config_spec.name
 
     # Replace the default_toolchain_config_spec struct for its name, as the rule expects a string dict.
-    # also, dont include the config_versions attr as its a struct (which we flatten below)
+    # also, dont include the toolchain_config_suite_autogen_spec attr as its a struct (which we flatten below)
     toolchain_config_suite_spec_stripped = {
         "default_toolchain_config_spec": default_toolchain_config_spec,
         "repo_name": toolchain_config_suite_spec["repo_name"],
@@ -1010,13 +1066,14 @@ def rbe_autoconfig(
         configs_obj_env_keys = config_objs.env_keys,
         configs_obj_env_values = config_objs.env_values,
         config_repos = config_repos,
-        config_version = config_version,
+        config_version = None if toolchain_config_spec == None else toolchain_config_spec.name,
         container_to_config_spec_names_map = container_to_config_spec_names_map,
         copy_resources = copy_resources,
         create_cc_configs = create_cc_configs,
         create_java_configs = create_java_configs,
         create_testdata = create_testdata,
         create_versions = create_versions,
+        detect_java_home = detect_java_home,
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,

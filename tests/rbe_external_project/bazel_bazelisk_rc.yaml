@@ -8,9 +8,7 @@ steps:
 
 # Install bazelisk
 - name: 'gcr.io/cloud-builders/wget'
-  entrypoint: bash
-  args:
-  - ./tests/rbe_external_project/baselisk.sh
+  entrypoint: tests/rbe_repo/bazelisk.sh
 
 # modify the WORKSPACE file & delete the existing .bazelrc file
 - name: 'gcr.io/gcp-runtimes/ubuntu_16_0_4'
