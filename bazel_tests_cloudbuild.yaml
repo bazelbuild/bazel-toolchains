@@ -3,13 +3,11 @@
 # Their purpose is to verify the checked in configs are usable on RBE
 # with several older versions of Bazel
 
-# Proper functioning of these test requires the _BAZEL_VERSION and
-# _CONTAINER_MAJOR_VERSION substitution parameters to be set in the trigger
+# Proper functioning of these test requires the _BAZEL_VERSION 
+# substitution parameter to be set in the trigger
 # with name "config: /bazel_tests_cloudbuild.yaml {_BAZEL_VERSION}"
 # in https://pantheon.corp.google.com/cloud-build/triggers?project=asci-toolchain.
-# _BAZEL_VERSION should point to a version of Bazel to verify with these tests
-# _CONTAINER_MAJOR_VERSION must correspond to a valid container major version
-# for which a toolchain config was published for the given bazel version.
+# _BAZEL_VERSION should point to a version of Bazel to verify with these.
 
 steps:
 # Test that runs with rbe_autoconfig with Bazel ${_BAZEL_VERSION}
@@ -17,8 +15,9 @@ steps:
 # as we only maintain bazelrc files for these.
 - name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
-  - --bazelrc=bazelrc/bazel-${_BAZEL_VERSION}.bazelrc
+  - --bazelrc=../../../../bazelrc/bazel-${_BAZEL_VERSION}.bazelrc
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
+  - //:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'

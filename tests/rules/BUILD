@@ -16,6 +16,7 @@ load(
     "@bazel_tools//tools/build_rules:test_rules.bzl",
     "file_test",
 )
+load("//rules/container:packages_metadata.bzl", "packages_metadata")
 
 # Simply ensures the file supposed to be downloaded by the gce_file
 # test rule was actually downloaded and the contents of the file was
@@ -24,4 +25,22 @@ file_test(
     name = "gcs_file_test",
     content = "0",
     file = "@download_test_gcs_file//file:test.txt",
+)
+
+packages_metadata(
+    name = "packages_metadata",
+    metadata_csv = "packages_metadata.csv",
+)
+
+file_test(
+    name = "test_packages_metadata",
+    content = """packages:
+- name: aaa
+  version: "1"
+- name: bbb
+  version: "3"
+- name: ccc
+  version: "2"
+""",
+    file = ":packages_metadata.yaml",
 )

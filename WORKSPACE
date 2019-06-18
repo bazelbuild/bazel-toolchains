@@ -55,6 +55,14 @@ go_rules_dependencies()
 
 go_register_toolchains()
 
+# The following comment is needed to let Gazelle know that "bazel_gazelle"
+# is being imported from a *.bzl file.
+# gazelle:repo bazel_gazelle
+
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+
+gazelle_dependencies()
+
 container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
@@ -133,7 +141,6 @@ rbe_autoconfig(
 # TODO(nlopezgi): remove this target after migration.
 rbe_autoconfig(
     name = "rbe_autoconfig_autogen_ubuntu1604",
-    create_versions = False,
     digest = _ubuntu1604_digest,
     export_configs = True,
     registry = _ubuntu1604_registry,
@@ -334,9 +341,9 @@ rbe_autoconfig(
     name = "rbe_autoconf_custom_container",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    digest = "sha256:cda3a8608d0fc545dffc6c68f6cfab8eda280c7a1558bde0753ed2e8e3006224",
-    registry = _ubuntu1604_registry,
-    repository = "google/rbe-debian8",
+    digest = "sha256:9ed4a6bafffb0ca08389c4445955217802074d07bac9acff6b661239926555ed",
+    registry = "l.gcr.io",
+    repository = "google/bazel",
 )
 
 rbe_autoconfig(
@@ -584,3 +591,15 @@ pip_import(
 load("@pip_deps//:requirements.bzl", "pip_install")
 
 pip_install()
+
+go_repository(
+    name = "in_gopkg_yaml_v2",
+    commit = "51d6538a90f86fe93ac480b35f37b2be17fef232",  # v2.2.2
+    importpath = "gopkg.in/yaml.v2",
+)
+
+go_repository(
+    name = "com_github_pkg_errors",
+    commit = "05ac58a23b8798a296fa64f7d9c1559904db4b98",  # v0.8.1
+    importpath = "github.com/pkg/errors",
+)

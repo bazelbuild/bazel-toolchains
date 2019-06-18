@@ -126,7 +126,7 @@ def pull_container_needed(ctx):
         Returns true if its necesary to pull a container to generate configs.
     """
 
-    # We dont pull a container if we have found a config_version to use
+    # We don't pull a container if we have found a config_version to use
     # and there was no tag and no request to detect java home
     if ctx.attr.config_version and not ctx.attr.detect_java_home and not ctx.attr.tag:
         return False
