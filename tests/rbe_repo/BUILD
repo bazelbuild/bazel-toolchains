@@ -365,49 +365,49 @@ file_test(
 # need to be updated accordingly.
 file_test(
     name = "rbe_autoconf_custom_env_abi_libc_version_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
     regexp = "abi_libc_version = \"test_abi_libc_version_test\"",
 )
 
 file_test(
     name = "rbe_autoconf_custom_env_abi_version_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
     regexp = "abi_version = \"test_abi_version_test\"",
 )
 
 file_test(
     name = "rbe_autoconf_custom_env_bazel_host_system_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
     regexp = "host_system_name = \"test_bazel_host_system_test\"",
 )
 
 file_test(
     name = "rbe_autoconf_custom_env_bazel_target_cpu_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
-    regexp = "target_cpu = \"test_bazel_target_cpu_test\"",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
+    regexp = "cpu = \"test_bazel_target_cpu_test\"",
 )
 
 file_test(
     name = "rbe_autoconf_custom_env_bazel_target_libc_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
     regexp = "target_libc = \"test_bazel_target_libc_test\"",
 )
 
 file_test(
     name = "rbe_autoconf_custom_env_bazel_target_system_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
     regexp = "target_system_name = \"test_bazel_target_system_test\"",
 )
 
 file_test(
     name = "rbe_autoconf_custom_env_clang_toolchain_config_bzl_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
-    regexp = "path= \"/usr/local/bin/clang++\"",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
+    regexp = "\"gcc\": \"/usr/local/bin/clang++\"",
 )
 
 file_test(
     name = "rbe_autoconf_custom_env_clang_toolchain_config_bzl_2_test",
-    file = "@rbe_autoconf_custom_env//test:cc/cc_toolchain_config.bzl",
+    file = "@rbe_autoconf_custom_env//test:cc/test.BUILD",
     regexp = "compiler = \"clang++\"",
 )
 
