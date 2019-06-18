@@ -341,9 +341,9 @@ rbe_autoconfig(
     name = "rbe_autoconf_custom_container",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    digest = "sha256:eb9f72ddde60080912fed8a6f40c5a42c13ec6c890c0709c119213b199804456",
-    registry = _ubuntu1604_registry,
-    repository = "google/clang-debian9",
+    digest = "sha256:8fecd4573a081f51ff6103fea84b1e108cca75f0dedf5377eb2124b80f2d5f8f",
+    registry = "gcr.io",
+    repository = "cloud-builders/bazel",
 )
 
 rbe_autoconfig(
