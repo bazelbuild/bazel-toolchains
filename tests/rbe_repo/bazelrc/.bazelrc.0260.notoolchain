@@ -23,7 +23,7 @@ build:remote --strategy=Closure=remote
 build:remote --strategy=Genrule=remote
 build:remote --define=EXECUTOR=remote
 
-build:remote --remote_executor=remotebuildexecution.googleapis.com
+build:remote --remote_executor=grpcs://remotebuildexecution.googleapis.com
 build:remote --remote_timeout=3600
 build:remote --google_default_credentials=true
 
