@@ -204,11 +204,10 @@ def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, pro
     if digest not in container_to_config_spec_names_map.keys():
         container_to_config_spec_names_map = dict(ctx.attr.container_to_config_spec_names_map.items())
         container_to_config_spec_names_map.update({digest: [toolchain_config_spec_name]})
-    elif config not in container_to_config_spec_names_map[digest]:
+    elif toolchain_config_spec_name not in container_to_config_spec_names_map[digest]:
         configs = container_to_config_spec_names_map[digest]
         container_to_config_spec_names_map = dict(ctx.attr.container_to_config_spec_names_map.items())
         container_to_config_spec_names_map.update({digest: configs + [toolchain_config_spec_name]})
-
     versions_output += ["_TOOLCHAIN_CONFIG_SPECS = [%s]" % ",".join(configs_list)]
     versions_output += ["_BAZEL_TO_CONFIG_SPEC_NAMES = %s" % bazel_to_config_spec_names_map]
     versions_output += ["LATEST = \"%s\"" % digest]
