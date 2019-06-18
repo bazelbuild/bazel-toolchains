@@ -29,6 +29,18 @@ steps:
   - --extra_execution_platforms=@rbe_jdk11//config:platform
   - --host_platform=@rbe_jdk11//config:platform
   - --platforms=@rbe_jdk11//config:platform
-  - //src:bazel
+  - --
+  - //src/test/java/...
+  - -//src/test/java/com/google/devtools/build/lib/...
+  - -//src/test/java/com/google/devtools/build/android/...
+  - -//src/test/java/com/google/devtools/build/lib:sandbox-tests
+  - -//src/test/java/com/google/devtools/build/lib/shell:CommandUsingLinuxSandboxTest
+  - -//src/test/java/com/google/devtools/build/lib:vfs_inmemoryfs_test
+  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests:PythonBlackBoxTest
+  - -//src/test/java/com/google/devtools/build/lib/rules/objc:ObjcRulesTests
+  - -//src/test/java/com/google/devtools/build/lib:worker-tests
+  - -//src/test/java/com/google/devtools/build/lib/buildeventstream/transports:BuildEventTransportTest
+  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:BazelEmbeddedSkylarkBlackBoxTest
+  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:WorkspaceBlackBoxTest
   dir: 'external-src'
 timeout: 1200s
