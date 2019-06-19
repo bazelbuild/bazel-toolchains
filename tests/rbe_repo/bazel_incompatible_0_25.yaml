@@ -23,7 +23,7 @@ steps:
   # Turn on incompatible_enable_cc_toolchain_resolution and don't
   # use crosstool_top
   - --incompatible_enable_cc_toolchain_resolution
-  # DO NOT use BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN with 
+  # DO NOT use BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN with
   # incompatible_enable_cc_toolchain_resolution as its not supported
   # see https://github.com/bazelbuild/bazel/issues/7260#issuecomment-492673500
   #   - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1

@@ -25,5 +25,7 @@ steps:
   - --platforms=@rbe_default_generate//config:platform
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - --
   - //:say_hello_test
+  - "@java-sample//..."
   dir: 'tests/rbe_repo/examples/bazel_toolchains_client'

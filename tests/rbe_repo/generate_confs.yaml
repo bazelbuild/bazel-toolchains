@@ -8,7 +8,6 @@ steps:
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --host_javabase=@rbe_autoconf_generate//java:jdk
   - --javabase=@rbe_autoconf_generate//java:jdk
@@ -21,6 +20,7 @@ steps:
   - --host_platform=@rbe_autoconf_generate//config:platform
   - --platforms=@rbe_autoconf_generate//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
 
 # Tests rbe_autoconf generated artifacts, when config_repos attr is used,
 # are usable for an RBE build.
@@ -28,7 +28,6 @@ steps:
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --host_javabase=@rbe_autoconf_config_repos//java:jdk
   - --javabase=@rbe_autoconf_config_repos//java:jdk
@@ -41,6 +40,7 @@ steps:
   - --host_platform=@rbe_autoconf_config_repos//config:platform
   - --platforms=@rbe_autoconf_config_repos//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 # Tests rbe_autoconf generated artifacts, when an older rbe container
@@ -49,7 +49,6 @@ steps:
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --host_javabase=@rbe_autoconf_old_container//java:jdk
   - --javabase=@rbe_autoconf_old_container//java:jdk
@@ -62,6 +61,7 @@ steps:
   - --host_platform=@rbe_autoconf_old_container//config:platform
   - --platforms=@rbe_autoconf_old_container//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
 
 # Tests rbe_autoconf generated artifacts, when tag is used
 # to identify the container, are usable for an RBE build.
@@ -69,7 +69,6 @@ steps:
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --host_javabase=@rbe_autoconf_resovle_tag//java:jdk
   - --javabase=@rbe_autoconf_resovle_tag//java:jdk
@@ -82,6 +81,7 @@ steps:
   - --host_platform=@rbe_autoconf_resovle_tag//config:platform
   - --platforms=@rbe_autoconf_resovle_tag//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
 
 # Tests rbe_autoconf generated artifacts, when a custom container is used,
 # are usable for an RBE build.
@@ -89,7 +89,6 @@ steps:
   args:
   - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
-  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   - --config=remote
   - --host_javabase=@rbe_autoconf_custom_container//java:jdk
   - --javabase=@rbe_autoconf_custom_container//java:jdk
@@ -102,4 +101,5 @@ steps:
   - --host_platform=@rbe_autoconf_custom_container//config:platform
   - --platforms=@rbe_autoconf_custom_container//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
 

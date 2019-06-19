@@ -32,7 +32,6 @@ steps:
   args:
   - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
   - test
-  - //:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   # toolchain flags to use @rbe_custom_env1
@@ -46,13 +45,15 @@ steps:
   - --extra_execution_platforms=@rbe_custom_env1//config:platform
   - --host_platform=@rbe_custom_env1//config:platform
   - --platforms=@rbe_custom_env1//config:platform
+  - --
+  - //:say_hello_test
+  - "@java-sample//..."
   dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
 
 - name: 'l.gcr.io/google/bazel'
   args:
   - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
   - test
-  - //:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   # toolchain flags to use @rbe_custom_env2
@@ -66,13 +67,15 @@ steps:
   - --extra_execution_platforms=@rbe_custom_env2//config:platform
   - --host_platform=@rbe_custom_env2//config:platform
   - --platforms=@rbe_custom_env2//config:platform
+  - --
+  - //:say_hello_test
+  - "@java-sample//..."
   dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
 
 - name: 'l.gcr.io/google/bazel'
   args:
   - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
   - test
-  - //:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   # toolchain flags to use @rbe_custom_env3
@@ -86,4 +89,7 @@ steps:
   - --extra_execution_platforms=@rbe_custom_env3//config:platform
   - --host_platform=@rbe_custom_env3//config:platform
   - --platforms=@rbe_custom_env3//config:platform
+  - --
+  - //:say_hello_test
+  - "@java-sample//..."
   dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
