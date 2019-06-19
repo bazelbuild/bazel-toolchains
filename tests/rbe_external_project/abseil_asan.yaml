@@ -1,4 +1,4 @@
-# Basic test that builds Bazel on RBE using the latest Bazel version
+# Basic test that builds Abseil with ASAN on RBE using the latest Bazel version
 steps:
 # pull the abseil-cpp project
 - name: 'gcr.io/cloud-builders/git'
