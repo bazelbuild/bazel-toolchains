@@ -12,7 +12,7 @@ steps:
   entrypoint: ../tests/rbe_external_project/add_rbe_default.sh
   dir: 'external-src'
 
-# Launch an RBE test command using the @rbe_default toolchain
+# Launch an RBE test command using the @rbe_jdk11 toolchain
 # configs.
 - name: 'l.gcr.io/google/bazel'
   args:
@@ -31,6 +31,7 @@ steps:
   - --platforms=@rbe_jdk11//config:platform
   - --
   - //src/test/java/...
+  - -//src/test/java/com/google/devtools/build/lib/...
   - -//src/test/java/com/google/devtools/build/android/...
   - -//src/test/java/com/google/devtools/build/lib:sandbox-tests
   - -//src/test/java/com/google/devtools/build/lib/shell:CommandUsingLinuxSandboxTest
