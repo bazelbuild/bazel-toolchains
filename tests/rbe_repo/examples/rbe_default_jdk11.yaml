@@ -5,7 +5,6 @@ steps:
   args:
   - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
   - test
-  - //:say_hello_test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   # toolchain flags to use @rbe_jdk11
@@ -17,4 +16,7 @@ steps:
   - --extra_execution_platforms=@rbe_jdk11//config:platform
   - --host_platform=@rbe_jdk11//config:platform
   - --platforms=@rbe_jdk11//config:platform
+  - --
+  - //:say_hello_test
+  - "@java-sample//..."
   dir: 'tests/rbe_repo/examples/bazel_toolchains_client'

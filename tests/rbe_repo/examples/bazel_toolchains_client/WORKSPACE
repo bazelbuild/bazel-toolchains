@@ -24,6 +24,18 @@ local_repository(
     path = "../toolchain_config_host",
 )
 
+load(
+    "@bazel_tools//tools/build_defs/repo:http.bzl",
+    "http_archive",
+)
+
+http_archive(
+    name = "java-sample",
+    sha256 = "38f0c15f9805e0635acb7df1ac22b82e411e1bf29ddad90aa25f6967897af602",
+    strip_prefix = "examples-5d8c8961a2516ebf875787df35e98cadd08d43dc/java-tutorial",
+    urls = [("https://github.com/bazelbuild/examples/archive/5d8c8961a2516ebf875787df35e98cadd08d43dc.tar.gz")],
+)
+
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
 
 rbe_autoconfig(
