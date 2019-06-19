@@ -17,7 +17,7 @@ steps:
 - name: 'l.gcr.io/google/bazel'
   args:
   - --bazelrc=../bazelrc/.bazelrc.notoolchain
-  - build
+  - test
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
   # toolchain flags to use @rbe_jdk11

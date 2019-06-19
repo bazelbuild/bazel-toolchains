@@ -1,0 +1,60 @@
+# Basic test that builds Abseil with ASAN on RBE using the latest Bazel version
+steps:
+# pull the abseil-cpp project
+- name: 'gcr.io/cloud-builders/git'
+  args:
+  - clone
+  - https://github.com/abseil/abseil-cpp.git
+  - external-src
+
+# modify the WORKSPACE file
+- name: 'gcr.io/gcp-runtimes/ubuntu_16_0_4'
+  args:
+  - ../tests/rbe_external_project/add_rbe_default.sh
+  dir: 'external-src'
+
+# Add the BUILD file with the asan platform that enables ptrace
+- name: 'gcr.io/gcp-runtimes/ubuntu_16_0_4'
+  args:
+  - ../tests/rbe_external_project/add_asan_platform.sh
+  dir: 'external-src'
+
+# Launch an RBE test command using the @rbe_default toolchain
+# configs.
+- name: 'l.gcr.io/google/bazel'
+  args:
+  - --bazelrc=../bazelrc/.bazelrc.notoolchain
+  - test
+  # toolchain flags to use @rbe-default with asan platform
+  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --host_javabase=@rbe_default//java:jdk
+  - --javabase=@rbe_default//java:jdk
+  - --crosstool_top=@rbe_default//cc:toolchain
+  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+  - --extra_toolchains=@rbe_default//config:cc-toolchain
+  - --extra_execution_platforms=//rbe-asan:platform
+  - --host_platform=//rbe-asan:platform
+  - --platforms=//rbe-asan:platform
+  # asan specific flags
+  - --incompatible_enable_cc_toolchain_resolution
+  - --copt=-fsanitize=address
+  - --linkopt=-fsanitize=address
+  - --copt=-DADDRESS_SANITIZER=1
+  - --copt=-gmlt
+  - --strip=never
+  - --test_output=errors
+  # RBE project specific flags
+  - --config=remote
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - --
+  - //absl/...
+  - -//absl/numeric:int128_benchmark
+  - -//absl/time/internal/cctz:time_zone_format_test
+  - -//absl/time/internal/cctz:time_zone_lookup_test
+  - -//absl/debugging:demangle_test
+  - -//absl/debugging:leak_check_no_lsan_test
+  - -//absl/debugging:leak_check_test
+  - -//absl/debugging:symbolize_test
+  - -//absl/synchronization:mutex_benchmark
+  dir: 'external-src'
