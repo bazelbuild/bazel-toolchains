@@ -16,16 +16,13 @@ steps:
 # This test uses the configs via their path in the output_base
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=../../../../bazelrc/latest.bazelrc
+  - --bazelrc=bazelrc/latest.bazelrc
   - test
   - --config=remote
   - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --
-  - //:say_hello_test
-  - "@java-sample//..."
-  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 
 # Tests rbe_autoconf, when output_base is used, produces outputs that are
@@ -33,7 +30,7 @@ steps:
 # This test uses the configs via their path in the external repo
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=../../../../bazelrc/latest.bazelrc
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - --config=remote
   - --host_javabase=@rbe_autoconf_gcb_test//java:jdk
@@ -47,9 +44,6 @@ steps:
   - --host_platform=@rbe_autoconf_gcb_test//config:platform
   - --platforms=@rbe_autoconf_gcb_test//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --
-  - //:say_hello_test
-  - "@java-sample//..."
-  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
   env: ['RBE_AUTOCONF_ROOT=/workspace']
 

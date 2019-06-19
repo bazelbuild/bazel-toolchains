@@ -4,7 +4,7 @@
 steps:
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - --config=remote
   - --host_javabase=@rbe_autoconf_checked_in//java:jdk
@@ -18,14 +18,11 @@ steps:
   - --host_platform=@rbe_autoconf_checked_in//config:platform
   - --platforms=@rbe_autoconf_checked_in//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --
-  - //:say_hello_test
-  - "@java-sample//..."
-  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
 
 - name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
+  - --bazelrc=bazelrc/.bazelrc.notoolchain
   - test
   - --config=remote
   - --host_javabase=@rbe_autoconf_base_container_digest//java:jdk
@@ -39,8 +36,4 @@ steps:
   - --host_platform=@rbe_autoconf_base_container_digest//config:platform
   - --platforms=@rbe_autoconf_base_container_digest//config:platform
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --
-  - //:say_hello_test
-  - "@java-sample//..."
-  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
-
+  - //examples/remotebuildexecution/hello_world/cc:say_hello_test
