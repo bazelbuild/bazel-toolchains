@@ -15,9 +15,9 @@ steps:
 
 # Launch an RBE test command using the @rbe_default toolchain
 # configs.
-- name: 'l.gcr.io/google/bazel:0.26.0'
+- name: 'l.gcr.io/google/bazel'
   args:
-  - --bazelrc=../tests/rbe_repo/bazelrc/.bazelrc.pre0260.notoolchain
+  - --bazelrc=../bazelrc/.bazelrc.notoolchain
   - test
   - --verbose_failures
   # toolchain flags to use @rbe_default
@@ -25,7 +25,7 @@ steps:
   - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --host_javabase=@rbe_default//java:jdk
   - --javabase=@rbe_default//java:jdk
-  - --crosstool_top=@bazel_toolchains//configs/experimental/ubuntu16_04_clang/1.2/bazel_0.23.0/ubsan:toolchain
+  - --crosstool_top=@bazel_toolchains//configs/experimental/ubuntu16_04_clang/1.2/bazel_0.27.0/ubsan:toolchain
   - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
   - --extra_toolchains=@rbe_default//config:cc-toolchain
   - --extra_execution_platforms=@rbe_default//config:platform
