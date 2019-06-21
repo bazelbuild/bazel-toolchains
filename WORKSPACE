@@ -59,7 +59,7 @@ go_register_toolchains()
 # is being imported from a *.bzl file.
 # gazelle:repo bazel_gazelle
 
-load("//repositories:go_repositories.bzl", bazel_toolchains_go_deps="go_deps")
+load("//repositories:go_repositories.bzl", bazel_toolchains_go_deps = "go_deps")
 
 bazel_toolchains_go_deps()
 
