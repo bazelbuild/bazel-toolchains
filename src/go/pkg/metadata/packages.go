@@ -1,3 +1,5 @@
+// Package metadata provides functionality to store metadata about debian
+// packages installed in a docker image layer.
 package metadata
 
 // PackageMetadata is the YAML entry for a single software package.
