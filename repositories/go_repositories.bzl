@@ -19,11 +19,11 @@ Provides functions to pull all Go external package dependencies of this
 repository.
 """
 
-load("@bazel_gazelle//:deps.bzl", "go_repository")
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 def go_deps():
-    """
+    """Pull in external Go packages needed by Go binaries in this repo.
+
     Pull in all dependencies needed to build the Go binaries in this
     repository. This function assumes the repositories imported by the macro
     'repositories' in //repositories:repositories.bzl have been imported
