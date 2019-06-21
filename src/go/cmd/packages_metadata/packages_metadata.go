@@ -25,6 +25,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/bazelbuild/bazel-toolchains/src/go/pkg/metadata"
 )
 
 var (
@@ -32,28 +34,12 @@ var (
 	outputYAML = flag.String("outputYAML", "", "Path to the output YAML file to generate.")
 )
 
-// packageMetada is the YAML entry for a single software package.
-type packageMetadata struct {
-	// Name is the name of the software package.
-	Name string `yaml:"name"`
-	// Version is the version string of the software package.
-	Version string `yaml:"version"`
-}
-
-// packageMetadata is the collection of software package metadata read from
-// the input CSV file to be serialized into a YAML file.
-type packagesMetadata struct {
-	// Packages is the list of software package entries read from the input
-	// CSV file.
-	Packages []packageMetadata `yaml:"packages"`
-}
-
 // newPackageMetadataFromCSV reads the package metadata from the given
 // CSV file with columns "Name" & "Version" and returns the corresponding
-// packagesMetadata object. The package entries in the returned packagesMetadata
+// PackagesMetadata object. The package entries in the returned PackagesMetadata
 // are sorted by their package names.
-func newPackagesMetadataFromCSV(csvFile string) (*packagesMetadata, error) {
-	result := new(packagesMetadata)
+func newPackagesMetadataFromCSV(csvFile string) (*metadata.PackagesMetadata, error) {
+	result := new(metadata.PackagesMetadata)
 	f, err := os.Open(csvFile)
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to open %s for reading", csvFile)
@@ -74,7 +60,7 @@ func newPackagesMetadataFromCSV(csvFile string) (*packagesMetadata, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "error parsing record in CSV file %s", csvFile)
 		}
-		result.Packages = append(result.Packages, packageMetadata{
+		result.Packages = append(result.Packages, metadata.PackageMetadata{
 			Name:    record[0],
 			Version: record[1],
 		})

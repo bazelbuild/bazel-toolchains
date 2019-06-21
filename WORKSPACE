@@ -59,9 +59,9 @@ go_register_toolchains()
 # is being imported from a *.bzl file.
 # gazelle:repo bazel_gazelle
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("//repositories:go_repositories.bzl", bazel_toolchains_go_deps="go_deps")
 
-gazelle_dependencies()
+bazel_toolchains_go_deps()
 
 container_pull(
     name = "official_jessie",
@@ -591,15 +591,3 @@ pip_import(
 load("@pip_deps//:requirements.bzl", "pip_install")
 
 pip_install()
-
-go_repository(
-    name = "in_gopkg_yaml_v2",
-    commit = "51d6538a90f86fe93ac480b35f37b2be17fef232",  # v2.2.2
-    importpath = "gopkg.in/yaml.v2",
-)
-
-go_repository(
-    name = "com_github_pkg_errors",
-    commit = "05ac58a23b8798a296fa64f7d9c1559904db4b98",  # v0.8.1
-    importpath = "github.com/pkg/errors",
-)
