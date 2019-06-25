@@ -54,7 +54,9 @@ type metadataYAML struct {
 // 'm'. This does the following:
 // 1. Add every tag that appears in 'from' into 'm' if it doesn't already exist
 //    in 'm'.
-// 2. Add every package that apppears in 'from' into 'm'.
+// 2. Add every package that apppears in 'from' into 'm'. If the list of
+//    packages in 'from' have duplicates with the list of packages in 'm', the
+//    list of packages in 'm' will contain these duplicates after the merge.
 func (m *metadataYAML) merge(from *metadataYAML) error {
 	for _, t := range from.Tags {
 		if _, ok := m.tagsLookup[t]; ok {
