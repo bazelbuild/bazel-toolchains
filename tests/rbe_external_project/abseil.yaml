@@ -25,4 +25,6 @@ steps:
   - //absl/...
   - -//absl/time/internal/cctz:time_zone_format_test
   - -//absl/time/internal/cctz:time_zone_lookup_test
+  - -//absl/container:inlined_vector_benchmark
+  - -//absl/random:benchmarks
   dir: 'external-src'
