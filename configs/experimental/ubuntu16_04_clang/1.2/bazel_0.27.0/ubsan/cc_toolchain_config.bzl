@@ -83,6 +83,8 @@ def _impl(ctx):
     ]
     action_configs = []
 
+    # the three action_configs below are custom for ubsan, they point to
+    # clang++ as tool
     cpp_link_dynamic_library_action = action_config(
         action_name = ACTION_NAMES.cpp_link_dynamic_library,
         implies = [
@@ -139,7 +141,264 @@ def _impl(ctx):
         ],
         tools = [tool(path = "/usr/local/bin/clang++")],
     )
-    action_configs = [cpp_link_dynamic_library_action, cpp_link_executable_action, cpp_link_nodeps_dynamic_library_action]
+
+    # All action_configs below are copied as is from
+    # the 0.23.0 config that was generated automatically from a ubsan
+    # CROSSTOOL file
+    cpp_link_static_library_action = action_config(
+        action_name = ACTION_NAMES.cpp_link_static_library,
+        implies = ["archiver_flags", "linker_param_file"],
+        tools = [tool(path = "/usr/bin/ar")],
+    )
+
+    assemble_action = action_config(
+        action_name = ACTION_NAMES.assemble,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    c_compile_action = action_config(
+        action_name = ACTION_NAMES.c_compile,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    cpp_compile_action = action_config(
+        action_name = ACTION_NAMES.cpp_compile,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    cpp_header_parsing_action = action_config(
+        action_name = ACTION_NAMES.cpp_header_parsing,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    cpp_module_codegen_action = action_config(
+        action_name = ACTION_NAMES.cpp_module_codegen,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    preprocess_assemble_action = action_config(
+        action_name = ACTION_NAMES.preprocess_assemble,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    linkstamp_compile_action = action_config(
+        action_name = ACTION_NAMES.linkstamp_compile,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    cpp_module_compile_action = action_config(
+        action_name = ACTION_NAMES.cpp_module_compile,
+        implies = [
+            "user_compile_flags",
+            "sysroot",
+            "unfiltered_compile_flags",
+            "compiler_input_flags",
+            "compiler_output_flags",
+        ],
+        tools = [tool(path = "/usr/local/bin/clang")],
+    )
+
+    strip_action = action_config(
+        action_name = ACTION_NAMES.strip,
+        flag_sets = [
+            flag_set(
+                flag_groups = [
+                    flag_group(flags = ["-S", "-p", "-o", "%{output_file}"]),
+                    flag_group(
+                        flags = [
+                            "-R",
+                            ".gnu.switches.text.quote_paths",
+                            "-R",
+                            ".gnu.switches.text.bracket_paths",
+                            "-R",
+                            ".gnu.switches.text.system_paths",
+                            "-R",
+                            ".gnu.switches.text.cpp_defines",
+                            "-R",
+                            ".gnu.switches.text.cpp_includes",
+                            "-R",
+                            ".gnu.switches.text.cl_args",
+                            "-R",
+                            ".gnu.switches.text.lipo_info",
+                            "-R",
+                            ".gnu.switches.text.annotation",
+                        ],
+                    ),
+                    flag_group(
+                        flags = ["%{stripopts}"],
+                        iterate_over = "stripopts",
+                    ),
+                    flag_group(flags = ["%{input_file}"]),
+                ],
+            ),
+        ],
+        tools = [tool(path = "/usr/bin/strip")],
+    )
+
+    objcopy_embed_data_action = action_config(
+        action_name = "objcopy_embed_data",
+        enabled = True,
+        tools = [tool(path = "/usr/bin/objcopy")],
+    )
+    # End of action_configs copied from 0.23.0 config
+
+    action_configs = [
+        assemble_action,
+        preprocess_assemble_action,
+        linkstamp_compile_action,
+        c_compile_action,
+        cpp_compile_action,
+        cpp_header_parsing_action,
+        cpp_module_compile_action,
+        cpp_module_codegen_action,
+        cpp_link_executable_action,
+        cpp_link_nodeps_dynamic_library_action,
+        cpp_link_dynamic_library_action,
+        cpp_link_static_library_action,
+        strip_action,
+        objcopy_embed_data_action,
+    ]
+
+    no_legacy_features_feature = feature(name = "no_legacy_features")
+
+    # Features below are needed by action_configs copied from 0.23.0 config
+    compiler_input_flags_feature = feature(
+        name = "compiler_input_flags",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.assemble,
+                    ACTION_NAMES.preprocess_assemble,
+                    ACTION_NAMES.c_compile,
+                    ACTION_NAMES.cpp_compile,
+                    ACTION_NAMES.linkstamp_compile,
+                    ACTION_NAMES.cpp_module_compile,
+                    ACTION_NAMES.cpp_module_codegen,
+                    ACTION_NAMES.objc_compile,
+                    ACTION_NAMES.objcpp_compile,
+                    ACTION_NAMES.cpp_header_parsing,
+                    ACTION_NAMES.lto_backend,
+                ],
+                flag_groups = [
+                    flag_group(
+                        flags = ["-c", "%{source_file}"],
+                        expand_if_available = "source_file",
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    compiler_output_flags_feature = feature(
+        name = "compiler_output_flags",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.assemble,
+                    ACTION_NAMES.preprocess_assemble,
+                    ACTION_NAMES.c_compile,
+                    ACTION_NAMES.cpp_compile,
+                    ACTION_NAMES.linkstamp_compile,
+                    ACTION_NAMES.cpp_module_compile,
+                    ACTION_NAMES.cpp_module_codegen,
+                    ACTION_NAMES.objc_compile,
+                    ACTION_NAMES.objcpp_compile,
+                    ACTION_NAMES.cpp_header_parsing,
+                    ACTION_NAMES.lto_backend,
+                ],
+                flag_groups = [
+                    flag_group(
+                        flags = ["-S"],
+                        expand_if_available = "output_assembly_file",
+                    ),
+                    flag_group(
+                        flags = ["-E"],
+                        expand_if_available = "output_preprocess_file",
+                    ),
+                    flag_group(
+                        flags = ["-o", "%{output_file}"],
+                        expand_if_available = "output_file",
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    linker_param_file_feature = feature(
+        name = "linker_param_file",
+        flag_sets = [
+            flag_set(
+                actions = all_link_actions,
+                flag_groups = [
+                    flag_group(
+                        flags = ["-Wl,@%{linker_param_file}"],
+                        expand_if_available = "linker_param_file",
+                    ),
+                ],
+            ),
+            flag_set(
+                actions = [ACTION_NAMES.cpp_link_static_library],
+                flag_groups = [
+                    flag_group(
+                        flags = ["@%{linker_param_file}"],
+                        expand_if_available = "linker_param_file",
+                    ),
+                ],
+            ),
+        ],
+    )
+    # End of feature copied from 0.23.0 config
 
     supports_pic_feature = feature(
         name = "supports_pic",
@@ -1153,6 +1412,10 @@ def _impl(ctx):
     # TODO(#8303): Mac crosstool should also declare every feature.
     if is_linux:
         features = [
+            no_legacy_features_feature,
+            linker_param_file_feature,
+            compiler_input_flags_feature,
+            compiler_output_flags_feature,
             dependency_file_feature,
             random_seed_feature,
             pic_feature,
