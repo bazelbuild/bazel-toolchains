@@ -58,4 +58,6 @@ steps:
   - -//absl/synchronization:lifetime_test
   - -//absl/synchronization:notification_test
   - -//absl/container:hashtablez_sampler_test
+  - -//absl/container:inlined_vector_benchmark
+  - -//absl/random:benchmarks
   dir: 'external-src'

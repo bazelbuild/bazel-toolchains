@@ -57,4 +57,6 @@ steps:
   - -//absl/debugging:leak_check_test
   - -//absl/debugging:symbolize_test
   - -//absl/synchronization:mutex_benchmark
+  - -//absl/container:inlined_vector_benchmark
+  - -//absl/random:benchmarks
   dir: 'external-src'
