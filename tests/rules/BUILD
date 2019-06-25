@@ -48,7 +48,7 @@ file_test(
 
 metadata_merge(
     name = "metadata_merge",
-    yamls = [
+    srcs = [
         "metadata_merge_file1.yaml",
         "metadata_merge_file2.yaml",
         "metadata_merge_file3.yaml",
@@ -64,7 +64,7 @@ file_test(
 packages:
 - name: foo
   version: "1"
-- name: bar
+- name: baz
   version: "2"
 """,
     file = ":metadata_merge.yaml",
