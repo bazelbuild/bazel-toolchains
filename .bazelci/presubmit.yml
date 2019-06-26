@@ -26,8 +26,6 @@ platforms:
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_sh_toolchain_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_run_in_container_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_sh_toolchain_test"
-    # Mounting volumes is not supported in BuildKite CI, so skip no_copy_ tests
-    - "-//tests/rbe_repo:rbe_autoconf_no_copy_resources_run_and_extract_test"
     # docker_autoconfig tests
     - "//tests/config:ubuntu-xenial-autoconfig_test"
     # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
