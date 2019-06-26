@@ -327,8 +327,10 @@ were built and can be leveraged by all users of a container.
 NOTE 6: KNOWN LIMITATIONS
 
   - This rule can only run in Linux if it needs to generate configs.
-  - Use of copy_resources = False, is experimental and can be problematic
-    if more than 1 rbe_autoconfig rule is executed in parallel.
+  - This rule uses Bazelisk to run Bazel inside the given container. 
+    The container, thus, must be able to execute the Bazelisk binary
+    (i.e., container must be capable of running linux-amd releases in
+    https://github.com/bazelbuild/bazelisk/releases)
   - If using export_configs, and you have multiple rbe_autoconfig targets
     pointing to the same toolchain_config_suite_spec, these rules should not
     be executed together in the same bazel command, as they all depend on
@@ -436,7 +438,7 @@ def _rbe_autoconfig_impl(ctx):
     image_name = resolve_image_name(ctx)
     docker_tool_path = None
 
-    # Resolve the paths to mount/copy srcs to teh container and to
+    # Resolve the paths to copy srcs to the container and to
     # export configs.
     mount_project_root, export_project_root, use_default_project = resolve_project_root(ctx)
 
@@ -631,17 +633,6 @@ _rbe_autoconfig = repository_rule(
                    "container_to_config_version def in the versions.bzl file " +
                    "located in the 'output_base' of the 'toolchain_config_suite_spec'."),
         ),
-        "copy_resources": attr.bool(
-            default = True,
-            doc = (
-                "Specifies whether to copy instead of mounting " +
-                "resources such as scripts and project source code to the " +
-                "container for Bazel autoconfig. Note that copy_resources " +
-                "works out of the box when Bazel is run inside " +
-                "a docker container. "
-            ),
-            mandatory = True,
-        ),
         "create_cc_configs": attr.bool(
             doc = (
                 "Specifies whether to generate C/C++ configs. " +
@@ -788,7 +779,6 @@ def rbe_autoconfig(
         bazel_rc_version = None,
         toolchain_config_spec_name = None,
         config_repos = None,
-        copy_resources = True,
         create_cc_configs = True,
         create_java_configs = True,
         create_testdata = False,
@@ -836,12 +826,6 @@ def rbe_autoconfig(
       config_repos: Optional. List of additional external repos corresponding to
           configure like repo rules that need to be produced in addition to
           local_config_cc.
-      copy_resources: Optional. Default to True, if set to False, resources
-          such as scripts and project source code will be bind mounted onto the
-          container instead of copied. This is useful in system where bind mounting
-          is enabled and performance is critical.
-          Note: mounting of resources is experimental and may result in issues if
-          more than one rbe_autoconfig rule runs in parallel.
       create_cc_configs: Optional. Specifies whether to generate C/C++ configs.
           Defauls to True.
       create_java_configs: Optional. Specifies whether to generate java configs.
@@ -1068,7 +1052,6 @@ def rbe_autoconfig(
         config_repos = config_repos,
         config_version = None if toolchain_config_spec == None else toolchain_config_spec.name,
         container_to_config_spec_names_map = container_to_config_spec_names_map,
-        copy_resources = copy_resources,
         create_cc_configs = create_cc_configs,
         create_java_configs = create_java_configs,
         create_testdata = create_testdata,

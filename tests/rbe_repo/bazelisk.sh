@@ -18,6 +18,6 @@
 # This script should be executed from the root of an external project's srcs
 
 set -ex
-wget https://github.com/bazelbuild/bazelisk/releases/download/v0.0.7/bazelisk-linux-amd64
+wget https://github.com/bazelbuild/bazelisk/releases/download/v0.0.8/bazelisk-linux-amd64
 mv bazelisk-linux-amd64 bazelisk
 chmod 755 bazelisk

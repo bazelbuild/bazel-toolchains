@@ -29,39 +29,26 @@ _PROJECT_REPO_DIR = "project_src"
 _REPO_DIR = _ROOT_DIR + "/" + _PROJECT_REPO_DIR
 _OUTPUT_DIR = _ROOT_DIR + "/autoconf_out"
 
-# Creates file "container/run_in_container.sh" which can be mounted onto container
-# to run the commands to install bazel, run it and create the output tar
+_BAZELISK_PATH = _ROOT_DIR + "/bazelisk"
+_BAZELISK_RELEASE = "v0.0.8"
+_BAZELISK_SHA = "5fced4fec06bf24beb631837fa9497b6698f34041463d9188610dfa7b91f4f8d"
+
+# Creates file "container/run_in_container.sh" which will be copied onto container
+# to run the commands to run bazel and create the output tar
 def _create_docker_cmd(
         ctx,
         config_repos,
-        bazel_version,
-        bazel_rc_version,
         outputs_tar,
         use_default_project):
-    # Command to install Bazel version
-    # If a specific Bazel and Bazel RC version is specified, install that version.
-    bazel_url = "https://releases.bazel.build/" + bazel_version
-    if bazel_rc_version:
-        bazel_url += ("/rc" + str(bazel_rc_version) +
-                      "/bazel-" + bazel_version + "rc" +
-                      str(bazel_rc_version))
-    else:
-        bazel_url += "/release/bazel-" + bazel_version
-    bazel_url += "-installer-linux-x86_64.sh"
-    install_bazel_cmd = ["bazel_url=" + bazel_url]
-    install_bazel_cmd += ["mkdir -p /src/bazel"]
-    install_bazel_cmd += ["cd /src/bazel/"]
-    install_bazel_cmd += ["wget $bazel_url --no-verbose --ca-certificate=/etc/ssl/certs/ca-certificates.crt -O /tmp/bazel-installer.sh"]
-    install_bazel_cmd += ["chmod +x /tmp/bazel-installer.sh"]
-    install_bazel_cmd += ["/tmp/bazel-installer.sh"]
-    install_bazel_cmd += ["rm -f /tmp/bazel-installer.sh"]
+    # Set permissions on bazelisk
+    bazelisk_cmd = "chmod +x " + _BAZELISK_PATH
 
     # Command to recursively convert soft links to hard links in the config_repos
     # Needed because some outputs of local_cc_config (e.g., dummy_toolchain.bzl)
     # could be symlinks.
     deref_symlinks_cmd = []
     for config_repo in config_repos:
-        symlinks_cmd = ("find $(bazel info output_base)/" +
+        symlinks_cmd = ("find $(" + _BAZELISK_PATH + " info output_base)/" +
                         _EXTERNAL_FOLDER_PREFIX + config_repo +
                         " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \;")
         deref_symlinks_cmd.append(symlinks_cmd)
@@ -71,7 +58,7 @@ def _create_docker_cmd(
     # of the container.
     copy_cmd = ["mkdir " + _OUTPUT_DIR]
     for config_repo in config_repos:
-        src_dir = "$(bazel info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
+        src_dir = "$(" + _BAZELISK_PATH + " info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + _OUTPUT_DIR)
     copy_cmd.append("tar -cf /" + outputs_tar + " -C " + _OUTPUT_DIR + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
@@ -91,7 +78,7 @@ def _create_docker_cmd(
 
     # For each config repo we run the target @<config_repo>//...
     bazel_targets = "@" + "//... @".join(config_repos) + "//..."
-    bazel_cmd += " && bazel build " + bazel_targets
+    bazel_cmd += " && " + _BAZELISK_PATH + " build " + bazel_targets
 
     # Command to run to clean up after autoconfiguration.
     # we start with "cd ." to make sure in case of failure everything after the
@@ -105,7 +92,7 @@ def _create_docker_cmd(
         "set -ex",
         ctx.attr.setup_cmd,
     ]
-    docker_cmd += install_bazel_cmd
+    docker_cmd += [bazelisk_cmd]
     docker_cmd += setup_default_project_cmd
     docker_cmd += [
         bazel_cmd,
@@ -224,7 +211,7 @@ def run_and_extract(
       docker_tool_path: path to the docker binary.
       image_name: name of the image to pull.
       project_root: the absolute path to the root of the project that will
-          be mounted/copied to the container
+          be copied to the container
       use_default_project: whether or not to use the default project to generate configs
     """
     outputs_tar = ctx.attr.name + "_out.tar"
@@ -232,41 +219,37 @@ def run_and_extract(
     # Create command to run inside docker container
     _create_docker_cmd(
         ctx,
-        bazel_version = bazel_version,
-        bazel_rc_version = bazel_rc_version,
         config_repos = config_repos,
         outputs_tar = outputs_tar,
         use_default_project = use_default_project,
     )
 
+    # Download bazelisk
+    bazelisk_url = "https://github.com/bazelbuild/bazelisk/releases/download/%s/bazelisk-linux-amd64" % _BAZELISK_RELEASE
+    ctx.download(bazelisk_url, "bazelisk", _BAZELISK_SHA)
+
     # Create the docker run flags to set env vars
     docker_run_flags = []
     for env in ctx.attr.env:
         docker_run_flags += ["--env", env + "=" + ctx.attr.env[env]]
+    bazel_version_string = bazel_version
+    if bazel_rc_version:
+        bazel_version_string += "rc" + str(bazel_rc_version)
+
+    # Set the Bazel version that Bazelisk will use
+    docker_run_flags += ["--env", ("USE_BAZEL_VERSION=%s" % bazel_version_string)]
 
     # Command to copy resources used for rbe_autoconfig to the container.
     copy_data_cmd = []
 
     # Command to clean up the data volume container.
     clean_data_volume_cmd = ""
-    if ctx.attr.copy_resources:
-        copy_data_cmd.append("data_volume=$(docker create -v " + _ROOT_DIR + " " + image_name + ")")
-        copy_data_cmd.append(docker_tool_path + " cp $(realpath " + project_root + ") $data_volume:" + _REPO_DIR)
-        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("container")) + " $data_volume:" + _ROOT_DIR + "/container")
-        docker_run_flags += ["--volumes-from", "$data_volume"]
-        clean_data_volume_cmd = docker_tool_path + " rm $data_volume"
-    else:
-        mount_read_only_flag = ":ro"
-        if use_default_project:
-            # If we use the default project, we need to modify the WORKSPACE
-            # and BUILD files, so don't mount read-only
-            mount_read_only_flag = ""
-
-        # If the rule is invoked from bazel-toolchains itself, then project_root
-        # is a symlink, which can cause mounting issues on GCB.
-        target = "$(realpath " + project_root + "):" + _REPO_DIR + mount_read_only_flag
-        docker_run_flags += ["-v", target]
-        docker_run_flags += ["-v", str(ctx.path("container")) + ":" + _ROOT_DIR + "/container"]
+    copy_data_cmd.append("data_volume=$(docker create -v " + _ROOT_DIR + " " + image_name + ")")
+    copy_data_cmd.append(docker_tool_path + " cp $(realpath " + project_root + ") $data_volume:" + _REPO_DIR)
+    copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("container")) + " $data_volume:" + _ROOT_DIR + "/container")
+    copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("bazelisk")) + " $data_volume:" + _BAZELISK_PATH)
+    docker_run_flags += ["--volumes-from", "$data_volume"]
+    clean_data_volume_cmd = docker_tool_path + " rm $data_volume"
 
     # Create the template to run
     template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:extract.sh.tpl"))

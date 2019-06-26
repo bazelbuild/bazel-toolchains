@@ -224,7 +224,7 @@ file_test(
 file_test(
     name = "rbe_autoconf_generate_run_in_container_test",
     file = "@rbe_autoconf_generate//test:container/run_in_container.sh",
-    regexp = "bazel build @local_config_cc",
+    regexp = "build @local_config_cc",
 )
 
 file_test(
@@ -242,7 +242,7 @@ file_test(
 file_test(
     name = "rbe_autoconf_config_repos_no_cc_config_run_in_container_test",
     file = "@rbe_autoconf_config_repos_no_cc_config//test:container/run_in_container.sh",
-    regexp = "bazel build @local_config_sh/",
+    regexp = "build @local_config_sh/",
 )
 
 file_test(
@@ -315,26 +315,13 @@ file_test(
 file_test(
     name = "rbe_autoconf_custom_container_sha_test",
     file = "@rbe_autoconf_custom_container//test:config/test.BUILD",
-    regexp = "9ed4a6bafffb0ca08389c4445955217802074d07bac9acff6b661239926555ed",
+    regexp = "eb9f72ddde60080912fed8a6f40c5a42c13ec6c890c0709c119213b199804456",
 )
 
 file_test(
     name = "rbe_autoconf_custom_os_family_test",
     file = "@rbe_autoconf_custom_container//test:config/test.BUILD",
     regexp = "OSFamily",
-)
-
-# Tests validate run_and_extract uses mount volumes (-v) vs
-# data volumes.
-# Set with tag 'manual' as this test messes up others if the
-# external repos are pulled in parallel.
-# This is because when sources are mounted race conditions can
-# occur when the sample project is used.
-file_test(
-    name = "rbe_autoconf_no_copy_resources_run_and_extract_test",
-    file = "@rbe_autoconf_no_copy_resources//test:run_and_extract.sh",
-    regexp = "realpath",
-    tags = ["manual"],
 )
 
 file_test(
@@ -602,7 +589,7 @@ sh_test(
 file_test(
     name = "rbe_autoconf_config_repos_output_base_run_in_container_test",
     file = "@rbe_autoconf_config_repos_output_base//test:container/run_in_container.sh",
-    regexp = "bazel build @local_config_cc//... @local_config_sh//...",
+    regexp = "build @local_config_cc//... @local_config_sh//...",
 )
 
 # Tests for output_base + config_dir. These require RBE_AUTOCONF_ROOT env
