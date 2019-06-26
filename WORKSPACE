@@ -49,12 +49,6 @@ load(
 
 bazel_toolchains_images()
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-go_rules_dependencies()
-
-go_register_toolchains()
-
 # The following comment is needed to let Gazelle know that "bazel_gazelle"
 # is being imported from a *.bzl file.
 # gazelle:repo bazel_gazelle
