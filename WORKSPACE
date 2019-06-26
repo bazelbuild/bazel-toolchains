@@ -283,14 +283,6 @@ rbe_autoconfig(
 )
 
 rbe_autoconfig(
-    name = "rbe_autoconf_no_copy_resources",
-    bazel_version = _ubuntu1604_bazel,
-    copy_resources = False,
-    create_testdata = True,
-    use_checked_in_confs = "False",
-)
-
-rbe_autoconfig(
     name = "rbe_autoconf_config_repos",
     bazel_version = _ubuntu1604_bazel,
     config_repos = ["local_config_sh"],
@@ -335,9 +327,10 @@ rbe_autoconfig(
     name = "rbe_autoconf_custom_container",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    digest = "sha256:9ed4a6bafffb0ca08389c4445955217802074d07bac9acff6b661239926555ed",
+    digest = "sha256:eb9f72ddde60080912fed8a6f40c5a42c13ec6c890c0709c119213b199804456",
+    env = clang_env(),
     registry = "l.gcr.io",
-    repository = "google/bazel",
+    repository = "google/clang-debian9",
 )
 
 rbe_autoconfig(
