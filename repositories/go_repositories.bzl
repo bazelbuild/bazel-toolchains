@@ -19,6 +19,7 @@ Provides functions to pull all Go external package dependencies of this
 repository.
 """
 
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 def go_deps():
@@ -29,6 +30,8 @@ def go_deps():
     'repositories' in //repositories:repositories.bzl have been imported
     already.
     """
+    go_rules_dependencies()
+    go_register_toolchains()
     gazelle_dependencies()
     excludes = native.existing_rules().keys()
     if "in_gopkg_yaml_v2" not in excludes:
