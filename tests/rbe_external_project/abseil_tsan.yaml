@@ -59,6 +59,5 @@ steps:
   - -//absl/synchronization:notification_test
   - -//absl/container:hashtablez_sampler_test
   - -//absl/container:inlined_vector_benchmark
-  - -//absl/random:benchmarks
-  - -//absl/random/internal:randen_benchmarks
+  - -//absl/random/...
   dir: 'external-src'
