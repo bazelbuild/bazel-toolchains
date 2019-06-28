@@ -58,5 +58,5 @@ steps:
   - -//absl/debugging:symbolize_test
   - -//absl/synchronization:mutex_benchmark
   - -//absl/container:inlined_vector_benchmark
-  - -//absl/random:benchmarks
+  - -//absl/random/...
   dir: 'external-src'
