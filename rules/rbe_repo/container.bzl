@@ -50,7 +50,7 @@ def _create_docker_cmd(
     for config_repo in config_repos:
         symlinks_cmd = ("find $(" + _BAZELISK_PATH + " info output_base)/" +
                         _EXTERNAL_FOLDER_PREFIX + config_repo +
-                        " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \;")
+                        " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \\;")
         deref_symlinks_cmd.append(symlinks_cmd)
     deref_symlinks_cmd = " && ".join(deref_symlinks_cmd)
 
