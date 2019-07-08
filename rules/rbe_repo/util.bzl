@@ -208,7 +208,7 @@ def copy_to_test_dir(ctx):
     print_exec_results("copy test output files", result, True, args)
 
     # Rename BUILD files
-    ctx.file("rename_build_files.sh", "find ./test -name \"BUILD\" -exec sh -c 'mv \"$1\" \"$(dirname $1)/test.BUILD\"' _ {} \;", True)
+    ctx.file("rename_build_files.sh", "find ./test -name \"BUILD\" -exec sh -c 'mv \"$1\" \"$(dirname $1)/test.BUILD\"' _ {} \\;", True)
     result = ctx.execute(["./rename_build_files.sh"])
     print_exec_results("Rename BUILD files in test output", result, True, args)
 
