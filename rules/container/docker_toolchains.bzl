@@ -107,9 +107,9 @@ def _language_tool_layer_impl(
         # debs to installables_tars.
 
     elif packages != []:
-        download_pkgs_output_tar = ctx.attr.name + "-download_pkgs_output_tar.tar"
-        download_pkgs_output_script = ctx.attr.name + "-download_pkgs_output_script.sh"
-        download_pkgs_output_metadata = ctx.attr.name + "-download_pkgs_output_metadata.csv"
+        download_pkgs_output_tar = ctx.attr.name + "_output_tar.tar"
+        download_pkgs_output_script = ctx.attr.name + "_script.sh"
+        download_pkgs_output_metadata = ctx.attr.name + "_metadata.csv"
 
         aggregated_debian_tar = _generate_deb_tar.implementation(
             ctx,

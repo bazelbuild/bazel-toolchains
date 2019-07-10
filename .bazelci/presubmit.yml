@@ -38,7 +38,6 @@ platforms:
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     test_flags:
-    - "--config=ci"
     - "--action_env=RBE_AUTOCONF_ROOT=/workdir"
     - "--action_env=PATH"
     - "--test_output=errors"
