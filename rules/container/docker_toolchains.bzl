@@ -14,12 +14,12 @@
 
 """Definitions of language_tool_layer and toolchain_container rules."""
 
-load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
-load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
-load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
 load("@io_bazel_rules_docker//container:providers.bzl", "ImageInfo")
+load("@io_bazel_rules_docker//docker/package_managers:apt_key.bzl", _key = "key")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", _download = "download")
+load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", _install = "install")
 load(":debian_pkg_tar.bzl", _generate_deb_tar = "generate")
 
 LanguageToolLayerInfo = provider(fields = [
@@ -107,9 +107,9 @@ def _language_tool_layer_impl(
         # debs to installables_tars.
 
     elif packages != []:
-        download_pkgs_output_tar = ctx.attr.name + "-download_pkgs_output_tar.tar"
-        download_pkgs_output_script = ctx.attr.name + "-download_pkgs_output_script.sh"
-        download_pkgs_output_metadata = ctx.attr.name + "-download_pkgs_output_metadata.csv"
+        download_pkgs_output_tar = ctx.attr.name + "_output_tar.tar"
+        download_pkgs_output_script = ctx.attr.name + "_script.sh"
+        download_pkgs_output_metadata = ctx.attr.name + "_metadata.csv"
 
         aggregated_debian_tar = _generate_deb_tar.implementation(
             ctx,

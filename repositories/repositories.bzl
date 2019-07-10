@@ -26,7 +26,6 @@ load(
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_toolchains//deps:io_bazel_rules_docker.bzl", io_bazel_rules_docker_version = "version")
 load("@bazel_toolchains//deps:io_bazel_rules_go.bzl", io_bazel_rules_go_version = "version")
-load("@bazel_toolchains//deps:base_images_docker.bzl", base_images_docker_version = "version")
 
 def repositories():
     """Download dependencies of bazel-toolchains."""
@@ -66,14 +65,6 @@ def repositories():
             name = "bazel_gazelle",
             sha256 = "3c681998538231a2d24d0c07ed5a7658cb72bfb5fd4bf9911157c0e9ac6a2687",
             urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.17.0/bazel-gazelle-0.17.0.tar.gz"],
-        )
-
-    if "base_images_docker" not in excludes:
-        git_repository(
-            name = "base_images_docker",
-            commit = base_images_docker_version,
-            remote = "https://github.com/GoogleContainerTools/base-images-docker.git",
-            # TODO (suvanjan): Add sha256 field once copybara supports it.
         )
 
     # =============================== Repo rule deps ==========================

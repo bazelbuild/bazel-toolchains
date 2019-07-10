@@ -15,9 +15,9 @@
 Provides functionality to organize debian packages into tarballs.
 """
 
-load("@base_images_docker//package_managers:apt_key.bzl", _apt_key = "key")
-load("@base_images_docker//package_managers:download_pkgs.bzl", _download_deb_pkgs = "download")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
+load("@io_bazel_rules_docker//docker/package_managers:apt_key.bzl", _apt_key = "key")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", _download_deb_pkgs = "download")
 
 def _input_validation(kwargs):
     allowed_attribues = ["name", "base", "language_layers"]

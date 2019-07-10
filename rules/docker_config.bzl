@@ -118,13 +118,13 @@ Known issues:
  - Rule cannot be placed in the BUILD file at the root of a project
 """
 
-load("@base_images_docker//util:run.bzl", _extract = "extract")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
 )
+load("@io_bazel_rules_docker//docker/util:run.bzl", _extract = "extract")
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -333,7 +333,7 @@ docker_toolchain_autoconfig_ = rule(
         "use_default_project": attr.bool(default = False),
         # TODO(nlopezgi): fix upstream attr declaration that is missing repo name
         "_extract_tpl": attr.label(
-            default = Label("@base_images_docker//util:extract.sh.tpl"),
+            default = Label("@io_bazel_rules_docker//docker/util:extract.sh.tpl"),
             allow_single_file = True,
         ),
         "_image_id_extractor": attr.label(
