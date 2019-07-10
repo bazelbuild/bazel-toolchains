@@ -14,12 +14,12 @@
 
 """Definitions of language_tool_layer and toolchain_container rules."""
 
-load("@base_images_docker//package_managers:apt_key.bzl", _key = "key")
-load("@base_images_docker//package_managers:download_pkgs.bzl", _download = "download")
-load("@base_images_docker//package_managers:install_pkgs.bzl", _install = "install")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@io_bazel_rules_docker//container:container.bzl", _container = "container")
 load("@io_bazel_rules_docker//container:providers.bzl", "ImageInfo")
+load("@io_bazel_rules_docker//docker/package_managers:apt_key.bzl", _key = "key")
+load("@io_bazel_rules_docker//docker/package_managers:download_pkgs.bzl", _download = "download")
+load("@io_bazel_rules_docker//docker/package_managers:install_pkgs.bzl", _install = "install")
 load(":debian_pkg_tar.bzl", _generate_deb_tar = "generate")
 
 LanguageToolLayerInfo = provider(fields = [
