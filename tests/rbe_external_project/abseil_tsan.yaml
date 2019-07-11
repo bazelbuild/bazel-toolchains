@@ -60,4 +60,5 @@ steps:
   - -//absl/container:hashtablez_sampler_test
   - -//absl/container:inlined_vector_benchmark
   - -//absl/random/...
+  - -//absl/numeric:int128_benchmark
   dir: 'external-src'
