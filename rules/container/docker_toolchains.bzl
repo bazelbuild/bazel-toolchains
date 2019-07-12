@@ -16,8 +16,8 @@
 
 load(
     "@io_bazel_rules_docker//docker/toolchain_container:toolchain_container.bzl",
-    _toolchain_container = "toolchain_container",
     _language_tool_layer = "language_tool_layer",
+    _toolchain_container = "toolchain_container",
 )
 
 # Redirects all defs to implementation which has been refactored to
@@ -25,4 +25,3 @@ load(
 
 language_tool_layer = _language_tool_layer
 toolchain_container = _toolchain_container
-
