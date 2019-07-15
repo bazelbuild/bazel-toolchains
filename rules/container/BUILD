@@ -19,19 +19,11 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 bzl_library(
-    name = "debian_pkg_tar",
-    srcs = [
-        "debian_pkg_tar.bzl",
-    ],
-)
-
-bzl_library(
     name = "docker_toolchains",
     srcs = [
         "docker_toolchains.bzl",
     ],
     deps = [
-        ":debian_pkg_tar",
-        "@io_bazel_rules_docker//container",
+        "@io_bazel_rules_docker//docker/toolchain_container",
     ],
 )

@@ -33,7 +33,7 @@ bazel_rc = "1"
 
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-autoconfig",
-    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
+    base = "@io_bazel_rules_docker//tests/docker/toolchain_container:rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -41,7 +41,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "external-repo-autoconfig",
-    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
+    base = "@io_bazel_rules_docker//tests/docker/toolchain_container:rbe-test-xenial-with-pkgs.tar",
     config_repos = [
         "local_config_sh",
         "local_config_cc",
@@ -58,7 +58,7 @@ docker_toolchain_autoconfig(
 # bazel test //tests/config:this-project-repo-autoconfig_test --define mount_project=$(realpath .)
 docker_toolchain_autoconfig(
     name = "this-project-repo-autoconfig",
-    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
+    base = "@io_bazel_rules_docker//tests/docker/toolchain_container:rbe-test-xenial-with-pkgs.tar",
     config_repos = [
         "local_config_sh",
         "local_config_cc",
@@ -71,7 +71,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-bazel-head-autoconfig",
-    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
+    base = "@io_bazel_rules_docker//tests/docker/toolchain_container:rbe-test-xenial-with-pkgs.tar",
     env = gcc_env(),
     tags = ["manual"],
     test = True,
@@ -81,7 +81,7 @@ docker_toolchain_autoconfig(
 # Note that we only support Bazel rc versions at 0.10.0 or above.
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-custom-bazel-rc-version-autoconfig",
-    base = "//tests/container:rbe-test-xenial-with-pkgs.tar",
+    base = "@io_bazel_rules_docker//tests/docker/toolchain_container:rbe-test-xenial-with-pkgs.tar",
     bazel_rc_version = bazel_rc,
     bazel_version = bazel_latest_with_rc,
     env = gcc_env(),
@@ -91,7 +91,7 @@ docker_toolchain_autoconfig(
 
 docker_toolchain_autoconfig(
     name = "ubuntu-xenial-build-bazel-src",
-    base = "//tests/container:rbe-test-no-bazel.tar",
+    base = "@io_bazel_rules_docker//tests/docker/toolchain_container:rbe-test-no-bazel.tar",
     bazel_version = _latest_bazel,
     build_bazel_src = True,
     env = gcc_env(),
