@@ -63,8 +63,8 @@ def repositories():
     if "bazel_gazelle" not in excludes:
         http_archive(
             name = "bazel_gazelle",
-            sha256 = "3c681998538231a2d24d0c07ed5a7658cb72bfb5fd4bf9911157c0e9ac6a2687",
-            urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.17.0/bazel-gazelle-0.17.0.tar.gz"],
+            sha256 = "887c6e7764463d2a39cecbebfdb7ca73ad9cb628e5c4d08cf64d1195300bea62",
+            urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.18.0/bazel-gazelle-0.18.0.tar.gz"],
         )
 
     # =============================== Repo rule deps ==========================
