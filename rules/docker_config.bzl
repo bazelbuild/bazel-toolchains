@@ -332,12 +332,14 @@ docker_toolchain_autoconfig_ = rule(
         "use_bazel_head": attr.bool(default = False),
         "use_default_project": attr.bool(default = False),
         # TODO(nlopezgi): fix upstream attr declaration that is missing repo name
+        "_extract_image_id": attr.label(
+            default = Label("@io_bazel_rules_docker//contrib:extract_image_id"),
+            cfg = "host",
+            executable = True,
+            allow_files = True,
+        ),
         "_extract_tpl": attr.label(
             default = Label("@io_bazel_rules_docker//docker/util:extract.sh.tpl"),
-            allow_single_file = True,
-        ),
-        "_image_id_extractor": attr.label(
-            default = "@io_bazel_rules_docker//contrib:extract_image_id.py",
             allow_single_file = True,
         ),
         "_installers": attr.label(default = ":bazel_installers", allow_files = True),
