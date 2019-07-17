@@ -18,11 +18,16 @@ load(
 )
 load(
     "//configs/ubuntu16_04_clang:versions.bzl",
+    RBE_CONTAINERS_MAP = "CONTAINER_TO_CONFIG_SPEC_NAMES",
     RBE_UBUNTU16_04_LATEST = "LATEST",
 )
 load(
     "//configs/dependency-tracking:ubuntu1604.bzl",
     _ubuntu1604_bazel = "bazel",
+)
+load(
+    "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
+    "default_toolchain_config_suite_spec",
 )
 load(
     "//tests/rbe_repo:versions_test.bzl",
@@ -761,4 +766,19 @@ sh_test(
         "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:empty",
         "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:exported_testdata",
     ],
+)
+
+# Verifies that all containers listed in the versions.bzl file used by
+# rbe_autoconfig are available for pulling.
+# This test requires docker to be present on the path.
+sh_test(
+    name = "rbe_container_test",
+    srcs = [":rbe_container_test.sh"],
+    args = [(("{}/{}@{}").format(
+        # use l.gcr.io to test with no auth required
+        "l.gcr.io",
+        default_toolchain_config_suite_spec()["container_repo"],
+        sha256,
+    )) for sha256 in RBE_CONTAINERS_MAP.keys()],
+    tags = ["no-remote"],
 )
