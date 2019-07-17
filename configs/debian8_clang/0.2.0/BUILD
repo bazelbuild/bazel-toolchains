@@ -14,6 +14,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
+load("@rules_java//java:defs.bzl", "java_runtime")
+
 java_runtime_suite(
     name = "jdk8",
     default = ":jdk8-default",

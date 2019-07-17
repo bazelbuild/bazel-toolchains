@@ -16,6 +16,8 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
+load("@rules_java//java:defs.bzl", "java_toolchain")
+
 java_toolchain(
     name = "remote_toolchain",
     bootclasspath = ["@bazel_tools//tools/jdk:bootclasspath"],

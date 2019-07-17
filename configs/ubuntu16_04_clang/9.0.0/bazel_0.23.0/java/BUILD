@@ -16,6 +16,8 @@
 # and should not be modified directly.
 # See @bazel_toolchains//rules:rbe_repo.bzl
 
+load("@rules_java//java:defs.bzl", "java_runtime")
+
 package(default_visibility = ["//visibility:public"])
 
 java_runtime(
