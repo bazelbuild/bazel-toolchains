@@ -1,4 +1,6 @@
-# Copyright 2017 The Bazel Authors. All rights reserved.
+#!/bin/bash
+#
+# Copyright 2015 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,19 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Ship the environment to the C++ action
+#
+set -eu
 
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+# Set-up the environment
 
-licenses(["notice"])  # Apache 2.0
 
-package(default_visibility = ["//visibility:public"])
-
-bzl_library(
-    name = "docker_toolchains",
-    srcs = [
-        "docker_toolchains.bzl",
-    ],
-    deps = [
-        "@io_bazel_rules_docker//docker/toolchain_container",
-    ],
-)
+# Call the C++ compiler
+/usr/local/bin/clang "$@"
