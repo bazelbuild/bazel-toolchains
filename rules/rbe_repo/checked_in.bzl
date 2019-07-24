@@ -179,7 +179,7 @@ def validateUseOfCheckedInConfigs(
     # If a config was requested or found via digest, lets see if its compatible with
     # the selected Bazel version
     if requested_toolchain_config_spec_name or config:
-        if not config:
+        if requested_toolchain_config_spec_name:
             config = _get_config(requested_toolchain_config_spec_name, toolchain_config_specs)
         if config and config.name not in bazel_compat_configs:
             print(("%s not using checked in configs; config %s was " +
