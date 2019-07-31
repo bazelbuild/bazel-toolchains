@@ -275,12 +275,13 @@ def _validate_config_version_spec(name, config_version_spec):
         error_detail = error_detail_prefix + "a name",
         object_to_check = config_version_spec.name,
     )
-    _check_type(
-        name = name,
-        expected_type = "string",
-        error_detail = error_detail_prefix + "a java_home",
-        object_to_check = config_version_spec.java_home,
-    )
+    if config_version_spec.java_home:
+        _check_type(
+            name = name,
+            expected_type = "string",
+            error_detail = error_detail_prefix + "a java_home",
+            object_to_check = config_version_spec.java_home,
+        )
     _check_type(
         name = name,
         expected_type = "bool",
