@@ -48,11 +48,11 @@ _BAZEL_TO_CONFIG_SPEC_NAMES = {}
 LATEST = ""
 
 # Map from sha256 of the toolchain container to corresponding config_spec names.
-_CONTAINER_TO_CONFIG_SPEC_NAMES = {}
+CONTAINER_TO_CONFIG_SPEC_NAMES = {}
 
 TOOLCHAIN_CONFIG_AUTOGEN_SPEC = struct(
     bazel_to_config_spec_names_map = _BAZEL_TO_CONFIG_SPEC_NAMES,
-    container_to_config_spec_names_map = _CONTAINER_TO_CONFIG_SPEC_NAMES,
+    container_to_config_spec_names_map = CONTAINER_TO_CONFIG_SPEC_NAMES,
     default_toolchain_config_spec = _DEFAULT_TOOLCHAIN_CONFIG_SPEC,
     latest_container = LATEST,
     toolchain_config_specs = _TOOLCHAIN_CONFIG_SPECS,
@@ -277,7 +277,7 @@ def _validate_config_version_spec(name, config_version_spec):
     )
     _check_type(
         name = name,
-        expected_type = "string",
+        expected_type = "string" if config_version_spec.create_java_configs else "NoneType",
         error_detail = error_detail_prefix + "a java_home",
         object_to_check = config_version_spec.java_home,
     )
@@ -406,7 +406,7 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home)
             env_index += 1
         config = struct(
             name = toolchain_config_spec_name,
-            java_home = ctx.attr.configs_obj_java_home[index],
+            java_home = ctx.attr.configs_obj_java_home[index] if ctx.attr.configs_obj_create_java_configs[index] else None,
             create_java_configs = True if ctx.attr.configs_obj_create_java_configs[index] else False,
             create_cc_configs = True if ctx.attr.configs_obj_create_cc_configs[index] else False,
             config_repos = config_repos,

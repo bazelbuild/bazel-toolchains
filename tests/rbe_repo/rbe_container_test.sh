@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright 2017 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+set -ex
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
-bzl_library(
-    name = "docker_toolchains",
-    srcs = [
-        "docker_toolchains.bzl",
-    ],
-    deps = [
-        "@io_bazel_rules_docker//docker/toolchain_container",
-    ],
-)
+# Simple script that checks a list of images (passed as args)
+# can be pulled with "docker pull"
+# Script attempts to delete images after pulling.
+for image in "$@"
+do
+    echo "pulling $image"
+    docker pull $image
+    # Try to delete, but dont fail if could not
+    docker rmi $image || true
+done

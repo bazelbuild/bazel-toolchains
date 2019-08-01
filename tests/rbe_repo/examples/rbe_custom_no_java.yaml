@@ -1,0 +1,30 @@
+steps:
+# Build the @rbe_custom_no_java toolchain
+# configs.
+- name: 'l.gcr.io/google/bazel'
+  args:
+  - build
+  - "@rbe_custom_no_java//..."
+  dir: 'tests/rbe_repo/examples/toolchain_config_host'
+  env: ['RBE_AUTOCONF_ROOT=/workspace/tests/rbe_repo/examples/toolchain_config_host']
+
+
+# Launch a RBE hello world build + unit test using the @rbe_custom_no_java toolchain
+# configs.
+- name: 'l.gcr.io/google/bazel'
+  args:
+  - --bazelrc=../../../../bazelrc/.bazelrc.notoolchain
+  - build
+  - --config=remote
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  # toolchain flags to use @rbe_custom_no_java
+  - --crosstool_top=@rbe_custom_no_java//cc:toolchain
+  - --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+  - --extra_toolchains=@rbe_custom_no_java//config:cc-toolchain
+  - --extra_execution_platforms=@rbe_custom_no_java//config:platform
+  - --host_platform=@rbe_custom_no_java//config:platform
+  - --platforms=@rbe_custom_no_java//config:platform
+  - --
+  - //:say_hello_test
+  - "@java-sample//..."
+  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'

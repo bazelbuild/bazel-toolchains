@@ -12,18 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
-
-bzl_library(
-    name = "docker_toolchains",
-    srcs = [
-        "docker_toolchains.bzl",
-    ],
-    deps = [
-        "@io_bazel_rules_docker//docker/toolchain_container",
-    ],
-)

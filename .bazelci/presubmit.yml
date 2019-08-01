@@ -14,7 +14,6 @@ platforms:
     - "--"
     # rbe_autoconfig tests
     - "//tests/rbe_repo/..."
-    - "//tests/container/..."
     # tests that require output_base / config_repos are timing out.
     # TODO(nlopezgi): debug, fix and enable these tests.
     - "-//tests/rbe_repo:rbe_autoconf_output_base_test"

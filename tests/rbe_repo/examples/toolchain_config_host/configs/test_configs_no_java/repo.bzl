@@ -11,19 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+""" Definitions for a custom rbe_repo."""
 
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load(":versions.bzl", "TOOLCHAIN_CONFIG_AUTOGEN_SPEC")
 
-licenses(["notice"])  # Apache 2.0
-
-package(default_visibility = ["//visibility:public"])
-
-bzl_library(
-    name = "docker_toolchains",
-    srcs = [
-        "docker_toolchains.bzl",
-    ],
-    deps = [
-        "@io_bazel_rules_docker//docker/toolchain_container",
-    ],
-)
+CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC = {
+    "repo_name": "toolchain_config_host",
+    "output_base": "configs/test_configs_no_java",
+    "container_repo": "google/bazel",
+    "container_registry": "marketplace.gcr.io",
+    "toolchain_config_suite_autogen_spec": TOOLCHAIN_CONFIG_AUTOGEN_SPEC,
+}
