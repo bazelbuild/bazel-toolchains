@@ -1043,7 +1043,7 @@ def rbe_autoconfig(
         bazel_to_config_spec_names_map = bazel_to_config_spec_names_map,
         toolchain_config_spec_name = toolchain_config_spec_name,
         configs_obj_names = config_objs.names,
-        configs_obj_java_home = config_objs.java_home,
+        configs_obj_java_home = config_objs.java_home if create_java_configs else None,
         configs_obj_create_java_configs = config_objs.create_java_configs,
         configs_obj_create_cc_configs = config_objs.create_cc_configs,
         configs_obj_config_repos = config_objs.config_repos,
