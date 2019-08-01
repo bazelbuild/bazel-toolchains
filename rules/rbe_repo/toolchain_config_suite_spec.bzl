@@ -277,7 +277,7 @@ def _validate_config_version_spec(name, config_version_spec):
     )
     _check_type(
         name = name,
-        expected_type = "string",
+        expected_type = "string" if config_version_spec.create_java_configs else "NoneType",
         error_detail = error_detail_prefix + "a java_home",
         object_to_check = config_version_spec.java_home,
     )
@@ -406,7 +406,7 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home)
             env_index += 1
         config = struct(
             name = toolchain_config_spec_name,
-            java_home = ctx.attr.configs_obj_java_home[index],
+            java_home = ctx.attr.configs_obj_java_home[index] if ctx.attr.configs_obj_create_java_configs[index] else None,
             create_java_configs = True if ctx.attr.configs_obj_create_java_configs[index] else False,
             create_cc_configs = True if ctx.attr.configs_obj_create_cc_configs[index] else False,
             config_repos = config_repos,

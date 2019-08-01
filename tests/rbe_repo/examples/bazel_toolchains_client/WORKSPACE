@@ -67,6 +67,10 @@ load(
     "CUSTOM_ENV3",
     "CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC",
 )
+load(
+    "@toolchain_config_host//configs/test_configs_no_java:repo.bzl",
+    NO_JAVA_TOOLCHAIN_CONFIG_SUITE_SPEC = "CUSTOM_TOOLCHAIN_CONFIG_SUITE_SPEC",
+)
 
 # Basic test for rbe_custom, the corresponding GCB build should first
 # build the @toolchain_config_host so this one can use those.
@@ -226,4 +230,11 @@ new_local_repository(
     name = "rbe_custom_config_tar",
     build_file = "BUILD.config_tar_test",
     path = "../config_out",
+)
+
+rbe_autoconfig(
+    name = "rbe_custom_no_java",
+    create_java_configs = False,
+    toolchain_config_suite_spec = NO_JAVA_TOOLCHAIN_CONFIG_SUITE_SPEC,
+    use_checked_in_confs = "Force",
 )
