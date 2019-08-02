@@ -21,6 +21,10 @@ set -ex
 mv WORKSPACE WORKSPACE.bak
 
 if grep -q rbe_default "WORKSPACE.bak"; then
+  # Add content from the txt file right after the line that starts with
+  # 'workspace(' (this will match the 'workspace(name="...")' line only).
+  # Content needs to be added as high up in WORKSPACE as possible so that
+  # it cannot be overriden by other declarations.
   sed '/workspace(/ r ../tests/rbe_external_project/rbe_autoconf_default_targets_no_rbe_default.txt' WORKSPACE.bak > WORKSPACE
 else
   sed '/workspace(/ r ../tests/rbe_external_project/rbe_autoconf_default_targets.txt' WORKSPACE.bak > WORKSPACE
