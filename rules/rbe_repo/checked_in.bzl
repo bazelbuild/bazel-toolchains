@@ -253,7 +253,6 @@ def validateUseOfCheckedInConfigs(
                "for config '%s' in %s") % (name, config, container_to_config_spec_names_map))
         return None, None
 
-    print("%s is using checked-in configs '%s'" % (name, config))
     return config, digest
 
 def _get_config(toolchain_config_spec_name, toolchain_config_specs):

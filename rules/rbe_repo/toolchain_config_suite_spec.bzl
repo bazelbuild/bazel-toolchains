@@ -406,7 +406,7 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home)
             env_index += 1
         config = struct(
             name = toolchain_config_spec_name,
-            java_home = ctx.attr.configs_obj_java_home[index] if ctx.attr.configs_obj_create_java_configs[index] else None,
+            java_home = ctx.attr.configs_obj_java_home[index] if ctx.attr.configs_obj_java_home and ctx.attr.configs_obj_java_home[index] else None,
             create_java_configs = True if ctx.attr.configs_obj_create_java_configs[index] else False,
             create_cc_configs = True if ctx.attr.configs_obj_create_cc_configs[index] else False,
             config_repos = config_repos,
