@@ -82,3 +82,11 @@ bzl_library(
         "@bazel_toolchains//rules/rbe_repo",
     ],
 )
+
+bzl_library(
+    name = "exec_properties",
+    srcs = [
+        "exec_properties.bzl",
+    ],
+)
+
