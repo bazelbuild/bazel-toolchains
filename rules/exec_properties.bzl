@@ -15,18 +15,18 @@
 """This file contains macros to create and manipulate dictionaries of properties to be used as execution properties for RBE.
 """
 
-def _add(dict,
-         var_name,
-         key,
-         value,
-         verifier_fcn=None,
-         transform_fcn=None,
-        ):
+def _add(
+        dict,
+        var_name,
+        key,
+        value,
+        verifier_fcn = None,
+        transform_fcn = None):
     """Add a key-value to a dict.
-    
+
     If value is None, don't add anything.
     The dict will always be a string->string dict, but the value argument to this function may be of a different type.
-    
+
     dict: The dict to update.
     var_name: Used for error messages.
     key: The key in the dict.
@@ -38,16 +38,14 @@ def _add(dict,
     if value == None:
         return
     if verifier_fcn != None:
-        verifier_fcn(var_name, value) # verifier_fcn will fail() if necessary
+        verifier_fcn(var_name, value)  # verifier_fcn will fail() if necessary
     if transform_fcn != None:
         value = transform_fcn(value)
     dict[key] = str(value)
 
-
 def _verify_string(var_name, value):
     if type(value) != "string":
         fail("%s must be a string" % var_name)
-
 
 def _verify_bool(var_name, value):
     if type(value) != "bool":
@@ -59,57 +57,33 @@ def _verify_os(var_name, value):
     if value not in valid_os_list:
         fail("%s must be one of %s" % (var_name, valid_os_list))
 
-
 def _transform_network(value):
     return "standard" if value else "off"
 
-
 def create_exec_properties_dict(
-    # The asterisk means that all following arguments must be specified by name at the call site.
-    # This allows future insertions of arguments to this function without breaking callers which might have otherwise depended on argument ordering.
-    *,
-    container_image=None,
-    pool=None,
-    os_family=None,
-    gce_machine_type=None,
-    jdk_version=None,
-    docker_add_capabilities=None,
-    docker_drop_capabilities=None,
-    docker_network_enabled=None,
-    docker_privileged=None,
-    docker_run_as_root=None,
-    docker_runtime=None,
-    docker_sibling_containers=None,
-    docker_ulimits=None,
-    docker_use_urandom=None):
+        # The asterisk means that all following arguments must be specified by name at the call site.
+        # This allows future insertions of arguments to this function without breaking callers which might have otherwise depended on argument ordering.
+        *,
+        container_image = None,
+        docker_add_capabilities = None,
+        docker_drop_capabilities = None,
+        docker_network_enabled = None,
+        docker_privileged = None,
+        docker_run_as_root = None,
+        docker_runtime = None,
+        docker_sibling_containers = None,
+        docker_ulimits = None,
+        docker_use_urandom = None,
+        gce_machine_type = None,
+        jdk_version = None,
+        os_family = None,
+        pool = None):
     """Return a dict with exec_properties that are supported by RBE.
-    
-    Args:
-    container_image (string): The container that RBE will execute in.
-    pool (string): If specified, the action will be executed only on this worker pool.
-    os_family (string): If specified, the action will be executed only on workers of this OS family.
-    gce_machine_type (string): If specified, the action will be executed only on workers of this machine type.
-    jdk_version (string): If specified, the action will be executed only on workers that have this JDK version.
-    docker_add_capabilities (string): If specified, RBE will add these (comma separated) capabilities to the capabilities it uses for running docker.
-    docker_drop_capabilities (string): If specified, RBE will remove these (comma separated) capabilities from the capabilities it uses for running docker.
-    docker_network_enabled (bool): If set to True, executions running in the docker container will have outgoing network access.
-    docker_privileged (bool): If set to True, RBE will run docker in privileged mode.
-    docker_run_as_root (bool): If set to True, RBE will run docker as root.
-    docker_runtime (string): Used for GPU support. E.g. set to "nvidia".
-    docker_sibling_containers (bool): If set to True, RBE will run docker in a way that allows it to spawn new docker containers.
-    docker_ulimits (string): Adjusts the ulimit values send to docker.
-    docker_use_urandom (bool): If set to True, RBE will mount dev/urandom as /dev/random inside the docker container.
-    
-    For more information about these options, see https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties
-    
-    Returns: the dict
+
+    For information about the various options, see https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties
     """
     dict = {}
     _add(dict, "container_image", "container-image", container_image, _verify_string)
-    _add(dict, "pool", "Pool", pool, _verify_string)
-    _add(dict, "os_family", "OSFamily", os_family, _verify_os)
-    _add(dict, "gce_machine_type", "gceMachineType", gce_machine_type, _verify_string)
-    _add(dict, "jdk_version", "jdk-version", jdk_version, _verify_string)
     _add(dict, "docker_add_capabilities", "dockerAddCapabilities", docker_add_capabilities, _verify_string)
     _add(dict, "docker_drop_capabilities", "dockerDropCapabilities", docker_drop_capabilities, _verify_string)
     _add(dict, "docker_network_enabled", "dockerNetwork", docker_network_enabled, _verify_bool, _transform_network)
@@ -119,8 +93,11 @@ def create_exec_properties_dict(
     _add(dict, "docker_sibling_containers", "dockerSiblingContainers", docker_sibling_containers, _verify_bool)
     _add(dict, "docker_ulimits", "dockerUlimits", docker_ulimits, _verify_string)
     _add(dict, "docker_use_urandom", "dockerUseURandom", docker_use_urandom, _verify_bool)
+    _add(dict, "gce_machine_type", "gceMachineType", gce_machine_type, _verify_string)
+    _add(dict, "jdk_version", "jdk-version", jdk_version, _verify_string)
+    _add(dict, "os_family", "OSFamily", os_family, _verify_os)
+    _add(dict, "pool", "Pool", pool, _verify_string)
     return dict
-
 
 def merge_dicts(*dict_args):
     """
