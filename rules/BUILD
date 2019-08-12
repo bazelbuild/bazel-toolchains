@@ -83,10 +83,3 @@ bzl_library(
     ],
 )
 
-bzl_library(
-    name = "exec_properties",
-    srcs = [
-        "exec_properties.bzl",
-    ],
-)
-
