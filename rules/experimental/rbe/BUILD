@@ -24,4 +24,3 @@ bzl_library(
         "exec_properties.bzl",
     ],
 )
-
