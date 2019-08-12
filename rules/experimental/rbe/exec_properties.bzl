@@ -27,13 +27,14 @@ def _add(
     If value is None, don't add anything.
     The dict will always be a string->string dict, but the value argument to this function may be of a different type.
 
-    dict: The dict to update.
-    var_name: Used for error messages.
-    key: The key in the dict.
-    value: The value provided by the caller. This may or may not be what ends up in the dict.
-    verifier_fcn: Verifies the validity of value. On error, it's the verifier's responsibility to call fail().
-    transform_fcn: Transform the value provided to this function with a value to put in the dict.
-                   Note that a transform_fcn is not needed for casting a non string to string, this will be done anyway.
+    Args:
+      dict: The dict to update.
+      var_name: Used for error messages.
+      key: The key in the dict.
+      value: The value provided by the caller. This may or may not be what ends up in the dict.
+      verifier_fcn: Verifies the validity of value. On error, it's the verifier's responsibility to call fail().
+      transform_fcn: Transform the value provided to this function with a value to put in the dict.
+          Note that a transform_fcn is not needed for casting a non string to string, this will be done anyway.
     """
     if value == None:
         return
@@ -60,52 +61,87 @@ def _verify_os(var_name, value):
 def _transform_network(value):
     return "standard" if value else "off"
 
-def create_exec_properties_dict(
-        # TODO(eytankidron): Since we will probably insert more parameters to this function in the future, we should
-        # prevent callers from calling this function with positional arguments and instead force them to use keywords.
-        # The way to do that is to put a * argument as the first argument.
-        # Unfortunately this notation fails buildifier (see https://github.com/bazelbuild/buildtools/issues/699).
-        # Uncomment the following line once this issue is resolved.
-        # *,
-        container_image = None,
-        docker_add_capabilities = None,
-        docker_drop_capabilities = None,
-        docker_network_enabled = None,
-        docker_privileged = None,
-        docker_run_as_root = None,
-        docker_runtime = None,
-        docker_sibling_containers = None,
-        docker_ulimits = None,
-        docker_use_urandom = None,
-        gce_machine_type = None,
-        jdk_version = None,
-        os_family = None,
-        pool = None):
+
+
+def create_exec_properties_dict(**kwargs):
     """Return a dict with exec_properties that are supported by RBE.
 
-    For information about the various options, see https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties
+    Args:
+      **kwargs: Arguments specifying what keys are populated in the returned dict.
+          Note that the name of the key in kwargs is not the same as the name of the key in the returned dict.
+          For more information about what each parameter is see https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties.
+          If this link is broken for you, you may not to be whitelisted for RBE. See https://groups.google.com/forum/#!forum/rbe-alpha-customers.    
+
+    Returns:
+      A dict that can be used as, for example, the exec_properties parameter of platform.
     """
+    params = {
+        "container_image" : struct(
+            key="container-image",
+            verifier_fcn=_verify_string),
+        "docker_add_capabilities" : struct(
+            key="dockerAddCapabilities",
+            verifier_fcn=_verify_string),
+        "docker_drop_capabilities" : struct(
+            key="dockerDropCapabilities",
+            verifier_fcn=_verify_string),
+        "docker_network_enabled" : struct(
+            key="dockerNetwork",
+            verifier_fcn=_verify_bool,
+            transform_fcn=_transform_network),
+        "docker_privileged" : struct(
+            key="dockerPrivileged",
+            verifier_fcn=_verify_bool),
+        "docker_run_as_root" : struct(
+            key="dockerRunAsRoot",
+            verifier_fcn=_verify_bool),
+        "docker_runtime" : struct(
+            key="dockerRuntime",
+            verifier_fcn=_verify_string),
+        "docker_sibling_containers" : struct(
+            key="dockerSiblingContainers",
+            verifier_fcn=_verify_bool),
+        "docker_ulimits" : struct(
+            key="dockerUlimits",
+            verifier_fcn=_verify_string),
+        "docker_use_urandom" : struct(
+            key="dockerUseURandom",
+            verifier_fcn=_verify_bool),
+        "gce_machine_type" : struct(
+            key="gceMachineType",
+            verifier_fcn=_verify_string),
+        "jdk_version" : struct(
+            key="jdk-version",
+            verifier_fcn=_verify_string),
+        "os_family" : struct(
+            key="OSFamily",
+            verifier_fcn=_verify_os),
+        "pool" : struct(
+            key="Pool",
+            verifier_fcn=_verify_string),
+    }
+
     dict = {}
-    _add(dict, "container_image", "container-image", container_image, _verify_string)
-    _add(dict, "docker_add_capabilities", "dockerAddCapabilities", docker_add_capabilities, _verify_string)
-    _add(dict, "docker_drop_capabilities", "dockerDropCapabilities", docker_drop_capabilities, _verify_string)
-    _add(dict, "docker_network_enabled", "dockerNetwork", docker_network_enabled, _verify_bool, _transform_network)
-    _add(dict, "docker_privileged", "dockerPrivileged", docker_privileged, _verify_bool)
-    _add(dict, "docker_run_as_root", "dockerRunAsRoot", docker_run_as_root, _verify_bool)
-    _add(dict, "docker_runtime", "dockerRuntime", docker_runtime, _verify_string)
-    _add(dict, "docker_sibling_containers", "dockerSiblingContainers", docker_sibling_containers, _verify_bool)
-    _add(dict, "docker_ulimits", "dockerUlimits", docker_ulimits, _verify_string)
-    _add(dict, "docker_use_urandom", "dockerUseURandom", docker_use_urandom, _verify_bool)
-    _add(dict, "gce_machine_type", "gceMachineType", gce_machine_type, _verify_string)
-    _add(dict, "jdk_version", "jdk-version", jdk_version, _verify_string)
-    _add(dict, "os_family", "OSFamily", os_family, _verify_os)
-    _add(dict, "pool", "Pool", pool, _verify_string)
+    for var_name, value in kwargs.items():
+        if not var_name in params:
+            fail("%s is not a valid var_name" % var_name)
+        p = params[var_name]
+        _add(dict=dict,
+             var_name=var_name,
+             key=p.key,
+             value=value,
+             verifier_fcn=p.verifier_fcn if hasattr(p, "verifier_fcn") else None,
+             transform_fcn=p.transform_fcn if hasattr(p, "transform_fcn") else None)
     return dict
 
 def merge_dicts(*dict_args):
-    """
-    Merge any number of dicts into a new dict,
-    precedence goes to key value pairs in latter dicts.
+    """Merge any number of dicts into a new dict.
+
+    Args:
+      *dict_args: A list of zero or more dicts.
+
+    Returns:
+      A merge of the input dicts. Precedence goes to key value pairs in latter dicts.
     """
     result = {}
     for dictionary in dict_args:
