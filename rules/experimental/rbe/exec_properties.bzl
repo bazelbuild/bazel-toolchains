@@ -61,9 +61,12 @@ def _transform_network(value):
     return "standard" if value else "off"
 
 def create_exec_properties_dict(
-        # The asterisk means that all following arguments must be specified by name at the call site.
-        # This allows future insertions of arguments to this function without breaking callers which might have otherwise depended on argument ordering.
-        *,
+        # TODO(eytankidron): Since we will probably insert more parameters to this function in the future, we should
+        # prevent callers from calling this function with positional arguments and instead force them to use keywords.
+        # The way to do that is to put a * argument as the first argument.
+        # Unfortunately this notation fails buildifier (see https://github.com/bazelbuild/buildtools/issues/699).
+        # Uncomment the following line once this issue is resolved.
+        # *,
         container_image = None,
         docker_add_capabilities = None,
         docker_drop_capabilities = None,
