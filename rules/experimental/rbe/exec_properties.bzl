@@ -61,6 +61,66 @@ def _verify_os(var_name, value):
 def _transform_network(value):
     return "standard" if value else "off"
 
+PARAMS = {
+    "container_image": struct(
+        key = "container-image",
+        verifier_fcn = _verify_string,
+    ),
+    "docker_add_capabilities": struct(
+        key = "dockerAddCapabilities",
+        verifier_fcn = _verify_string,
+    ),
+    "docker_drop_capabilities": struct(
+        key = "dockerDropCapabilities",
+        verifier_fcn = _verify_string,
+    ),
+    "docker_network_enabled": struct(
+        key = "dockerNetwork",
+        verifier_fcn = _verify_bool,
+        transform_fcn = _transform_network,
+    ),
+    "docker_privileged": struct(
+        key = "dockerPrivileged",
+        verifier_fcn = _verify_bool,
+    ),
+    "docker_run_as_root": struct(
+        key = "dockerRunAsRoot",
+        verifier_fcn = _verify_bool,
+    ),
+    "docker_runtime": struct(
+        key = "dockerRuntime",
+        verifier_fcn = _verify_string,
+    ),
+    "docker_sibling_containers": struct(
+        key = "dockerSiblingContainers",
+        verifier_fcn = _verify_bool,
+    ),
+    "docker_ulimits": struct(
+        key = "dockerUlimits",
+        verifier_fcn = _verify_string,
+    ),
+    "docker_use_urandom": struct(
+        key = "dockerUseURandom",
+        verifier_fcn = _verify_bool,
+    ),
+    "gce_machine_type": struct(
+        key = "gceMachineType",
+        verifier_fcn = _verify_string,
+    ),
+    "jdk_version": struct(
+        key = "jdk-version",
+        verifier_fcn = _verify_string,
+    ),
+    "os_family": struct(
+        key = "OSFamily",
+        verifier_fcn = _verify_os,
+    ),
+    "pool": struct(
+        key = "Pool",
+        verifier_fcn = _verify_string,
+    ),
+}
+
 def create_exec_properties_dict(**kwargs):
     """Return a dict with exec_properties that are supported by RBE.
 
@@ -73,71 +133,11 @@ def create_exec_properties_dict(**kwargs):
     Returns:
       A dict that can be used as, for example, the exec_properties parameter of platform.
     """
-    params = {
-        "container_image": struct(
-            key = "container-image",
-            verifier_fcn = _verify_string,
-        ),
-        "docker_add_capabilities": struct(
-            key = "dockerAddCapabilities",
-            verifier_fcn = _verify_string,
-        ),
-        "docker_drop_capabilities": struct(
-            key = "dockerDropCapabilities",
-            verifier_fcn = _verify_string,
-        ),
-        "docker_network_enabled": struct(
-            key = "dockerNetwork",
-            verifier_fcn = _verify_bool,
-            transform_fcn = _transform_network,
-        ),
-        "docker_privileged": struct(
-            key = "dockerPrivileged",
-            verifier_fcn = _verify_bool,
-        ),
-        "docker_run_as_root": struct(
-            key = "dockerRunAsRoot",
-            verifier_fcn = _verify_bool,
-        ),
-        "docker_runtime": struct(
-            key = "dockerRuntime",
-            verifier_fcn = _verify_string,
-        ),
-        "docker_sibling_containers": struct(
-            key = "dockerSiblingContainers",
-            verifier_fcn = _verify_bool,
-        ),
-        "docker_ulimits": struct(
-            key = "dockerUlimits",
-            verifier_fcn = _verify_string,
-        ),
-        "docker_use_urandom": struct(
-            key = "dockerUseURandom",
-            verifier_fcn = _verify_bool,
-        ),
-        "gce_machine_type": struct(
-            key = "gceMachineType",
-            verifier_fcn = _verify_string,
-        ),
-        "jdk_version": struct(
-            key = "jdk-version",
-            verifier_fcn = _verify_string,
-        ),
-        "os_family": struct(
-            key = "OSFamily",
-            verifier_fcn = _verify_os,
-        ),
-        "pool": struct(
-            key = "Pool",
-            verifier_fcn = _verify_string,
-        ),
-    }
-
     dict = {}
     for var_name, value in kwargs.items():
-        if not var_name in params:
+        if not var_name in PARAMS:
             fail("%s is not a valid var_name" % var_name)
-        p = params[var_name]
+        p = PARAMS[var_name]
         _add(
             dict = dict,
             var_name = var_name,
