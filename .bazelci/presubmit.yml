@@ -8,11 +8,11 @@ buildifier:
   # TODO (suvanjan): Re-enable once issues and https://github.com/bazelbuild/buildtools/issues/575
   # are fixed.
   warnings: "attr-cfg,attr-license,attr-non-empty,attr-output-default,attr-single-file,confusing-name,constant-glob,ctx-actions,ctx-args,depset-iteration,depset-union,dict-concatenation,duplicated-name,filetype,function-docstring,git-repository,http-archive,integer-division,load,load-on-top,module-docstring,name-conventions,native-build,native-package,no-effect,output-group,package-name,package-on-top,positional-args,redefined-variable,repository-name,same-origin-load,string-iteration,unreachable,unused-variable"
-platforms:
-  rbe_ubuntu1604:
+tasks:
+  rbe_autoconfig:
+    platform: ubuntu1604
     test_targets:
     - "--"
-    # rbe_autoconfig tests
     - "//tests/rbe_repo/..."
     # tests that require output_base / config_repos are timing out.
     # TODO(nlopezgi): debug, fix and enable these tests.
@@ -25,7 +25,19 @@ platforms:
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_sh_toolchain_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_run_in_container_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_sh_toolchain_test"
-    # docker_autoconfig tests
+    test_flags:
+    - "--action_env=RBE_AUTOCONF_ROOT=/workdir"
+    - "--action_env=PATH"
+    - "--test_output=errors"
+    - "--verbose_failures"
+    - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
+    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+    - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+  docker_autoconfig:
+    platform: ubuntu1604
+    test_targets:
+    - "--"
     - "//tests/config:ubuntu-xenial-autoconfig_test"
     # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
     #- "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
