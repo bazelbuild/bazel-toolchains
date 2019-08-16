@@ -1,5 +1,21 @@
+# Copyright 2017 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 load("//rules/experimental/rbe:exec_properties.bzl", "create_exec_properties_dict")
 load("//configs/ubuntu16_04_clang:versions.bzl", "LATEST")
+
+CONTAINER_IMAGE = "docker://l.gcr.io/google/rbe-ubuntu16-04@%s" % LATEST
 
 # Test the docker_privileged property
 constraint_setting(name = "constraint_privileged")
@@ -13,7 +29,7 @@ platform(
     name = "platform_privileged_on",
     constraint_values = [":constraint_privileged_on"],
     exec_properties = create_exec_properties_dict(
-        container_image = "docker://marketplace.gcr.io/google/rbe-ubuntu16-04@%s" % LATEST,
+        container_image = CONTAINER_IMAGE,
         docker_privileged = True,
     ),
 )
@@ -45,7 +61,7 @@ platform(
     name = "platform_network_enabled",
     constraint_values = [":constraint_network_enabled"],
     exec_properties = create_exec_properties_dict(
-        container_image = "docker://marketplace.gcr.io/google/rbe-ubuntu16-04@%s" % LATEST,
+        container_image = CONTAINER_IMAGE,
         docker_network_enabled = True,
     ),
 )
