@@ -9,7 +9,8 @@ buildifier:
   # are fixed.
   warnings: "attr-cfg,attr-license,attr-non-empty,attr-output-default,attr-single-file,confusing-name,constant-glob,ctx-actions,ctx-args,depset-iteration,depset-union,dict-concatenation,duplicated-name,filetype,function-docstring,git-repository,http-archive,integer-division,load,load-on-top,module-docstring,name-conventions,native-build,native-package,no-effect,output-group,package-name,package-on-top,positional-args,redefined-variable,repository-name,same-origin-load,string-iteration,unreachable,unused-variable"
 tasks:
-  rbe_ubuntu1604:
+  rbe_autoconfig:
+    platform: rbe_ubuntu1604
     test_targets:
     - "--"
     # rbe_autoconfig tests
@@ -49,6 +50,7 @@ tasks:
     # Run tests on RBE. These tests run on platforms with various execution
     # properties. the tests verify that the approriate properties are set (or not set).
     # The properties are configured on the platforms using create_exec_properties_dict().
+    platform: rbe_ubuntu1604
     test_targets:
     - "--"
     - "//tests/rules/experimental/rbe/..."
