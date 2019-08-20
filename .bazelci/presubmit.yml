@@ -8,8 +8,9 @@ buildifier:
   # TODO (suvanjan): Re-enable once issues and https://github.com/bazelbuild/buildtools/issues/575
   # are fixed.
   warnings: "attr-cfg,attr-license,attr-non-empty,attr-output-default,attr-single-file,confusing-name,constant-glob,ctx-actions,ctx-args,depset-iteration,depset-union,dict-concatenation,duplicated-name,filetype,function-docstring,git-repository,http-archive,integer-division,load,load-on-top,module-docstring,name-conventions,native-build,native-package,no-effect,output-group,package-name,package-on-top,positional-args,redefined-variable,repository-name,same-origin-load,string-iteration,unreachable,unused-variable"
-platforms:
-  rbe_ubuntu1604:
+tasks:
+  rbe_autoconfig:
+    platform: rbe_ubuntu1604
     test_targets:
     - "--"
     # rbe_autoconfig tests
@@ -45,3 +46,19 @@ platforms:
     - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
     - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
+  rbe_exec_properties:
+    # Run tests on RBE. These tests run on platforms with various execution
+    # properties. the tests verify that the approriate properties are set (or not set).
+    # The properties are configured on the platforms using create_exec_properties_dict().
+    bazel: 0.29.0rc6
+    platform: rbe_ubuntu1604
+    test_targets:
+    - "--"
+    - "//tests/rules/experimental/rbe/..."
+    test_flags:
+    - "--test_output=errors"
+    - "--verbose_failures"
+    - "--extra_execution_platforms=@rbe_default//config:platform,//tests/rules/experimental/rbe:platform_privileged_on,//tests/rules/experimental/rbe:platform_network_enabled"
+    - "--host_platform=@rbe_default//config:platform"
+    - "--platforms=@rbe_default//config:platform"
+
