@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("//rules/experimental/rbe:exec_properties.bzl", "create_exec_properties_dict")
-load("//configs/ubuntu16_04_clang:versions.bzl", "LATEST")
 
 # Test the docker_privileged property
 constraint_setting(name = "constraint_privileged")
@@ -25,9 +24,9 @@ constraint_value(
 
 platform(
     name = "platform_privileged_on",
-    parents = ["@rbe_default_exec_properties//config:platform"],
     constraint_values = [":constraint_privileged_on"],
     exec_properties = create_exec_properties_dict(docker_privileged = True),
+    parents = ["@rbe_default_exec_properties//config:platform"],
 )
 
 # privileged_off_test should run with @rbe_default_exec_properties//config:platform
@@ -55,9 +54,9 @@ constraint_value(
 
 platform(
     name = "platform_network_enabled",
-    parents = ["@rbe_default_exec_properties//config:platform"],
     constraint_values = [":constraint_network_enabled"],
     exec_properties = create_exec_properties_dict(docker_network_enabled = True),
+    parents = ["@rbe_default_exec_properties//config:platform"],
 )
 
 # network_disabled_test should run with @rbe_default_exec_properties//config:platform
