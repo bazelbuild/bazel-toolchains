@@ -15,8 +15,6 @@
 load("//rules/experimental/rbe:exec_properties.bzl", "create_exec_properties_dict")
 load("//configs/ubuntu16_04_clang:versions.bzl", "LATEST")
 
-CONTAINER_IMAGE = "docker://l.gcr.io/google/rbe-ubuntu16-04@%s" % LATEST
-
 # Test the docker_privileged property
 constraint_setting(name = "constraint_privileged")
 
@@ -27,14 +25,12 @@ constraint_value(
 
 platform(
     name = "platform_privileged_on",
+    parents = ["@rbe_default_exec_properties//config:platform"],
     constraint_values = [":constraint_privileged_on"],
-    exec_properties = create_exec_properties_dict(
-        container_image = CONTAINER_IMAGE,
-        docker_privileged = True,
-    ),
+    exec_properties = create_exec_properties_dict(docker_privileged = True),
 )
 
-# privileged_off_test should run with @rbe_default//config:platform
+# privileged_off_test should run with @rbe_default_exec_properties//config:platform
 sh_test(
     name = "privileged_off_test",
     srcs = ["privileged_off.sh"],
@@ -59,14 +55,12 @@ constraint_value(
 
 platform(
     name = "platform_network_enabled",
+    parents = ["@rbe_default_exec_properties//config:platform"],
     constraint_values = [":constraint_network_enabled"],
-    exec_properties = create_exec_properties_dict(
-        container_image = CONTAINER_IMAGE,
-        docker_network_enabled = True,
-    ),
+    exec_properties = create_exec_properties_dict(docker_network_enabled = True),
 )
 
-# network_disabled_test should run with @rbe_default//config:platform
+# network_disabled_test should run with @rbe_default_exec_properties//config:platform
 sh_test(
     name = "network_disabled_test",
     srcs = ["network_disabled.sh"],
