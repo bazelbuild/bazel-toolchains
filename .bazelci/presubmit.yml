@@ -50,7 +50,6 @@ tasks:
     # Run tests on RBE. These tests run on platforms with various execution
     # properties. the tests verify that the approriate properties are set (or not set).
     # The properties are configured on the platforms using create_exec_properties_dict().
-    bazel: 0.29.0rc7
     platform: rbe_ubuntu1604
     test_targets:
     - "--"
