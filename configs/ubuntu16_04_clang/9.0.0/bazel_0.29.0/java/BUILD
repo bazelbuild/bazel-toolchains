@@ -18,25 +18,8 @@
 
 package(default_visibility = ["//visibility:public"])
 
-toolchain(
-    name = "cc-toolchain",
-    exec_compatible_with = [
-        %{exec_compatible_with}
-    ],
-    target_compatible_with = [
-        %{target_compatible_with}
-    ],
-    toolchain = "%{cc_toolchain}",
-    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-)
-
-platform(
-    name = "platform",
-    constraint_values = [
-        %{exec_compatible_with}
-    ],
-    exec_properties = {
-        "container-image": "docker://%{image_name}",
-        "OSFamily" : "Linux",
-    },
+java_runtime(
+    name = "jdk",
+    srcs = [],
+    java_home = "/usr/lib/jvm/java-8-openjdk-amd64",
 )

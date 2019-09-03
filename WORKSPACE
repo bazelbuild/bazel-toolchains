@@ -131,6 +131,12 @@ rbe_autoconfig(
     name = "rbe_default",
 )
 
+# Same as @rbe_default except that the platform uses exec_properties instead of remote_execution_properties.
+rbe_autoconfig(
+    name = "rbe_default_exec_properties",
+    use_legacy_platform_definition = False,
+)
+
 # Automatic config generation target for RBE Ubuntu 16.04
 rbe_autoconfig(
     name = "rbe_default_gen",

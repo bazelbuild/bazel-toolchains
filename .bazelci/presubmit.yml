@@ -50,7 +50,6 @@ tasks:
     # Run tests on RBE. These tests run on platforms with various execution
     # properties. the tests verify that the approriate properties are set (or not set).
     # The properties are configured on the platforms using create_exec_properties_dict().
-    bazel: 0.29.0rc6
     platform: rbe_ubuntu1604
     test_targets:
     - "--"
@@ -58,7 +57,6 @@ tasks:
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--extra_execution_platforms=@rbe_default//config:platform,//tests/rules/experimental/rbe:platform_privileged_on,//tests/rules/experimental/rbe:platform_network_enabled"
-    - "--host_platform=@rbe_default//config:platform"
-    - "--platforms=@rbe_default//config:platform"
-
+    - "--extra_execution_platforms=@rbe_default_exec_properties//config:platform,//tests/rules/experimental/rbe:platform_privileged_on,//tests/rules/experimental/rbe:platform_network_enabled"
+    - "--host_platform=@rbe_default_exec_properties//config:platform"
+    - "--platforms=@rbe_default_exec_properties//config:platform"
