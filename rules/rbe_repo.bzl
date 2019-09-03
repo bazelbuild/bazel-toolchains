@@ -511,6 +511,7 @@ def _rbe_autoconfig_impl(ctx):
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 toolchain_config_spec_name = toolchain_config_spec_name,
+                use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
             )
 
             # Create the versions.bzl file
@@ -536,6 +537,7 @@ def _rbe_autoconfig_impl(ctx):
                 ctx,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
+                use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
             )
             create_configs_tar(ctx)
 
@@ -548,6 +550,7 @@ def _rbe_autoconfig_impl(ctx):
             toolchain_config_spec_name = toolchain_config_spec_name,
             image_name = resolve_rbe_original_image_name(ctx, image_name),
             name = name,
+            use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
         )
 
     # Copy all outputs to the test directory
@@ -763,6 +766,18 @@ _rbe_autoconfig = repository_rule(
                    "configs were found."),
             values = CHECKED_IN_CONFS_VALUES,
         ),
+        "use_legacy_platform_definition": attr.bool(
+            doc = (
+                "Specifies whether the underlying platform uses the " +
+                "remote_execution_properties property (if use_legacy_platform_definition " +
+                "is True) or the exec_properties property. The reason why this " +
+                "is important is because a platform that inherits from this " +
+                "platform and wishes to add execution properties must use the " +
+                "same field remote_execution_properties/exec_properties that " +
+                "the parent platform uses."
+            ),
+            mandatory = True,
+        ),
     },
     environ = [
         AUTOCONF_ROOT,
@@ -794,7 +809,8 @@ def rbe_autoconfig(
         registry = None,
         repository = None,
         target_compatible_with = None,
-        use_checked_in_confs = CHECKED_IN_CONFS_TRY):
+        use_checked_in_confs = CHECKED_IN_CONFS_TRY,
+        use_legacy_platform_definition = True):
     """ Creates a repository with toolchain configs generated for a container image.
 
     This macro wraps (and simplifies) invocation of _rbe_autoconfig rule.
@@ -899,6 +915,14 @@ def rbe_autoconfig(
           allways attempt to generate the configs by pulling a toolchain
           container and running Bazel inside. If set to "Force" rule will error
           out if no checked-in configs were found.
+      use_legacy_platform_definition: Defaults to True (for now).
+          Specifies whether the underlying platform uses the
+          remote_execution_properties property (if use_legacy_platform_definition
+          is True) or the exec_properties property. The reason why this
+          is important is because a platform that inherits from this
+          platform and wishes to add execution properties must use the
+          same field remote_execution_properties/exec_properties that
+          the parent platform uses.
     """
     if not use_checked_in_confs in CHECKED_IN_CONFS_VALUES:
         fail("use_checked_in_confs must be one of %s." % CHECKED_IN_CONFS_VALUES)
@@ -1068,4 +1092,5 @@ def rbe_autoconfig(
         tag = tag,
         target_compatible_with = target_compatible_with,
         use_checked_in_confs = use_checked_in_confs,
+        use_legacy_platform_definition = use_legacy_platform_definition,
     )

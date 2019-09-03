@@ -35,8 +35,14 @@ platform(
     constraint_values = [
         %{exec_compatible_with}
     ],
-    exec_properties = {
-        "container-image": "docker://%{image_name}",
-        "OSFamily" : "Linux",
-    },
+    remote_execution_properties = """
+        properties: {
+          name: "container-image"
+          value:"docker://%{image_name}"
+        }
+        properties {
+           name: "OSFamily"
+           value:  "Linux"
+        }
+        """, 
 )
