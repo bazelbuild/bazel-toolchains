@@ -49,23 +49,7 @@ def repositories():
             "@io_bazel_rules_docker//toolchains/docker:default_osx_toolchain",
         )
 
-    # io_bazel_rules_go is the dependency of container_test rules.
-    if "io_bazel_rules_go" not in excludes:
-        git_repository(
-            name = "io_bazel_rules_go",
-            # TODO (suvanjan): Change this back to track releases instead of
-            # HEAD once copybara supports tracking tagged commits.
-            commit = io_bazel_rules_go_version,
-            remote = "https://github.com/bazelbuild/rules_go.git",
-            # TODO (suvanjan): Add sha256 field once copybara supports it.
-        )
-
-    if "bazel_gazelle" not in excludes:
-        http_archive(
-            name = "bazel_gazelle",
-            sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
-            urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz"],
-        )
+    packages_metadata_repositories()
 
     # =============================== Repo rule deps ==========================
     if "bazel_skylib" not in excludes:
@@ -85,3 +69,26 @@ def repositories():
             sha256 = "30af2ca7abfb65987cd61802ca6e352aadc6129dfb5bfc9c81f16617bc3a4416",
             urls = ["https://bazel.build/bazel-release.pub.gpg"],
         )
+
+def packages_metadata_repositories():
+    """Download dependencies of packages_metadata rule only."""
+    excludes = native.existing_rules().keys()
+
+    # io_bazel_rules_go is the dependency of packages_metadata rule.
+    if "io_bazel_rules_go" not in excludes:
+        git_repository(
+            name = "io_bazel_rules_go",
+            # TODO (suvanjan): Change this back to track releases instead of
+            # HEAD once copybara supports tracking tagged commits.
+            commit = io_bazel_rules_go_version,
+            remote = "https://github.com/bazelbuild/rules_go.git",
+            # TODO (suvanjan): Add sha256 field once copybara supports it.
+        )
+
+    if "bazel_gazelle" not in excludes:
+        http_archive(
+            name = "bazel_gazelle",
+            sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
+            urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz"],
+        )
+
