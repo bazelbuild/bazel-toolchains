@@ -30,8 +30,8 @@ _REPO_DIR = _ROOT_DIR + "/" + _PROJECT_REPO_DIR
 _OUTPUT_DIR = _ROOT_DIR + "/autoconf_out"
 
 _BAZELISK_PATH = _ROOT_DIR + "/bazelisk"
-_BAZELISK_RELEASE = "v0.0.8"
-_BAZELISK_SHA = "5fced4fec06bf24beb631837fa9497b6698f34041463d9188610dfa7b91f4f8d"
+_BAZELISK_RELEASE = "v1.0"
+_BAZELISK_SHA = "820f1432bb729cf1d51697a64ce57c0cff7ea4013acaf871b8c24b6388174d0d"
 
 # Creates file "container/run_in_container.sh" which will be copied onto container
 # to run the commands to run bazel and create the output tar
