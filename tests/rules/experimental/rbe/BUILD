@@ -44,7 +44,7 @@ sh_test(
     ],
 )
 
-# Test the docker_network_enabled property
+# Test the docker_network property
 constraint_setting(name = "constraint_network")
 
 constraint_value(
@@ -55,7 +55,7 @@ constraint_value(
 platform(
     name = "platform_network_enabled",
     constraint_values = [":constraint_network_enabled"],
-    exec_properties = create_exec_properties_dict(docker_network_enabled = True),
+    exec_properties = create_exec_properties_dict(docker_network = "standard"),
     parents = ["@rbe_default_exec_properties//config:platform"],
 )
 

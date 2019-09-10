@@ -20,8 +20,7 @@ def _add(
         var_name,
         key,
         value,
-        verifier_fcn = None,
-        transform_fcn = None):
+        verifier_fcn = None):
     """Add a key-value to a dict.
 
     If value is None, don't add anything.
@@ -33,15 +32,11 @@ def _add(
       key: The key in the dict.
       value: The value provided by the caller. This may or may not be what ends up in the dict.
       verifier_fcn: Verifies the validity of value. On error, it's the verifier's responsibility to call fail().
-      transform_fcn: Transform the value provided to this function with a value to put in the dict.
-          Note that a transform_fcn is not needed for casting a non string to string, this will be done anyway.
     """
     if value == None:
         return
     if verifier_fcn != None:
         verifier_fcn(var_name, value)  # verifier_fcn will fail() if necessary
-    if transform_fcn != None:
-        value = transform_fcn(value)
     dict[key] = str(value)
 
 def _verify_string(var_name, value):
@@ -52,14 +47,16 @@ def _verify_bool(var_name, value):
     if type(value) != "bool":
         fail("%s must be a bool" % var_name)
 
-def _verify_os(var_name, value):
+def _verify_one_of(var_name, value, valid_values):
     _verify_string(var_name, value)
-    valid_os_list = ["Linux", "Windows"]
-    if value not in valid_os_list:
-        fail("%s must be one of %s" % (var_name, valid_os_list))
+    if value not in valid_values:
+        fail("%s must be one of %s" % (var_name, valid_values))
 
-def _transform_network(value):
-    return "standard" if value else "off"
+def _verify_os(var_name, value):
+    _verify_one_of(var_name, value, ["Linux", "Windows"])
+
+def _verify_docker_network(var_name, value):
+    _verify_one_of(var_name, value, ["standard", "off"])
 
 PARAMS = {
     "container_image": struct(
@@ -74,10 +71,9 @@ PARAMS = {
         key = "dockerDropCapabilities",
         verifier_fcn = _verify_string,
     ),
-    "docker_network_enabled": struct(
+    "docker_network": struct(
         key = "dockerNetwork",
-        verifier_fcn = _verify_bool,
-        transform_fcn = _transform_network,
+        verifier_fcn = _verify_docker_network,
     ),
     "docker_privileged": struct(
         key = "dockerPrivileged",
@@ -144,7 +140,6 @@ def create_exec_properties_dict(**kwargs):
             key = p.key,
             value = value,
             verifier_fcn = p.verifier_fcn if hasattr(p, "verifier_fcn") else None,
-            transform_fcn = p.transform_fcn if hasattr(p, "transform_fcn") else None,
         )
     return dict
 
