@@ -119,7 +119,7 @@ Known issues:
 """
 
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("@bazel_toolchains//rules/container:docker_toolchains.bzl", "toolchain_container")
+load("@io_bazel_rules_docker//docker/toolchain_container:toolchain_container.bzl", "toolchain_container")
 load(
     "@io_bazel_rules_docker//container:container.bzl",
     _container = "container",
