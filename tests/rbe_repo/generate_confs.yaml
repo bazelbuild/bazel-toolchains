@@ -2,6 +2,7 @@
 # targets. Their purpose is to verify the configs are usable on RBE.
 # Tests below generate configs and use them directly in an RBE
 # Build.
+timeout: 1200s
 steps:
 # Tests rbe_autoconf generated artifacts are usable for an RBE build.
 - name: 'l.gcr.io/google/bazel'
