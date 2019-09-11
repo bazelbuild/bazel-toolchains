@@ -19,11 +19,9 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 bzl_library(
-    name = "docker_toolchains",
+    name = "packages_metadata",
     srcs = [
-        "docker_toolchains.bzl",
-    ],
-    deps = [
-        "@io_bazel_rules_docker//docker/toolchain_container",
+        "metadata_merge.bzl",
+        "packages_metadata.bzl",
     ],
 )

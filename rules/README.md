@@ -1,22 +1,14 @@
 # Usage
 
-This directory contains a skylark rule to generate the toolchain configs. See README.md under
-the root directory for the definition of toolchain configs.
+This directory contains Starlark rules to generate toolchain configs that can be used
+with remote execution. See README.md under the root directory for the definition of toolchain configs.
 
-For a given version of Bazel, the `docker_toolchain_autoconfig` rule will:
-* build the execution container image,
-* install Bazel,
-* build the container, and
-* extract the toolchain config.
+User facing rules in this repo are:
+* `rbe_autoconfig` rule (see rbe_repo.bzl) is a repo rule that attempts to find toolchain configs that will work for your environment. If no toolchain configs are found, it pulls a container and generates them on demand. This rule also (optionally) can create the toolchain configs within your source tree.
+* `docker_toolchain_autoconfig` rule (see docker_config.bzl) is a Starlark rule that builds a container and uses that to produce toolchain configs. It must be executed prior to running a build on Bazel and is only kept for legacy purposes. All new users should use `rbe_autoconfig`.
 
-Refer to the documentation in docker_config.bzl for more details of how to execute this rule
-and how to extract the toolchain configs.
-
-The BUILD file in this directory contains 3 sample `docker_toolchain_autoconfig` targets which
-use Bazel 0.7.0 to generate toolchain configs for:
-* Debian8 Clang environment,
-* Ubuntu Trusty GCC environment, and
-* Ubuntu Xenial GCC environment.
+Refer to the documentation in rbe_repo.bzl and docker_config.bzl for more details of how to execute these rules
+to pick/produce toolchain configs.
 
 # Authentication
 
