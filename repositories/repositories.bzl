@@ -25,7 +25,6 @@ load(
 )
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_toolchains//deps:io_bazel_rules_docker.bzl", io_bazel_rules_docker_version = "version")
-load("@bazel_toolchains//deps:io_bazel_rules_go.bzl", io_bazel_rules_go_version = "version")
 
 def repositories():
     """Download dependencies of bazel-toolchains."""
