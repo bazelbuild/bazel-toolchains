@@ -60,14 +60,6 @@ load(
 
 bazel_toolchains_images()
 
-# The following comment is needed to let Gazelle know that "bazel_gazelle"
-# is being imported from a *.bzl file.
-# gazelle:repo bazel_gazelle
-
-load("//repositories:go_repositories.bzl", bazel_toolchains_go_deps = "go_deps")
-
-bazel_toolchains_go_deps()
-
 container_pull(
     name = "official_jessie",
     registry = "index.docker.io",
