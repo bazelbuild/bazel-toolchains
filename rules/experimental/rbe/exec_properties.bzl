@@ -13,6 +13,92 @@
 # limitations under the License.
 
 """This file contains macros to create and manipulate dictionaries of properties to be used as execution properties for RBE.
+
+It also contains macros that create repository rules for standard and custom sets of execution
+property sets.
+
+Here are some examples of how to use these repository rules:
+
+Scenario 1 - The standard use case:
+
+In the WORKSPACE file, call
+  rbe_exec_properties(
+      name = "exec_properties",
+  )
+
+This creates a local repo @rbe_exec_properties with standard RBE execution property sets. For
+example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}
+
+Then, in some BUILD file, you can reference this execution property set as follows:
+
+  load("@exec_properties//:exec_propert_sets.bzl", "NETWORK_ON")
+  ...
+  exec_properties = NETWORK_ON
+
+The reason not to directly set exec_properties = {...} in a target is that then it might be hard to
+depend on such a target from another repo, if, say, that other repo wants to use remote execution
+but not RBE.
+
+Scenario 2 - non-RBE remote execution:
+
+Let's assume that the non-RBE remote execution endpoint provides a macro similar to
+rbe_exec_properties (say other_re_exec_properties), which populates the same variables (e.g.
+NETWORK_ON) with possibly different dict values.
+In this case, the WORKSPACE would look like this:
+  other_re_exec_properties(
+      name = "exec_properties",
+  )
+
+And the targets in the BUILD files will be able to depend on targets from other repos that were
+written with RBE in mind.
+
+Scenario 3 - rbe_exec_properties with override:
+
+Let's now assume that a particular repo, running with a particular RBE setups, wants to enforce
+for the sake of hermeticity, that no build or test will ever have network access. This would be
+achieved as follows.
+
+In the WORKSPACE file, call
+  rbe_exec_properties(
+      name = "exec_properties",
+      override = {
+          "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
+      },
+  )
+
+This would override the meaning of NETWORK_ON for this workspace only.
+
+Scenario 4 - custom execution properties
+
+In this scenario, let's assume that a target is best run remotely on a high memory GCE machine.
+The RBE setup associated with the workspace where the target is defined has workers of type
+"n1-highmem-8".
+Setting exec_properties = {"gceMachineType" : "n1-highmem-8"} is problematic because it does not
+lend itself to another repo depending on this target if, for example, the other repo does not use
+RBE. Or it might use RBE but have a different high memory GCE machine such as "n1-highmem-16".
+Unlike the case of NETWORK_ON, rbe_exec_properties does not provide a standard HIGH_MEM_MACHINE
+execution property set (although it might do so in the future).
+
+The recommended way to do this is as follows:
+
+In the WORKSPACE file, call
+  custom_exec_properties(
+      name = "my_bespoke_exec_properties",
+      dicts = {
+          "HIGH_MEM_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
+      },
+  )
+
+And then in the BUILD file:
+  load("@my_bespoke_exec_properties//:exec_propert_sets.bzl", "HIGH_MEM_MACHINE")
+  target(
+      ...
+      exec_properties = HIGH_MEM_MACHINE,
+  )
+
+A depending repo can then either define HIGH_MEM_MACHINE on @my_bespoke_exec_properties to be
+{"gceMachineType" : "n1-highmem-8"}, or it can define it to be anything else.
+
 """
 
 def _add(
@@ -156,3 +242,108 @@ def merge_dicts(*dict_args):
     for dictionary in dict_args:
         result.update(dictionary)
     return result
+
+def _exec_property_sets_repository_impl(repository_ctx):
+    repository_ctx.file(
+        "BUILD",
+        content = repository_ctx.attr.buildfile_content,
+        executable = False,
+    )
+    repository_ctx.file(
+        "exec_propert_sets.bzl",
+        content = repository_ctx.attr.exec_property_sets_content,
+        executable = False,
+    )
+
+# _exec_property_sets_repository is a repository rule that creates a repo with the specified exec_property_sets.
+_exec_property_sets_repository = repository_rule(
+    implementation = _exec_property_sets_repository_impl,
+    local = True,
+    attrs = {
+        "buildfile_content": attr.string(mandatory = True),
+        "exec_property_sets_content": attr.string(mandatory = True),
+    },
+)
+
+def _verify_dict_of_dicts(name, dicts):
+    """ Verify that dict is of type {string->{string->string}}.
+
+    Args:
+      name: Name of the repo rule. Used for error messages.
+      dicts: a dict whose key is a string and whose value is a dict from string to string.
+    """
+
+    # Verify that dict is of type {string->{string->string}}.
+    for key, value in dicts.items():
+        if type(key) != "string":
+            fail("In repo rule %s, execution property set name %s must be a string" % (name, key))
+        if type(value) != "dict":
+            fail("In repo rule %s, execution property set of %s must be a dict" % (name, key))
+        for k, v in value.items():
+            if type(k) != "string":
+                fail("In repo rule %s, execution property set %s, the key %s must be a string" % (name, key, k))
+            if type(v) != "string":
+                fail("In repo rule %s, execution property set %s, key %s, the value %s must be a string" % (name, key, k, v))
+
+def custom_exec_properties(name, dicts):
+    """ Creates a repository containing execution property dicts.
+
+    Use this macro in your WORKSPACE.
+
+    Args:
+      name: Name of the repo rule.
+      dicts: The set of execution property sets.
+    """
+    _verify_dict_of_dicts(name, dicts)
+
+    buildfile_content = ""
+    exec_property_sets_content = ""
+    for key, value in dicts.items():
+        exec_property_sets_content += "%s = %s\n" % (key, value)
+
+    _exec_property_sets_repository(
+        name = name,
+        buildfile_content = buildfile_content,
+        exec_property_sets_content = exec_property_sets_content,
+    )
+
+standard_property_sets = {
+    "NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
+    "NETWORK_OFF": create_exec_properties_dict(docker_network = "off"),
+    "DOCKER_PRIVILEGED": create_exec_properties_dict(docker_privileged = True),
+    "NOT_DOCKER_PRIVILEGED": create_exec_properties_dict(docker_privileged = False),
+    "DOCKER_RUN_AS_ROOT": create_exec_properties_dict(docker_run_as_root = True),
+    "NOT_DOCKER_RUN_AS_ROOT": create_exec_properties_dict(docker_run_as_root = False),
+    "DOCKER_SIBLINGS_CONTAINERS": create_exec_properties_dict(docker_sibling_containers = True),
+    "NOT_DOCKER_SIBLINGS_CONTAINERS": create_exec_properties_dict(docker_sibling_containers = False),
+    "DOCKER_USE_URANDOM": create_exec_properties_dict(docker_use_urandom = True),
+    "NOT_DOCKER_USE_URANDOM": create_exec_properties_dict(docker_use_urandom = False),
+    "LINUX": create_exec_properties_dict(os_family = "Linux"),
+    "WINDOWS": create_exec_properties_dict(os_family = "Windows"),
+    "NVIDIA": create_exec_properties_dict(docker_runtime = "nvidia"),
+}
+
+def rbe_exec_properties(name, override = None):
+    """ Creates a repository with several default execution property dictionaries.
+
+    Use this macro in your WORKSPACE.
+
+    Args:
+      name: Name of repo rule.
+      override: An optional dict of exec_properties dicts. The keys of the override dicts must be
+          names of existing property sets. The values are exec_properties dicts.
+    """
+    if override == None:
+        custom_exec_properties(name, standard_property_sets)
+        return
+
+    _verify_dict_of_dicts(name, override)
+    dicts = {}
+    for key, value in standard_property_sets.items():
+        dicts[key] = value
+    for key, value in override.items():
+        if not key in dicts:
+            fail("In repo rule %s, execution property set %s is not a standard property set name and hence cannot be overridden" % (name, key))
+        dicts[key] = value
+
+    custom_exec_properties(name, dicts)

@@ -57,6 +57,6 @@ tasks:
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--extra_execution_platforms=@rbe_default_exec_properties//config:platform,//tests/rules/experimental/rbe:platform_privileged_on,//tests/rules/experimental/rbe:platform_network_enabled"
+    - "--extra_execution_platforms=@rbe_default_exec_properties//config:platform,//tests/rules/experimental/rbe:platform_privileged_on,//tests/rules/experimental/rbe:platform_network_enabled,//tests/rules/experimental/rbe:platform_bespoke_network_enabled,//tests/rules/experimental/rbe:platform_overridden_network_enabled"
     - "--host_platform=@rbe_default_exec_properties//config:platform"
     - "--platforms=@rbe_default_exec_properties//config:platform"
