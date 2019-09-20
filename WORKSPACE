@@ -229,12 +229,21 @@ rbe_autoconfig(
 
 load("//rules:environments.bzl", "clang_env")
 
-# Use in the RBE Ubuntu1604 container release.
+# Used in the RBE Ubuntu1604 container release.
 rbe_autoconfig(
     name = "rbe_ubuntu1604_test",
     env = clang_env(),
     registry = "gcr.io",
     repository = "asci-toolchain/test-rbe-ubuntu16_04",
+    tag = "latest",
+)
+
+# Used in the RBE Ubuntu1804 container release.
+rbe_autoconfig(
+    name = "rbe_ubuntu1804_test",
+    env = clang_env(),
+    registry = "gcr.io",
+    repository = "rbe-containers/test-rbe-ubuntu18_04",
     tag = "latest",
 )
 
