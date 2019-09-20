@@ -246,7 +246,7 @@ def merge_dicts(*dict_args):
 def _exec_property_sets_repository_impl(repository_ctx):
     repository_ctx.file(
         "BUILD",
-        content = repository_ctx.attr.buildfile_content,
+        content = "",
         executable = False,
     )
     repository_ctx.file(
@@ -260,7 +260,6 @@ _exec_property_sets_repository = repository_rule(
     implementation = _exec_property_sets_repository_impl,
     local = True,
     attrs = {
-        "buildfile_content": attr.string(mandatory = True),
         "exec_property_sets_content": attr.string(mandatory = True),
     },
 )
@@ -296,14 +295,12 @@ def custom_exec_properties(name, dicts):
     """
     _verify_dict_of_dicts(name, dicts)
 
-    buildfile_content = ""
     exec_property_sets_content = ""
     for key, value in dicts.items():
         exec_property_sets_content += "%s = %s\n" % (key, value)
 
     _exec_property_sets_repository(
         name = name,
-        buildfile_content = buildfile_content,
         exec_property_sets_content = exec_property_sets_content,
     )
 
