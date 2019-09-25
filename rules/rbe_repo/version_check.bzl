@@ -60,4 +60,7 @@ def _check_bazel_version(bazel_version_fallback):
                "was not defined explicitly in rbe_autoconfig target. " +
                "Falling back to '%s'") % bazel_version_fallback)
         return bazel_version_fallback
+    if native.bazel_version > bazel_version_fallback:
+        print("\nCurrent running Bazel is ahead of bazel-toolchains repo. " +
+              "Please update your pin to bazel-toolchains repo.")
     return native.bazel_version
