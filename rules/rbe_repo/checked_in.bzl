@@ -103,7 +103,7 @@ def validateUseOfCheckedInConfigs(
         print("%s not using checked in configs as detect_java_home was set to True " % name)
         return None, None
     if bazel_rc_version:
-        print("%s not using checked in configs as hazel rc version was used " % name)
+        print("%s not using checked in configs as bazel rc version was used " % name)
         return None, None
 
     if not base_container_digest:
