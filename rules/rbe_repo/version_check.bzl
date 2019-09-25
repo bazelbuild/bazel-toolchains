@@ -60,10 +60,12 @@ def _check_bazel_version(bazel_version_fallback):
                "was not defined explicitly in rbe_autoconfig target. " +
                "Falling back to '%s'") % bazel_version_fallback)
         return bazel_version_fallback
+
     # If running a release that is not an RC, print a warning if the
     # fallback (latest known in this repo) is old
-    if (native.bazel_version.find("rc")==-1 and
+    if (native.bazel_version.find("rc") == -1 and
         native.bazel_version > bazel_version_fallback):
         print("\nCurrent running Bazel is ahead of bazel-toolchains repo. " +
-              "Please update your pin to bazel-toolchains repo.")
+              "Please update your pin to bazel-toolchains repo in your " +
+              "WORKSPACE file.")
     return native.bazel_version
