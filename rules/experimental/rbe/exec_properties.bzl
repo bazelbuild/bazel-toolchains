@@ -39,7 +39,12 @@ The reason not to directly set exec_properties = {...} in a target is that then 
 depend on such a target from another repo, if, say, that other repo wants to use remote execution
 but not RBE.
 
-Scenario 2 - non-RBE remote execution:
+Scenario 2 - local execution
+
+If bazel is set up so that the targets are executed locally, then the contents of exec_properties
+are ignored.
+
+Scenario 3 - non-RBE remote execution:
 
 Let's assume that the non-RBE remote execution endpoint provides a macro similar to
 rbe_exec_properties (say other_re_exec_properties), which populates the same variables (e.g.
@@ -52,7 +57,7 @@ In this case, the WORKSPACE would look like this:
 And the targets in the BUILD files will be able to depend on targets from other repos that were
 written with RBE in mind.
 
-Scenario 3 - rbe_exec_properties with override:
+Scenario 4 - rbe_exec_properties with override:
 
 Let's now assume that a particular repo, running with a particular RBE setups, wants to enforce
 for the sake of hermeticity, that no build or test will ever have network access. This would be
@@ -68,7 +73,7 @@ In the WORKSPACE file, call
 
 This would override the meaning of NETWORK_ON for this workspace only.
 
-Scenario 4 - custom execution properties
+Scenario 5 - custom execution properties
 
 In this scenario, let's assume that a target is best run remotely on a high memory GCE machine.
 The RBE setup associated with the workspace where the target is defined has workers of type
@@ -260,7 +265,10 @@ _exec_property_sets_repository = repository_rule(
     implementation = _exec_property_sets_repository_impl,
     local = True,
     attrs = {
-        "exec_property_sets_content": attr.string(mandatory = True),
+        "exec_property_sets_content": attr.string(
+            mandatory = True,
+            doc = "The content of the exec_propert_sets.bzl file within the repository rule.",
+        ),
     },
 )
 
@@ -304,7 +312,7 @@ def custom_exec_properties(name, dicts):
         exec_property_sets_content = exec_property_sets_content,
     )
 
-standard_property_sets = {
+STANDARD_PROPERTY_SETS = {
     "NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
     "NETWORK_OFF": create_exec_properties_dict(docker_network = "off"),
     "DOCKER_PRIVILEGED": create_exec_properties_dict(docker_privileged = True),
@@ -331,12 +339,12 @@ def rbe_exec_properties(name, override = None):
           names of existing property sets. The values are exec_properties dicts.
     """
     if override == None:
-        custom_exec_properties(name, standard_property_sets)
+        custom_exec_properties(name, STANDARD_PROPERTY_SETS)
         return
 
     _verify_dict_of_dicts(name, override)
     dicts = {}
-    for key, value in standard_property_sets.items():
+    for key, value in STANDARD_PROPERTY_SETS.items():
         dicts[key] = value
     for key, value in override.items():
         if not key in dicts:
