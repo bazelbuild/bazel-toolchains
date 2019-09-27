@@ -582,12 +582,12 @@ rbe_autoconfig_root(name = "rbe_autoconfig_root")
 # Define several exec property repo rules to be used in testing
 load("//rules/experimental/rbe:exec_properties.bzl", "create_exec_properties_dict", "custom_exec_properties", "rbe_exec_properties")
 
-# A standrad RBE execution property set repo rule
+# A standard RBE execution property set repo rule
 rbe_exec_properties(
     name = "exec_properties",
 )
 
-# A standrad RBE execution property set repo rule whose NETWORK_ON has been overridden by "network off".
+# A standard RBE execution property set repo rule whose NETWORK_ON has been overridden by "network off".
 rbe_exec_properties(
     name = "exec_properties_with_override",
     override = {

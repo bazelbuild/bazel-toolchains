@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@exec_properties//:exec_propert_sets.bzl", "DOCKER_PRIVILEGED", "NETWORK_ON")
+load("@exec_properties//:constants.bzl", "DOCKER_PRIVILEGED", "NETWORK_ON")
 
 # OVERRIDDEN_NETWORK_ON is actually the same as NETWORK_OFF (see WORKSPACE file).
-load("@exec_properties_with_override//:exec_propert_sets.bzl", OVERRIDDEN_NETWORK_ON = "NETWORK_ON")
+load("@exec_properties_with_override//:constants.bzl", OVERRIDDEN_NETWORK_ON = "NETWORK_ON")
 
 # BESPOKE_NETWORK_ON is the same as NETWORK_ON (see WORKSPACE file).
-load("@network_on_exec_properties//:exec_propert_sets.bzl", "BESPOKE_NETWORK_ON")
+load("@network_on_exec_properties//:constants.bzl", "BESPOKE_NETWORK_ON")
 
 # Test the docker_privileged property
 

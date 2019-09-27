@@ -15,7 +15,7 @@
 """This file contains macros to create and manipulate dictionaries of properties to be used as execution properties for RBE.
 
 It also contains macros that create repository rules for standard and custom sets of execution
-property sets.
+properties.
 
 Here are some examples of how to use these repository rules:
 
@@ -26,12 +26,12 @@ In the WORKSPACE file, call
       name = "exec_properties",
   )
 
-This creates a local repo @rbe_exec_properties with standard RBE execution property sets. For
+This creates a local repo @rbe_exec_properties with standard RBE execution property constants. For
 example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}
 
-Then, in some BUILD file, you can reference this execution property set as follows:
+Then, in some BUILD file, you can reference this execution property constant as follows:
 
-  load("@exec_properties//:exec_propert_sets.bzl", "NETWORK_ON")
+  load("@exec_properties//:constants.bzl", "NETWORK_ON")
   ...
   exec_properties = NETWORK_ON
 
@@ -47,7 +47,7 @@ are ignored.
 Scenario 3 - non-RBE remote execution:
 
 Let's assume that the non-RBE remote execution endpoint provides a macro similar to
-rbe_exec_properties (say other_re_exec_properties), which populates the same variables (e.g.
+rbe_exec_properties (say other_re_exec_properties), which populates the same constants (e.g.
 NETWORK_ON) with possibly different dict values.
 In this case, the WORKSPACE would look like this:
   other_re_exec_properties(
@@ -59,9 +59,8 @@ written with RBE in mind.
 
 Scenario 4 - rbe_exec_properties with override:
 
-Let's now assume that a particular repo, running with a particular RBE setups, wants to enforce
-for the sake of hermeticity, that no build or test will ever have network access. This would be
-achieved as follows.
+Let's now assume that a particular repo, running with a particular RBE setups, wants to run
+everything without network access. This would be achieved as follows.
 
 In the WORKSPACE file, call
   rbe_exec_properties(
@@ -95,7 +94,7 @@ In the WORKSPACE file, call
   )
 
 And then in the BUILD file:
-  load("@my_bespoke_exec_properties//:exec_propert_sets.bzl", "HIGH_MEM_MACHINE")
+  load("@my_bespoke_exec_properties//:constants.bzl", "HIGH_MEM_MACHINE")
   target(
       ...
       exec_properties = HIGH_MEM_MACHINE,
@@ -255,8 +254,8 @@ def _exec_property_sets_repository_impl(repository_ctx):
         executable = False,
     )
     repository_ctx.file(
-        "exec_propert_sets.bzl",
-        content = repository_ctx.attr.exec_property_sets_content,
+        "constants.bzl",
+        content = repository_ctx.attr.constants_bzl_content,
         executable = False,
     )
 
@@ -265,9 +264,9 @@ _exec_property_sets_repository = repository_rule(
     implementation = _exec_property_sets_repository_impl,
     local = True,
     attrs = {
-        "exec_property_sets_content": attr.string(
+        "constants_bzl_content": attr.string(
             mandatory = True,
-            doc = "The content of the exec_propert_sets.bzl file within the repository rule.",
+            doc = "The content of the constants.bzl file within the repository rule.",
         ),
     },
 )
@@ -299,17 +298,17 @@ def custom_exec_properties(name, dicts):
 
     Args:
       name: Name of the repo rule.
-      dicts: The set of execution property sets.
+      dicts: The execution property set constants.
     """
     _verify_dict_of_dicts(name, dicts)
 
-    exec_property_sets_content = ""
+    constants_bzl_content = ""
     for key, value in dicts.items():
-        exec_property_sets_content += "%s = %s\n" % (key, value)
+        constants_bzl_content += "%s = %s\n" % (key, value)
 
     _exec_property_sets_repository(
         name = name,
-        exec_property_sets_content = exec_property_sets_content,
+        constants_bzl_content = constants_bzl_content,
     )
 
 STANDARD_PROPERTY_SETS = {
@@ -325,7 +324,6 @@ STANDARD_PROPERTY_SETS = {
     "NOT_DOCKER_USE_URANDOM": create_exec_properties_dict(docker_use_urandom = False),
     "LINUX": create_exec_properties_dict(os_family = "Linux"),
     "WINDOWS": create_exec_properties_dict(os_family = "Windows"),
-    "NVIDIA": create_exec_properties_dict(docker_runtime = "nvidia"),
 }
 
 def rbe_exec_properties(name, override = None):
@@ -336,7 +334,7 @@ def rbe_exec_properties(name, override = None):
     Args:
       name: Name of repo rule.
       override: An optional dict of exec_properties dicts. The keys of the override dicts must be
-          names of existing property sets. The values are exec_properties dicts.
+          names of existing execution properties constant. The values are exec_properties dicts.
     """
     if override == None:
         custom_exec_properties(name, STANDARD_PROPERTY_SETS)
