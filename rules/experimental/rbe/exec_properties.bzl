@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This file contains macros to create and manipulate dictionaries of properties to be used as execution properties for RBE.
+"""This file contains macros that create repository rules for standard and custom sets of execution properties.
 
-It also contains macros that create repository rules for standard and custom sets of execution
-properties.
+It also contains macros to create and manipulate dictionaries of properties to be used as execution 
+properties for RBE.
 
 Here are some examples of how to use these repository rules:
 
@@ -27,7 +27,8 @@ In the WORKSPACE file, call
   )
 
 This creates a local repo @rbe_exec_properties with standard RBE execution property constants. For
-example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}
+example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}. (For the full list of these
+constants see STANDARD_PROPERTY_SETS further down in this file.)
 
 Then, in some BUILD file, you can reference this execution property constant as follows:
 
@@ -41,7 +42,7 @@ but not RBE.
 
 Scenario 2 - local execution
 
-If bazel is set up so that the targets are executed locally, then the contents of exec_properties
+If Bazel is set up so that the targets are executed locally, then the contents of exec_properties
 are ignored.
 
 Scenario 3 - non-RBE remote execution:
@@ -55,11 +56,12 @@ In this case, the WORKSPACE would look like this:
   )
 
 And the targets in the BUILD files will be able to depend on targets from other repos that were
-written with RBE in mind.
+written with RBE in mind, as the name of the repo defined in the WORKSPACE (exec_properties in this
+case) is the same. The is why the repo name exec_properties does *not* contain the word rbe.
 
 Scenario 4 - rbe_exec_properties with override:
 
-Let's now assume that a particular repo, running with a particular RBE setups, wants to run
+Let's now assume that a particular repo, running with a particular RBE setup, wants to run
 everything without network access. This would be achieved as follows.
 
 In the WORKSPACE file, call
@@ -71,6 +73,8 @@ In the WORKSPACE file, call
   )
 
 This would override the meaning of NETWORK_ON for this workspace only.
+For this override to work, we depend on targets marking their network dependecy by using NETWORK_ON
+that was loaded from the repo @exec_properties.
 
 Scenario 5 - custom execution properties
 
@@ -78,12 +82,12 @@ In this scenario, let's assume that a target is best run remotely on a high memo
 The RBE setup associated with the workspace where the target is defined has workers of type
 "n1-highmem-8".
 Setting exec_properties = {"gceMachineType" : "n1-highmem-8"} is problematic because it does not
-lend itself to another repo depending on this target if, for example, the other repo does not use
-RBE. Or it might use RBE but have a different high memory GCE machine such as "n1-highmem-16".
-Unlike the case of NETWORK_ON, rbe_exec_properties does not provide a standard HIGH_MEM_MACHINE
-execution property set (although it might do so in the future).
+lend itself to another repo depending on this target if, for example, the other repo uses a remote
+execution endpoint other than RBE. Or, it might use RBE but have a different high memory GCE
+machine such as "n1-highmem-16". Unlike the case of NETWORK_ON, rbe_exec_properties does not
+provide a standard HIGH_MEM_MACHINE execution property set (although it might do so in the future).
 
-The recommended way to do this is as follows:
+The recommended way to define this high-mem dependency is as follows:
 
 In the WORKSPACE file, call
   custom_exec_properties(
@@ -101,7 +105,9 @@ And then in the BUILD file:
   )
 
 A depending repo can then either define HIGH_MEM_MACHINE on @my_bespoke_exec_properties to be
-{"gceMachineType" : "n1-highmem-8"}, or it can define it to be anything else.
+{"gceMachineType" : "n1-highmem-8"}, or it can define it to be anything else, such as, for example
+{"gceMachineType" : "n1-highmem-16"} or some other property name that is consumable by a non-RBE
+remote execution endpoint.
 
 """
 
@@ -250,7 +256,16 @@ def merge_dicts(*dict_args):
 def _exec_property_sets_repository_impl(repository_ctx):
     repository_ctx.file(
         "BUILD",
-        content = "",
+        content = """
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+package(default_visibility = ["//visibility:public"])
+bzl_library(
+    name = "constants",
+    srcs = [
+        "constants.bzl",
+    ],
+)
+""",
         executable = False,
     )
     repository_ctx.file(
@@ -298,7 +313,8 @@ def custom_exec_properties(name, dicts):
 
     Args:
       name: Name of the repo rule.
-      dicts: The execution property set constants.
+      dicts: A dictionary whose key is the constant name and whose value is a string->string
+          execution properies dict.
     """
     _verify_dict_of_dicts(name, dicts)
 
@@ -311,6 +327,9 @@ def custom_exec_properties(name, dicts):
         constants_bzl_content = constants_bzl_content,
     )
 
+# STANDARD_PROPERTY_SETS is the SoT for the list of constants that rbe_exec_properties defines.
+# For more information about what each parameter of create_exec_properties_dict() means, see
+# https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties.
 STANDARD_PROPERTY_SETS = {
     "NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
     "NETWORK_OFF": create_exec_properties_dict(docker_network = "off"),
