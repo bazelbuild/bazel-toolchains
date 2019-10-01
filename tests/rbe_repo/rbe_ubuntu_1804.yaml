@@ -1,0 +1,31 @@
+# Steps in this file use toolchain configs produced by rbe_ubuntu1804
+# target with multiple versions of Bazel.
+# Their purpose is to verify that generated configs are usable on RBE.
+
+steps:
+# Install bazelisk
+- name: 'gcr.io/cloud-builders/wget'
+  entrypoint: ../bazelisk.sh
+  dir: 'tests/rbe_repo/examples'
+
+- name: 'l.gcr.io/google/bazel'
+  entrypoint: ../bazelisk
+  env: ['USE_BAZEL_VERSION=${_BAZEL_VERSION}']
+  args:
+  - --bazelrc=../../bazelrc/${_BAZELRC_FILE}
+  - test
+  - --host_javabase=@rbe_ubuntu1804//java:jdk
+  - --javabase=@rbe_ubuntu1804//java:jdk
+  - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+  - --crosstool_top=@rbe_ubuntu1804//cc:toolchain
+  - --extra_toolchains=@rbe_ubuntu1804//config:cc-toolchain
+  - --extra_execution_platforms=@rbe_ubuntu1804//config:platform
+  - --host_platform=@rbe_ubuntu1804//config:platform
+  - --platforms=@rbe_ubuntu1804//config:platform
+  - --config=remote
+  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
+  - --
+  - //:say_hello_test
+  - "@java-sample//..."
+  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
