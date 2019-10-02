@@ -154,6 +154,24 @@ def _verify_os(var_name, value):
 def _verify_docker_network(var_name, value):
     _verify_one_of(var_name, value, ["standard", "off"])
 
+def _verify_docker_shm_size(var_name, value):
+    _verify_string(var_name, value)
+
+    # The expect format is <number><unit>.
+    # <number> must be greater than 0.
+    # <unit> is optional and can be b (bytes), k (kilobytes), m (megabytes), or g (gigabytes).
+    # The entire string is also allowed to be empty.
+    if value == "":
+        return  # Both <number> and <unit> can be unspecified.
+
+    # The last char can be one of [bkmg], or it can be omitted. The rest should be a number.
+    # Peel off the last character if it is a valid unit and put the remainder in number.
+    number = value if "bkmg".find(value[-1:]) == -1 else value[:-1]
+    if not number.isdigit():
+        fail("%s = \"%s\" must be of the format \"[0-9]*[bkmg]?\"" % (var_name, value))
+    if number == "0":
+        fail("%s = \"%s\" must have a numeric value greater than 0." % (var_name, value))
+
 PARAMS = {
     "container_image": struct(
         key = "container-image",
@@ -182,6 +200,10 @@ PARAMS = {
     "docker_runtime": struct(
         key = "dockerRuntime",
         verifier_fcn = _verify_string,
+    ),
+    "docker_shm_size": struct(
+        key = "dockerShmSize",
+        verifier_fcn = _verify_docker_shm_size,
     ),
     "docker_sibling_containers": struct(
         key = "dockerSiblingContainers",
