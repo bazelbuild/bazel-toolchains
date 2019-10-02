@@ -508,11 +508,11 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating export platform")
             create_export_platform(
                 ctx,
+                exec_properties = ctx.attr.exec_properties,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 toolchain_config_spec_name = toolchain_config_spec_name,
                 use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
-                exec_properties = ctx.attr.exec_properties,
             )
 
             # Create the versions.bzl file
@@ -536,10 +536,10 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating external repo platform")
             create_external_repo_platform(
                 ctx,
+                exec_properties = ctx.attr.exec_properties,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
-                exec_properties = ctx.attr.exec_properties,
             )
             create_configs_tar(ctx)
 
@@ -549,11 +549,11 @@ def _rbe_autoconfig_impl(ctx):
         create_config_aliases(ctx, toolchain_config_spec_name)
         create_alias_platform(
             ctx,
-            toolchain_config_spec_name = toolchain_config_spec_name,
+            exec_properties = ctx.attr.exec_properties,
             image_name = resolve_rbe_original_image_name(ctx, image_name),
             name = name,
+            toolchain_config_spec_name = toolchain_config_spec_name,
             use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
-            exec_properties = ctx.attr.exec_properties,
         )
 
     # Copy all outputs to the test directory
@@ -886,10 +886,11 @@ def rbe_autoconfig(
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
-      exec_properties: Optional. A string->string dict containing execution properties
-          to be used when creating the underlying platform. When providing this attribute
-          use_legacy_platform_definition must be set to False. Note that the container
-          image property must not be specified via this attribute.
+      exec_properties: Optional. A string->string dict containing execution
+          properties to be used when creating the underlying platform. When
+          providing this attribute use_legacy_platform_definition must be set
+          to False. Note that the container image property must not be specified
+          via this attribute.
       export_configs: Optional, default False. Whether to copy generated configs
           (if they are generated) to the 'output_base' defined in
           'toolchain_config_suite_spec'. If set to False, a configs.tar file
@@ -972,6 +973,13 @@ def rbe_autoconfig(
         fail("All of 'digest', 'repository' and 'registry' or " +
              "all of 'tag', 'repository' and 'registry' or " +
              "none of them must be set.")
+
+    if use_legacy_platform_definition == True and exec_properties:
+        fail("exec_properties must not be set when " +
+             "use_legacy_platform_definition is True.")
+
+    if exec_properties and "container-image" in exec_properties:
+        fail("exec_properties must not contain a container image")
 
     # Set to defaults only if all are unset.
     if not repository and not registry and not tag and not digest:
