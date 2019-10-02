@@ -35,8 +35,5 @@ platform(
     constraint_values = [
         %{exec_compatible_with}
     ],
-    exec_properties = {
-        "container-image": "docker://%{image_name}",
-        "OSFamily" : "Linux",
-    },
+    exec_properties = %{platform_exec_properties},
 )

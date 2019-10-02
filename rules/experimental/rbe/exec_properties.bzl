@@ -272,7 +272,8 @@ def merge_dicts(*dict_args):
     """
     result = {}
     for dictionary in dict_args:
-        result.update(dictionary)
+        if dictionary:
+            result.update(dictionary)
     return result
 
 def _exec_property_sets_repository_impl(repository_ctx):

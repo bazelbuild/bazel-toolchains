@@ -602,3 +602,12 @@ custom_exec_properties(
         "BESPOKE_NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
     },
 )
+
+load("@exec_properties//:constants.bzl", "DOCKER_PRIVILEGED")
+
+# Same as @rbe_default_exec_properties execept that the exec properties also include DOCKER_PRIVILEGED.
+rbe_autoconfig(
+    name = "rbe_default_with_docker_priveleged",
+    exec_properties = DOCKER_PRIVILEGED,
+    use_legacy_platform_definition = False,
+)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@exec_properties//:constants.bzl", "DOCKER_PRIVILEGED", "NETWORK_ON")
+load("@exec_properties//:constants.bzl", "NETWORK_ON")
 
 # OVERRIDDEN_NETWORK_ON is actually the same as NETWORK_OFF (see WORKSPACE file).
 load("@exec_properties_with_override//:constants.bzl", OVERRIDDEN_NETWORK_ON = "NETWORK_ON")
@@ -32,8 +32,7 @@ constraint_value(
 platform(
     name = "platform_privileged_on",
     constraint_values = [":constraint_privileged_on"],
-    exec_properties = DOCKER_PRIVILEGED,
-    parents = ["@rbe_default_exec_properties//config:platform"],
+    parents = ["@rbe_default_with_docker_priveleged//config:platform"],
 )
 
 # privileged_off_test should run with @rbe_default_exec_properties//config:platform

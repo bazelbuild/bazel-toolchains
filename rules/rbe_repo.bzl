@@ -508,6 +508,7 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating export platform")
             create_export_platform(
                 ctx,
+                exec_properties = ctx.attr.exec_properties,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 toolchain_config_spec_name = toolchain_config_spec_name,
@@ -535,6 +536,7 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating external repo platform")
             create_external_repo_platform(
                 ctx,
+                exec_properties = ctx.attr.exec_properties,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
@@ -547,9 +549,10 @@ def _rbe_autoconfig_impl(ctx):
         create_config_aliases(ctx, toolchain_config_spec_name)
         create_alias_platform(
             ctx,
-            toolchain_config_spec_name = toolchain_config_spec_name,
+            exec_properties = ctx.attr.exec_properties,
             image_name = resolve_rbe_original_image_name(ctx, image_name),
             name = name,
+            toolchain_config_spec_name = toolchain_config_spec_name,
             use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
         )
 
@@ -696,6 +699,15 @@ _rbe_autoconfig = repository_rule(
                    "example, [\"@bazel_tools//platforms:linux\"]. Default " +
                    " is set to values for rbe-ubuntu16-04 container."),
         ),
+        "exec_properties": attr.string_dict(
+            doc = (
+                "Optional. The execution properties to be used when creating the " +
+                "underlying platform. When providing this attribute, " +
+                "use_legacy_platform_definition must be set to False. Note that " +
+                "the container image property must not be specified via this " +
+                "attribute."
+            ),
+        ),
         "export_configs": attr.bool(
             doc = (
                 "Specifies whether to copy generated configs to the 'output_base' " +
@@ -774,7 +786,8 @@ _rbe_autoconfig = repository_rule(
                 "is important is because a platform that inherits from this " +
                 "platform and wishes to add execution properties must use the " +
                 "same field remote_execution_properties/exec_properties that " +
-                "the parent platform uses."
+                "the parent platform uses. This attribute must be set to False if the " +
+                "exec_properties attribute is set."
             ),
             mandatory = True,
         ),
@@ -802,6 +815,7 @@ def rbe_autoconfig(
         digest = None,
         env = None,
         exec_compatible_with = None,
+        exec_properties = None,
         export_configs = False,
         java_home = None,
         tag = None,
@@ -872,6 +886,11 @@ def rbe_autoconfig(
       exec_compatible_with: Optional. List of constraints to add to the produced
           toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
           exec_compatible_with/constraint_values attrs, respectively.
+      exec_properties: Optional. A string->string dict containing execution
+          properties to be used when creating the underlying platform. When
+          providing this attribute use_legacy_platform_definition must be set
+          to False. Note that the container image property must not be specified
+          via this attribute.
       export_configs: Optional, default False. Whether to copy generated configs
           (if they are generated) to the 'output_base' defined in
           'toolchain_config_suite_spec'. If set to False, a configs.tar file
@@ -922,7 +941,8 @@ def rbe_autoconfig(
           is important is because a platform that inherits from this
           platform and wishes to add execution properties must use the
           same field remote_execution_properties/exec_properties that
-          the parent platform uses.
+          the parent platform uses. This attribute must be set to False if the
+          exec_properties attribute is set.
     """
     if not use_checked_in_confs in CHECKED_IN_CONFS_VALUES:
         fail("use_checked_in_confs must be one of %s." % CHECKED_IN_CONFS_VALUES)
@@ -953,6 +973,13 @@ def rbe_autoconfig(
         fail("All of 'digest', 'repository' and 'registry' or " +
              "all of 'tag', 'repository' and 'registry' or " +
              "none of them must be set.")
+
+    if use_legacy_platform_definition == True and exec_properties:
+        fail("exec_properties must not be set when " +
+             "use_legacy_platform_definition is True.")
+
+    if exec_properties and "container-image" in exec_properties:
+        fail("exec_properties must not contain a container image")
 
     # Set to defaults only if all are unset.
     if not repository and not registry and not tag and not digest:
@@ -1084,6 +1111,7 @@ def rbe_autoconfig(
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
+        exec_properties = exec_properties,
         export_configs = export_configs,
         java_home = java_home,
         toolchain_config_suite_spec = toolchain_config_suite_spec_stripped,
