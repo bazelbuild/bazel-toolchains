@@ -12,7 +12,103 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This file contains macros to create and manipulate dictionaries of properties to be used as execution properties for RBE.
+"""This file contains macros that create repository rules for standard and custom sets of execution properties.
+
+It also contains macros to create and manipulate dictionaries of properties to be used as execution 
+properties for RBE.
+
+Here are some examples of how to use these repository rules:
+
+Scenario 1 - The standard use case:
+
+In the WORKSPACE file, call
+  rbe_exec_properties(
+      name = "exec_properties",
+  )
+
+This creates a local repo @rbe_exec_properties with standard RBE execution property constants. For
+example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}. (For the full list of these
+constants see STANDARD_PROPERTY_SETS further down in this file.)
+
+Then, in some BUILD file, you can reference this execution property constant as follows:
+
+  load("@exec_properties//:constants.bzl", "NETWORK_ON")
+  ...
+  exec_properties = NETWORK_ON
+
+The reason not to directly set exec_properties = {...} in a target is that then it might be hard to
+depend on such a target from another repo, if, say, that other repo wants to use remote execution
+but not RBE.
+
+Scenario 2 - local execution
+
+If Bazel is set up so that the targets are executed locally, then the contents of exec_properties
+are ignored.
+
+Scenario 3 - non-RBE remote execution:
+
+Let's assume that the non-RBE remote execution endpoint provides a macro similar to
+rbe_exec_properties (say other_re_exec_properties), which populates the same constants (e.g.
+NETWORK_ON) with possibly different dict values.
+In this case, the WORKSPACE would look like this:
+  other_re_exec_properties(
+      name = "exec_properties",
+  )
+
+And the targets in the BUILD files will be able to depend on targets from other repos that were
+written with RBE in mind, as the name of the repo defined in the WORKSPACE (exec_properties in this
+case) is the same. The is why the repo name exec_properties does *not* contain the word rbe.
+
+Scenario 4 - rbe_exec_properties with override:
+
+Let's now assume that a particular repo, running with a particular RBE setup, wants to run
+everything without network access. This would be achieved as follows.
+
+In the WORKSPACE file, call
+  rbe_exec_properties(
+      name = "exec_properties",
+      override = {
+          "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
+      },
+  )
+
+This would override the meaning of NETWORK_ON for this workspace only.
+For this override to work, we depend on targets marking their network dependecy by using NETWORK_ON
+that was loaded from the repo @exec_properties.
+
+Scenario 5 - custom execution properties
+
+In this scenario, let's assume that a target is best run remotely on a high memory GCE machine.
+The RBE setup associated with the workspace where the target is defined has workers of type
+"n1-highmem-8".
+Setting exec_properties = {"gceMachineType" : "n1-highmem-8"} is problematic because it does not
+lend itself to another repo depending on this target if, for example, the other repo uses a remote
+execution endpoint other than RBE. Or, it might use RBE but have a different high memory GCE
+machine such as "n1-highmem-16". Unlike the case of NETWORK_ON, rbe_exec_properties does not
+provide a standard HIGH_MEM_MACHINE execution property set (although it might do so in the future).
+
+The recommended way to define this high-mem dependency is as follows:
+
+In the WORKSPACE file, call
+  custom_exec_properties(
+      name = "my_bespoke_exec_properties",
+      dicts = {
+          "HIGH_MEM_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
+      },
+  )
+
+And then in the BUILD file:
+  load("@my_bespoke_exec_properties//:constants.bzl", "HIGH_MEM_MACHINE")
+  target(
+      ...
+      exec_properties = HIGH_MEM_MACHINE,
+  )
+
+A depending repo can then either define HIGH_MEM_MACHINE on @my_bespoke_exec_properties to be
+{"gceMachineType" : "n1-highmem-8"}, or it can define it to be anything else, such as, for example
+{"gceMachineType" : "n1-highmem-16"} or some other property name that is consumable by a non-RBE
+remote execution endpoint.
+
 """
 
 def _add(
@@ -58,6 +154,24 @@ def _verify_os(var_name, value):
 def _verify_docker_network(var_name, value):
     _verify_one_of(var_name, value, ["standard", "off"])
 
+def _verify_docker_shm_size(var_name, value):
+    _verify_string(var_name, value)
+
+    # The expect format is <number><unit>.
+    # <number> must be greater than 0.
+    # <unit> is optional and can be b (bytes), k (kilobytes), m (megabytes), or g (gigabytes).
+    # The entire string is also allowed to be empty.
+    if value == "":
+        return  # Both <number> and <unit> can be unspecified.
+
+    # The last char can be one of [bkmg], or it can be omitted. The rest should be a number.
+    # Peel off the last character if it is a valid unit and put the remainder in number.
+    number = value if "bkmg".find(value[-1:]) == -1 else value[:-1]
+    if not number.isdigit():
+        fail("%s = \"%s\" must be of the format \"[0-9]*[bkmg]?\"" % (var_name, value))
+    if number == "0":
+        fail("%s = \"%s\" must have a numeric value greater than 0." % (var_name, value))
+
 PARAMS = {
     "container_image": struct(
         key = "container-image",
@@ -86,6 +200,10 @@ PARAMS = {
     "docker_runtime": struct(
         key = "dockerRuntime",
         verifier_fcn = _verify_string,
+    ),
+    "docker_shm_size": struct(
+        key = "dockerShmSize",
+        verifier_fcn = _verify_docker_shm_size,
     ),
     "docker_sibling_containers": struct(
         key = "dockerSiblingContainers",
@@ -154,5 +272,123 @@ def merge_dicts(*dict_args):
     """
     result = {}
     for dictionary in dict_args:
-        result.update(dictionary)
+        if dictionary:
+            result.update(dictionary)
     return result
+
+def _exec_property_sets_repository_impl(repository_ctx):
+    repository_ctx.file(
+        "BUILD",
+        content = """
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+package(default_visibility = ["//visibility:public"])
+bzl_library(
+    name = "constants",
+    srcs = [
+        "constants.bzl",
+    ],
+)
+""",
+        executable = False,
+    )
+    repository_ctx.file(
+        "constants.bzl",
+        content = repository_ctx.attr.constants_bzl_content,
+        executable = False,
+    )
+
+# _exec_property_sets_repository is a repository rule that creates a repo with the specified exec_property_sets.
+_exec_property_sets_repository = repository_rule(
+    implementation = _exec_property_sets_repository_impl,
+    local = True,
+    attrs = {
+        "constants_bzl_content": attr.string(
+            mandatory = True,
+            doc = "The content of the constants.bzl file within the repository rule.",
+        ),
+    },
+)
+
+def _verify_dict_of_dicts(name, dicts):
+    """ Verify that dict is of type {string->{string->string}}.
+
+    Args:
+      name: Name of the repo rule. Used for error messages.
+      dicts: a dict whose key is a string and whose value is a dict from string to string.
+    """
+
+    # Verify that dict is of type {string->{string->string}}.
+    for key, value in dicts.items():
+        if type(key) != "string":
+            fail("In repo rule %s, execution property set name %s must be a string" % (name, key))
+        if type(value) != "dict":
+            fail("In repo rule %s, execution property set of %s must be a dict" % (name, key))
+        for k, v in value.items():
+            if type(k) != "string":
+                fail("In repo rule %s, execution property set %s, the key %s must be a string" % (name, key, k))
+            if type(v) != "string":
+                fail("In repo rule %s, execution property set %s, key %s, the value %s must be a string" % (name, key, k, v))
+
+def custom_exec_properties(name, dicts):
+    """ Creates a repository containing execution property dicts.
+
+    Use this macro in your WORKSPACE.
+
+    Args:
+      name: Name of the repo rule.
+      dicts: A dictionary whose key is the constant name and whose value is a string->string
+          execution properies dict.
+    """
+    _verify_dict_of_dicts(name, dicts)
+
+    constants_bzl_content = ""
+    for key, value in dicts.items():
+        constants_bzl_content += "%s = %s\n" % (key, value)
+
+    _exec_property_sets_repository(
+        name = name,
+        constants_bzl_content = constants_bzl_content,
+    )
+
+# STANDARD_PROPERTY_SETS is the SoT for the list of constants that rbe_exec_properties defines.
+# For more information about what each parameter of create_exec_properties_dict() means, see
+# https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties.
+STANDARD_PROPERTY_SETS = {
+    "NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
+    "NETWORK_OFF": create_exec_properties_dict(docker_network = "off"),
+    "DOCKER_PRIVILEGED": create_exec_properties_dict(docker_privileged = True),
+    "NOT_DOCKER_PRIVILEGED": create_exec_properties_dict(docker_privileged = False),
+    "DOCKER_RUN_AS_ROOT": create_exec_properties_dict(docker_run_as_root = True),
+    "NOT_DOCKER_RUN_AS_ROOT": create_exec_properties_dict(docker_run_as_root = False),
+    "DOCKER_SIBLINGS_CONTAINERS": create_exec_properties_dict(docker_sibling_containers = True),
+    "NOT_DOCKER_SIBLINGS_CONTAINERS": create_exec_properties_dict(docker_sibling_containers = False),
+    "DOCKER_USE_URANDOM": create_exec_properties_dict(docker_use_urandom = True),
+    "NOT_DOCKER_USE_URANDOM": create_exec_properties_dict(docker_use_urandom = False),
+    "LINUX": create_exec_properties_dict(os_family = "Linux"),
+    "WINDOWS": create_exec_properties_dict(os_family = "Windows"),
+}
+
+def rbe_exec_properties(name, override = None):
+    """ Creates a repository with several default execution property dictionaries.
+
+    Use this macro in your WORKSPACE.
+
+    Args:
+      name: Name of repo rule.
+      override: An optional dict of exec_properties dicts. The keys of the override dicts must be
+          names of existing execution properties constant. The values are exec_properties dicts.
+    """
+    if override == None:
+        custom_exec_properties(name, STANDARD_PROPERTY_SETS)
+        return
+
+    _verify_dict_of_dicts(name, override)
+    dicts = {}
+    for key, value in STANDARD_PROPERTY_SETS.items():
+        dicts[key] = value
+    for key, value in override.items():
+        if not key in dicts:
+            fail("In repo rule %s, execution property set %s is not a standard property set name and hence cannot be overridden" % (name, key))
+        dicts[key] = value
+
+    custom_exec_properties(name, dicts)

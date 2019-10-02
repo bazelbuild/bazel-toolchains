@@ -238,3 +238,14 @@ rbe_autoconfig(
     toolchain_config_suite_spec = NO_JAVA_TOOLCHAIN_CONFIG_SUITE_SPEC,
     use_checked_in_confs = "Force",
 )
+
+load("@bazel_toolchains//rules:environments.bzl", "clang_env")
+
+# Used by GCB tests that run rbe_ubuntu_1804.yaml config
+rbe_autoconfig(
+    name = "rbe_ubuntu1804",
+    env = clang_env(),
+    registry = "gcr.io",
+    repository = "cloud-marketplace/google/rbe-ubuntu18-04",
+    tag = "latest",
+)
