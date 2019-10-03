@@ -247,11 +247,6 @@ rbe_autoconfig(
     tag = "latest",
 )
 
-# Use in the BazelCI.
-rbe_autoconfig(
-    name = "buildkite_config",
-)
-
 # Targets below for purposes of testing of rbe_autoconfig rule only
 
 rbe_autoconfig(
@@ -603,11 +598,29 @@ custom_exec_properties(
     },
 )
 
-load("@exec_properties//:constants.bzl", "DOCKER_PRIVILEGED")
+load(
+    "@exec_properties//:constants.bzl",
+    "DOCKER_PRIVILEGED",
+    "DOCKER_SIBLINGS_CONTAINERS",
+    "NETWORK_ON",
+)
 
 # Same as @rbe_default_exec_properties execept that the exec properties also include DOCKER_PRIVILEGED.
 rbe_autoconfig(
     name = "rbe_default_with_docker_priveleged",
     exec_properties = DOCKER_PRIVILEGED,
+    use_legacy_platform_definition = False,
+)
+
+load("@bazel_toolchains//rules/experimental/rbe:exec_properties.bzl", "merge_dicts")
+
+# Use in the BazelCI.
+rbe_autoconfig(
+    name = "buildkite_config",
+    base_container_digest = "sha256:4bfd33aa9ce73e28718385b8c01608a79bc6546906f01cf9329311cace1766a1",
+    digest = "sha256:c20046852a2d7910c55d76e0ec9c182b37532a9f0360d22dd5c9a1451b7c3a15",
+    exec_properties = merge_dicts(DOCKER_SIBLINGS_CONTAINERS, NETWORK_ON),
+    registry = "marketplace.gcr.io",
+    repository = "google/bazel",
     use_legacy_platform_definition = False,
 )

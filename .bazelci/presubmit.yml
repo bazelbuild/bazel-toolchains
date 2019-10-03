@@ -42,10 +42,6 @@ tasks:
     - "--action_env=PATH"
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_docker"
-    - "--extra_execution_platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
-    - "--host_platform=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
-    - "--platforms=@bazel_toolchains//configs/ubuntu16_04_clang/latest:platform_docker"
   rbe_exec_properties:
     # Run tests on RBE. These tests run on platforms with various execution
     # properties. the tests verify that the approriate properties are set (or not set).
