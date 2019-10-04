@@ -13,4 +13,4 @@
 # limitations under the License.
 """Commit sha for bazelbuild/rules_docker."""
 
-version = "89772c5ea4a7685b5378ed0fc111597b461bf15c"
+version = "b5e5506d2e2c82a21f9db69ee00e3333f8377e48"
