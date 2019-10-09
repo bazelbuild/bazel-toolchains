@@ -59,7 +59,7 @@ And the targets in the BUILD files will be able to depend on targets from other 
 written with RBE in mind, as the name of the repo defined in the WORKSPACE (exec_properties in this
 case) is the same. The is why the repo name exec_properties does *not* contain the word rbe.
 
-Scenario 4 - rbe_exec_properties with override:
+Scenario 4 - rbe_exec_properties with override_constants:
 
 Let's now assume that a particular repo, running with a particular RBE setup, wants to run
 everything without network access. This would be achieved as follows.
@@ -67,7 +67,7 @@ everything without network access. This would be achieved as follows.
 In the WORKSPACE file, call
   rbe_exec_properties(
       name = "exec_properties",
-      override = {
+      override_constants = {
           "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
       },
   )
@@ -92,7 +92,7 @@ The recommended way to define this high-mem dependency is as follows:
 In the WORKSPACE file, call
   custom_exec_properties(
       name = "my_bespoke_exec_properties",
-      dicts = {
+      constants = {
           "HIGH_MEM_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
       },
   )
@@ -325,20 +325,20 @@ def _verify_dict_of_dicts(name, dicts):
             if type(v) != "string":
                 fail("In repo rule %s, execution property set %s, key %s, the value %s must be a string" % (name, key, k, v))
 
-def custom_exec_properties(name, dicts):
+def custom_exec_properties(name, constants):
     """ Creates a repository containing execution property dicts.
 
     Use this macro in your WORKSPACE.
 
     Args:
       name: Name of the repo rule.
-      dicts: A dictionary whose key is the constant name and whose value is a string->string
+      constants: A dictionary whose key is the constant name and whose value is a string->string
           execution properies dict.
     """
-    _verify_dict_of_dicts(name, dicts)
+    _verify_dict_of_dicts(name, constants)
 
     constants_bzl_content = ""
-    for key, value in dicts.items():
+    for key, value in constants.items():
         constants_bzl_content += "%s = %s\n" % (key, value)
 
     _exec_property_sets_repository(
@@ -364,25 +364,26 @@ STANDARD_PROPERTY_SETS = {
     "WINDOWS": create_exec_properties_dict(os_family = "Windows"),
 }
 
-def rbe_exec_properties(name, override = None):
+def rbe_exec_properties(name, override_constants = None):
     """ Creates a repository with several default execution property dictionaries.
 
     Use this macro in your WORKSPACE.
 
     Args:
       name: Name of repo rule.
-      override: An optional dict of exec_properties dicts. The keys of the override dicts must be
-          names of existing execution properties constant. The values are exec_properties dicts.
+      override_constants: An optional dict of exec_properties dicts. The keys of the
+          override_constants dicts must be names of existing execution properties constants. The
+          values are exec_properties dicts.
     """
-    if override == None:
+    if override_constants == None:
         custom_exec_properties(name, STANDARD_PROPERTY_SETS)
         return
 
-    _verify_dict_of_dicts(name, override)
+    _verify_dict_of_dicts(name, override_constants)
     dicts = {}
     for key, value in STANDARD_PROPERTY_SETS.items():
         dicts[key] = value
-    for key, value in override.items():
+    for key, value in override_constants.items():
         if not key in dicts:
             fail("In repo rule %s, execution property set %s is not a standard property set name and hence cannot be overridden" % (name, key))
         dicts[key] = value
