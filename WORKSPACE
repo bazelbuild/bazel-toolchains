@@ -365,10 +365,10 @@ rbe_autoconfig(
 
 rbe_autoconfig(
     name = "rbe_autoconf_base_container_digest",
-    base_container_digest = "sha256:bc6a2ad47b24d01a73da315dd288a560037c51a95cc77abb837b26fef1408798",
+    base_container_digest = "sha256:06f8f8e9f97daa1c15466536dc2a7ae6641d16962d7b58a393af8060e460f571",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
-    digest = "sha256:1fcb66b2d451b453aa7e9ef0798823c657fa0f5b3a6b52f607cc6da1e68a11ca",
+    digest = "sha256:0151b16320e3132a9899022567ce2b1c3d237b20913140410b9037317d333672",
     env = clang_env(),
     registry = "marketplace.gcr.io",
     repository = "google/bazel",
