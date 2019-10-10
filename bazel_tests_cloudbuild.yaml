@@ -13,9 +13,7 @@ steps:
 # Test that runs with rbe_autoconfig with Bazel ${_BAZEL_VERSION}
 # This test can only run with Bazel versions that have x.x.0 format
 # as we only maintain bazelrc files for these.
-# TODO(nlopezgi): switch back to public version of container
-# once 1.0.0 is out
-- name: 'gcr.io/asci-toolchain/nosla-ubuntu16-04-bazel:${_BAZEL_VERSION}'
+- name: 'l.gcr.io/google/bazel:${_BAZEL_VERSION}'
   args:
   - --bazelrc=../../../../bazelrc/bazel-${_BAZEL_VERSION}.bazelrc
   - test
