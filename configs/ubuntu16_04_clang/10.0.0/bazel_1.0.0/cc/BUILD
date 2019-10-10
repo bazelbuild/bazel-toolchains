@@ -14,11 +14,11 @@
 
 # This becomes the BUILD file for @local_config_cc// under non-FreeBSD unixes.
 
-package(default_visibility = ["//visibility:public"])
-
-load(":cc_toolchain_config.bzl", "cc_toolchain_config")
-load(":armeabi_cc_toolchain_config.bzl", "armeabi_cc_toolchain_config")
 load("@rules_cc//cc:defs.bzl", "cc_toolchain", "cc_toolchain_suite")
+load(":armeabi_cc_toolchain_config.bzl", "armeabi_cc_toolchain_config")
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
+
+package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])  # Apache 2.0
 
@@ -50,10 +50,10 @@ filegroup(
 cc_toolchain_suite(
     name = "toolchain",
     toolchains = {
-        "k8|clang": ":cc-compiler-k8",
-        "k8": ":cc-compiler-k8",
-        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
         "armeabi-v7a": ":cc-compiler-armeabi-v7a",
+        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+        "k8": ":cc-compiler-k8",
+        "k8|clang": ":cc-compiler-k8",
     },
 )
 
@@ -124,11 +124,11 @@ cc_toolchain_config(
     target_system_name = "x86_64-unknown-linux-gnu",
     tool_paths = {
         "ar": "/usr/bin/ar",
-        "ld": "/usr/bin/ld",
         "cpp": "/usr/bin/cpp",
-        "gcc": "/usr/local/bin/clang",
         "dwp": "/usr/bin/dwp",
+        "gcc": "/usr/local/bin/clang",
         "gcov": "/dev/null",
+        "ld": "/usr/bin/ld",
         "nm": "/usr/bin/nm",
         "objcopy": "/usr/bin/objcopy",
         "objdump": "/usr/bin/objdump",
