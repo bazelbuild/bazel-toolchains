@@ -221,10 +221,6 @@ PARAMS = {
         key = "gceMachineType",
         verifier_fcn = _verify_string,
     ),
-    "jdk_version": struct(
-        key = "jdk-version",
-        verifier_fcn = _verify_string,
-    ),
     "os_family": struct(
         key = "OSFamily",
         verifier_fcn = _verify_os,
