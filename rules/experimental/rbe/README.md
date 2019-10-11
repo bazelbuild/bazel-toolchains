@@ -157,43 +157,7 @@ custom_exec_properties(
 
 As alluded to in the use cases described above, there are some anti-patterns to avoid.
 
-### Anti-pattern 1 - Do not create repo names that are not properly prefixed.
-
-When creating local repos, other than @exec_properties, using rbe_exec_properties and when creating
-any local repos using custom_exec_properties, add a prefix to the repo name to make it globally
-unique. This is important in order to avoid name clashes with other repos.
-
-Here is an example of what might go wrong.
-
-Workspace A's WORKSPACE contains the following snippet:
-```
-custom_exec_properties(
-    name = "my_exec_properties",
-    constants = {
-        "MY_DOCKER_FLAGS": create_some_combination_of_exec_properties_docker_flags(),
-    },
-)
-```
-  
-And workspace A defines a foo_library that uses this constant MY_DOCKER_FLAGS.
-
-Similarly workspace B's WORKSPACE contains a very similar snippet, which uses the same repo name
-and same constant name as repo A does, but with a different content:
-```
-custom_exec_properties(
-    name = "my_exec_properties",
-    constants = {
-        "MY_DOCKER_FLAGS": create_some_other_combination_of_exec_properties_docker_flags(),
-    },
-)
-```
-
-The owners of repos A and B are unaware of each other, but repo C, has some targets that depend on
-repo A and other targets that depend on repo B. That means that repo C will have to define a local
-repo @my_exec_properties which contains a constant MY_DOCKER_FLAGS. But it will not be able to do so
-in a way that will not break at least one of its dependencies.
-
-### Anti-pattern 2 - Do not populate the exec_properties dict manually.
+### Anti-pattern 1 - Do not populate the exec_properties dict manually.
 
 ⚠️ **Warning**: Avoid creating a dict that looks like this.
 ```
@@ -218,7 +182,7 @@ parsing the bazel code, instead of having RBE just ignore keys that it doesn't r
 the developer spend more time that is necessary trying to figure out what went wrong. Furthermore,
 create_exec_properties_dict will perform some validation about the values.
 
-### Anti-pattern 3 - Do not call create_exec_properties_dict directly from BUILD files.
+### Anti-pattern 2 - Do not call create_exec_properties_dict directly from BUILD files.
 
 Instead create_exec_properties_dict should only be called from the WORKSPACE in the context of
 creating a local repo, typically using custom_exec_properties.
@@ -227,6 +191,7 @@ Here is what might go wrong.
 
 Let's assume that repo A defines a foo_library target that, if executed remotely on RBE, should run
 on a high memory machine such as "n1-highmem-8". So the target looks like this:
+⚠️ **Warning**: Do not do this!
 ```
 foo_library(
    name="my_lib",
@@ -247,4 +212,42 @@ repo B will not be able to depend on repo A's target :my_lib.
 
 The proper way for repo A to define this dependency on high memory machines is descibed in use case
 5 [above](#use-case-5---custom-execution-properties).
+
+### Anti-pattern 3 - Do not create repo names that are not properly prefixed.
+
+When creating local repos, other than @exec_properties, using rbe_exec_properties and when creating
+any local repos using custom_exec_properties, add a prefix to the repo name to make it globally
+unique. This is important in order to avoid name clashes with other repos.
+
+Here is an example of what might go wrong.
+
+Workspace A's WORKSPACE contains the following snippet:
+⚠️ **Warning**: Do not do this!
+```
+custom_exec_properties(
+    name = "my_exec_properties",
+    constants = {
+        "MY_DOCKER_FLAGS": create_some_combination_of_exec_properties_docker_flags(),
+    },
+)
+```
+  
+And workspace A defines a foo_library that uses this constant MY_DOCKER_FLAGS.
+
+Similarly workspace B's WORKSPACE contains a very similar snippet, which uses the same repo name
+and same constant name as repo A does, but with a different content.
+⚠️ **Warning**: Do not do this either!
+```
+custom_exec_properties(
+    name = "my_exec_properties",
+    constants = {
+        "MY_DOCKER_FLAGS": create_some_other_combination_of_exec_properties_docker_flags(),
+    },
+)
+```
+
+The owners of repos A and B are unaware of each other, but repo C, has some targets that depend on
+repo A and other targets that depend on repo B. That means that repo C will have to define a local
+repo @my_exec_properties which contains a constant MY_DOCKER_FLAGS. But it will not be able to do so
+in a way that will not break at least one of its dependencies.
 
