@@ -21,7 +21,7 @@ Here are some examples of how to use these repository rules:
 
 Scenario 1 - The standard use case:
 
-In the WORKSPACE file, call
+In the WORKSPACE file, call 
   rbe_exec_properties(
       name = "exec_properties",
   )
