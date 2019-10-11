@@ -45,9 +45,9 @@ The following are some use cases showing how these repo rules should be used.
 
 In the WORKSPACE file, call
 ```
-  rbe_exec_properties(
-      name = "exec_properties",
-  )
+rbe_exec_properties(
+    name = "exec_properties",
+)
 ```
 
 This creates a local repo @rbe_exec_properties with standard RBE execution property constants. For
@@ -55,13 +55,14 @@ example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}. (For the f
 constants see STANDARD_PROPERTY_SETS in exec_properties.bzl.)
 
 Then, in some BUILD file, you can reference this execution property constant as follows:
-
-  load("@exec_properties//:constants.bzl", "NETWORK_ON")
-  ...
-  foo_test(
-     ...
-     exec_properties = NETWORK_ON,
-  )
+```
+load("@exec_properties//:constants.bzl", "NETWORK_ON")
+...
+foo_test(
+   ...
+   exec_properties = NETWORK_ON,
+)
+```
 
 The reason not to directly set exec_properties = {...} in a target is that then it might be hard to
 depend on such a target from another repo, if, say, that other repo wants to use remote execution
@@ -78,9 +79,11 @@ Let's assume that the non-RBE remote execution endpoint provides a macro similar
 rbe_exec_properties (say other_re_exec_properties), which populates the same constants (e.g.
 NETWORK_ON) with possibly different dict values.
 In this case, the WORKSPACE would look like this:
-  other_re_exec_properties(
-      name = "exec_properties",
-  )
+```
+other_re_exec_properties(
+    name = "exec_properties",
+)
+```
 
 And the targets in the BUILD files will be able to depend on targets from other repos that were
 written with RBE in mind, as the name of the repo defined in the WORKSPACE (exec_properties in this
@@ -92,12 +95,14 @@ Let's now assume that a particular repo, running with a particular RBE setup, wa
 everything without network access. This would be achieved as follows.
 
 In the WORKSPACE file, call
-  rbe_exec_properties(
-      name = "exec_properties",
-      override_constants = {
-          "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
-      },
-  )
+```
+rbe_exec_properties(
+    name = "exec_properties",
+    override_constants = {
+        "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
+    },
+)
+```
 
 This would override the meaning of NETWORK_ON for this workspace only.
 For this override to work, we depend on targets marking their network dependecy by using NETWORK_ON
@@ -116,20 +121,24 @@ provide a standard HIGH_MEM_MACHINE execution property set (although it might do
 
 The recommended way to define this high-mem dependency is as follows:
 
-In the WORKSPACE file, call
-  custom_exec_properties(
-      name = "my_bespoke_exec_properties",
-      constants = {
-          "HIGH_MEM_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
-      },
-  )
+In the WORKSPACE file, call:
+```
+custom_exec_properties(
+    name = "my_bespoke_exec_properties",
+    constants = {
+        "HIGH_MEM_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
+    },
+)
+```
 
 And then in the BUILD file:
-  load("@my_bespoke_exec_properties//:constants.bzl", "HIGH_MEM_MACHINE")
-  foo_bin(
-      ...
-      exec_properties = HIGH_MEM_MACHINE,
-  )
+```
+load("@my_bespoke_exec_properties//:constants.bzl", "HIGH_MEM_MACHINE")
+foo_bin(
+    ...
+    exec_properties = HIGH_MEM_MACHINE,
+)
+```
 
 A depending repo can then either define HIGH_MEM_MACHINE on @my_bespoke_exec_properties to be
 {"gceMachineType" : "n1-highmem-8"}, or it can define it to be anything else, such as, for example
@@ -149,23 +158,27 @@ unique. This is important in order to avoid name clashes with other repos.
 Here is an example of what might go wrong.
 
 Workspace A's WORKSPACE contains the following snippet:
-  custom_exec_properties(
-      name = "my_exec_properties",
-      constants = {
-          "MY_DOCKER_FLAGS": create_some_combination_of_exec_properties_docker_flags(),
-      },
-  )
+```
+custom_exec_properties(
+    name = "my_exec_properties",
+    constants = {
+        "MY_DOCKER_FLAGS": create_some_combination_of_exec_properties_docker_flags(),
+    },
+)
+```
   
 And workspace A defines a foo_library that uses this constant MY_DOCKER_FLAGS.
 
 Similarly workspace B's WORKSPACE contains a very similar snippet, which uses the same repo name
 and same constant name as repo A does, but with a different content:
-  custom_exec_properties(
-      name = "my_exec_properties",
-      constants = {
-          "MY_DOCKER_FLAGS": create_some_other_combination_of_exec_properties_docker_flags(),
-      },
-  )
+```
+custom_exec_properties(
+    name = "my_exec_properties",
+    constants = {
+        "MY_DOCKER_FLAGS": create_some_other_combination_of_exec_properties_docker_flags(),
+    },
+)
+```
 
 Now the owners of repos A and B are unaware of each other, but repo C, has some targets that depend
 on repo A and other targets that depend on repo B. That means that repo C will have to define a
@@ -181,11 +194,13 @@ Here is what might go wrong.
 
 Let's assume that repo A defines a foo_library target that, if executed remotely on RBE, should run
 on a high CPU machine such as "n1-highcpu-64". So the target looks like this:
-  foo_library(
-     name="my_lib",
-     ...
-     exec_properties = create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
-  )
+```
+foo_library(
+   name="my_lib",
+   ...
+   exec_properties = create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
+)
+```
 
 Now let's assume that repo B has a target that transitively depeneds on repo A's target :my_lib.
 If repo B's target runs on RBE, it will only be able to run on a worker whose machine type is
@@ -199,25 +214,29 @@ not be able to depend on repo A's target :my_lib.
 
 The proper way for repo A to define this dependency on high CPU machines is to add to their
 WORKSPACE file:
-  custom_exec_properties(
-      name = "some_repo_specific_prefix_exec_properties",
-      constants = {
-          "HIGH_CPU_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
-      },
-  )
+```
+custom_exec_properties(
+    name = "some_repo_specific_prefix_exec_properties",
+    constants = {
+        "HIGH_CPU_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
+    },
+)
+```
   
 And in their BUILD file:
-  load("@some_repo_specific_prefix_exec_properties//:constants.bzl", "HIGH_CPU_MACHINE")
-  ...
-  foo_library(
-     name="my_lib",
-     ...
-     exec_properties = HIGH_CPU_MACHINE,
-  )
+```
+load("@some_repo_specific_prefix_exec_properties//:constants.bzl", "HIGH_CPU_MACHINE")
+...
+foo_library(
+   name="my_lib",
+   ...
+   exec_properties = HIGH_CPU_MACHINE,
+)
+```
   
 repo A should also provide a deps() macro that should be called from any WORKSPACE that depends on
 repo A. The deps macro will look something like:
-
+```
 def deps():
   ...
   excludes = native.existing_rules().keys()
@@ -228,10 +247,13 @@ def deps():
               "HIGH_CPU_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
           },
       )
+```
     
 That way, a repo B, should have in its WORKSPACE:
-  load("@repo_a:deps.bzl", repo_a_deps = "deps")
-  repo_a_deps()
+```
+load("@repo_a:deps.bzl", repo_a_deps = "deps")
+repo_a_deps()
+```
 
 But it can also add, further up in its WORKSPACE, its own definition of
 @some_repo_specific_prefix_exec_properties.
