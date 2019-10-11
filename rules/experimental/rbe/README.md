@@ -109,12 +109,14 @@ that was loaded from the repo @exec_properties.
 ### Use case 5 - custom execution properties
 
 In this scenario, let's assume that a target is best run remotely on a high memory GCE machine.
-The RBE setup associated with the workspace where the target is defined has workers of type
-"n1-highmem-8".
+Let's also assume that the RBE setup associated with the workspace where the target is defined has
+workers of type "n1-highmem-8".
+
 Setting exec_properties = {"gceMachineType" : "n1-highmem-8"} is problematic because it does not
 lend itself to another repo depending on this target in all cases. See
-(anti-patterns](#anti-patterns) below. Unlike the case of NETWORK_ON, rbe_exec_properties does not
-provide a standard HIGH_MEM_MACHINE execution property set (although it might do so in the future).
+[anti-patterns](#anti-patterns) below. Unlike the case of NETWORK_ON, rbe_exec_properties does not
+provide a standard HIGH_MEM_MACHINE execution property constant (although it might do so in the
+future).
 
 The recommended way for a repo (let's call this repo, repo A) to define this high-mem dependency is
 as follows:
@@ -186,10 +188,10 @@ custom_exec_properties(
 )
 ```
 
-Now the owners of repos A and B are unaware of each other, but repo C, has some targets that depend
-on repo A and other targets that depend on repo B. That means that repo C will have to define a
-local repo @my_exec_properties which contains a constant MY_DOCKER_FLAGS. But it will not be able
-to do so in a way that will not break at least one of its dependencies.
+The owners of repos A and B are unaware of each other, but repo C, has some targets that depend on
+repo A and other targets that depend on repo B. That means that repo C will have to define a local
+repo @my_exec_properties which contains a constant MY_DOCKER_FLAGS. But it will not be able to do so
+in a way that will not break at least one of its dependencies.
 
 ### Anti-pattern 2 - Do not populate the exec_properties dict manually.
 
