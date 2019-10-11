@@ -191,6 +191,7 @@ Here is what might go wrong.
 
 Let's assume that repo A defines a foo_library target that, if executed remotely on RBE, should run
 on a high memory machine such as "n1-highmem-8". So the target looks like this:
+
 ⚠️ **Warning**: Do not do this!
 ```
 foo_library(
@@ -222,6 +223,7 @@ unique. This is important in order to avoid name clashes with other repos.
 Here is an example of what might go wrong.
 
 Workspace A's WORKSPACE contains the following snippet:
+
 ⚠️ **Warning**: Do not do this!
 ```
 custom_exec_properties(
@@ -236,6 +238,7 @@ And workspace A defines a foo_library that uses this constant MY_DOCKER_FLAGS.
 
 Similarly workspace B's WORKSPACE contains a very similar snippet, which uses the same repo name
 and same constant name as repo A does, but with a different content.
+
 ⚠️ **Warning**: Do not do this either!
 ```
 custom_exec_properties(
