@@ -54,7 +54,8 @@ This creates a local repo @rbe_exec_properties with standard RBE execution prope
 example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}. (For the full list of these
 constants see STANDARD_PROPERTY_SETS in exec_properties.bzl.)
 
-Then, in some BUILD file, you can reference this execution property constant as follows:
+Then, in some BUILD file in your work space, you can reference this execution property constant as
+follows:
 ```
 load("@exec_properties//:constants.bzl", "NETWORK_ON")
 ...
@@ -63,10 +64,6 @@ foo_test(
    exec_properties = NETWORK_ON,
 )
 ```
-
-The reason not to directly set exec_properties = {...} in a target is that then it might be hard to
-depend on such a target from another repo, if, say, that other repo wants to use remote execution
-but not RBE.
 
 ### Use case 2 - local execution
 
@@ -78,7 +75,7 @@ are ignored.
 Let's assume that the non-RBE remote execution endpoint provides a macro similar to
 rbe_exec_properties (say other_re_exec_properties), which populates the same constants (e.g.
 NETWORK_ON) with possibly different dict values.
-In this case, the WORKSPACE would look like this:
+In this case, the WORKSPACE would, presumably, look like this:
 ```
 other_re_exec_properties(
     name = "exec_properties",
@@ -92,7 +89,8 @@ case) is the same. That is why the repo name exec_properties does *not* contain 
 ### Use case 4 - rbe_exec_properties with override_constants:
 
 Let's now assume that a particular repo, running with a particular RBE setup, wants to run
-everything without network access. This would be achieved as follows.
+all its remote execution actions without network access, possibly for the sake of identifying any
+network dependencies. This would be achieved as follows.
 
 In the WORKSPACE file, call
 ```
@@ -114,17 +112,17 @@ In this scenario, let's assume that a target is best run remotely on a high memo
 The RBE setup associated with the workspace where the target is defined has workers of type
 "n1-highmem-8".
 Setting exec_properties = {"gceMachineType" : "n1-highmem-8"} is problematic because it does not
-lend itself to another repo depending on this target if, for example, the other repo uses a remote
-execution endpoint other than RBE. Or, it might use RBE but have a different high memory GCE
-machine such as "n1-highmem-16". Unlike the case of NETWORK_ON, rbe_exec_properties does not
+lend itself to another repo depending on this target in all cases. See
+(anti-patterns](#anti-patterns) below. Unlike the case of NETWORK_ON, rbe_exec_properties does not
 provide a standard HIGH_MEM_MACHINE execution property set (although it might do so in the future).
 
-The recommended way to define this high-mem dependency is as follows:
+The recommended way for a repo (let's call this repo, repo A) to define this high-mem dependency is
+as follows:
 
 In the WORKSPACE file, call:
 ```
 custom_exec_properties(
-    name = "my_bespoke_exec_properties",
+    name = "repo_a_prefix_high_mem_machine_exec_property",
     constants = {
         "HIGH_MEM_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
     },
@@ -133,17 +131,25 @@ custom_exec_properties(
 
 And then in the BUILD file:
 ```
-load("@my_bespoke_exec_properties//:constants.bzl", "HIGH_MEM_MACHINE")
-foo_bin(
+load("@repo_a_prefix_high_mem_machine_exec_property//:constants.bzl", "HIGH_MEM_MACHINE")
+foo_library(
+    name="my_lib",
     ...
     exec_properties = HIGH_MEM_MACHINE,
 )
 ```
 
-A depending repo can then either define HIGH_MEM_MACHINE on @my_bespoke_exec_properties to be
-{"gceMachineType" : "n1-highmem-8"}, or it can define it to be anything else, such as, for example
-{"gceMachineType" : "n1-highmem-16"} or some other property name that is consumable by a non-RBE
-remote execution endpoint.
+A depending repo (repo B) must also call custom_exec_properties in their WORKSPACE and map
+HIGH_MEM_MACHINE.
+They may, for whatever reason, decide to map it to something else.
+```
+custom_exec_properties(
+    name = "repo_a_prefix_high_mem_machine_exec_property",
+    constants = {
+        "HIGH_MEM_MACHINE": ...,
+    },
+)
+```
 
 ## Anti-patterns
 
@@ -184,8 +190,33 @@ Now the owners of repos A and B are unaware of each other, but repo C, has some 
 on repo A and other targets that depend on repo B. That means that repo C will have to define a
 local repo @my_exec_properties which contains a constant MY_DOCKER_FLAGS. But it will not be able
 to do so in a way that will not break at least one of its dependencies.
- 
-### Anti-pattern 2 - Do not call create_exec_properties_dict directly from BUILD files.
+
+### Anti-pattern 2 - Do not populate the exec_properties dict manually.
+
+Avoid creating a dict that looks like this:
+```
+{
+    "gceMachineType" : "n1-highmem-8",
+    "dockerPrivileged" : "True",
+    "dockerSiblingContainers" : "True",
+}
+```
+
+Instead, always prefer using create_exec_properties_dict like so:
+```
+create_exec_properties_dict(
+    gce_machine_type = "n1-highmem-8",
+    docker_privileged = True,
+    docker_sibling_containers = True,
+)
+```
+
+create_exec_properties_dict is better because typos in key names will be caught early, while
+parsing the bazel code, instead of having RBE just ignore keys that it doesn't recognize and having
+the developer spend more time that is necessary trying to figure out what went wrong. Furthermore,
+create_exec_properties_dict will perform some validation about the values.
+
+### Anti-pattern 3 - Do not call create_exec_properties_dict directly from BUILD files.
 
 Instead create_exec_properties_dict should only be called from the WORKSPACE in the context of
 creating a local repo, typically using custom_exec_properties.
@@ -193,69 +224,25 @@ creating a local repo, typically using custom_exec_properties.
 Here is what might go wrong.
 
 Let's assume that repo A defines a foo_library target that, if executed remotely on RBE, should run
-on a high CPU machine such as "n1-highcpu-64". So the target looks like this:
+on a high memory machine such as "n1-highmem-8". So the target looks like this:
 ```
 foo_library(
    name="my_lib",
    ...
-   exec_properties = create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
+   exec_properties = create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
 )
 ```
 
 Now let's assume that repo B has a target that transitively depeneds on repo A's target :my_lib.
 If repo B's target runs on RBE, it will only be able to run on a worker whose machine type is
-"n1-highcpu-64".
+"n1-highmem-8".
 
 This can be problematic for a few reasons. Perhaps for cost reasons, the owners of repo B do not
-maintain such machines and instead want to build this foo_library on "n1-highcpu-8" machines. Or
-perhaps, they are using a different remote execution end point that defines a completely different
-way to specify that an action runs remotely on a high-cpu machine. If this is the case, repo B will
-not be able to depend on repo A's target :my_lib.
+maintain such machines and instead want to build this foo_library on "n1-highmem-4" machines. Or
+perhaps, they are using a different remote execution end point (not RBE) that defines a completely
+different way to specify that an action runs remotely on a high memory machine. If this is the case,
+repo B will not be able to depend on repo A's target :my_lib.
 
-The proper way for repo A to define this dependency on high CPU machines is to add to their
-WORKSPACE file:
-```
-custom_exec_properties(
-    name = "some_repo_specific_prefix_exec_properties",
-    constants = {
-        "HIGH_CPU_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
-    },
-)
-```
-  
-And in their BUILD file:
-```
-load("@some_repo_specific_prefix_exec_properties//:constants.bzl", "HIGH_CPU_MACHINE")
-...
-foo_library(
-   name="my_lib",
-   ...
-   exec_properties = HIGH_CPU_MACHINE,
-)
-```
-  
-repo A should also provide a deps() macro that should be called from any WORKSPACE that depends on
-repo A. The deps macro will look something like:
-```
-def deps():
-  ...
-  excludes = native.existing_rules().keys()
-  if "some_repo_specific_prefix_exec_properties" not in excludes:
-      custom_exec_properties(
-          name = "some_repo_specific_prefix_exec_properties",
-          constants = {
-              "HIGH_CPU_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highcpu-64"),
-          },
-      )
-```
-    
-That way, a repo B, should have in its WORKSPACE:
-```
-load("@repo_a:deps.bzl", repo_a_deps = "deps")
-repo_a_deps()
-```
-
-But it can also add, further up in its WORKSPACE, its own definition of
-@some_repo_specific_prefix_exec_properties.
-
+The proper way for repo A to define this dependency on high memory machines is descibed in use case
+5 [above](#use-case-5---custom-execution-properties).
 
