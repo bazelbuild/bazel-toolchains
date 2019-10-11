@@ -585,7 +585,7 @@ rbe_exec_properties(
 # A standard RBE execution property set repo rule whose NETWORK_ON has been overridden by "network off".
 rbe_exec_properties(
     name = "exec_properties_with_override",
-    override = {
+    override_constants = {
         "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
     },
 )
@@ -593,7 +593,7 @@ rbe_exec_properties(
 # A custom execution property set repo rule defining its own name for the network on property set.
 custom_exec_properties(
     name = "network_on_exec_properties",
-    dicts = {
+    constants = {
         "BESPOKE_NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
     },
 )
