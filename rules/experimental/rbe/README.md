@@ -195,7 +195,7 @@ in a way that will not break at least one of its dependencies.
 
 ### Anti-pattern 2 - Do not populate the exec_properties dict manually.
 
-Avoid creating a dict that looks like this:
+Warning: Avoid creating a dict that looks like this.
 ```
 {
     "gceMachineType" : "n1-highmem-8",
