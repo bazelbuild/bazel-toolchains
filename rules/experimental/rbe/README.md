@@ -8,21 +8,21 @@ exec_properties.bzl contains the following starlark macros:
 
 ## rbe_exec_properties
 
-rbe_exec_properties is a starlark macro that can be called from the WORKSPACE file. It creates a
-repository repo that contains a set of standard constants each of which contains a dictionary of
-remote execution properties that are consumable by RBE.
+rbe_exec_properties is a starlark macro that can be called from the WORKSPACE file. It wraps a repo
+rule that creates a local repository. This local repository contains a set of standard constants
+each of which contains a dictionary of remote execution properties that are consumable by RBE.
 
-It is highly recommended to call this repo "exec_properties" for reasons that will be explained
-below.
+A standrad name for this repository is "exec_properties", and that's the name that should generally
+be used.
 
 ## custom_exec_properties
 
-custom_exec_properties is a starlark macro that can be called from the WORKSPACE file. It creates a
-repository repo that contains a set user defined constants each of which contains a dictionary of
-remote execution properties.
+custom_exec_properties is a starlark macro that can be called from the WORKSPACE file. It wraps a
+repo rule that creates a local repository. This local repository contains a set of user defined
+constants, each of which contains a dictionary of remote execution properties.
 
-It is highly recommended to use a globally unique name for this repo (definitely not
-"exec_properties") for reasons that will be explained below.
+It is highly recommended to use a globally unique name for this repo (and definitely not
+"exec_properties") for reasons that are discussed in more details [below](#anti-patterns).
 
 ## create_exec_properties_dict
 
