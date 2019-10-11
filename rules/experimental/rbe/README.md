@@ -30,7 +30,7 @@ create_exec_properties_dict is a starlark macro that creates a dictionary of rem
 properties. create_exec_properties_dict ensures that the created dictionary is compatible with
 what RBE supports.
 
-It is highly recommended that this macro is only called from the WORKSPACE file in the context of
+It is highly recommended that this macro only be called from the WORKSPACE file in the context of
 creating repo rules using rbe_exec_properties or custom_exec_properties. See more on this below.
 
 ## merge_dicts
@@ -44,9 +44,11 @@ The following are some use cases showing how these repo rules should be used.
 ### Use case 1 - The standard use case:
 
 In the WORKSPACE file, call
+```
   rbe_exec_properties(
       name = "exec_properties",
   )
+```
 
 This creates a local repo @rbe_exec_properties with standard RBE execution property constants. For
 example, NETWORK_ON which is the dict {"dockerNetwork" : "standard"}. (For the full list of these
