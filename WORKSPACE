@@ -575,7 +575,7 @@ rbe_autoconfig(
 rbe_autoconfig_root(name = "rbe_autoconfig_root")
 
 # Define several exec property repo rules to be used in testing.
-load("//rules/experimental/rbe:exec_properties.bzl", "create_exec_properties_dict", "custom_exec_properties", "rbe_exec_properties")
+load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict", "custom_exec_properties", "rbe_exec_properties")
 
 # A standard RBE execution property set repo rule.
 rbe_exec_properties(
@@ -612,7 +612,7 @@ rbe_autoconfig(
     use_legacy_platform_definition = False,
 )
 
-load("@bazel_toolchains//rules/experimental/rbe:exec_properties.bzl", "merge_dicts")
+load("@bazel_toolchains//rules/exec_properties:exec_properties.bzl", "merge_dicts")
 
 # Use in the BazelCI.
 rbe_autoconfig(

@@ -49,10 +49,10 @@ tasks:
     platform: rbe_ubuntu1604
     test_targets:
     - "--"
-    - "//tests/rules/experimental/rbe/..."
+    - "//tests/rules/exex_properties/..."
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
-    - "--extra_execution_platforms=@rbe_default_exec_properties//config:platform,//tests/rules/experimental/rbe:platform_privileged_on,//tests/rules/experimental/rbe:platform_network_enabled,//tests/rules/experimental/rbe:platform_bespoke_network_enabled,//tests/rules/experimental/rbe:platform_overridden_network_enabled"
+    - "--extra_execution_platforms=@rbe_default_exec_properties//config:platform,//tests/rules/exec_properties:platform_privileged_on,//tests/rules/exec_properties:platform_network_enabled,//tests/rules/exec_properties:platform_bespoke_network_enabled,//tests/rules/exec_properties:platform_overridden_network_enabled"
     - "--host_platform=@rbe_default_exec_properties//config:platform"
     - "--platforms=@rbe_default_exec_properties//config:platform"
