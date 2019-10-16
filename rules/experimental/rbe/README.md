@@ -8,7 +8,7 @@ exec_properties.bzl contains the following Starlark macros:
 
 ## rbe_exec_properties
 
-`rbe_exec_properties` is a Starlark macro that can be called from the WORKSPACE file. It wraps a
+`rbe_exec_properties` is a Starlark macro that can be called from the `WORKSPACE` file. It wraps a
 repo rule that creates a local repository. This local repository contains a set of standard
 constants each of which contains a dictionary of remote execution properties that are consumable by
 RBE.
@@ -18,8 +18,8 @@ be used.
 
 ## custom_exec_properties
 
-`custom_exec_properties` is a Starlark macro that can be called from the WORKSPACE file. It wraps a
-repo rule that creates a local repository. This local repository contains a set of user defined
+`custom_exec_properties` is a Starlark macro that can be called from the `WORKSPACE` file. It wraps
+a repo rule that creates a local repository. This local repository contains a set of user defined
 constants, each of which contains a dictionary of remote execution properties.
 
 It is highly recommended to use a globally unique name for this repo rule (and definitely not
@@ -31,7 +31,7 @@ It is highly recommended to use a globally unique name for this repo rule (and d
 properties. `create_exec_properties_dict` ensures that the created dictionary is compatible with
 what RBE supports.
 
-It is highly recommended that this macro only be called from the WORKSPACE file in the context of
+It is highly recommended that this macro only be called from the `WORKSPACE` file in the context of
 creating repo rules using `rbe_exec_properties` or `custom_exec_properties`. See more on this
 below.
 
@@ -45,7 +45,7 @@ The following are some use cases showing how these repo rules should be used.
 
 ### Use case 1 - The standard use case:
 
-In the WORKSPACE file, call
+In the `WORKSPACE` file, call
 ```
 rbe_exec_properties(
     name = "exec_properties",
@@ -56,8 +56,8 @@ This creates a local repo `@exec_properties` with standard RBE execution propert
 example, `NETWORK_ON` which is the dict `{"dockerNetwork" : "standard"}`. (For the full list of
 these constants see `STANDARD_PROPERTY_SETS` in exec_properties.bzl.)
 
-Then, in some BUILD file in your Bazel project, you can reference this execution property constant
-as follows:
+Then, in some `BUILD` file in your Bazel project, you can reference this execution property
+constant as follows:
 ```
 load("@exec_properties//:constants.bzl", "NETWORK_ON")
 ...
@@ -77,17 +77,17 @@ are ignored.
 Let's assume that the non-RBE remote execution endpoint provides a macro similar to
 `rbe_exec_properties` (say `other_re_exec_properties`), which populates the same constants (e.g.
 `NETWORK_ON`) with possibly different dict values.
-In this case, the WORKSPACE would, presumably, look like this:
+In this case, the `WORKSPACE` would, presumably, look like this:
 ```
 other_re_exec_properties(
     name = "exec_properties",
 )
 ```
 
-And the targets in the BUILD files will be able to depend on targets from other Bazel projects that
-were written with RBE in mind, as the name of the repo defined in the WORKSPACE (`exec_properties`
-in this case) is the same. That is why the repo name `exec_properties` does *not* contain the word
-RBE.
+And the targets in the `BUILD` files will be able to depend on targets from other Bazel projects
+that were written with RBE in mind, as the name of the repo defined in the `WORKSPACE`
+(`exec_properties` in this case) is the same. That is why the repo name `exec_properties` does
+*not* contain the word RBE.
 
 ### Use case 4 - rbe_exec_properties with override_constants:
 
@@ -95,7 +95,7 @@ Let's now assume that a particular Bazel project, running with a particular RBE 
 all its remote execution actions without network access, possibly for the sake of identifying any
 network dependencies. This would be achieved as follows.
 
-In the WORKSPACE file, call
+In the `WORKSPACE` file, call
 ```
 rbe_exec_properties(
     name = "exec_properties",
@@ -124,7 +124,7 @@ the future).
 The recommended way for a Bazel project (let's call this project, project A) to define this
 high-mem dependency is as follows:
 
-In the WORKSPACE file, call:
+In the `WORKSPACE` file, call:
 ```
 custom_exec_properties(
     name = "proj_a_prefix_high_mem_machine_exec_property",
@@ -134,7 +134,7 @@ custom_exec_properties(
 )
 ```
 
-And then in the BUILD file:
+And then in the `BUILD` file:
 ```
 load("@proj_a_prefix_high_mem_machine_exec_property//:constants.bzl", "HIGH_MEM_MACHINE")
 foo_library(
@@ -144,7 +144,7 @@ foo_library(
 )
 ```
 
-A depending Bazel project (project B) must also call `custom_exec_properties` in its WORKSPACE and
+A depending Bazel project (project B) must also call `custom_exec_properties` in its `WORKSPACE` and
 map `HIGH_MEM_MACHINE`. It may, for whatever reason, decide to map it to something else.
 ```
 custom_exec_properties(
@@ -184,9 +184,9 @@ parsing the Bazel code, instead of having RBE just ignore keys that it doesn't r
 the developer spend more time that is necessary trying to figure out what went wrong. Furthermore,
 `create_exec_properties_dict` will perform some validation about the values.
 
-### Anti-pattern 2 - Do not call create_exec_properties_dict directly from BUILD files.
+### Anti-pattern 2 - Do not call create_exec_properties_dict directly from `BUILD` files.
 
-Instead `create_exec_properties_dict` should only be called from the WORKSPACE in the context of
+Instead `create_exec_properties_dict` should only be called from the `WORKSPACE` in the context of
 creating a local repo, typically using `custom_exec_properties`.
 
 Here is what might go wrong.
@@ -224,7 +224,7 @@ globally unique. This is important in order to avoid name clashes with other Baz
 
 Here is an example of what might go wrong.
 
-Bazel project A's WORKSPACE contains the following snippet:
+Bazel project A's `WORKSPACE` contains the following snippet:
 
 ⚠️ **Warning**: Do not do this!
 ```
@@ -236,11 +236,11 @@ custom_exec_properties(
 )
 ```
   
-And project A defines in one of its BUILD files, a `foo_library` that uses this constant
+And project A defines in one of its `BUILD` files, a `foo_library` that uses this constant
 `MY_DOCKER_FLAGS`.
 
-Similarly Bazel project B's WORKSPACE contains a very similar snippet, which uses the same local repo
-name and the same constant name as project A does, but with a different content.
+Similarly Bazel project B's `WORKSPACE` contains a very similar snippet, which uses the same local
+repo name and the same constant name as project A does, but with a different content.
 
 ⚠️ **Warning**: Do not do this either!
 ```
