@@ -19,7 +19,7 @@ load(
     "JAVA_CONFIG_DIR",
     "PLATFORM_DIR",
 )
-load("//rules/experimental/rbe:exec_properties.bzl", "create_exec_properties_dict", "merge_dicts")
+load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict", "merge_dicts")
 
 _CC_TOOLCHAIN = ":cc-compiler-k8"
 
