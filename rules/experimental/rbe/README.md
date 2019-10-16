@@ -53,11 +53,11 @@ rbe_exec_properties(
 ```
 
 This creates a local repo `@exec_properties` with standard RBE execution property constants. For
-example, `NETWORK_ON which` is the dict `{"dockerNetwork" : "standard"}`. (For the full list of
+example, `NETWORK_ON` which is the dict `{"dockerNetwork" : "standard"}`. (For the full list of
 these constants see `STANDARD_PROPERTY_SETS` in exec_properties.bzl.)
 
-Then, in some BUILD file in your work space, you can reference this execution property constant as
-follows:
+Then, in some BUILD file in your Bazel project, you can reference this execution property constant
+as follows:
 ```
 load("@exec_properties//:constants.bzl", "NETWORK_ON")
 ...
@@ -204,8 +204,8 @@ foo_library(
 ```
 
 Now let's assume that Bazel project B has a target that transitively depeneds on project A's target
-`:my_lib`. If project B's target runs on RBE, it will only be able to run on a worker whose machine
-type is `n1-highmem-8`.
+`:my_lib`. If the bazel invocation is configured to execute remotely, it will only be able to
+execute `:my_lib` on a worker whose machine type is `n1-highmem-8`.
 
 This can be problematic for a few reasons. Perhaps for cost reasons, the owners of project B do not
 maintain such machines and instead want to build this `foo_library` on `n1-highmem-4` machines. Or
