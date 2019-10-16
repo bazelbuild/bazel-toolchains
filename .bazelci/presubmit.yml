@@ -49,7 +49,7 @@ tasks:
     platform: rbe_ubuntu1604
     test_targets:
     - "--"
-    - "//tests/rules/exex_properties/..."
+    - "//tests/rules/exec_properties/..."
     test_flags:
     - "--test_output=errors"
     - "--verbose_failures"
