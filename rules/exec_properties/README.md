@@ -193,13 +193,15 @@ keys that it doesn't recognize and having the developer spend more time that is
 necessary trying to figure out what went wrong. Furthermore,
 `create_exec_properties_dict` will perform some validation about the values.
 
-### Anti-pattern 2 - Do not call create_exec_properties_dict directly from BUILD files.
+### Anti-pattern 2 - Do not call create_exec_properties_dict from a target.
 
-Instead `create_exec_properties_dict` should only be called from the
-`WORKSPACE` in the context of creating a local repo, typically using
-`custom_exec_properties`.
+Instead `create_exec_properties_dict` should be called from the `WORKSPACE` in
+the context of creating a local repo, typically using `custom_exec_properties`.
+It can also be called from a `BUILD` file in the context of defining a
+platform.
 
-Here is what might go wrong.
+Here is what might go wrong if it is called directly when populating the
+`exec_properties` field of a target.
 
 Let's assume that Bazel project A defines a `foo_library` target that, if
 executed remotely on RBE, should run on a high memory machine such as
