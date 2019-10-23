@@ -773,6 +773,7 @@ sh_test(
 # This test requires docker to be present on the path.
 sh_test(
     name = "rbe_container_test",
+    size = "large",
     srcs = [":rbe_container_test.sh"],
     args = [(("{}/{}@{}").format(
         # use l.gcr.io to test with no auth required
