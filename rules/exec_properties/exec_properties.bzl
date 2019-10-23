@@ -205,7 +205,7 @@ def create_exec_properties_dict(**kwargs):
     Args:
       **kwargs: Arguments specifying what keys are populated in the returned dict.
           Note that the name of the key in kwargs is not the same as the name of the key in the returned dict.
-          For more information about what each parameter is see https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties.
+          For more information about what each parameter is see https://cloud.google.com/remote-build-execution/docs/remote-execution-properties.
           If this link is broken for you, you may not to be whitelisted for RBE. See https://groups.google.com/forum/#!forum/rbe-alpha-customers.
 
     Returns:
@@ -326,7 +326,7 @@ def custom_exec_properties(name, constants):
 
 # STANDARD_PROPERTY_SETS is the SoT for the list of constants that rbe_exec_properties defines.
 # For more information about what each parameter of create_exec_properties_dict() means, see
-# https://cloud.google.com/remote-build-execution/docs/remote-execution-environment#remote_execution_properties.
+# https://cloud.google.com/remote-build-execution/docs/remote-execution-properties.
 STANDARD_PROPERTY_SETS = {
     "NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
     "NETWORK_OFF": create_exec_properties_dict(docker_network = "off"),
