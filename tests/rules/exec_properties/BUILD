@@ -12,6 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load(":compare.bzl", "compare_dicts_test")
+load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict")
+
+compare_dicts_test(
+    name="docker_network_compare_test",
+    expected = {"dockerNetwork": "standard"},
+    actual = create_exec_properties_dict(docker_network = "standard"),
+)
+
+compare_dicts_test(
+    name="multiple_properties_compare_test",
+    expected = {
+        "dockerPrivileged": "True",
+        "OSFamily": "Windows",
+    },
+    actual = create_exec_properties_dict(
+        docker_privileged = True,
+        os_family = "Windows",
+    ),
+)
+
+compare_dicts_test(
+    name="properties_compare_test",
+    expected = {
+        "label:abc": "123",
+        "label:def": "456",
+    },
+    actual = create_exec_properties_dict(labels = {
+        "abc": "123",
+        "def": "456",
+    }),
+)
+
 load("@exec_properties//:constants.bzl", "NETWORK_ON")
 
 # OVERRIDDEN_NETWORK_ON is actually the same as NETWORK_OFF (see WORKSPACE file).
