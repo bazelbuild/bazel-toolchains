@@ -239,7 +239,7 @@ rbe_autoconfig(
 
 As of bazel 0.29.0, platforms support exec_properties instead of the deprecated
 remote_execution_properties to configure remote execution properties. The new
-field is a String -> String dictionary rather than a proto serialized as a
+field is a string->string dictionary rather than a proto serialized as a
 string.
 
 rbe_autoconfig now has a field use_legacy_platform_definition, which for
@@ -248,13 +248,13 @@ causes the underlying platform to be configured using the new exec_properties
 field.
 
 Furthermore, rbe_autoconfig itself also has an exec_properties field. Any
-values set there are used in to configure the underlying platform. This field
+values set there are used in configuring the underlying platform. This field
 only works if use_legacy_platform_definition is set to False.
 
-Note that the container image cannot be set using in rbe_autoconfig via the
+Note that the container image cannot be set in rbe_autoconfig via the
 exec_properties field.
 
-Here is an example of a rbe_autoconfig that configures its underlying platform
+Here is an example of an rbe_autoconfig that configures its underlying platform
 to set the size of the shared memory partition for the docker container to 128
 megabytes.
 
@@ -267,12 +267,12 @@ rbe_autoconfig(
 )
 
 Note the use of create_exec_properties_dict. This is a bazel macro that makes
-it convient to create the dicts used in exec_properties. You should always
+it convenient to create the dicts used in exec_properties. You should always
 prefer to use it over composing the dict manually.
 
 Additionally, there are standard execution property dicts that you may want to
 use. These standard dicts should always be preferred if defined. These standard
-dicts are defined in a local repo that can be set up via the bazel macro
+dicts are defined in a local repo that can be set up via a bazel macro called
 rbe_exec_properties. The following example has rbe_autoconfig create an
 underlying platform that allows network access to the remote execution worker.
 
@@ -290,7 +290,8 @@ rbe_autoconfig(
     exec_properties = NETWORK_ON,
 )
 
-For more information, see https://github.com/bazelbuild/bazel-toolchains/tree/master/rules/exec_properties
+For more information on create_exec_properties_dict, rbe_exec_properties and
+other related bazel macros, see https://github.com/bazelbuild/bazel-toolchains/tree/master/rules/exec_properties
 
 NOTES:
 
