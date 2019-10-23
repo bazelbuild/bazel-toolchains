@@ -34,7 +34,7 @@ compare_dicts_test(
 )
 
 compare_dicts_test(
-    name = "properties_compare_test",
+    name = "labels_compare_test",
     actual = create_exec_properties_dict(labels = {
         "abc": "123",
         "def": "456",
