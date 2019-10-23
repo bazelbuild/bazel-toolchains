@@ -43,6 +43,26 @@ def _add(
         verifier_fcn(var_name, value)  # verifier_fcn will fail() if necessary
     dict[key] = str(value)
 
+def _add_labels(
+        dict,
+        var_name,
+        labels):
+    """Add zero of more label key-values to a dict.
+
+    If labels is None, don't add anything. Otherwise, labels must be a string->string dictionary.
+    For every key, value in the labels dictionary, add to dict the key-value ("label:" + key -> value).
+
+    Args:
+      dict: The dict to update.
+      var_name: Used for error messages.
+      labels: A string->string dictionary of labels.
+    """
+    if labels == None:
+        return
+    _verify_labels(var_name, labels)
+    for key, value in labels.items():
+        dict["label:%s" % key] = value
+
 def _verify_string(var_name, value):
     if type(value) != "string":
         fail("%s must be a string" % var_name)
@@ -50,6 +70,46 @@ def _verify_string(var_name, value):
 def _verify_bool(var_name, value):
     if type(value) != "bool":
         fail("%s must be a bool" % var_name)
+
+def _verify_labels(var_name, labels):
+    # labels must be a string->string dict.
+    if type(labels) != "dict":
+        fail("%s must be a dict" % var_name)
+    for key, value in labels.items():
+        _verify_label(var_name, key, value)
+
+def _verify_label(var_name, key, value):
+    # This is based on the Requirements for labels outlined in
+    # https://cloud.google.com/resource-manager/docs/creating-managing-labels.
+
+    # Keys have a minimum length of 1 character and a maximum length of 63
+    # characters, and cannot be empty. Values can be empty, and have a maximum
+    # length of 63 characters.
+    _verify_string("%s.%s" % (var_name, key), key)
+    if len(key) == 0:
+        fail("%s cannot contain an empty key" % var_name)
+    if len(key) > 63:
+        fail("%s.%s exceeds the 63 character length limit for a label name" % (var_name, key))
+    _verify_string("value of %s.%s" % (var_name, key), value)
+    if len(value) > 63:
+        fail("value of %s.%s exceeds the 63 character length limit for a label value" % (var_name, key))
+
+    # The actual requirement is:
+    # Keys and values can contain only lowercase letters, numeric characters,
+    # underscores, and dashes. All characters must use UTF-8 encoding, and
+    # international characters are allowed.
+    # Keys must start with a lowercase letter or international character.
+    #
+    # But since I don't know of a way to verify international characters in
+    # starlark, we will enforce slightly less strict requirements. Namely:
+    # Keys and labels must not contain upper case letters.
+    # Keys must not start with a number, underscore or dash.
+    if key != key.lower():
+        fail("%s.%s must not contain capital letters" % (var_name, key))
+    if value != value.lower():
+        fail("value of %s.%s must not contain capital letters" % (var_name, key))
+    if "0123456789-_".find(key[0]) != -1:
+        fail("%s.%s must start with a lowercase letter or international character" % (var_name, key))
 
 def _verify_one_of(var_name, value, valid_values):
     _verify_string(var_name, value)
@@ -153,16 +213,26 @@ def create_exec_properties_dict(**kwargs):
     """
     dict = {}
     for var_name, value in kwargs.items():
-        if not var_name in PARAMS:
+        if var_name in PARAMS:
+            p = PARAMS[var_name]
+            _add(
+                dict = dict,
+                var_name = var_name,
+                key = p.key,
+                value = value,
+                verifier_fcn = p.verifier_fcn if hasattr(p, "verifier_fcn") else None,
+            )
+        elif var_name == "labels":
+            # labels is a special parameter. Its value is a dict and it maps to
+            # multiple properties.
+            _add_labels(
+                dict = dict,
+                var_name = var_name,
+                labels = value,
+            )
+        else:
             fail("%s is not a valid var_name" % var_name)
-        p = PARAMS[var_name]
-        _add(
-            dict = dict,
-            var_name = var_name,
-            key = p.key,
-            value = value,
-            verifier_fcn = p.verifier_fcn if hasattr(p, "verifier_fcn") else None,
-        )
+
     return dict
 
 def merge_dicts(*dict_args):
