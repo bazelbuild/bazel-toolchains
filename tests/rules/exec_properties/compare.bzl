@@ -17,10 +17,10 @@
 """
 
 def _test_succeeds():
-    return "exit 0"    
+    return "exit 0"
 
 def _test_fails(expected, actual):
-    return"""
+    return """
 echo "dicts don't match."
 echo "Expecting:"
 echo '%s'
@@ -54,14 +54,13 @@ compare_dicts_test = rule(
     implementation = _compare_dicts_impl,
     attrs = {
         "expected": attr.string_dict(
-            mandatory=True,
-            doc="The expected dictionary",
+            mandatory = True,
+            doc = "The expected dictionary",
         ),
         "actual": attr.string_dict(
-            mandatory=True,
-            doc="The actual dictionary",
+            mandatory = True,
+            doc = "The actual dictionary",
         ),
     },
     test = True,
 )
-

@@ -16,33 +16,33 @@ load(":compare.bzl", "compare_dicts_test")
 load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict")
 
 compare_dicts_test(
-    name="docker_network_compare_test",
-    expected = {"dockerNetwork": "standard"},
+    name = "docker_network_compare_test",
     actual = create_exec_properties_dict(docker_network = "standard"),
+    expected = {"dockerNetwork": "standard"},
 )
 
 compare_dicts_test(
-    name="multiple_properties_compare_test",
-    expected = {
-        "dockerPrivileged": "True",
-        "OSFamily": "Windows",
-    },
+    name = "multiple_properties_compare_test",
     actual = create_exec_properties_dict(
         docker_privileged = True,
         os_family = "Windows",
     ),
+    expected = {
+        "dockerPrivileged": "True",
+        "OSFamily": "Windows",
+    },
 )
 
 compare_dicts_test(
-    name="properties_compare_test",
-    expected = {
-        "label:abc": "123",
-        "label:def": "456",
-    },
+    name = "properties_compare_test",
     actual = create_exec_properties_dict(labels = {
         "abc": "123",
         "def": "456",
     }),
+    expected = {
+        "label:abc": "123",
+        "label:def": "456",
+    },
 )
 
 load("@exec_properties//:constants.bzl", "NETWORK_ON")
