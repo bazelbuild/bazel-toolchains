@@ -188,7 +188,7 @@ bazel build @rbe_your_custom_toolchain_config_suite_spec//...
 
 This will create the toolchain configs in the 'output_base' defined in the
 'toolchain_config_suite_spec'. It will generate configs for the current version
-of bazel you are running with (overridable via attr).
+of Bazel you are running with (overridable via attr).
 This will also (abusing Bazel hermeticity principles) modify the versions.bzl
 file in the 'output_base'. This is so that subsequent executions of the target
 (by you, or by any of your users after you have checked-in these generated files)
@@ -237,7 +237,7 @@ rbe_autoconfig(
     toolchain_config_suite_spec = your_toolchain_config_suite_spec_struct,
 )
 
-As of bazel 0.29.0, platforms support exec_properties instead of the deprecated
+As of Bazel 0.29.0, platforms support exec_properties instead of the deprecated
 remote_execution_properties to configure remote execution properties. The new
 field is a string->string dictionary rather than a proto serialized as a
 string.
@@ -266,13 +266,13 @@ rbe_autoconfig(
     exec_properties = create_exec_properties_dict(docker_shm_size = "128m"),
 )
 
-Note the use of create_exec_properties_dict. This is a bazel macro that makes
+Note the use of create_exec_properties_dict. This is a Bazel macro that makes
 it convenient to create the dicts used in exec_properties. You should always
 prefer to use it over composing the dict manually.
 
 Additionally, there are standard execution property dicts that you may want to
 use. These standard dicts should always be preferred if defined. These standard
-dicts are defined in a local repo that can be set up via a bazel macro called
+dicts are defined in a local repo that can be set up via a Bazel macro called
 rbe_exec_properties. The following example has rbe_autoconfig create an
 underlying platform that allows network access to the remote execution worker.
 
@@ -291,7 +291,7 @@ rbe_autoconfig(
 )
 
 For more information on create_exec_properties_dict, rbe_exec_properties and
-other related bazel macros, see https://github.com/bazelbuild/bazel-toolchains/tree/master/rules/exec_properties
+other related Bazel macros, see https://github.com/bazelbuild/bazel-toolchains/tree/master/rules/exec_properties
 
 NOTES:
 
