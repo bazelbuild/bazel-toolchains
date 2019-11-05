@@ -33,10 +33,6 @@ definitely not `exec_properties`) for reasons that are discussed in more details
 remote execution properties. `create_exec_properties_dict` ensures that the
 created dictionary is compatible with what RBE supports.
 
-It is highly recommended that this macro only be called from the `WORKSPACE`
-file in the context of creating repo rules using `rbe_exec_properties` or
-`custom_exec_properties`. See more on this below.
-
 ## merge_dicts
 
 `merge_dicts` is a Starlark macro that merges dictionaries of remote execution
