@@ -19,7 +19,8 @@ load(
     "JAVA_CONFIG_DIR",
     "PLATFORM_DIR",
 )
-load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict", "merge_dicts")
+load("//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 _CC_TOOLCHAIN = ":cc-compiler-k8"
 
@@ -160,11 +161,11 @@ def _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target
                               ("\",\n        \"").join(ctx.attr.target_compatible_with) +
                               "\",")
 
-    platform_exec_properties = create_exec_properties_dict(
+    platform_exec_properties = create_rbe_exec_properties_dict(
         container_image = "docker://%s" % image_name,
         os_family = "Linux",
     )
-    platform_exec_properties = merge_dicts(platform_exec_properties, exec_properties)
+    platform_exec_properties = dicts.add(platform_exec_properties, exec_properties)
 
     ctx.template(
         PLATFORM_DIR + "/BUILD",

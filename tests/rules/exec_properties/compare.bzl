@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This file contains a test rule compare_dicts_test for unit testing create_exec_properties_dict.
+"""This file contains a test rule compare_dicts_test for unit testing create_rbe_exec_properties_dict.
 
 """
 

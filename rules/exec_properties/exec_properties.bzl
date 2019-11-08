@@ -200,6 +200,9 @@ PARAMS = {
 }
 
 def create_exec_properties_dict(**kwargs):
+    fail("create_exec_properties_dict is deprecated. Please use create_rbe_exec_properties_dict instead.")
+
+def create_rbe_exec_properties_dict(**kwargs):
     """Return a dict with exec_properties that are supported by RBE.
 
     Args:
@@ -236,19 +239,7 @@ def create_exec_properties_dict(**kwargs):
     return dict
 
 def merge_dicts(*dict_args):
-    """Merge any number of dicts into a new dict.
-
-    Args:
-      *dict_args: A list of zero or more dicts.
-
-    Returns:
-      A merge of the input dicts. Precedence goes to key value pairs in latter dicts.
-    """
-    result = {}
-    for dictionary in dict_args:
-        if dictionary:
-            result.update(dictionary)
-    return result
+    fail("merge_dicts is deprecated. Please use dicts.add() instead. See https://github.com/bazelbuild/bazel-skylib/blob/master/docs/dicts_doc.md")
 
 def _exec_property_sets_repository_impl(repository_ctx):
     repository_ctx.file(
@@ -325,21 +316,21 @@ def custom_exec_properties(name, constants):
     )
 
 # STANDARD_PROPERTY_SETS is the SoT for the list of constants that rbe_exec_properties defines.
-# For more information about what each parameter of create_exec_properties_dict() means, see
+# For more information about what each parameter of create_rbe_exec_properties_dict() means, see
 # https://cloud.google.com/remote-build-execution/docs/remote-execution-properties.
 STANDARD_PROPERTY_SETS = {
-    "NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
-    "NETWORK_OFF": create_exec_properties_dict(docker_network = "off"),
-    "DOCKER_PRIVILEGED": create_exec_properties_dict(docker_privileged = True),
-    "NOT_DOCKER_PRIVILEGED": create_exec_properties_dict(docker_privileged = False),
-    "DOCKER_RUN_AS_ROOT": create_exec_properties_dict(docker_run_as_root = True),
-    "NOT_DOCKER_RUN_AS_ROOT": create_exec_properties_dict(docker_run_as_root = False),
-    "DOCKER_SIBLINGS_CONTAINERS": create_exec_properties_dict(docker_sibling_containers = True),
-    "NOT_DOCKER_SIBLINGS_CONTAINERS": create_exec_properties_dict(docker_sibling_containers = False),
-    "DOCKER_USE_URANDOM": create_exec_properties_dict(docker_use_urandom = True),
-    "NOT_DOCKER_USE_URANDOM": create_exec_properties_dict(docker_use_urandom = False),
-    "LINUX": create_exec_properties_dict(os_family = "Linux"),
-    "WINDOWS": create_exec_properties_dict(os_family = "Windows"),
+    "NETWORK_ON": create_rbe_exec_properties_dict(docker_network = "standard"),
+    "NETWORK_OFF": create_rbe_exec_properties_dict(docker_network = "off"),
+    "DOCKER_PRIVILEGED": create_rbe_exec_properties_dict(docker_privileged = True),
+    "NOT_DOCKER_PRIVILEGED": create_rbe_exec_properties_dict(docker_privileged = False),
+    "DOCKER_RUN_AS_ROOT": create_rbe_exec_properties_dict(docker_run_as_root = True),
+    "NOT_DOCKER_RUN_AS_ROOT": create_rbe_exec_properties_dict(docker_run_as_root = False),
+    "DOCKER_SIBLINGS_CONTAINERS": create_rbe_exec_properties_dict(docker_sibling_containers = True),
+    "NOT_DOCKER_SIBLINGS_CONTAINERS": create_rbe_exec_properties_dict(docker_sibling_containers = False),
+    "DOCKER_USE_URANDOM": create_rbe_exec_properties_dict(docker_use_urandom = True),
+    "NOT_DOCKER_USE_URANDOM": create_rbe_exec_properties_dict(docker_use_urandom = False),
+    "LINUX": create_rbe_exec_properties_dict(os_family = "Linux"),
+    "WINDOWS": create_rbe_exec_properties_dict(os_family = "Windows"),
 }
 
 def rbe_exec_properties(name, override_constants = None):
