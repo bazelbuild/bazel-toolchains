@@ -30,6 +30,15 @@ def repositories():
     """Download dependencies of bazel-toolchains."""
     excludes = native.existing_rules().keys()
 
+    # =============================== Repo rule deps ==========================
+    if "bazel_skylib" not in excludes:
+        http_archive(
+            name = "bazel_skylib",
+            sha256 = "e5d90f0ec952883d56747b7604e2a15ee36e288bb556c3d0ed33e818a4d971f2",
+            strip_prefix = "bazel-skylib-1.0.2",
+            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/1.0.2.tar.gz"],
+        )
+
     # ============================== Repositories ==============================
     if "io_bazel_rules_docker" not in excludes:
         git_repository(
@@ -46,15 +55,6 @@ def repositories():
             "@io_bazel_rules_docker//toolchains/docker:default_linux_toolchain",
             "@io_bazel_rules_docker//toolchains/docker:default_windows_toolchain",
             "@io_bazel_rules_docker//toolchains/docker:default_osx_toolchain",
-        )
-
-    # =============================== Repo rule deps ==========================
-    if "bazel_skylib" not in excludes:
-        http_archive(
-            name = "bazel_skylib",
-            sha256 = "e5d90f0ec952883d56747b7604e2a15ee36e288bb556c3d0ed33e818a4d971f2",
-            strip_prefix = "bazel-skylib-1.0.2",
-            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/1.0.2.tar.gz"],
         )
 
     # ================================ GPG Keys ================================
