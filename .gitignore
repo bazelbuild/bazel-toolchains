@@ -13,6 +13,7 @@
 # based on the name of the directory bazel is cloned into.
 /bazel-*
 /tests/rbe_repo/examples/bazel_toolchains_client/bazel-*
+/tests/rbe_repo/examples/toolchain_config_host/bazel-*
 /rbe-test-output/
 # Ignore outputs generated during Bazel bootstrapping.
 /output/
