@@ -19,6 +19,10 @@ local_repository(
     path = "../../../..",
 )
 
+load("@bazel_toolchains//repositories:repositories.bzl", bazel_toolchains_repositories = "repositories")
+
+bazel_toolchains_repositories()
+
 local_repository(
     name = "toolchain_config_host",
     path = "../toolchain_config_host",
