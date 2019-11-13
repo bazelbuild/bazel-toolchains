@@ -258,17 +258,17 @@ Here is an example of an rbe_autoconfig that configures its underlying platform
 to set the size of the shared memory partition for the docker container to 128
 megabytes.
 
-load("@bazel_toolchains//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict")
+load("@bazel_toolchains//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
 
 rbe_autoconfig(
     name = "rbe_default",
     use_legacy_platform_definition = False,
-    exec_properties = create_exec_properties_dict(docker_shm_size = "128m"),
+    exec_properties = create_rbe_exec_properties_dict(docker_shm_size = "128m"),
 )
 
-Note the use of create_exec_properties_dict. This is a Bazel macro that makes
-it convenient to create the dicts used in exec_properties. You should always
-prefer to use it over composing the dict manually.
+Note the use of create_rbe_exec_properties_dict. This is a Bazel macro that
+makes it convenient to create the dicts used in exec_properties. You should
+always prefer to use it over composing the dict manually.
 
 Additionally, there are standard execution property dicts that you may want to
 use. These standard dicts should always be preferred if defined. These standard
@@ -290,8 +290,8 @@ rbe_autoconfig(
     exec_properties = NETWORK_ON,
 )
 
-For more information on create_exec_properties_dict, rbe_exec_properties and
-other related Bazel macros, see https://github.com/bazelbuild/bazel-toolchains/tree/master/rules/exec_properties
+For more information on create_rbe_exec_properties_dict, rbe_exec_properties
+and other related Bazel macros, see https://github.com/bazelbuild/bazel-toolchains/tree/master/rules/exec_properties
 
 NOTES:
 

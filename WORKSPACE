@@ -564,7 +564,7 @@ rbe_autoconfig(
 rbe_autoconfig_root(name = "rbe_autoconfig_root")
 
 # Define several exec property repo rules to be used in testing.
-load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict", "custom_exec_properties", "rbe_exec_properties")
+load("//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict", "custom_exec_properties", "rbe_exec_properties")
 
 # A standard RBE execution property set repo rule.
 rbe_exec_properties(
@@ -575,7 +575,7 @@ rbe_exec_properties(
 rbe_exec_properties(
     name = "exec_properties_with_override",
     override_constants = {
-        "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
+        "NETWORK_ON": create_rbe_exec_properties_dict(docker_network = "off"),
     },
 )
 
@@ -583,7 +583,7 @@ rbe_exec_properties(
 custom_exec_properties(
     name = "network_on_exec_properties",
     constants = {
-        "BESPOKE_NETWORK_ON": create_exec_properties_dict(docker_network = "standard"),
+        "BESPOKE_NETWORK_ON": create_rbe_exec_properties_dict(docker_network = "standard"),
     },
 )
 
@@ -601,14 +601,14 @@ rbe_autoconfig(
     use_legacy_platform_definition = False,
 )
 
-load("@bazel_toolchains//rules/exec_properties:exec_properties.bzl", "merge_dicts")
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 # Use in the BazelCI.
 rbe_autoconfig(
     name = "buildkite_config",
     base_container_digest = "sha256:4bfd33aa9ce73e28718385b8c01608a79bc6546906f01cf9329311cace1766a1",
     digest = "sha256:c20046852a2d7910c55d76e0ec9c182b37532a9f0360d22dd5c9a1451b7c3a15",
-    exec_properties = merge_dicts(DOCKER_SIBLINGS_CONTAINERS, NETWORK_ON),
+    exec_properties = dicts.add(DOCKER_SIBLINGS_CONTAINERS, NETWORK_ON),
     registry = "marketplace.gcr.io",
     repository = "google/bazel",
     use_legacy_platform_definition = False,

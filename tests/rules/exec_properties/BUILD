@@ -13,17 +13,17 @@
 # limitations under the License.
 
 load(":compare.bzl", "compare_dicts_test")
-load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict")
+load("//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
 
 compare_dicts_test(
     name = "docker_network_compare_test",
-    actual = create_exec_properties_dict(docker_network = "standard"),
+    actual = create_rbe_exec_properties_dict(docker_network = "standard"),
     expected = {"dockerNetwork": "standard"},
 )
 
 compare_dicts_test(
     name = "multiple_properties_compare_test",
-    actual = create_exec_properties_dict(
+    actual = create_rbe_exec_properties_dict(
         docker_privileged = True,
         os_family = "Windows",
     ),
@@ -35,7 +35,7 @@ compare_dicts_test(
 
 compare_dicts_test(
     name = "labels_compare_test",
-    actual = create_exec_properties_dict(labels = {
+    actual = create_rbe_exec_properties_dict(labels = {
         "abc": "123",
         "def": "456",
     }),

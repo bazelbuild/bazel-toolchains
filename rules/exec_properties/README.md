@@ -3,8 +3,7 @@
 exec_properties.bzl contains the following Starlark macros:
 * rbe_exec_properties
 * custom_exec_properties
-* create_exec_properties_dict
-* merge_dicts
+* create_rbe_exec_properties_dict
 
 ## rbe_exec_properties
 
@@ -27,16 +26,11 @@ It is highly recommended to use a globally unique name for this repo rule (and
 definitely not `exec_properties`) for reasons that are discussed in more details
 [below](#anti-patterns).
 
-## create_exec_properties_dict
+## create_rbe_exec_properties_dict
 
-`create_exec_properties_dict` is a Starlark macro that creates a dictionary of
-remote execution properties. `create_exec_properties_dict` ensures that the
-created dictionary is compatible with what RBE supports.
-
-## merge_dicts
-
-`merge_dicts` is a Starlark macro that merges dictionaries of remote execution
-properties.
+`create_rbe_exec_properties_dict` is a Starlark macro that creates a dictionary
+of remote execution properties. `create_rbe_exec_properties_dict` ensures that
+the created dictionary is compatible with what RBE supports.
 
 ## Use cases
 
@@ -101,7 +95,7 @@ In the `WORKSPACE` file, call
 rbe_exec_properties(
     name = "exec_properties",
     override_constants = {
-        "NETWORK_ON": create_exec_properties_dict(docker_network = "off"),
+        "NETWORK_ON": create_rbe_exec_properties_dict(docker_network = "off"),
     },
 )
 ```
@@ -131,7 +125,7 @@ In the `WORKSPACE` file, call:
 custom_exec_properties(
     name = "proj_a_prefix_high_mem_machine_exec_property",
     constants = {
-        "HIGH_MEM_MACHINE": create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
+        "HIGH_MEM_MACHINE": create_rbe_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
     },
 )
 ```
@@ -174,27 +168,27 @@ avoid.
 }
 ```
 
-Instead, always prefer using `create_exec_properties_dict` like so:
+Instead, always prefer using `create_rbe_exec_properties_dict` like so:
 ```
-create_exec_properties_dict(
+create_rbe_exec_properties_dict(
     gce_machine_type = "n1-highmem-8",
     docker_privileged = True,
     docker_sibling_containers = True,
 )
 ```
 
-`create_exec_properties_dict` is better because typos in key names will be
+`create_rbe_exec_properties_dict` is better because typos in key names will be
 caught early, while parsing the Bazel code, instead of having RBE just ignore
 keys that it doesn't recognize and having the developer spend more time that is
 necessary trying to figure out what went wrong. Furthermore,
-`create_exec_properties_dict` will perform some validation about the values.
+`create_rbe_exec_properties_dict` will perform some validation about the values.
 
-### Anti-pattern 2 - Do not call create_exec_properties_dict from a target.
+### Anti-pattern 2 - Do not call create_rbe_exec_properties_dict from a target.
 
-Instead `create_exec_properties_dict` should be called from the `WORKSPACE` in
-the context of creating a local repo, typically using `custom_exec_properties`.
-It can also be called from a `BUILD` file in the context of defining a
-platform.
+Instead `create_rbe_exec_properties_dict` should be called from the `WORKSPACE`
+in the context of creating a local repo, typically using
+`custom_exec_properties`. It can also be called from a `BUILD` file in the
+context of defining a platform.
 
 Here is what might go wrong if it is called directly when populating the
 `exec_properties` field of a target.
@@ -208,7 +202,7 @@ executed remotely on RBE, should run on a high memory machine such as
 foo_library(
    name="my_lib",
    ...
-   exec_properties = create_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
+   exec_properties = create_rbe_exec_properties_dict(gce_machine_type = "n1-highmem-8"),
 )
 ```
 

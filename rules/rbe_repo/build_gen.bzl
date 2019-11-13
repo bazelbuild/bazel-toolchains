@@ -19,9 +19,17 @@ load(
     "JAVA_CONFIG_DIR",
     "PLATFORM_DIR",
 )
-load("//rules/exec_properties:exec_properties.bzl", "create_exec_properties_dict", "merge_dicts")
+load("//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
 
 _CC_TOOLCHAIN = ":cc-compiler-k8"
+
+# Defining a local version of dicts.add in order not to create a dependency on bazel_skylib.
+def _merge_dicts(*dict_args):
+    result = {}
+    for dictionary in dict_args:
+        if dictionary:
+            result.update(dictionary)
+    return result
 
 def create_config_aliases(ctx, toolchain_config_spec_name):
     """Produces BUILD files with alias for the C++ and Java toolchain targets.
@@ -160,11 +168,11 @@ def _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target
                               ("\",\n        \"").join(ctx.attr.target_compatible_with) +
                               "\",")
 
-    platform_exec_properties = create_exec_properties_dict(
+    platform_exec_properties = create_rbe_exec_properties_dict(
         container_image = "docker://%s" % image_name,
         os_family = "Linux",
     )
-    platform_exec_properties = merge_dicts(platform_exec_properties, exec_properties)
+    platform_exec_properties = _merge_dicts(platform_exec_properties, exec_properties)
 
     ctx.template(
         PLATFORM_DIR + "/BUILD",
