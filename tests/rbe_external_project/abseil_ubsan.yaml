@@ -20,6 +20,7 @@ steps:
   - --bazelrc=../tests/rbe_repo/bazelrc/.bazelrc.0260.notoolchain
   - test
   - --verbose_failures
+  - --keep_going
   # toolchain flags to use @rbe_default
   - --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
   - --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
@@ -37,6 +38,7 @@ steps:
   - --copt=-gmlt
   - --strip=never
   - --test_output=errors
+  - --copt=-Wno-implicit-int-float-conversion
   # RBE project specific flags
   - --config=remote
   - --remote_instance_name=projects/asci-toolchain/instances/default_instance
@@ -45,5 +47,7 @@ steps:
   - -//absl/time/internal/cctz:time_zone_format_test
   - -//absl/time/internal/cctz:time_zone_lookup_test
   - -//absl/container:inlined_vector_benchmark
+  - -//absl/numeric:int128_test
   - -//absl/random/...
+  - -//absl/strings:str_format_convert_test
   dir: 'external-src'
