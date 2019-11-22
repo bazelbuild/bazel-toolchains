@@ -28,7 +28,7 @@ load(
 
 docker_toolchain_configure(
     name = "docker_config",
-    docker_path = "/usr/bin/dockerrr",
+    docker_path = "/usr/bin/docker",
 )
 
 load(
