@@ -3,6 +3,8 @@ steps:
   args:
     - "--bazelrc=bazelrc/latest.bazelrc"
     - "test"
+    - "--test_output=errors"
+    - "--verbose_failures"
     - "//tests/config:ubuntu-xenial-autoconfig_test"
     - "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
     - "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
@@ -10,5 +12,6 @@ steps:
     - "//tests/config:external-repo-autoconfig_test"
     - "//tests/config:this-project-repo-autoconfig"
     - "//tests/config:ubuntu-xenial-build-bazel-src"
+    - "--define mount_project=$(realpath .)"
     - "--config=remote"
     - "--remote_instance_name=projects/asci-toolchain/instances/default_instance"
