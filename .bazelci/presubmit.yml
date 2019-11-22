@@ -27,14 +27,14 @@ tasks:
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_run_in_container_test"
     - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_sh_toolchain_test"
     # docker_autoconfig tests
-    - "//tests/config:ubuntu-xenial-autoconfig_test"
+    # - "//tests/config:ubuntu-xenial-autoconfig_test"
     # TODO(nlopezgi): reenable this test once bazel 0.19.2 is out
     #- "//tests/config:ubuntu-xenial-bazel-head-autoconfig_test"
-    - "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
-    - "//tests/config:ubuntu16_04_clang_autoconfig_test"
-    - "//tests/config:external-repo-autoconfig_test"
+    # - "//tests/config:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
+    # - "//tests/config:ubuntu16_04_clang_autoconfig_test"
+    # - "//tests/config:external-repo-autoconfig_test"
     - "//tests/config:this-project-repo-autoconfig"
-    - "//tests/config:ubuntu-xenial-build-bazel-src"
+    # - "//tests/config:ubuntu-xenial-build-bazel-src"
     - "//configs/ubuntu16_04_clang:default-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.1-bazel_0.18.0-autoconfig_test"
     test_flags:
