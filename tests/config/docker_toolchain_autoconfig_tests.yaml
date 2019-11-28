@@ -20,7 +20,7 @@ timeout: "1200s"
 steps:
 - name: "l.gcr.io/google/bazel"
   args:
-    - "--bazelrc=.bazelrc"
+    - "--bazelrc=tests/config/.bazelrc"
     - "test"
     - "--test_output=errors"
     - "--verbose_failures"
