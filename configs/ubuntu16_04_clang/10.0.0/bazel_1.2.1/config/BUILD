@@ -43,7 +43,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:87d0fa2c56558f2f0d05116e6142b29d9ee509776be5fa9794a57f281b75b14e"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:57fbf17cb0d43fb7a00b4e0476750643cb80377e5c38b2e28490d6c69ad8fa2d"
         }
         properties {
            name: "OSFamily"
