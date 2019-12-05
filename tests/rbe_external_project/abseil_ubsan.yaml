@@ -1,4 +1,4 @@
-# Basic test that builds Absel with UBSAN on RBE using the latest Bazel version
+# Basic test that builds Abseil with UBSAN on RBE using the latest Bazel version
 steps:
 # pull the abseil-cpp project
 - name: 'gcr.io/cloud-builders/git'
@@ -15,7 +15,7 @@ steps:
 
 # Launch an RBE test command using the @rbe_default toolchain
 # configs.
-- name: 'l.gcr.io/google/bazel:0.29.1'
+- name: 'l.gcr.io/google/bazel:1.0.0'
   args:
   - --bazelrc=../tests/rbe_repo/bazelrc/.bazelrc.0260.notoolchain
   - test
@@ -46,6 +46,7 @@ steps:
   - //absl/...
   - -//absl/time/internal/cctz:time_zone_format_test
   - -//absl/time/internal/cctz:time_zone_lookup_test
+  - -//absl/time:time_test
   - -//absl/container:inlined_vector_benchmark
   - -//absl/numeric:int128_test
   - -//absl/random/...
