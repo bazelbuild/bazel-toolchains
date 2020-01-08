@@ -40,6 +40,9 @@ steps:
   - --incompatible_enable_cc_toolchain_resolution
   - --copt=-fsanitize=address
   - --linkopt=-fsanitize=address
+  # This is needed because cc_configure does not currently add
+  # /usr/local/lib/clang/10.0.0/share to the builtin_include_directory_paths
+  - --copt=-fno-sanitize-blacklist
   - --copt=-DADDRESS_SANITIZER=1
   - --copt=-gmlt
   - --strip=never
