@@ -33,6 +33,9 @@ steps:
   # msan specific flags
   - --copt=-fsanitize=memory
   - --linkopt=-fsanitize=memory
+  # This is needed because cc_configure does not currently add
+  # /usr/local/lib/clang/10.0.0/share to the builtin_include_directory_paths
+  - --copt=-fno-sanitize-blacklist
   - --copt=-DMEMORY_SANITIZER=1
   - --test_output=errors
   - --cxxopt=--stdlib=libc++
