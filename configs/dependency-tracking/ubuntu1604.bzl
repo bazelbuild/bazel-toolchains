@@ -2,5 +2,5 @@
 bazel = "2.0.0"
 registry = "marketplace.gcr.io"
 repository = "google/rbe-ubuntu16-04"
-digest = "sha256:9d3104c820537dbf975c78048ddbe71d3f82515cf92b1106ddc552292c187511"
+digest = "sha256:93f7e127196b9b653d39830c50f8b05d49ef6fd8739a9b5b8ab16e1df5399e50"
 configs_version = "10.0.0"
