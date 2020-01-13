@@ -189,6 +189,10 @@ PARAMS = {
         key = "gceMachineType",
         verifier_fcn = _verify_string,
     ),
+    "isa": struct(
+        key = "ISA",
+        verifier_fcn = _verify_string,
+    ),
     "os_family": struct(
         key = "OSFamily",
         verifier_fcn = _verify_os,
