@@ -264,7 +264,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
     image_tar = ctx.actions.declare_file(name + ".tar")
 
     # TODO(nlopezgi): fix upstream issue that output_executable is required
-    load_image_sh_file = ctx.actions.declare_file(name + "load.sh")
+    load_image_sh_file = ctx.actions.declare_file(name + ".executable")
     _container.image.implementation(
         ctx,
         files = files,
