@@ -1,6 +1,6 @@
 """Information tracking the latest published configs."""
-bazel = "2.1.0"
+bazel = "2.1.1"
 registry = "marketplace.gcr.io"
 repository = "google/rbe-ubuntu16-04"
-digest = "sha256:ac36d37616b044ee77813fc7cd36607a6dc43c65357f3e2ca39f3ad723e426f6"
+digest = "sha256:1062b3c9002e6c09e31d3463fc5c24b0d2212f706733404918e18cff8f66dc5c"
 configs_version = "10.0.0"
