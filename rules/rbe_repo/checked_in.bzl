@@ -202,7 +202,6 @@ def validateUseOfCheckedInConfigs(
                "and/or 'create_cc_configs = %s' passed as attrs") %
               (
                   name,
-                  bazel_version,
                   str(bazel_compat_configs),
                   env,
                   config_repos,
