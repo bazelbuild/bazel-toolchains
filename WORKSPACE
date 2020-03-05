@@ -354,7 +354,7 @@ rbe_autoconfig(
 
 rbe_autoconfig(
     name = "rbe_autoconf_base_container_digest",
-    base_container_digest = "sha256:06f8f8e9f97daa1c15466536dc2a7ae6641d16962d7b58a393af8060e460f571",
+    base_container_digest = "sha256:b4dad0bfc4951d619229ab15343a311f2415a16ef83bcaa55b44f4e2bf1cf635",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
     digest = "sha256:0151b16320e3132a9899022567ce2b1c3d237b20913140410b9037317d333672",
