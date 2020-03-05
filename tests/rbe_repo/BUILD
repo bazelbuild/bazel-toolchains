@@ -443,7 +443,7 @@ sh_test(
 file_test(
     name = "rbe_autoconf_base_container_digest_container_sha_test",
     file = "@rbe_autoconf_base_container_digest//test:config/test.BUILD",
-    regexp = "0151b16320e3132a9899022567ce2b1c3d237b20913140410b9037317d333672",
+    regexp = "b28ddaf98c6e0bb840c5fded3c0a899a7db45bb44f69859f16c37be092bfcb4e",
 )
 
 file_test(
