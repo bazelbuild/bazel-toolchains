@@ -34,7 +34,6 @@ steps:
   - -//src/test/java/com/google/devtools/build/lib/...
   - -//src/test/java/com/google/devtools/build/android/...
   - -//src/test/java/com/google/devtools/build/lib/shell:CommandUsingLinuxSandboxTest
-  - -//src/test/java/com/google/devtools/build/lib:vfs_inmemoryfs_test
   - -//src/test/java/com/google/devtools/build/lib/blackbox/tests:PythonBlackBoxTest
   - -//src/test/java/com/google/devtools/build/lib/rules/objc:ObjcRulesTests
   - -//src/test/java/com/google/devtools/build/lib:worker-tests
