@@ -33,6 +33,5 @@ steps:
   - -//src/test/java/com/google/devtools/build/lib/buildeventstream/transports:BuildEventTransportTest
   - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:BazelEmbeddedSkylarkBlackBoxTest
   - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:WorkspaceBlackBoxTest
-  - -//src/test/java/com/google/devtools/build/skyframe:skyframe_base_test
   dir: 'external-src'
 timeout: 1200s
