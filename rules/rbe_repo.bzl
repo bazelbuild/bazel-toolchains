@@ -184,7 +184,7 @@ WORKSPACE the following:
 
 You can then run:
 
-bazel build @rbe_your_custom_toolchain_config_suite_spec//...
+RBE_AUTOCONF_ROOT=$(pwd) bazel build @rbe_your_custom_toolchain_config_suite_spec//...
 
 This will create the toolchain configs in the 'output_base' defined in the
 'toolchain_config_suite_spec'. It will generate configs for the current version
