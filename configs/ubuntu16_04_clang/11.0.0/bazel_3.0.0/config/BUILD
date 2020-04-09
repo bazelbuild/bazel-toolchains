@@ -29,7 +29,7 @@ toolchain(
         "@bazel_tools//platforms:linux",
         "@bazel_tools//platforms:x86_64",
     ],
-    toolchain = "//configs/ubuntu16_04_clang/11.0.0/bazel_2.2.0/cc:cc-compiler-k8",
+    toolchain = "//configs/ubuntu16_04_clang/11.0.0/bazel_3.0.0/cc:cc-compiler-k8",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
@@ -43,7 +43,7 @@ platform(
     remote_execution_properties = """
         properties: {
           name: "container-image"
-          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:ef6ab043a2b570fbfb14121c78248f1ba496fab78df017acbb121fcd01731e74"
+          value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:5464e3e83dc656fc6e4eae6a01f5c2645f1f7e95854b3802b85e86484132d90e"
         }
         properties {
            name: "OSFamily"
