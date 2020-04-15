@@ -32,7 +32,7 @@ fi
 %{copy_data_cmd}
 
 # Pass an empty entrypoint to override any set by default in the container.
-id=$(${DOCKER} run -d --entrypoint "" %{docker_run_flags} %{image_name} %{commands})
+id=$(${DOCKER} run -d --entrypoint "" --user root %{docker_run_flags} %{image_name} %{commands})
 
 ${DOCKER} wait $id
 # Check the docker logs contain the expected 'created outputs_tar' string
