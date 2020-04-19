@@ -499,8 +499,12 @@ def _rbe_autoconfig_impl(ctx):
     mount_project_root, export_project_root, use_default_project = resolve_project_root(ctx)
 
     # Check if pulling a container will be needed and pull it if so
-    digest = ctx.attr.digest
-    if pull_container_needed(ctx):
+    if ctx.attr.local_image:
+        image_name = ctx.attr.local_image
+        docker_tool_path = validate_host(ctx)
+        if ctx.attr.create_versions:
+            digest = ctx.attr.digest
+    elif pull_container_needed(ctx):
         ctx.report_progress("validating host tools")
         docker_tool_path = validate_host(ctx)
 
@@ -784,6 +788,10 @@ _rbe_autoconfig = repository_rule(
                    "JAVA_HOME env var from the container. If that is not set, the rule " +
                    "will fail."),
         ),
+        "local_image": attr.string(
+            doc = ("Optional. The local image to use instead of pulling one " +
+                   "from a container registry."),
+        ),
         "registry": attr.string(
             doc = ("Optional. The registry to pull the container from. For example, " +
                    "marketplace.gcr.io. The default is the value for the selected " +
@@ -874,6 +882,7 @@ def rbe_autoconfig(
         exec_properties = None,
         export_configs = False,
         java_home = None,
+        local_image = None,
         tag = None,
         toolchain_config_suite_spec = default_toolchain_config_suite_spec(),
         registry = None,
@@ -1023,12 +1032,19 @@ def rbe_autoconfig(
     if tag and digest:
         fail("'tag' and 'digest' cannot be set at the same time.")
 
-    if not ((not digest and not tag and not repository and not registry) or
-            (digest and repository and registry) or
-            (tag and repository and registry)):
-        fail("All of 'digest', 'repository' and 'registry' or " +
-             "all of 'tag', 'repository' and 'registry' or " +
-             "none of them must be set.")
+    if local_image:
+        if (create_versions != bool(digest)):
+            fail("When 'local_image' is set, then 'digest' must be set " +
+                 "exactly when 'create_versions' is True.")
+        elif (tag or repository or registry):
+            fail("When 'local_image' is set, none of 'repository', " +
+                 "'registry', or 'tag' may be set.")
+    elif not ((not digest and not tag and not repository and not registry) or
+              (digest and repository and registry) or
+              (tag and repository and registry)):
+        fail("When 'local_image' is unset, all of 'digest', 'repository' " +
+             "and 'registry' or all of 'tag', 'repository' and 'registry' " +
+             "or none of them must be set.")
 
     if use_legacy_platform_definition == True and exec_properties:
         fail("exec_properties must not be set when " +
@@ -1170,6 +1186,7 @@ def rbe_autoconfig(
         exec_properties = exec_properties,
         export_configs = export_configs,
         java_home = java_home,
+        local_image = local_image,
         toolchain_config_suite_spec = toolchain_config_suite_spec_stripped,
         registry = registry,
         repository = repository,
