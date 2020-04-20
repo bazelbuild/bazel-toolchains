@@ -504,18 +504,24 @@ def _rbe_autoconfig_impl(ctx):
         ctx.report_progress("validating host tools")
         docker_tool_path = validate_host(ctx)
 
-        # Pull the image using 'docker pull'
-        pull_image(ctx, docker_tool_path, image_name)
+        if ctx.attr.pull:
+            # Pull the image using 'docker pull'
+            pull_image(ctx, docker_tool_path, image_name)
 
-        # If tag is specified instead of digest, resolve it to digest in the
-        # image_name as it will be used later on in the platform targets.
-        if ctx.attr.tag:
-            result = ctx.execute([docker_tool_path, "inspect", "--format={{index .RepoDigests 0}}", image_name])
-            print_exec_results("Resolve image digest", result, fail_on_error = True)
-            image_name = result.stdout.splitlines()[0]
-            digest = image_name.split("@")[1]
-            print("Image with given tag `%s` is resolved to '%s', digest is '%s'" %
-                  (ctx.attr.tag, image_name, digest))
+            # If tag is specified instead of digest, resolve it to digest in the
+            # image_name as it will be used later on in the platform targets.
+            if ctx.attr.tag:
+                # If a container was never pushed to a registry, it has no RepoDigests.
+                result = ctx.execute([docker_tool_path, "inspect", "--format={{index .RepoDigests 0}}", image_name])
+                print_exec_results("Resolve image digest", result, fail_on_error = True)
+                image_name = result.stdout.splitlines()[0]
+                digest = image_name.split("@")[1]
+                print("Image with given tag `%s` is resolved to '%s', digest is '%s'" %
+                      (ctx.attr.tag, image_name, digest))
+        else:
+            result = ctx.execute([docker_tool_path, "images", "-q", image_name])
+            if result.return_code != 0 or not result.stdout.splitlines():
+                fail("'pull=False' but the container is not available locally")
 
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
@@ -573,6 +579,11 @@ def _rbe_autoconfig_impl(ctx):
 
             # Create the versions.bzl file
             if ctx.attr.create_versions:
+                if not digest:
+                    fail(("'create_versions' is True, but 'digest' was " +
+                          "empty or could not be retrieved, This could " +
+                          "happen when the image is local and was never " +
+                          "pushed to a registry."))
                 create_versions_file(
                     ctx,
                     digest = digest,
@@ -784,6 +795,14 @@ _rbe_autoconfig = repository_rule(
                    "JAVA_HOME env var from the container. If that is not set, the rule " +
                    "will fail."),
         ),
+        "pull": attr.bool(
+            default = True,
+            doc = ("Optional. If False, the container is expected to be cached locally and will " +
+                   "never be pulled. Setting this value to False can be useful while developing " +
+                   "a custom container that is built locally but not yet pushed to a registry. " +
+                   "Note that such containers do not have a digest computed, so use 'tag=latest' " +
+                   "instead of trying to specify a 'digest'."),
+        ),
         "registry": attr.string(
             doc = ("Optional. The registry to pull the container from. For example, " +
                    "marketplace.gcr.io. The default is the value for the selected " +
@@ -876,6 +895,7 @@ def rbe_autoconfig(
         java_home = None,
         tag = None,
         toolchain_config_suite_spec = default_toolchain_config_suite_spec(),
+        pull = True,
         registry = None,
         repository = None,
         target_compatible_with = None,
@@ -1171,6 +1191,7 @@ def rbe_autoconfig(
         export_configs = export_configs,
         java_home = java_home,
         toolchain_config_suite_spec = toolchain_config_suite_spec_stripped,
+        pull = pull,
         registry = registry,
         repository = repository,
         tag = tag,
