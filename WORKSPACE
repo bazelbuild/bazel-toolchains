@@ -458,6 +458,7 @@ rbe_autoconfig(
     name = "rbe_autoconf_output_base_config_dir",
     bazel_version = _ubuntu1604_bazel,
     create_testdata = True,
+    export_configs = True,
     toolchain_config_spec_name = "test_config_dir",
     toolchain_config_suite_spec = {
         "container_registry": rbe_default_repo()["container_registry"],
