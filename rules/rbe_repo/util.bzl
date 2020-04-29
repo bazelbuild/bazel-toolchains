@@ -202,8 +202,8 @@ def copy_to_test_dir(ctx):
       ctx: the Bazel context object.
     """
 
-    # Copy all files to the test directory
-    args = ["bash", "-c", "mkdir ./.test && cp -r ./* ./.test && mv ./.test ./test"]
+    # Copy all files to the test directory, including the output into RBE_AUTOCONF_ROOT contents
+    args = ["bash", "-c", ("mkdir ./.test && cp -r ./* ./.test && cp -r %s ./.test/rbe_autoconf_root && mv ./.test ./test" % ctx.os.environ.get(AUTOCONF_ROOT, None))]
     result = ctx.execute(args)
     print_exec_results("copy test output files", result, True, args)
 
