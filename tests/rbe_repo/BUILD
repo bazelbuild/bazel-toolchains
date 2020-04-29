@@ -703,7 +703,6 @@ sh_test(
         "assert_output_base_cc_confs",
         "assert_output_base_java_confs",
         "assert_output_base_platform_confs",
-        # "assert_java_home", TODO: is this test needed here?
     ],
     data = [
         ":rbe_autoconf_checks.sh",
