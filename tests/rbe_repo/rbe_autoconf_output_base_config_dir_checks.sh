@@ -36,5 +36,7 @@ OUTPUT_BASE=$2
 CONFIG_DIR=$3
 BAZEL_VERSION=$4
 
-OUTPUT_BASE_EMPTY=$(cat ${AUTOCONF_ROOT})/${OUTPUT_BASE}/bazel_${BAZEL_VERSION}/CONFIG_DIR/empty
+OUTPUT_BASE_EMPTY=$(cat ${AUTOCONF_ROOT})/${OUTPUT_BASE}/${CONFIG_DIR}/bazel_${BAZEL_VERSION}/empty
 set -- ${OUTPUT_BASE_EMPTY} "${@:5}"
+
+source tests/rbe_repo/rbe_autoconf_checks.sh
