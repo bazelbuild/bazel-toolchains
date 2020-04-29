@@ -42,7 +42,7 @@ platform(
         }
         properties {
            name: "OSFamily"
-           value:  "Linux"
+           value:  "%{os_family}"
         }
         """, 
 )

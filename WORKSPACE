@@ -269,6 +269,24 @@ rbe_autoconfig(
 )
 
 rbe_autoconfig(
+    name = "rbe_autoconf_generate_windows",
+    bazel_version = "3.1.0",
+    create_testdata = True,
+    use_checked_in_confs = "False",
+    digest = "sha256:4fa38fa8c1070850b098d8c03334a86774fffa87004a0ce601d87a883745f9f0",
+    registry = "gcr.io",
+    repository = "envoy-ci/envoy-build-windows",
+    exec_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+    ],
+    target_compatible_with = [
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//platforms:windows",
+    ],
+)
+
+rbe_autoconfig(
     name = "rbe_autoconf_generate_no_java",
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
@@ -397,6 +415,31 @@ rbe_autoconfig(
         "output_base": "rbe-test-output/config/rbe_autoconf_output_base",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+    },
+    use_checked_in_confs = "False",
+)
+
+load(
+    "//tests/rbe_repo:versions.bzl",
+    gcb_test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_output_base_windows",
+    bazel_version = "3.1.0",
+    create_testdata = True,
+    create_java_configs = False,
+    digest = "sha256:4fa38fa8c1070850b098d8c03334a86774fffa87004a0ce601d87a883745f9f0",
+    registry = "gcr.io",
+    repository = "envoy-ci/envoy-build-windows",
+    export_configs = True,
+    toolchain_config_spec_name = "test_config_dir",
+    toolchain_config_suite_spec = {
+        "container_registry": "gcr.io",
+        "container_repo": "envoy-ci/envoy-build-windows",
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base_windows",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": gcb_test_toolchain_config_suite_autogen_spec,
     },
     use_checked_in_confs = "False",
 )
@@ -535,11 +578,6 @@ rbe_autoconfig(
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": blank_toolchain_config_suite_autogen_spec,
     },
-)
-
-load(
-    "//tests/rbe_repo:versions.bzl",
-    gcb_test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
 
 # This repo should only be used for GCB tests.

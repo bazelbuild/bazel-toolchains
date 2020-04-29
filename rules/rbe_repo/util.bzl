@@ -123,13 +123,13 @@ def resolve_project_root(ctx):
         # This is Bazel black magic, we're traversing the directories in the output_base,
         # assuming that the bazel_toolchains external repo will exist in the
         # expected path.
-        mount_project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
-        if not mount_project_root.exists:
-            fail(("Could not find default autoconf project in %s, please make sure " +
-                  "the bazel-toolchains repo is imported in your workspace with name " +
-                  "'bazel_toolchains' and imported before the rbe_autoconfig target " +
-                  "declaration ") % str(project_root))
-        mount_project_root = str(mount_project_root)
+        # mount_project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+        # if not mount_project_root.exists:
+        #     fail(("Could not find default autoconf project in %s, please make sure " +
+        #           "the bazel-toolchains repo is imported in your workspace with name " +
+        #           "'bazel_toolchains' and imported before the rbe_autoconfig target " +
+        #           "declaration ") % str(project_root))
+        # mount_project_root = str(mount_project_root)
         use_default_project = True
 
     return mount_project_root, export_project_root, use_default_project
@@ -143,8 +143,6 @@ def validate_host(ctx):
     Returns:
         Returns the path to the docker tool binary.
     """
-    if ctx.os.name.lower() != "linux":
-        fail("Not running on linux host, cannot run rbe_autoconfig.")
     docker_tool_path = ctx.os.environ.get(DOCKER_PATH, None)
     if not docker_tool_path:
         docker_tool_path = ctx.which("docker")
@@ -214,7 +212,7 @@ def copy_to_test_dir(ctx):
 
     # Rename BUILD files
     ctx.file("rename_build_files.sh", "find ./test -name \"BUILD\" -exec sh -c 'mv \"$1\" \"$(dirname $1)/test.BUILD\"' _ {} \\;", True)
-    result = ctx.execute(["./rename_build_files.sh"])
+    result = ctx.execute(["bash", "./rename_build_files.sh"])
     print_exec_results("Rename BUILD files in test output", result, True, args)
 
     # create a root BUILD file with a filegroup

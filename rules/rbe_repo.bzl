@@ -382,10 +382,10 @@ were built and can be leveraged by all users of a container.
 
 NOTE 6: KNOWN LIMITATIONS
 
-  - This rule can only run in Linux if it needs to generate configs.
   - This rule uses Bazelisk to run Bazel inside the given container.
     The container, thus, must be able to execute the Bazelisk binary
-    (i.e., container must be capable of running linux-amd releases in
+    (i.e., Linux or Windows based container must be capable of running
+    the respective linux-amd or windows-amd releases from
     https://github.com/bazelbuild/bazelisk/releases)
   - If using export_configs, and you have multiple rbe_autoconfig targets
     pointing to the same toolchain_config_suite_spec, these rules should not

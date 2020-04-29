@@ -21,7 +21,11 @@ load(
 )
 load("//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
 
-_CC_TOOLCHAIN = ":cc-compiler-k8"
+def _cc_toolchain(ctx):
+    if ctx.os.name.lower().find("windows") != -1:
+        return ":cc-compiler-x64_windows"
+    else:
+        return ":cc-compiler-k8"
 
 # Defining a local version of dicts.add in order not to create a dependency on bazel_skylib.
 def _merge_dicts(*dict_args):
@@ -113,7 +117,7 @@ def create_export_platform(ctx, exec_properties, image_name, name, toolchain_con
     if toolchain_config_spec_name:
         cc_toolchain_target += "/" + toolchain_config_spec_name
     cc_toolchain_target += "/bazel_" + ctx.attr.bazel_version
-    cc_toolchain_target += "/cc" + _CC_TOOLCHAIN
+    cc_toolchain_target += "/cc" + _cc_toolchain(ctx)
     _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
 def create_external_repo_platform(ctx, exec_properties, image_name, name, use_legacy_platform_definition):
@@ -130,7 +134,7 @@ def create_external_repo_platform(ctx, exec_properties, image_name, name, use_le
       use_legacy_platform_definition: Whether to create a platform with
           remote_execution_properties (legacy) or with exec_properties.
     """
-    cc_toolchain_target = "@" + ctx.attr.name + "//" + CC_CONFIG_DIR + _CC_TOOLCHAIN
+    cc_toolchain_target = "@" + ctx.attr.name + "//" + CC_CONFIG_DIR + _cc_toolchain(ctx)
     _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
 def create_alias_platform(ctx, exec_properties, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
@@ -153,7 +157,7 @@ def create_alias_platform(ctx, exec_properties, image_name, name, toolchain_conf
         bazel_version = ctx.attr.bazel_version,
         cc_dir = CC_CONFIG_DIR,
         config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
-        target = _CC_TOOLCHAIN,
+        target = _cc_toolchain(ctx),
         toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
     ))
     _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
@@ -168,9 +172,14 @@ def _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target
                               ("\",\n        \"").join(ctx.attr.target_compatible_with) +
                               "\",")
 
+    # TODO: move _is_windows from container.bzl to exported from util.bzl or use other exported function from another file
+    if ctx.os.name.lower().find("windows") != -1:
+        os_family = "Windows"
+    else:
+        os_family = "Linux"
     platform_exec_properties = create_rbe_exec_properties_dict(
         container_image = "docker://%s" % image_name,
-        os_family = "Linux",
+        os_family = os_family,
     )
     platform_exec_properties = _merge_dicts(platform_exec_properties, exec_properties)
 
@@ -181,6 +190,7 @@ def _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target
             "%{cc_toolchain}": cc_toolchain_target,
             "%{exec_compatible_with}": exec_compatible_with,
             "%{image_name}": image_name,
+            "%{os_family}": os_family,
             "%{platform_exec_properties}": "%s" % platform_exec_properties,
             "%{target_compatible_with}": target_compatible_with,
         },
