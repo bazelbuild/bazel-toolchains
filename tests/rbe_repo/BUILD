@@ -490,7 +490,7 @@ sh_test(
     name = "rbe_autoconf_output_base_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
-        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "$(location @rbe_autoconf_output_base//test:empty)",
         "rbe-test-output/config/rbe_autoconf_output_base",
         "9.0.0",
         _ubuntu1604_bazel,
@@ -500,8 +500,8 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base//test:empty",
         "@rbe_autoconf_output_base//test:exported_testdata",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
@@ -538,7 +538,7 @@ sh_test(
     name = "rbe_autoconf_output_base_no_java_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
-        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "$(location @rbe_autoconf_output_base_no_java//test:empty)",
         "rbe-test-output/config/rbe_autoconf_output_base_no_java",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",
@@ -547,8 +547,8 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_no_java//test:empty",
         "@rbe_autoconf_output_base_no_java//test:exported_testdata",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
@@ -556,7 +556,7 @@ sh_test(
     name = "rbe_autoconf_output_base_no_cc_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
-        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "$(location @rbe_autoconf_output_base_no_cc//test:empty)",
         "rbe-test-output/config/rbe_autoconf_output_base_no_cc",
         "9.0.0",
         _ubuntu1604_bazel,
@@ -566,8 +566,8 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_no_cc//test:empty",
         "@rbe_autoconf_output_base_no_cc//test:exported_testdata",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
@@ -575,7 +575,7 @@ sh_test(
     name = "rbe_autoconf_config_repos_output_base_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
-        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "$(location @rbe_autoconf_config_repos_output_base//test:empty)",
         "rbe-test-output/config/rbe_autoconf_config_repos_output_base",
         "9.0.0",
         _ubuntu1604_bazel,
@@ -586,8 +586,8 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_config_repos_output_base//test:empty",
         "@rbe_autoconf_config_repos_output_base//test:exported_testdata",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
@@ -603,7 +603,7 @@ sh_test(
     name = "rbe_autoconf_output_base_config_dir_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
-        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "$(location @rbe_autoconf_output_base_config_dir//test:empty)",
         "rbe-test-output/config/rbe_autoconf_output_base",
         "test_config_dir",
         _ubuntu1604_bazel,
@@ -613,8 +613,8 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_output_base_config_dir//test:empty",
         "@rbe_autoconf_output_base_config_dir//test:exported_testdata",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
@@ -696,19 +696,18 @@ sh_test(
     name = "rbe_autoconf_custom_toolchain_config_suite_spec_export_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
-        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "$(location @rbe_autoconf_custom_toolchain_config_suite_spec_export//test:empty)",
         "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_export",
         "test_config_dir",
         _ubuntu1604_bazel,
         "assert_output_base_cc_confs",
         "assert_output_base_java_confs",
         "assert_output_base_platform_confs",
-        "assert_java_home",
     ],
     data = [
         ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_export//test:empty",
         "@rbe_autoconf_custom_toolchain_config_suite_spec_export//test:exported_testdata",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
@@ -736,7 +735,7 @@ sh_test(
     name = "rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
     args = [
-        "$(location @rbe_autoconfig_root//:AUTOCONF_ROOT)",
+        "$(location @rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:empty)",
         "rbe-test-output/config/rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions",
         "default_toolchain_config_spec_name",
         _ubuntu1604_bazel,
@@ -746,8 +745,8 @@ sh_test(
     ],
     data = [
         ":rbe_autoconf_checks.sh",
+        "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:empty",
         "@rbe_autoconf_custom_toolchain_config_suite_spec_blank_versions//test:exported_testdata",
-        "@rbe_autoconfig_root//:AUTOCONF_ROOT",
     ],
 )
 
