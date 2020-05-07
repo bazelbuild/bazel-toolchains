@@ -32,6 +32,18 @@ tasks:
     - "--action_env=PATH"
     - "--test_output=errors"
     - "--verbose_failures"
+  rbe_autoconfig_windows:
+    platform: windows
+    test_targets:
+    # rbe_autoconfig tests for Windows
+    - "//tests/rbe_repo:rbe_autoconf_generate_windows_test"
+    - "//tests/rbe_repo:rbe_autoconf_generate_cc_toolchain_windows_test"
+    - "//tests/rbe_repo:rbe_autoconf_output_base_windows_test"
+    test_flags:
+    - "--action_env=RBE_AUTOCONF_ROOT=C:/workdir"
+    - "--action_env=PATH"
+    - "--test_output=errors"
+    - "--verbose_failures"
   rbe_exec_properties:
     # Run tests on RBE. These tests run on platforms with various execution
     # properties. the tests verify that the approriate properties are set (or not set).
