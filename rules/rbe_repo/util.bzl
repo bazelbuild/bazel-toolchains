@@ -19,6 +19,7 @@ load(
 )
 
 _VERBOSE = False
+_SUPPORTED_OS_FAMILIES = ["Linux", "Windows"]
 
 DOCKER_PATH = "DOCKER_PATH"
 CC_CONFIG_DIR = "cc"
@@ -77,12 +78,57 @@ def resolve_rbe_original_image_name(ctx, image_name):
         return image_name.replace("l.gcr.io", "marketplace.gcr.io")
     return image_name
 
+def _generate_sample_cc_project(ctx):
+    """Generates a sample cc project in the repository context
+
+    Args:
+      ctx: the Bazel repository context object
+
+    Returns
+      string path to the generated project in the repository
+    """
+
+    ctx.file(
+        "cc-sample-project/BUILD",
+        """package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])  # Apache 2.0
+
+filegroup(
+    name = "srcs",
+    srcs = [
+        "BUILD",
+        "test.cc",
+    ],
+)
+
+cc_test(
+    name = "test",
+    srcs = ["test.cc"],
+)
+""",
+    )
+    ctx.file(
+        "cc-sample-project/test.cc",
+        """#include <iostream>
+
+int main() {
+  std::cout << "Hello test!" << std::endl;
+  return 0;
+}
+
+""",
+    )
+    ctx.file("cc-sample-project/WORKSPACE", "")
+
+    return str(ctx.path("cc-sample-project"))
+
 def resolve_project_root(ctx):
     """Returns the project_root .
 
     Returns the project_root that will be used to copy sources
-    to the container (if needed) and whether or not the default cc project
-    was selected.
+    to the container (if needed). If no external project root was
+    provided, we generate the default in the repository context.
 
     Args:
       ctx: the Bazel context object.
@@ -93,11 +139,10 @@ def resolve_project_root(ctx):
     """
 
     if ctx.attr.config_version:
-        return None, None, None
+        return None, None
 
     export_project_root = None
     mount_project_root = None
-    use_default_project = False
 
     # If not using checked-in configs and either export configs was selected or
     # config_repos were requested we need to resolve the path to the project root
@@ -117,22 +162,25 @@ def resolve_project_root(ctx):
             mount_project_root = project_root
     if not ctx.attr.config_repos:
         # If no config repos, we can use the default sample project
-        # TODO(nlopezgi): consider using native.existing_rules() to validate
-        # bazel_toolchains repo exists.
-        # Try to use the default project
-        # This is Bazel black magic, we're traversing the directories in the output_base,
-        # assuming that the bazel_toolchains external repo will exist in the
-        # expected path.
-        # mount_project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
-        # if not mount_project_root.exists:
-        #     fail(("Could not find default autoconf project in %s, please make sure " +
-        #           "the bazel-toolchains repo is imported in your workspace with name " +
-        #           "'bazel_toolchains' and imported before the rbe_autoconfig target " +
-        #           "declaration ") % str(project_root))
-        # mount_project_root = str(mount_project_root)
-        use_default_project = True
+        mount_project_root = _generate_sample_cc_project(ctx)
 
-    return mount_project_root, export_project_root, use_default_project
+    return mount_project_root, export_project_root
+
+def os_family(ctx):
+    """Retrieve the OS Family of host environment
+
+    Args:
+      ctx: the Bazel context object.
+
+    Returns:
+      Returns the name of the OS Family
+    """
+    os_name = ctx.os.name.lower()
+    if os_name.find("windows") != -1:
+        return "Windows"
+    if os_name == "linux":
+        return "Linux"
+    return os_name
 
 def validate_host(ctx):
     """Perform validations of host environment to be able to run the rule.
@@ -143,6 +191,9 @@ def validate_host(ctx):
     Returns:
         Returns the path to the docker tool binary.
     """
+    os = os_family(ctx)
+    if os not in _SUPPORTED_OS_FAMILIES:
+        fail("Not running on supported OS, %s must be one of: %s" % (os, ",".join(_SUPPORTED_OS_FAMILIES)))
     docker_tool_path = ctx.os.environ.get(DOCKER_PATH, None)
     if not docker_tool_path:
         docker_tool_path = ctx.which("docker")

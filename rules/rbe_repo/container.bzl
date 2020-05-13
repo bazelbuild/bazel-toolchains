@@ -16,6 +16,7 @@
 load(
     "//rules/rbe_repo:util.bzl",
     "CC_CONFIG_DIR",
+    "os_family",
     "print_exec_results",
 )
 
@@ -24,60 +25,52 @@ load(
 # https://github.com/bazelbuild/bazel/issues/1262
 _EXTERNAL_FOLDER_PREFIX = "external/"
 
-_BAZELISK_RELEASE = "v1.3.0"
-_BAZELISK_FILENAME_LINUX = "bazelisk"
-_BAZELISK_SHA_LINUX = "98af93c6781156ff3dd36fa06ba6b6c0a529595abb02c569c99763203f3964cc"
-_BAZELISK_FILENAME_WINDOWS = "bazelisk.exe"
-_BAZELISK_SHA_WINDOWS = "31fa9fcf250fe64aa3c5c83b69d76e1e9571b316a58bb5c714084495623e38b0"
+_ROOT_DIR = {
+    "Linux": "/rbe_autoconf",
+    "Windows": "C:/rbe_autoconf",
+}
 _PROJECT_REPO_DIR = "project_src"
+_OUTPUT_DIR = "autoconf_out"
 
-def _is_windows(ctx):
-    return ctx.os.name.lower().find("windows") != -1
+_DOCKER_RUN_USER = {
+    "Linux": "root",
+    "Windows": "ContainerAdministrator",
+}
 
-def _root_dir(ctx):
-    if _is_windows(ctx):
-        return "C:/rbe_autoconf"
-    else:
-        return "/rbe_autoconf"
-
-def _download_bazelisk(ctx):
-    bazelisk_url = "https://github.com/bazelbuild/bazelisk/releases/download/%s/bazelisk-" % _BAZELISK_RELEASE
-    if _is_windows(ctx):
-        bazelisk_url += "windows-amd64.exe"
-        bazelisk_filename = "bazelisk" + "/" + _BAZELISK_FILENAME_WINDOWS
-        bazelisk_sha = _BAZELISK_SHA_WINDOWS
-    else:
-        bazelisk_url += "linux-amd64"
-        bazelisk_filename = _BAZELISK_FILENAME_WINDOWS
-        bazelisk_sha = _BAZELISK_SHA_WINDOWS
-    ctx.download(bazelisk_url, bazelisk_filename, bazelisk_sha)
-
-def _bazelisk_path(ctx):
-    if _is_windows(ctx):
-        return _root_dir(ctx) + "/bazelisk/" + _BAZELISK_FILENAME_WINDOWS
-    else:
-        return _root_dir(ctx) + "/" + _BAZELISK_FILENAME_WINDOWS
+_BAZELISK_RELEASE = "v1.3.0"
+_BAZELISK_DOWNLOAD_INFO = {
+    "Linux": struct(
+        file_name = "bazelisk",
+        url = "https://github.com/bazelbuild/bazelisk/releases/download/%s/bazelisk-linux-amd64" % _BAZELISK_RELEASE,
+        sha256 = "98af93c6781156ff3dd36fa06ba6b6c0a529595abb02c569c99763203f3964cc",
+    ),
+    "Windows": struct(
+        file_name = "bazelisk.exe",
+        url = "https://github.com/bazelbuild/bazelisk/releases/download/%s/bazelisk-windows-amd64.exe" % _BAZELISK_RELEASE,
+        sha256 = "31fa9fcf250fe64aa3c5c83b69d76e1e9571b316a58bb5c714084495623e38b0",
+    ),
+}
 
 # Creates file "container/run_in_container.sh" which will be copied onto container
 # to run the commands to run bazel and create the output tar
 def _create_docker_cmd(
         ctx,
+        os_name,
         config_repos,
-        outputs_tar,
-        use_default_project):
-    bazelisk_cmd = ""
+        outputs_tar):
+    bazelisk_path = _ROOT_DIR[os_name] + "/bazelisk/" + _BAZELISK_DOWNLOAD_INFO[os_name].file_name
 
-    if not _is_windows(ctx):
-        # Set permissions on bazelisk
-        bazelisk_cmd = "chmod +x " + _bazelisk_path(ctx)
+    # Set permissions on bazelisk
+    bazelisk_cmd = "chmod +x " + bazelisk_path
 
     # Command to recursively convert soft links to hard links in the config_repos
     # Needed because some outputs of local_cc_config (e.g., dummy_toolchain.bzl)
     # could be symlinks.
-    deref_symlinks_cmd = []
+    # Here we need to find the correct find binary, on Windows there may be a find program
+    # on the PATH at C:\Windows\system32\find that occurs before the one from the bash installation
+    deref_symlinks_cmd = ["find_bin=$(which -a find | grep -v system32 | head -1)"]
     for config_repo in config_repos:
-        # TODO: fix the find command below
-        symlinks_cmd = ("/usr/bin/find $(" + _bazelisk_path(ctx) + " info output_base)/" +
+        symlinks_cmd = ("$find_bin $(" + bazelisk_path + " info output_base)/" +
                         _EXTERNAL_FOLDER_PREFIX + config_repo +
                         " -type l -exec bash -c 'ln -f \"$(readlink -m \"$0\")\" \"$0\"' {} \\;")
         deref_symlinks_cmd.append(symlinks_cmd)
@@ -85,10 +78,10 @@ def _create_docker_cmd(
 
     # Command to copy produced toolchain configs to a tar at the root
     # of the container.
-    output_dir = _root_dir(ctx) + "/autoconf_out"
+    output_dir = _ROOT_DIR[os_name] + "/" + _OUTPUT_DIR
     copy_cmd = ["mkdir " + output_dir]
     for config_repo in config_repos:
-        src_dir = "$(" + _bazelisk_path(ctx) + " info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
+        src_dir = "$(" + bazelisk_path + " info output_base)/" + _EXTERNAL_FOLDER_PREFIX + config_repo
         copy_cmd.append("cp -dr " + src_dir + " " + output_dir)
     copy_cmd.append("tar -cf /" + outputs_tar + " -C " + output_dir + "/ . ")
     output_copy_cmd = " && ".join(copy_cmd)
@@ -97,25 +90,22 @@ def _create_docker_cmd(
     # the contents of this echo line are checked for in extract.sh.tpl
     success_echo_cmd = "echo 'created outputs_tar'"
 
-    # if use_default_project was selected, we need to modify the WORKSPACE and BUILD file
-    setup_default_project_cmd = ["cd ."]
-
-    bazel_cmd = "cd " + _root_dir(ctx) + "/" + _PROJECT_REPO_DIR
+    bazel_cmd = "cd " + _ROOT_DIR[os_name] + "/" + _PROJECT_REPO_DIR
 
     # For each config repo we run the target @<config_repo>//...
     bazel_targets = "@" + "//... @".join(config_repos) + "//..."
 
-    # TODO: the target exclusion below is b/c bazel has a bug, see: https://github.com/bazelbuild/bazel/issues/11101
-    # the relevant changes have not made their way to a bazel release yet
-    if _is_windows(ctx):
+    # TODO(sunjayBhatia): this can be removed once the fixes for this issue are in a Bazel release:
+    # https://github.com/bazelbuild/bazel/issues/11101
+    if os_name == "Windows":
         bazel_targets += " -- -@local_config_cc//:link_dynamic_library"
 
-    bazel_cmd += " && " + _bazelisk_path(ctx) + " build " + bazel_targets
+    bazel_cmd += " && " + bazelisk_path + " build " + bazel_targets
 
     # Command to run to clean up after autoconfiguration.
     # we start with "cd ." to make sure in case of failure everything after the
     # ";" will be executed
-    clean_cmd = "cd . ; bazel clean"
+    clean_cmd = "cd . ; " + bazelisk_path + " clean"
 
     docker_cmd = [
         "#!/bin/bash",
@@ -123,7 +113,6 @@ def _create_docker_cmd(
         ctx.attr.setup_cmd,
     ]
     docker_cmd += [bazelisk_cmd]
-    docker_cmd += setup_default_project_cmd
     docker_cmd += [
         bazel_cmd,
         deref_symlinks_cmd,
@@ -216,40 +205,6 @@ def get_java_home(ctx, docker_tool_path, image_name):
     else:
         return None
 
-def _generate_sample_cc_project(ctx):
-    ctx.file(
-        "cc-sample-project/BUILD",
-        """package(default_visibility = ["//visibility:public"])
-
-licenses(["notice"])  # Apache 2.0
-
-filegroup(
-    name = "srcs",
-    srcs = [
-        "BUILD",
-        "test.cc",
-    ],
-)
-
-cc_test(
-    name = "test",
-    srcs = ["test.cc"],
-)
-""",
-    )
-    ctx.file(
-        "cc-sample-project/test.cc",
-        """#include <iostream>
-
-int main() {
-  std::cout << "Hello test!" << std::endl;
-  return 0;
-}
-
-""",
-    )
-    ctx.file("cc-sample-project/WORKSPACE", "")
-
 def run_and_extract(
         ctx,
         bazel_version,
@@ -257,8 +212,7 @@ def run_and_extract(
         config_repos,
         docker_tool_path,
         image_name,
-        project_root,
-        use_default_project):
+        project_root):
     """Runs the container and extracts the toolchain configs.
 
     Runs the container (creates command to run inside container) and extracts the
@@ -276,21 +230,25 @@ def run_and_extract(
       image_name: name of the image to pull.
       project_root: the absolute path to the root of the project that will
           be copied to the container
-      use_default_project: whether or not to use the default project to generate configs
     """
     outputs_tar = ctx.attr.name + "_out.tar"
+
+    os_name = os_family(ctx)
 
     # Create command to run inside docker container
     _create_docker_cmd(
         ctx,
+        os_name = os_name,
         config_repos = config_repos,
         outputs_tar = outputs_tar,
-        use_default_project = use_default_project,
     )
 
-    _download_bazelisk(ctx)
-
-    _generate_sample_cc_project(ctx)
+    # Download bazelisk
+    ctx.download(
+        _BAZELISK_DOWNLOAD_INFO[os_name].url,
+        "bazelisk/" + _BAZELISK_DOWNLOAD_INFO[os_name].file_name,
+        _BAZELISK_DOWNLOAD_INFO[os_name].sha256,
+    )
 
     # Create the docker run flags to set env vars
     docker_run_flags = []
@@ -303,12 +261,8 @@ def run_and_extract(
     # Set the Bazel version that Bazelisk will use
     docker_run_flags += ["--env", ("USE_BAZEL_VERSION=%s" % bazel_version_string)]
 
-    # Run as the root user on Linux and equivalent ContainerAdministrator on Windows for images
-    # that have a default USER set in the Dockerfile
-    if _is_windows(ctx):
-        docker_run_flags += ["--user", "ContainerAdministrator"]
-    else:
-        docker_run_flags += ["--user", "root"]
+    # Override the user in case a default set in the container image
+    docker_run_flags += ["--user", _DOCKER_RUN_USER[os_name]]
 
     # Command to copy resources used for rbe_autoconfig to the container.
     copy_data_cmd = []
@@ -316,17 +270,23 @@ def run_and_extract(
     # Command to clean up the data volume container.
     clean_data_volume_cmd = ""
 
+    # Set up destionation paths for assets we add to container
+    asset_root_dir = _ROOT_DIR[os_name]
+    project_root_dest = asset_root_dir + "/" + _PROJECT_REPO_DIR
+    run_container_dir_dest = asset_root_dir + "/container"
+    bazelisk_dest = asset_root_dir + "/bazelisk"
+
     # docker cp does not function on Windows as expected when copying into volumes so we use bind
     # mounts instead
-    if _is_windows(ctx):
-        docker_run_flags += ["-v", str(ctx.path("cc-sample-project")) + ":" + _root_dir(ctx) + "/" + _PROJECT_REPO_DIR]
-        docker_run_flags += ["-v", str(ctx.path("container")) + ":" + _root_dir(ctx) + "/container"]
-        docker_run_flags += ["-v", str(ctx.path("bazelisk")) + ":" + _root_dir(ctx) + "/bazelisk"]
+    if os_name == "Windows":
+        docker_run_flags += ["-v", project_root + ":" + project_root_dest]
+        docker_run_flags += ["-v", str(ctx.path("container")) + ":" + run_container_dir_dest]
+        docker_run_flags += ["-v", str(ctx.path("bazelisk")) + ":" + bazelisk_dest]
     else:
-        copy_data_cmd.append("data_volume=$(docker -v " + _root_dir(ctx) + " " + image_name + ")")
-        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("cc-sample-project")) + " $data_volume:" + _root_dir(ctx) + "/" + _PROJECT_REPO_DIR)
-        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("container")) + " $data_volume:" + _root_dir(ctx) + "/container")
-        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path(_BAZELISK_FILENAME_LINUX)) + " $data_volume:" + _bazelisk_path(ctx))
+        copy_data_cmd.append("data_volume=$(docker create -v " + asset_root_dir + " " + image_name + ")")
+        copy_data_cmd.append(docker_tool_path + " cp " + project_root + " $data_volume:" + project_root_dest)
+        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("container")) + " $data_volume:" + run_container_dir_dest)
+        copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("bazelisk")) + " $data_volume:" + bazelisk_dest)
         docker_run_flags += ["--volumes-from", "$data_volume"]
         clean_data_volume_cmd = docker_tool_path + " rm $data_volume"
 
@@ -337,7 +297,7 @@ def run_and_extract(
         template,
         {
             "%{clean_data_volume_cmd}": clean_data_volume_cmd,
-            "%{commands}": "bash " + _root_dir(ctx) + "/container/run_in_container.sh",
+            "%{commands}": "bash " + run_container_dir_dest + "/run_in_container.sh",
             "%{copy_data_cmd}": " && ".join(copy_data_cmd),
             "%{docker_run_flags}": " ".join(docker_run_flags),
             "%{docker_tool_path}": docker_tool_path,
@@ -357,9 +317,9 @@ def run_and_extract(
     result = ctx.execute(["tar", "-xf", "output.tar"])
     print_exec_results("expand_tar", result)
 
-    result = ctx.execute(["mv", "./local_config_cc", ("./%s" % CC_CONFIG_DIR)])
+    result = ctx.execute(["bash", "-c", ("mv ./local_config_cc ./%s" % CC_CONFIG_DIR)])
     print_exec_results("move local_config_cc files", result)
-    result = ctx.execute(["rm", ("./%s/WORKSPACE" % CC_CONFIG_DIR)])
+    result = ctx.execute(["bash", "-c", ("rm ./%s/WORKSPACE" % CC_CONFIG_DIR)])
     print_exec_results("clean local_config_cc WORKSPACE", result)
-    result = ctx.execute(["rm", ("./%s/tools" % CC_CONFIG_DIR), "-drf"])
+    result = ctx.execute(["bash", "-c", ("rm ./%s/tools -drf" % CC_CONFIG_DIR)])
     print_exec_results("clean tools in local_config_cc", result)

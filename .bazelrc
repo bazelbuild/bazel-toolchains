@@ -18,3 +18,6 @@
 build --host_force_python=PY2
 test --host_force_python=PY2
 run --host_force_python=PY2
+
+# Defaults to auto which means off for Windows, explicitly enable for sh tests
+build --enable_runfiles=yes

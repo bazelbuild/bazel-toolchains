@@ -340,7 +340,7 @@ file_test(
 file_test(
     name = "rbe_autoconf_checked_generate_container_sha_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
-    regexp = "sha256:4fa38fa8c1070850b098d8c03334a86774fffa87004a0ce601d87a883745f9f",
+    regexp = "sha256:776f241c2693f3f2187d998dcc98d2b339dcb80c99ef59bccefad0eea6e61284",
 )
 
 file_test(

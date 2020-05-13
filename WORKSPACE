@@ -272,18 +272,18 @@ rbe_autoconfig(
     name = "rbe_autoconf_generate_windows",
     bazel_version = "3.1.0",
     create_testdata = True,
-    use_checked_in_confs = "False",
-    digest = "sha256:4fa38fa8c1070850b098d8c03334a86774fffa87004a0ce601d87a883745f9f0",
-    registry = "gcr.io",
-    repository = "envoy-ci/envoy-build-windows",
+    digest = "sha256:776f241c2693f3f2187d998dcc98d2b339dcb80c99ef59bccefad0eea6e61284",
     exec_compatible_with = [
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//platforms:windows",
     ],
+    registry = "gcr.io",
+    repository = "envoy-ci/envoy-build-windows",
     target_compatible_with = [
         "@bazel_tools//platforms:x86_64",
         "@bazel_tools//platforms:windows",
     ],
+    use_checked_in_confs = "False",
 )
 
 rbe_autoconfig(
@@ -427,12 +427,12 @@ load(
 rbe_autoconfig(
     name = "rbe_autoconf_output_base_windows",
     bazel_version = "3.1.0",
-    create_testdata = True,
     create_java_configs = False,
-    digest = "sha256:4fa38fa8c1070850b098d8c03334a86774fffa87004a0ce601d87a883745f9f0",
+    create_testdata = True,
+    digest = "sha256:776f241c2693f3f2187d998dcc98d2b339dcb80c99ef59bccefad0eea6e61284",
+    export_configs = True,
     registry = "gcr.io",
     repository = "envoy-ci/envoy-build-windows",
-    export_configs = True,
     toolchain_config_spec_name = "test_config_dir",
     toolchain_config_suite_spec = {
         "container_registry": "gcr.io",
