@@ -273,16 +273,8 @@ rbe_autoconfig(
     bazel_version = "3.1.0",
     create_testdata = True,
     digest = "sha256:776f241c2693f3f2187d998dcc98d2b339dcb80c99ef59bccefad0eea6e61284",
-    exec_compatible_with = [
-        "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//platforms:windows",
-    ],
     registry = "gcr.io",
     repository = "envoy-ci/envoy-build-windows",
-    target_compatible_with = [
-        "@bazel_tools//platforms:x86_64",
-        "@bazel_tools//platforms:windows",
-    ],
     use_checked_in_confs = "False",
 )
 

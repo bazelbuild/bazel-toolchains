@@ -98,7 +98,7 @@ def create_java_runtime(ctx, java_home):
         False,
     )
 
-def create_export_platform(ctx, exec_properties, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
+def create_export_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
     """Creates a BUILD file (to be exported to output_base) with the cc_toolchain and platform targets.
 
     Args:
@@ -118,9 +118,9 @@ def create_export_platform(ctx, exec_properties, image_name, name, toolchain_con
         cc_toolchain_target += "/" + toolchain_config_spec_name
     cc_toolchain_target += "/bazel_" + ctx.attr.bazel_version
     cc_toolchain_target += "/cc" + _CC_TOOLCHAIN[os_family(ctx)]
-    _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
+    _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
-def create_external_repo_platform(ctx, exec_properties, image_name, name, use_legacy_platform_definition):
+def create_external_repo_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, use_legacy_platform_definition):
     """Creates a BUILD file (to be used with configs in the external repo) with the cc_toolchain and platform targets.
 
     Args:
@@ -135,9 +135,9 @@ def create_external_repo_platform(ctx, exec_properties, image_name, name, use_le
           remote_execution_properties (legacy) or with exec_properties.
     """
     cc_toolchain_target = "@" + ctx.attr.name + "//" + CC_CONFIG_DIR + _CC_TOOLCHAIN[os_family(ctx)]
-    _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
+    _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
-def create_alias_platform(ctx, exec_properties, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
+def create_alias_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
     """Creates a BUILD file (pointing to checked in config) with the cc_toolchain and platform targets.
 
     Args:
@@ -160,16 +160,16 @@ def create_alias_platform(ctx, exec_properties, image_name, name, toolchain_conf
         target = _CC_TOOLCHAIN[os_family(ctx)],
         toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
     ))
-    _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
+    _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
 # Creates a BUILD file with the cc_toolchain and platform targets
-def _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition):
+def _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition):
     template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.platform_legacy.tpl")) if use_legacy_platform_definition else ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.platform.tpl"))
     exec_compatible_with = ("\"" +
-                            ("\",\n        \"").join(ctx.attr.exec_compatible_with) +
+                            ("\",\n        \"").join(exec_compatible_with) +
                             "\",")
     target_compatible_with = ("\"" +
-                              ("\",\n        \"").join(ctx.attr.target_compatible_with) +
+                              ("\",\n        \"").join(target_compatible_with) +
                               "\",")
 
     os = os_family(ctx)

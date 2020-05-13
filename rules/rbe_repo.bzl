@@ -440,6 +440,7 @@ load(
     "AUTOCONF_ROOT",
     "DOCKER_PATH",
     "copy_to_test_dir",
+    "os_family",
     "print_exec_results",
     "resolve_image_name",
     "resolve_project_root",
@@ -459,15 +460,27 @@ _CONFIG_REPOS = ["local_config_cc"]
 
 _DEFAULT_TOOLCHAIN_CONFIG_SPEC_NAME = "default_toolchain_config_spec_name"
 
-_RBE_UBUNTU_EXEC_COMPAT_WITH = [
-    "@bazel_tools//platforms:x86_64",
-    "@bazel_tools//platforms:linux",
-    "@bazel_tools//tools/cpp:clang",
-]
-_RBE_UBUNTU_TARGET_COMPAT_WITH = [
-    "@bazel_tools//platforms:linux",
-    "@bazel_tools//platforms:x86_64",
-]
+_EXEC_COMPAT_WITH = {
+    "Linux": [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+        "@bazel_tools//tools/cpp:clang",
+    ],
+    "Windows": [
+        "@bazel_tools//platforms:windows",
+        "@bazel_tools//platforms:x86_64",
+    ],
+}
+_TARGET_COMPAT_WITH = {
+    "Linux": [
+        "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
+    ],
+    "Windows": [
+        "@bazel_tools//platforms:windows",
+        "@bazel_tools//platforms:x86_64",
+    ],
+}
 
 def _rbe_autoconfig_impl(ctx):
     """Core implementation of _rbe_autoconfig repository rule."""
@@ -494,6 +507,15 @@ def _rbe_autoconfig_impl(ctx):
     name = ctx.attr.name
     image_name = resolve_image_name(ctx)
     docker_tool_path = None
+
+    # Resolve defaults for invocation
+    target_compatible_with = ctx.attr.target_compatible_with
+    if not target_compatible_with:
+        target_compatible_with = _TARGET_COMPAT_WITH[os_family(ctx)]
+
+    exec_compatible_with = ctx.attr.exec_compatible_with
+    if not exec_compatible_with:
+        exec_compatible_with = _EXEC_COMPAT_WITH[os_family(ctx)]
 
     # Resolve the paths to copy srcs to the container and to
     # export configs.
@@ -565,6 +587,8 @@ def _rbe_autoconfig_impl(ctx):
             create_export_platform(
                 ctx,
                 exec_properties = ctx.attr.exec_properties,
+                exec_compatible_with = exec_compatible_with,
+                target_compatible_with = target_compatible_with,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 toolchain_config_spec_name = toolchain_config_spec_name,
@@ -593,6 +617,8 @@ def _rbe_autoconfig_impl(ctx):
             create_external_repo_platform(
                 ctx,
                 exec_properties = ctx.attr.exec_properties,
+                exec_compatible_with = exec_compatible_with,
+                target_compatible_with = target_compatible_with,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
                 name = name,
                 use_legacy_platform_definition = ctx.attr.use_legacy_platform_definition,
@@ -606,6 +632,8 @@ def _rbe_autoconfig_impl(ctx):
         create_alias_platform(
             ctx,
             exec_properties = ctx.attr.exec_properties,
+            exec_compatible_with = exec_compatible_with,
+            target_compatible_with = target_compatible_with,
             image_name = resolve_rbe_original_image_name(ctx, image_name),
             name = name,
             toolchain_config_spec_name = toolchain_config_spec_name,
@@ -748,12 +776,10 @@ _rbe_autoconfig = repository_rule(
                    "generate the toolchain configs."),
         ),
         "exec_compatible_with": attr.string_list(
-            default = _RBE_UBUNTU_EXEC_COMPAT_WITH,
             doc = ("Optional. The list of constraints that will be added to the " +
                    "toolchain in its exec_compatible_with attribute (and to " +
                    "the platform in its constraint_values attr). For " +
-                   "example, [\"@bazel_tools//platforms:linux\"]. Default " +
-                   " is set to values for rbe-ubuntu16-04 container."),
+                   "example, [\"@bazel_tools//platforms:linux\"]."),
         ),
         "exec_properties": attr.string_dict(
             doc = (
@@ -818,11 +844,9 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. The tag of the image to pull, e.g. latest."),
         ),
         "target_compatible_with": attr.string_list(
-            default = _RBE_UBUNTU_TARGET_COMPAT_WITH,
             doc = ("The list of constraints that will be added to the " +
                    "toolchain in its target_compatible_with attribute. For " +
-                   "example, [\"@bazel_tools//platforms:linux\"]. Default " +
-                   " is set to values for rbe-ubuntu16-04 container."),
+                   "example, [\"@bazel_tools//platforms:linux\"]."),
         ),
         "use_checked_in_confs": attr.string(
             default = CHECKED_IN_CONFS_TRY,
