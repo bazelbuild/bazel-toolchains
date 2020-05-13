@@ -119,6 +119,7 @@ sh_test(
         "@rbe_autoconf_generate_windows//test:empty",
         "@rbe_autoconf_generate_windows//test:exported_testdata",
     ],
+    tags = ["windows"],
 )
 
 sh_test(
@@ -228,6 +229,7 @@ file_test(
     name = "rbe_autoconf_generate_cc_toolchain_windows_test",
     file = "@rbe_autoconf_generate_windows//test:cc/test.BUILD",
     regexp = "cc_toolchain(",
+    tags = ["windows"],
 )
 
 file_test(
@@ -240,6 +242,7 @@ file_test(
     name = "rbe_autoconf_generate_cc_toolchain_config_windows_test",
     file = "@rbe_autoconf_generate_windows//test:cc/test.BUILD",
     regexp = "cc_toolchain_config(",
+    tags = ["windows"],
 )
 
 file_test(
@@ -252,6 +255,7 @@ file_test(
     name = "rbe_autoconf_generate_cc_compiler_windows_test",
     file = "@rbe_autoconf_generate_windows//test:cc/test.BUILD",
     regexp = "cc-compiler-x64_windows",
+    tags = ["windows"],
 )
 
 file_test(
@@ -323,12 +327,14 @@ file_test(
     name = "rbe_autoconf_generate_platform_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
     regexp = "platforms:windows",
+    tags = ["windows"],
 )
 
 file_test(
     name = "rbe_autoconf_generate_config_toolchain_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
     regexp = "toolchain.*=.*\".*:cc-compiler-x64_windows\"",
+    tags = ["windows"],
 )
 
 file_test(
@@ -341,6 +347,7 @@ file_test(
     name = "rbe_autoconf_checked_generate_container_sha_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
     regexp = "sha256:776f241c2693f3f2187d998dcc98d2b339dcb80c99ef59bccefad0eea6e61284",
+    tags = ["windows"],
 )
 
 file_test(
@@ -353,6 +360,7 @@ file_test(
     name = "rbe_autoconf_checked_generate_os_family_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
     regexp = "value:.*\"Windows\"",
+    tags = ["windows"],
 )
 
 file_test(
@@ -583,6 +591,7 @@ sh_test(
         "@rbe_autoconf_output_base_windows//test:empty",
         "@rbe_autoconf_output_base_windows//test:exported_testdata",
     ],
+    tags = ["windows"],
 )
 
 file_test(

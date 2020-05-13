@@ -32,6 +32,7 @@ tasks:
     - "--action_env=PATH"
     - "--test_output=errors"
     - "--verbose_failures"
+    - "--test_tag_filters=-windows"
   rbe_exec_properties:
     # Run tests on RBE. These tests run on platforms with various execution
     # properties. the tests verify that the approriate properties are set (or not set).
@@ -46,3 +47,4 @@ tasks:
     - "--extra_execution_platforms=@rbe_default_exec_properties//config:platform,//tests/rules/exec_properties:platform_privileged_on,//tests/rules/exec_properties:platform_network_enabled,//tests/rules/exec_properties:platform_bespoke_network_enabled,//tests/rules/exec_properties:platform_overridden_network_enabled"
     - "--host_platform=@rbe_default_exec_properties//config:platform"
     - "--platforms=@rbe_default_exec_properties//config:platform"
+    - "--test_tag_filters=-windows"
