@@ -98,7 +98,6 @@ assert_cc_confs() {
 assert_cc_confs_windows() {
   assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_exists ${DIR}/cc/windows_cc_toolchain_config.bzl
-  # TODO: figure out what else we should assert on
 }
 
 # Checks that checked in configs were selected
@@ -136,7 +135,6 @@ assert_output_base_cc_confs() {
 assert_output_base_cc_confs_windows() {
   assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_exists ${DIR}/cc/windows_cc_toolchain_config.bzl
-  # TODO: figure out what else we should assert on
 }
 
 # Checks that cc config files were not generated in the output_base

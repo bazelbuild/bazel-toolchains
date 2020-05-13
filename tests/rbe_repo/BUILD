@@ -103,6 +103,7 @@ sh_test(
     ],
 )
 
+# TODO: Enable in CI
 sh_test(
     name = "rbe_autoconf_generate_windows_test",
     srcs = [":rbe_autoconf_checks.sh"],
@@ -110,7 +111,7 @@ sh_test(
         "$(location @rbe_autoconf_generate_windows//test:empty)",
         "assert_basic_cofig",
         "assert_no_checked_in_confs",
-        "assert_cc_confs_windows",  # TODO: see if we can improve this
+        "assert_cc_confs_windows",
         "assert_java_confs",
         "assert_image_pulled",
         "assert_configs_tar",
@@ -225,6 +226,7 @@ file_test(
     regexp = "cc_toolchain(",
 )
 
+# TODO: Enable in CI
 file_test(
     name = "rbe_autoconf_generate_cc_toolchain_windows_test",
     file = "@rbe_autoconf_generate_windows//test:cc/test.BUILD",
@@ -232,12 +234,14 @@ file_test(
     tags = ["windows"],
 )
 
+# TODO: Enable in CI
 file_test(
     name = "rbe_autoconf_generate_cc_toolchain_config_test",
     file = "@rbe_autoconf_generate//test:cc/test.BUILD",
     regexp = "cc_toolchain_config(",
 )
 
+# TODO: Enable in CI
 file_test(
     name = "rbe_autoconf_generate_cc_toolchain_config_windows_test",
     file = "@rbe_autoconf_generate_windows//test:cc/test.BUILD",
@@ -251,6 +255,7 @@ file_test(
     regexp = "cc-compiler-k8",
 )
 
+# TODO: Enable in CI
 file_test(
     name = "rbe_autoconf_generate_cc_compiler_windows_test",
     file = "@rbe_autoconf_generate_windows//test:cc/test.BUILD",
@@ -330,6 +335,7 @@ file_test(
     tags = ["windows"],
 )
 
+# TODO: Enable in CI
 file_test(
     name = "rbe_autoconf_generate_config_toolchain_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
@@ -343,6 +349,7 @@ file_test(
     regexp = RBE_UBUNTU16_04_LATEST,
 )
 
+# TODO: Enable in CI
 file_test(
     name = "rbe_autoconf_checked_generate_container_sha_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
@@ -356,6 +363,7 @@ file_test(
     regexp = "OSFamily",
 )
 
+# TODO: Enable in CI
 file_test(
     name = "rbe_autoconf_checked_generate_os_family_windows_test",
     file = "@rbe_autoconf_generate_windows//test:config/test.BUILD",
@@ -575,6 +583,7 @@ sh_test(
     ],
 )
 
+# TODO: Enable in CI and remove hardcoded Bazel version
 sh_test(
     name = "rbe_autoconf_output_base_windows_test",
     srcs = [":rbe_autoconf_output_base_config_dir_checks.sh"],
