@@ -107,6 +107,12 @@ def create_export_platform(ctx, exec_properties, exec_compatible_with, target_co
           be used when creating the platform. Will be used only when
           use_legacy_platform_definition == False. This dict must not contain
           "container-image".
+      exec_compatible_with: List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
+      target_compatible_with: List of constraints to add to the produced
+          toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
+          target_compatible_with attr.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
       toolchain_config_spec_name: name of the toolchain config spec
@@ -129,6 +135,12 @@ def create_external_repo_platform(ctx, exec_properties, exec_compatible_with, ta
           be used when creating the platform. Will be used only when
           use_legacy_platform_definition == False. This dict must not contain
           "container-image".
+      exec_compatible_with: List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
+      target_compatible_with: List of constraints to add to the produced
+          toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
+          target_compatible_with attr.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
       use_legacy_platform_definition: Whether to create a platform with
@@ -146,6 +158,12 @@ def create_alias_platform(ctx, exec_properties, exec_compatible_with, target_com
           be used when creating the platform. Will be used only when
           use_legacy_platform_definition == False. This dict must not contain
           "container-image".
+      exec_compatible_with: List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
+      target_compatible_with: List of constraints to add to the produced
+          toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
+          target_compatible_with attr.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
       toolchain_config_spec_name: name of the toolchain config spec.

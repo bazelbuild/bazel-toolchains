@@ -508,7 +508,7 @@ def _rbe_autoconfig_impl(ctx):
     image_name = resolve_image_name(ctx)
     docker_tool_path = None
 
-    # Resolve defaults for invocation
+    # Resolve default constraints if none set
     target_compatible_with = ctx.attr.target_compatible_with
     if not target_compatible_with:
         target_compatible_with = _TARGET_COMPAT_WITH[os_family(ctx)]
