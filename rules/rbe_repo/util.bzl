@@ -17,6 +17,10 @@ load(
     "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
     "default_toolchain_config_suite_spec",
 )
+load(
+    "//rules:sample_cc_project.bzl",
+    "generate_sample_cc_project",
+)
 
 _VERBOSE = False
 _SUPPORTED_OS_FAMILIES = ["Linux", "Windows"]
@@ -78,51 +82,6 @@ def resolve_rbe_original_image_name(ctx, image_name):
         return image_name.replace("l.gcr.io", "marketplace.gcr.io")
     return image_name
 
-def _generate_sample_cc_project(ctx):
-    """Generates a sample cc project in the repository context
-
-    Args:
-      ctx: the Bazel repository context object
-
-    Returns
-      string path to the generated project in the repository
-    """
-
-    ctx.file(
-        "cc-sample-project/BUILD",
-        """package(default_visibility = ["//visibility:public"])
-
-licenses(["notice"])  # Apache 2.0
-
-filegroup(
-    name = "srcs",
-    srcs = [
-        "BUILD",
-        "test.cc",
-    ],
-)
-
-cc_test(
-    name = "test",
-    srcs = ["test.cc"],
-)
-""",
-    )
-    ctx.file(
-        "cc-sample-project/test.cc",
-        """#include <iostream>
-
-int main() {
-  std::cout << "Hello test!" << std::endl;
-  return 0;
-}
-
-""",
-    )
-    ctx.file("cc-sample-project/WORKSPACE", "")
-
-    return str(ctx.path("cc-sample-project"))
-
 def resolve_project_root(ctx):
     """Returns the project_root .
 
@@ -162,7 +121,7 @@ def resolve_project_root(ctx):
             mount_project_root = project_root
     if not ctx.attr.config_repos:
         # If no config repos, we can use the default sample project
-        mount_project_root = _generate_sample_cc_project(ctx)
+        mount_project_root = generate_sample_cc_project(ctx)
 
     return mount_project_root, export_project_root
 

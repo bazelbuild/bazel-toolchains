@@ -33,14 +33,6 @@ filegroup(
     ],
 )
 
-pkg_tar(
-    name = "cc-sample-project-tar",
-    srcs = [
-        "cc-sample-project/BUILD.sample",
-        "cc-sample-project/test.cc",
-    ],
-)
-
 bzl_library(
     name = "environments",
     srcs = [

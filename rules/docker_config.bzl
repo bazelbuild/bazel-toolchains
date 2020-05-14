@@ -125,6 +125,10 @@ load(
     _container = "container",
 )
 load("@io_bazel_rules_docker//docker/util:run.bzl", _extract = "extract")
+load(
+    "//rules:sample_cc_project.bzl",
+    "generate_sample_cc_project",
+)
 
 # External folder is set to be deprecated, lets keep it here for easy
 # refactoring
@@ -135,15 +139,6 @@ _EXTERNAL_FOLDER_PREFIX = "external/"
 _WORKSPACE_NAME = "bazel_toolchains"
 
 _WORKSPACE_PREFIX = "@" + _WORKSPACE_NAME + "//"
-
-# Default cc project to use if no git_repo is provided.
-_DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR = _WORKSPACE_PREFIX + "rules:cc-sample-project-tar"
-
-# Filetype to restrict inputs
-tar_filetype = [
-    ".tar",
-    ".tar.xz",
-]
 
 def _docker_toolchain_autoconfig_impl(ctx):
     """Implementation for the docker_toolchain_autoconfig rule.
@@ -158,23 +153,25 @@ def _docker_toolchain_autoconfig_impl(ctx):
     name = ctx.attr.name
     outputs_tar = ctx.outputs.output_tar.basename
 
+    # Additional docker run flags
+    docker_run_flags = [""]
+
     # Command to retrieve the project from github if requested.
     clone_repo_cmd = "cd ."
+
     if ctx.attr.git_repo:
         clone_repo_cmd = ("cd " + bazel_config_dir + " && git clone " +
                           ctx.attr.git_repo + " " + project_repo_dir)
+    else:
+        # if mount_project was selected or we are using the default cc project,
+        # we'll mount it using docker_run_flags
+        repo_dir = bazel_config_dir + "/" + project_repo_dir
 
-    repo_dir = bazel_config_dir + "/" + project_repo_dir
-    if ctx.attr.repo_pkg_tar:
-        # if package tar was used then the command should expand it
-        clone_repo_cmd = ("mkdir %s && tar -xf /%s -C %s " %
-                          (repo_dir, ctx.file.repo_pkg_tar.basename, repo_dir))
-
-    # if mount_project was selected, we'll mount it using docker_run_flags
-    docker_run_flags = [""]
-    if ctx.attr.mount_project:
         mount_project = ctx.attr.mount_project
-        mount_project = ctx.expand_make_variables("mount_project", mount_project, {})
+        if ctx.attr.mount_project:
+            mount_project = ctx.expand_make_variables("mount_project", mount_project, {})
+        else:
+            mount_project = generate_sample_cc_project(ctx)
         target = mount_project + ":" + repo_dir + ":ro"
         docker_run_flags = ["-v", target]
 
@@ -220,8 +217,6 @@ def _docker_toolchain_autoconfig_impl(ctx):
 
     # Command to run autoconfigure targets.
     bazel_cmd = "cd " + bazel_config_dir + "/" + project_repo_dir
-    if ctx.attr.use_default_project:
-        bazel_cmd += " && touch WORKSPACE && mv BUILD.sample BUILD"
 
     # For each config repo we run the target @<config_repo>//...
     bazel_targets = "@" + "//... @".join(ctx.attr.config_repos) + "//..."
@@ -231,8 +226,6 @@ def _docker_toolchain_autoconfig_impl(ctx):
     # we start with "cd ." to make sure in case of failure everything after the
     # ";" will be executed
     clean_cmd = "cd . ; bazel clean"
-    if ctx.attr.use_default_project:
-        clean_cmd += " && rm WORKSPACE"
     if ctx.attr.git_repo:
         clean_cmd += " && cd " + bazel_config_dir + " && rm -drf " + project_repo_dir
 
@@ -256,10 +249,7 @@ def _docker_toolchain_autoconfig_impl(ctx):
         ]),
     )
 
-    # Include the repo_pkg_tar if needed
     files = [install_sh] + ctx.files._installers
-    if ctx.attr.repo_pkg_tar:
-        files += [ctx.file.repo_pkg_tar]
 
     image_tar = ctx.actions.declare_file(name + ".tar")
 
@@ -326,11 +316,9 @@ docker_toolchain_autoconfig_ = rule(
         "keys": attr.string_list(),
         "mount_project": attr.string(),
         "packages": attr.string_list(),
-        "repo_pkg_tar": attr.label(allow_single_file = tar_filetype),
         "setup_cmd": attr.string(default = "cd ."),
         "test": attr.bool(default = True),
         "use_bazel_head": attr.bool(default = False),
-        "use_default_project": attr.bool(default = False),
         # TODO(nlopezgi): fix upstream attr declaration that is missing repo name
         "_extract_image_id": attr.label(
             default = Label("@io_bazel_rules_docker//contrib:extract_image_id"),
@@ -355,10 +343,8 @@ docker_toolchain_autoconfig_ = rule(
 # Attributes below are expected in ctx, but should not be provided
 # in the BUILD file.
 reserved_attrs = [
-    "use_default_project",
     "files",
     "debs",
-    "repo_pkg_tar",
     # all the attrs from docker_build we dont want users to set
     "directory",
     "tars",
@@ -494,11 +480,6 @@ def docker_toolchain_autoconfig(**kwargs):
     if "git_repo" in kwargs and "mount_project" in kwargs:
         fail("'git_repo' cannot be used with 'mount_project'.")
 
-    # If a git_repo or mount_project was not provided
-    # use the default autoconfig project
-    if "git_repo" not in kwargs and "mount_project" not in kwargs:
-        kwargs["repo_pkg_tar"] = _DEFAULT_AUTOCONFIG_PROJECT_PKG_TAR
-        kwargs["use_default_project"] = True
     kwargs["files"] = [
         _WORKSPACE_PREFIX + "rules:install_bazel_head.sh",
         _WORKSPACE_PREFIX + "rules:install_bazel_version.sh",
