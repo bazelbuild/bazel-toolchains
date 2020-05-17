@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 licenses(["notice"])  # Apache 2.0
 
@@ -29,6 +30,14 @@ filegroup(
         "build_bazel_version.sh",
         "install_bazel_head.sh",
         "install_bazel_version.sh",
+    ],
+)
+
+pkg_tar(
+    name = "cc-sample-project-tar",
+    srcs = [
+        "cc-sample-project/BUILD.sample",
+        "cc-sample-project/test.cc",
     ],
 )
 

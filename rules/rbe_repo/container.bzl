@@ -57,7 +57,8 @@ def _create_docker_cmd(
         ctx,
         os_name,
         config_repos,
-        outputs_tar):
+        outputs_tar,
+        use_default_project):
     bazelisk_path = _ROOT_DIR[os_name] + "/bazelisk/" + _BAZELISK_DOWNLOAD_INFO[os_name].file_name
 
     # Set permissions on bazelisk
@@ -90,6 +91,13 @@ def _create_docker_cmd(
     # the contents of this echo line are checked for in extract.sh.tpl
     success_echo_cmd = "echo 'created outputs_tar'"
 
+    # if use_default_project was selected, we need to modify the WORKSPACE and BUILD file
+    setup_default_project_cmd = ["cd ."]
+    if use_default_project:
+        setup_default_project_cmd += ["cd " + _ROOT_DIR[os_name] + "/" + _PROJECT_REPO_DIR]
+        setup_default_project_cmd += ["mv BUILD.sample BUILD"]
+        setup_default_project_cmd += ["touch WORKSPACE"]
+
     bazel_cmd = "cd " + _ROOT_DIR[os_name] + "/" + _PROJECT_REPO_DIR
 
     # For each config repo we run the target @<config_repo>//...
@@ -106,6 +114,8 @@ def _create_docker_cmd(
     # we start with "cd ." to make sure in case of failure everything after the
     # ";" will be executed
     clean_cmd = "cd . ; " + bazelisk_path + " clean"
+    if use_default_project:
+        clean_cmd += "; rm WORKSPACE ; mv BUILD BUILD.sample"
 
     docker_cmd = [
         "#!/bin/bash",
@@ -113,6 +123,7 @@ def _create_docker_cmd(
         ctx.attr.setup_cmd,
     ]
     docker_cmd += [bazelisk_cmd]
+    docker_cmd += setup_default_project_cmd
     docker_cmd += [
         bazel_cmd,
         deref_symlinks_cmd,
@@ -212,7 +223,8 @@ def run_and_extract(
         config_repos,
         docker_tool_path,
         image_name,
-        project_root):
+        project_root,
+        use_default_project):
     """Runs the container and extracts the toolchain configs.
 
     Runs the container (creates command to run inside container) and extracts the
@@ -230,6 +242,7 @@ def run_and_extract(
       image_name: name of the image to pull.
       project_root: the absolute path to the root of the project that will
           be copied to the container
+      use_default_project: whether or not to use the default project to generate configs
     """
     outputs_tar = ctx.attr.name + "_out.tar"
 
@@ -241,6 +254,7 @@ def run_and_extract(
         os_name = os_name,
         config_repos = config_repos,
         outputs_tar = outputs_tar,
+        use_default_project = use_default_project,
     )
 
     # Download bazelisk
@@ -279,12 +293,13 @@ def run_and_extract(
     # docker cp does not function on Windows as expected when copying into volumes so we use bind
     # mounts instead
     if os_name == "Windows":
-        docker_run_flags += ["-v", project_root + ":" + project_root_dest]
+        copy_data_cmd.append("cp -arL " + project_root + " " + str(ctx.path("cc-sample-project")))
+        docker_run_flags += ["-v", str(ctx.path("cc-sample-project")) + ":" + project_root_dest]
         docker_run_flags += ["-v", str(ctx.path("container")) + ":" + run_container_dir_dest]
         docker_run_flags += ["-v", str(ctx.path("bazelisk")) + ":" + bazelisk_dest]
     else:
         copy_data_cmd.append("data_volume=$(docker create -v " + asset_root_dir + " " + image_name + ")")
-        copy_data_cmd.append(docker_tool_path + " cp " + project_root + " $data_volume:" + project_root_dest)
+        copy_data_cmd.append(docker_tool_path + " cp $(realpath " + project_root + ") $data_volume:" + project_root_dest)
         copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("container")) + " $data_volume:" + run_container_dir_dest)
         copy_data_cmd.append(docker_tool_path + " cp " + str(ctx.path("bazelisk")) + " $data_volume:" + bazelisk_dest)
         docker_run_flags += ["--volumes-from", "$data_volume"]

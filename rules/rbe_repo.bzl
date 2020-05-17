@@ -519,7 +519,7 @@ def _rbe_autoconfig_impl(ctx):
 
     # Resolve the paths to copy srcs to the container and to
     # export configs.
-    mount_project_root, export_project_root = resolve_project_root(ctx)
+    mount_project_root, export_project_root, use_default_project = resolve_project_root(ctx)
 
     # Check if pulling a container will be needed and pull it if so
     digest = ctx.attr.digest
@@ -571,6 +571,7 @@ def _rbe_autoconfig_impl(ctx):
                 docker_tool_path = docker_tool_path,
                 image_name = image_name,
                 project_root = mount_project_root,
+                use_default_project = use_default_project,
             )
 
         if ctx.attr.export_configs:

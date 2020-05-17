@@ -17,10 +17,6 @@ load(
     "//rules/rbe_repo:toolchain_config_suite_spec.bzl",
     "default_toolchain_config_suite_spec",
 )
-load(
-    "//rules:sample_cc_project.bzl",
-    "generate_sample_cc_project",
-)
 
 _VERBOSE = False
 _SUPPORTED_OS_FAMILIES = ["Linux", "Windows"]
@@ -86,8 +82,8 @@ def resolve_project_root(ctx):
     """Returns the project_root .
 
     Returns the project_root that will be used to copy sources
-    to the container (if needed). If no external project root was
-    provided, we generate the default in the repository context.
+    to the container (if needed) and whether or not the default cc project
+    was selected.
 
     Args:
       ctx: the Bazel context object.
@@ -98,10 +94,11 @@ def resolve_project_root(ctx):
     """
 
     if ctx.attr.config_version:
-        return None, None
+        return None, None, None
 
     export_project_root = None
     mount_project_root = None
+    use_default_project = False
 
     # If not using checked-in configs and either export configs was selected or
     # config_repos were requested we need to resolve the path to the project root
@@ -121,9 +118,22 @@ def resolve_project_root(ctx):
             mount_project_root = project_root
     if not ctx.attr.config_repos:
         # If no config repos, we can use the default sample project
-        mount_project_root = generate_sample_cc_project(ctx)
+        # TODO(nlopezgi): consider using native.existing_rules() to validate
+        # bazel_toolchains repo exists.
+        # Try to use the default project
+        # This is Bazel black magic, we're traversing the directories in the output_base,
+        # assuming that the bazel_toolchains external repo will exist in the
+        # expected path.
+        mount_project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
+        if not mount_project_root.exists:
+            fail(("Could not find default autoconf project in %s, please make sure " +
+                  "the bazel-toolchains repo is imported in your workspace with name " +
+                  "'bazel_toolchains' and imported before the rbe_autoconfig target " +
+                  "declaration ") % str(project_root))
+        mount_project_root = str(mount_project_root)
+        use_default_project = True
 
-    return mount_project_root, export_project_root
+    return mount_project_root, export_project_root, use_default_project
 
 def os_family(ctx):
     """Retrieve the OS Family of host environment
