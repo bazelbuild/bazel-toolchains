@@ -30,7 +30,7 @@ steps:
   - -//src/test/java/com/google/devtools/build/lib/rules/objc:ObjcRulesTests
   - -//src/test/java/com/google/devtools/build/lib:worker-tests
   - -//src/test/java/com/google/devtools/build/lib/buildeventstream/transports:BuildEventTransportTest
-  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:BazelEmbeddedSkylarkBlackBoxTest
+  - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:BazelEmbeddedStarlarkBlackBoxTest
   - -//src/test/java/com/google/devtools/build/lib/blackbox/tests/workspace:WorkspaceBlackBoxTest
   - -//src/test/java/com/google/devtools/build/skydoc:SkydocTest
   dir: 'external-src'
