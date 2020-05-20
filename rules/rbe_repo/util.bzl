@@ -19,6 +19,7 @@ load(
 )
 
 _VERBOSE = False
+_SUPPORTED_OS_FAMILIES = ["Linux", "Windows"]
 
 DOCKER_PATH = "DOCKER_PATH"
 CC_CONFIG_DIR = "cc"
@@ -134,6 +135,22 @@ def resolve_project_root(ctx):
 
     return mount_project_root, export_project_root, use_default_project
 
+def os_family(ctx):
+    """Retrieve the OS Family of host environment
+
+    Args:
+      ctx: the Bazel context object.
+
+    Returns:
+      Returns the name of the OS Family
+    """
+    os_name = ctx.os.name.lower()
+    if os_name.find("windows") != -1:
+        return "Windows"
+    if os_name == "linux":
+        return "Linux"
+    return os_name
+
 def validate_host(ctx):
     """Perform validations of host environment to be able to run the rule.
 
@@ -143,8 +160,9 @@ def validate_host(ctx):
     Returns:
         Returns the path to the docker tool binary.
     """
-    if ctx.os.name.lower() != "linux":
-        fail("Not running on linux host, cannot run rbe_autoconfig.")
+    os = os_family(ctx)
+    if os not in _SUPPORTED_OS_FAMILIES:
+        fail("Not running on supported OS, %s must be one of: %s" % (os, ",".join(_SUPPORTED_OS_FAMILIES)))
     docker_tool_path = ctx.os.environ.get(DOCKER_PATH, None)
     if not docker_tool_path:
         docker_tool_path = ctx.which("docker")
@@ -214,7 +232,7 @@ def copy_to_test_dir(ctx):
 
     # Rename BUILD files
     ctx.file("rename_build_files.sh", "find ./test -name \"BUILD\" -exec sh -c 'mv \"$1\" \"$(dirname $1)/test.BUILD\"' _ {} \\;", True)
-    result = ctx.execute(["./rename_build_files.sh"])
+    result = ctx.execute(["bash", "./rename_build_files.sh"])
     print_exec_results("Rename BUILD files in test output", result, True, args)
 
     # create a root BUILD file with a filegroup

@@ -151,7 +151,7 @@ def _get_cc_conf_files(ctx):
     if ctx.attr.create_cc_configs:
         # Get the files that were created in the CC_CONFIG_DIR
         ctx.file("local_config_files.sh", ("echo $(find ./%s -type f | sort -n)" % CC_CONFIG_DIR), True)
-        result = ctx.execute(["./local_config_files.sh"])
+        result = ctx.execute(["bash", "./local_config_files.sh"])
         print_exec_results("resolve autoconf files", result)
         cc_conf_files = result.stdout.splitlines()[0].split(" ")
     return cc_conf_files

@@ -18,10 +18,14 @@ load(
     "CC_CONFIG_DIR",
     "JAVA_CONFIG_DIR",
     "PLATFORM_DIR",
+    "os_family",
 )
 load("//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
 
-_CC_TOOLCHAIN = ":cc-compiler-k8"
+_CC_TOOLCHAIN = {
+    "Linux": ":cc-compiler-k8",
+    "Windows": ":cc-compiler-x64_windows",
+}
 
 # Defining a local version of dicts.add in order not to create a dependency on bazel_skylib.
 def _merge_dicts(*dict_args):
@@ -94,7 +98,7 @@ def create_java_runtime(ctx, java_home):
         False,
     )
 
-def create_export_platform(ctx, exec_properties, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
+def create_export_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
     """Creates a BUILD file (to be exported to output_base) with the cc_toolchain and platform targets.
 
     Args:
@@ -103,6 +107,12 @@ def create_export_platform(ctx, exec_properties, image_name, name, toolchain_con
           be used when creating the platform. Will be used only when
           use_legacy_platform_definition == False. This dict must not contain
           "container-image".
+      exec_compatible_with: List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
+      target_compatible_with: List of constraints to add to the produced
+          toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
+          target_compatible_with attr.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
       toolchain_config_spec_name: name of the toolchain config spec
@@ -113,10 +123,10 @@ def create_export_platform(ctx, exec_properties, image_name, name, toolchain_con
     if toolchain_config_spec_name:
         cc_toolchain_target += "/" + toolchain_config_spec_name
     cc_toolchain_target += "/bazel_" + ctx.attr.bazel_version
-    cc_toolchain_target += "/cc" + _CC_TOOLCHAIN
-    _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
+    cc_toolchain_target += "/cc" + _CC_TOOLCHAIN[os_family(ctx)]
+    _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
-def create_external_repo_platform(ctx, exec_properties, image_name, name, use_legacy_platform_definition):
+def create_external_repo_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, use_legacy_platform_definition):
     """Creates a BUILD file (to be used with configs in the external repo) with the cc_toolchain and platform targets.
 
     Args:
@@ -125,15 +135,21 @@ def create_external_repo_platform(ctx, exec_properties, image_name, name, use_le
           be used when creating the platform. Will be used only when
           use_legacy_platform_definition == False. This dict must not contain
           "container-image".
+      exec_compatible_with: List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
+      target_compatible_with: List of constraints to add to the produced
+          toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
+          target_compatible_with attr.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
       use_legacy_platform_definition: Whether to create a platform with
           remote_execution_properties (legacy) or with exec_properties.
     """
-    cc_toolchain_target = "@" + ctx.attr.name + "//" + CC_CONFIG_DIR + _CC_TOOLCHAIN
-    _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
+    cc_toolchain_target = "@" + ctx.attr.name + "//" + CC_CONFIG_DIR + _CC_TOOLCHAIN[os_family(ctx)]
+    _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
-def create_alias_platform(ctx, exec_properties, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
+def create_alias_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, toolchain_config_spec_name, use_legacy_platform_definition):
     """Creates a BUILD file (pointing to checked in config) with the cc_toolchain and platform targets.
 
     Args:
@@ -142,6 +158,12 @@ def create_alias_platform(ctx, exec_properties, image_name, name, toolchain_conf
           be used when creating the platform. Will be used only when
           use_legacy_platform_definition == False. This dict must not contain
           "container-image".
+      exec_compatible_with: List of constraints to add to the produced
+          toolchain/platform targets (e.g., ["@bazel_tools//platforms:linux"] in the
+          exec_compatible_with/constraint_values attrs, respectively.
+      target_compatible_with: List of constraints to add to the produced
+          toolchain target (e.g., ["@bazel_tools//platforms:linux"]) in the
+          target_compatible_with attr.
       image_name: the name of the image.
       name: name of rbe_autoconfig repo rule.
       toolchain_config_spec_name: name of the toolchain config spec.
@@ -153,24 +175,25 @@ def create_alias_platform(ctx, exec_properties, image_name, name, toolchain_conf
         bazel_version = ctx.attr.bazel_version,
         cc_dir = CC_CONFIG_DIR,
         config_output_base = ctx.attr.toolchain_config_suite_spec["output_base"],
-        target = _CC_TOOLCHAIN,
+        target = _CC_TOOLCHAIN[os_family(ctx)],
         toolchain_config_repo = ctx.attr.toolchain_config_suite_spec["repo_name"],
     ))
-    _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
+    _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition)
 
 # Creates a BUILD file with the cc_toolchain and platform targets
-def _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target, use_legacy_platform_definition):
+def _create_platform(ctx, exec_properties, exec_compatible_with, target_compatible_with, image_name, name, cc_toolchain_target, use_legacy_platform_definition):
     template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.platform_legacy.tpl")) if use_legacy_platform_definition else ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.platform.tpl"))
     exec_compatible_with = ("\"" +
-                            ("\",\n        \"").join(ctx.attr.exec_compatible_with) +
+                            ("\",\n        \"").join(exec_compatible_with) +
                             "\",")
     target_compatible_with = ("\"" +
-                              ("\",\n        \"").join(ctx.attr.target_compatible_with) +
+                              ("\",\n        \"").join(target_compatible_with) +
                               "\",")
 
+    os = os_family(ctx)
     platform_exec_properties = create_rbe_exec_properties_dict(
         container_image = "docker://%s" % image_name,
-        os_family = "Linux",
+        os_family = os,
     )
     platform_exec_properties = _merge_dicts(platform_exec_properties, exec_properties)
 
@@ -181,6 +204,7 @@ def _create_platform(ctx, exec_properties, image_name, name, cc_toolchain_target
             "%{cc_toolchain}": cc_toolchain_target,
             "%{exec_compatible_with}": exec_compatible_with,
             "%{image_name}": image_name,
+            "%{os_family}": os,
             "%{platform_exec_properties}": "%s" % platform_exec_properties,
             "%{target_compatible_with}": target_compatible_with,
         },

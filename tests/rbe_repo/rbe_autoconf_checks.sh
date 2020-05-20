@@ -94,6 +94,12 @@ assert_cc_confs() {
   assert_file_exists ${DIR}/cc/cc_wrapper.sh
 }
 
+# Checks that Windows cc config files were generated
+assert_cc_confs_windows() {
+  assert_file_exists ${DIR}/cc/test.BUILD
+  assert_file_exists ${DIR}/cc/windows_cc_toolchain_config.bzl
+}
+
 # Checks that checked in configs were selected
 assert_checked_in_cc_confs() {
   assert_file_exists ${DIR}/cc/test.BUILD
@@ -123,6 +129,12 @@ assert_output_base_cc_confs() {
   assert_file_exists ${DIR}/cc/test.BUILD
   assert_file_exists ${DIR}/cc/cc_toolchain_config.bzl
   assert_file_exists ${DIR}/cc/cc_wrapper.sh
+}
+
+# Checks that Windows cc config files were generated in the output_base
+assert_output_base_cc_confs_windows() {
+  assert_file_exists ${DIR}/cc/test.BUILD
+  assert_file_exists ${DIR}/cc/windows_cc_toolchain_config.bzl
 }
 
 # Checks that cc config files were not generated in the output_base

@@ -269,6 +269,16 @@ rbe_autoconfig(
 )
 
 rbe_autoconfig(
+    name = "rbe_autoconf_generate_windows",
+    bazel_version = "3.1.0",
+    create_testdata = True,
+    digest = "sha256:776f241c2693f3f2187d998dcc98d2b339dcb80c99ef59bccefad0eea6e61284",
+    registry = "gcr.io",
+    repository = "envoy-ci/envoy-build-windows",
+    use_checked_in_confs = "False",
+)
+
+rbe_autoconfig(
     name = "rbe_autoconf_generate_no_java",
     bazel_version = _ubuntu1604_bazel,
     create_java_configs = False,
@@ -397,6 +407,31 @@ rbe_autoconfig(
         "output_base": "rbe-test-output/config/rbe_autoconf_output_base",
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": rbe_default_repo()["toolchain_config_suite_autogen_spec"],
+    },
+    use_checked_in_confs = "False",
+)
+
+load(
+    "//tests/rbe_repo:versions.bzl",
+    gcb_test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
+)
+
+rbe_autoconfig(
+    name = "rbe_autoconf_output_base_windows",
+    bazel_version = "3.1.0",
+    create_java_configs = False,
+    create_testdata = True,
+    digest = "sha256:776f241c2693f3f2187d998dcc98d2b339dcb80c99ef59bccefad0eea6e61284",
+    export_configs = True,
+    registry = "gcr.io",
+    repository = "envoy-ci/envoy-build-windows",
+    toolchain_config_spec_name = "test_config_dir",
+    toolchain_config_suite_spec = {
+        "container_registry": "gcr.io",
+        "container_repo": "envoy-ci/envoy-build-windows",
+        "output_base": "rbe-test-output/config/rbe_autoconf_output_base_windows",
+        "repo_name": rbe_default_repo()["repo_name"],
+        "toolchain_config_suite_autogen_spec": gcb_test_toolchain_config_suite_autogen_spec,
     },
     use_checked_in_confs = "False",
 )
@@ -535,11 +570,6 @@ rbe_autoconfig(
         "repo_name": rbe_default_repo()["repo_name"],
         "toolchain_config_suite_autogen_spec": blank_toolchain_config_suite_autogen_spec,
     },
-)
-
-load(
-    "//tests/rbe_repo:versions.bzl",
-    gcb_test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
 
 # This repo should only be used for GCB tests.
