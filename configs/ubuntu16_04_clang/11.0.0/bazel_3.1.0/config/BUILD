@@ -21,8 +21,8 @@ package(default_visibility = ["//visibility:public"])
 toolchain(
     name = "cc-toolchain",
     exec_compatible_with = [
-        "@bazel_tools//platforms:x86_64",
         "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
         "@bazel_tools//tools/cpp:clang",
     ],
     target_compatible_with = [
@@ -36,8 +36,8 @@ toolchain(
 platform(
     name = "platform",
     constraint_values = [
-        "@bazel_tools//platforms:x86_64",
         "@bazel_tools//platforms:linux",
+        "@bazel_tools//platforms:x86_64",
         "@bazel_tools//tools/cpp:clang",
     ],
     remote_execution_properties = """
