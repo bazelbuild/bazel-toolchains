@@ -12,14 +12,14 @@ exec_properties.bzl contains the following Starlark macros:
 local repository contains a set of standard constants each of which contains a
 dictionary of remote execution properties that are consumable by RBE.
 
-A standrad name for this repository is `exec_properties`, and that's the name
+A standard name for this repository is `exec_properties`, and that's the name
 that should generally be used.
 
 ## custom_exec_properties
 
 `custom_exec_properties` is a Starlark macro that can be called from the
 `WORKSPACE` file. It wraps a repo rule that creates a local repository. This
-local repository contains a set of user defined constants, each of which
+local repository contains a set of user-defined constants, each of which
 contains a dictionary of remote execution properties.
 
 It is highly recommended to use a globally unique name for this repo rule (and
