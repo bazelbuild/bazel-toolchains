@@ -57,6 +57,7 @@ steps:
   - -//absl/synchronization:blocking_counter_test
   - -//absl/synchronization:lifetime_test
   - -//absl/synchronization:notification_test
+  - -//absl/container:btree_test
   - -//absl/container:hashtablez_sampler_test
   - -//absl/container:inlined_vector_benchmark
   - -//absl/random/...

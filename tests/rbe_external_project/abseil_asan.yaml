@@ -60,6 +60,7 @@ steps:
   - -//absl/debugging:leak_check_test
   - -//absl/debugging:symbolize_test
   - -//absl/synchronization:mutex_benchmark
+  - -//absl/container:btree_test
   - -//absl/container:inlined_vector_benchmark
   - -//absl/random/...
   dir: 'external-src'
