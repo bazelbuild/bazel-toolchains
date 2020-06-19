@@ -64,6 +64,7 @@ steps:
   - -//absl/numeric:int128_benchmark
   - -//absl/strings:str_format_convert_test
   - -//absl/algorithm:algorithm_benchmark
+  - -//absl/container:btree_test
   - -//absl/container:inlined_vector_benchmark
   - -//absl/random/...
   dir: 'external-src'
