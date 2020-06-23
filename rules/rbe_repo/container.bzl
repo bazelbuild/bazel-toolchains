@@ -56,6 +56,7 @@ _BAZELISK_DOWNLOAD_INFO = {
 def _create_docker_cmd(
         ctx,
         os_name,
+        bazel_version,
         config_repos,
         outputs_tar,
         use_default_project):
@@ -103,9 +104,10 @@ def _create_docker_cmd(
     # For each config repo we run the target @<config_repo>//...
     bazel_targets = "@" + "//... @".join(config_repos) + "//..."
 
-    # TODO(sunjayBhatia): this can be removed once the fixes for this issue are in a Bazel release:
-    # https://github.com/bazelbuild/bazel/issues/11101
-    if os_name == "Windows":
+    # TODO(sunjayBhatia): this can be removed once Bazel 3.1.0 and below are out of support
+    # See: https://github.com/bazelbuild/bazel/issues/11101
+    bazel_version_split = bazel_version.split(".")
+    if os_name == "Windows" and (bazel_version_split[0] < "3" or ((bazel_version_split[0] == "3" and bazel_version_split[1] < "2"))):
         bazel_targets += " -- -@local_config_cc//:link_dynamic_library"
 
     bazel_cmd += " && " + bazelisk_path + " build " + bazel_targets
@@ -252,6 +254,7 @@ def run_and_extract(
     _create_docker_cmd(
         ctx,
         os_name = os_name,
+        bazel_version = bazel_version,
         config_repos = config_repos,
         outputs_tar = outputs_tar,
         use_default_project = use_default_project,
