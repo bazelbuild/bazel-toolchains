@@ -35,7 +35,6 @@ load(
     "//tests/rbe_repo:versions_test.bzl",
     test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
-
 load(":rbe_container_test.bzl", "rbe_container_test")
 
 # sh_tests below verify that the rbe_autoconfig targets have the
