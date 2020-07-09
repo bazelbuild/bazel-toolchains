@@ -1,3 +1,5 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
 # Copyright 2017 The Bazel Authors. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +35,8 @@ load(
     "//tests/rbe_repo:versions_test.bzl",
     test_toolchain_config_suite_autogen_spec = "TOOLCHAIN_CONFIG_AUTOGEN_SPEC",
 )
+
+load(":rbe_container_test.bzl", "rbe_container_test")
 
 # sh_tests below verify that the rbe_autoconfig targets have the
 # right file structure in the external folder repo
@@ -867,16 +871,31 @@ sh_test(
 
 # Verifies that all containers listed in the versions.bzl file used by
 # rbe_autoconfig are available for pulling.
-# This test requires docker to be present on the path.
-sh_test(
+rbe_container_test(
     name = "rbe_container_test",
     size = "large",
-    srcs = [":rbe_container_test.sh"],
-    args = [(("{}/{}@{}").format(
+    images = [(("{}/{}@{}").format(
         # use l.gcr.io to test with no auth required
         "l.gcr.io",
         default_toolchain_config_suite_spec()["container_repo"],
         sha256,
     )) for sha256 in RBE_CONTAINERS_MAP.keys()],
     tags = ["no-remote"],
+)
+
+go_library(
+    name = "go_default_library",
+    srcs = ["image_exists.go"],
+    importpath = "github.com/bazelbuild/bazel-toolchains/tests/rbe_repo",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_google_go_containerregistry//pkg/name:go_default_library",
+        "@com_github_google_go_containerregistry//pkg/v1/remote:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "image_exists",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
 )
