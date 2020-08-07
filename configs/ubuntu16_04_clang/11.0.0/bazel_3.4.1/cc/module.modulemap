@@ -195,6 +195,7 @@ module "crosstool" [system] {
   textual header "/usr/local/lib/clang/11.0.0/include/ammintrin.h"
   textual header "/usr/local/lib/clang/11.0.0/include/arm64intr.h"
   textual header "/usr/local/lib/clang/11.0.0/include/arm_acle.h"
+  textual header "/usr/local/lib/clang/11.0.0/include/arm_bf16.h"
   textual header "/usr/local/lib/clang/11.0.0/include/arm_cde.h"
   textual header "/usr/local/lib/clang/11.0.0/include/arm_cmse.h"
   textual header "/usr/local/lib/clang/11.0.0/include/arm_fp16.h"
