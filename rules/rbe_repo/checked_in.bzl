@@ -196,12 +196,13 @@ def validateUseOfCheckedInConfigs(
         env = env,
         name = name,
     ):
-        print(("%s not using checked in configs; '%s' was picked/selected " +
-               "as a candidate matching config but it does not match " +
-               "the 'env = %s', 'config_repos = %s', " +
+        print(("%s not using checked in configs; '%s' was picked/selected as a candidate " +
+               "matching config for Bazel %s from whose list of compatible configs are %s " +
+               "but it does not match the 'env = %s', 'config_repos = %s', " +
                "and/or 'create_cc_configs = %s' passed as attrs") %
               (
                   name,
+                  config,
                   bazel_version,
                   str(bazel_compat_configs),
                   env,
