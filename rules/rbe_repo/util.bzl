@@ -144,6 +144,8 @@ def os_family(ctx):
     Returns:
       Returns the name of the OS Family
     """
+    if ctx.attr.os_family:
+      return ctx.attr.os_family
     os_name = ctx.os.name.lower()
     if os_name.find("windows") != -1:
         return "Windows"
