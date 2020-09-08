@@ -587,7 +587,7 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating export platform")
             create_export_platform(
                 ctx,
-                exec_properties = ctx.attr.exec_properties,
+                exec_properties = ctx.attr.internal_exec_properties,
                 exec_compatible_with = exec_compatible_with,
                 target_compatible_with = target_compatible_with,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
@@ -617,7 +617,7 @@ def _rbe_autoconfig_impl(ctx):
             ctx.report_progress("creating external repo platform")
             create_external_repo_platform(
                 ctx,
-                exec_properties = ctx.attr.exec_properties,
+                exec_properties = ctx.attr.internal_exec_properties,
                 exec_compatible_with = exec_compatible_with,
                 target_compatible_with = target_compatible_with,
                 image_name = resolve_rbe_original_image_name(ctx, image_name),
@@ -632,7 +632,7 @@ def _rbe_autoconfig_impl(ctx):
         create_config_aliases(ctx, toolchain_config_spec_name)
         create_alias_platform(
             ctx,
-            exec_properties = ctx.attr.exec_properties,
+            exec_properties = ctx.attr.internal_exec_properties,
             exec_compatible_with = exec_compatible_with,
             target_compatible_with = target_compatible_with,
             image_name = resolve_rbe_original_image_name(ctx, image_name),
@@ -782,7 +782,7 @@ _rbe_autoconfig = repository_rule(
                    "the platform in its constraint_values attr). For " +
                    "example, [\"@bazel_tools//platforms:linux\"]."),
         ),
-        "exec_properties": attr.string_dict(
+        "internal_exec_properties": attr.string_dict(
             doc = (
                 "Optional. The execution properties to be used when creating the " +
                 "underlying platform. When providing this attribute, " +
@@ -1192,7 +1192,7 @@ def rbe_autoconfig(
         digest = digest,
         env = env,
         exec_compatible_with = exec_compatible_with,
-        exec_properties = exec_properties,
+        internal_exec_properties = exec_properties,
         export_configs = export_configs,
         java_home = java_home,
         toolchain_config_suite_spec = toolchain_config_suite_spec_stripped,
