@@ -411,3 +411,10 @@
   date: "2020-08-26"
   bazelVersion: 3.4.1
   configVersion: 2
+- commitSHA: 55023929feb290e74ed5c6e4ef5ecf97948f222b
+  digest: 89a053218639b1c5e3589a859bb310e0a402dedbe4ee369560e66026ae5ef1f2
+  title: Toolchain configs for marketplace.gcr.io/google/rbe-ubuntu16-04, Bazel 3.5.0
+    (2020/09/03) (#910)
+  date: "2020-09-04"
+  bazelVersion: 3.5.0
+  configVersion: 0
