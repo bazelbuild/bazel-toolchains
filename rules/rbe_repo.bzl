@@ -509,7 +509,7 @@ def _rbe_autoconfig_impl(ctx):
     docker_tool_path = None
 
     # Resolve default constraints if none set
-    target_compatible_with = ctx.attr.target_compatible_with
+    target_compatible_with = ctx.attr.internal_target_compatible_with
     if not target_compatible_with:
         target_compatible_with = _TARGET_COMPAT_WITH[os_family(ctx)]
 
@@ -844,7 +844,7 @@ _rbe_autoconfig = repository_rule(
         "tag": attr.string(
             doc = ("Optional. The tag of the image to pull, e.g. latest."),
         ),
-        "target_compatible_with": attr.string_list(
+        "internal_target_compatible_with": attr.string_list(
             doc = ("The list of constraints that will be added to the " +
                    "toolchain in its target_compatible_with attribute. For " +
                    "example, [\"@bazel_tools//platforms:linux\"]."),
@@ -1199,7 +1199,7 @@ def rbe_autoconfig(
         registry = registry,
         repository = repository,
         tag = tag,
-        target_compatible_with = target_compatible_with,
+        internal_target_compatible_with = target_compatible_with,
         use_checked_in_confs = use_checked_in_confs,
         use_legacy_platform_definition = use_legacy_platform_definition,
     )
