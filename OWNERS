@@ -3,15 +3,14 @@
 
 # Reviewers may be auto-assigned by blunderbuss
 reviewers:
-- nlopezgi
 - smukherj1
-- alex1545
 - rbe-toolchains-pr-bot
+- davegay
+- eytankidron
 
 # Approvers can /approve changes to files within this directory tree.
 approvers:
-- nlopezgi
 - smukherj1
-- alex1545
 - rbe-toolchains-pr-bot
-
+- davegay
+- eytankidron
