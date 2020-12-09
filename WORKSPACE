@@ -21,6 +21,7 @@ load(
 
 bazel_toolchains_repositories()
 
+# Test change.
 load(
     "@io_bazel_rules_docker//toolchains/docker:toolchain.bzl",
     docker_toolchain_configure = "toolchain_configure",
