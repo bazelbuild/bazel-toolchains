@@ -12,15 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_toolchains//rules:docker_config.bzl", "docker_toolchain_autoconfig")
-load(
-    "@bazel_toolchains//rules:environments.bzl",
-    "clang_env",
-    "ubuntu16_04_clang_default_keys",
-    "ubuntu16_04_clang_default_packages",
-    "ubuntu16_04_clang_default_repos",
-)
 
 licenses(["notice"])  # Apache 2.0
 
@@ -39,4 +31,3 @@ platform(
         }
         """,
 )
-
