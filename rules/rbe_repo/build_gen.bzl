@@ -108,7 +108,7 @@ def create_java_runtime(ctx, java_home):
       java_home: the seleceted/resolved location for java_home.
     """
     bazel_version = tuple([int(n) for n in ctx.attr.bazel_version.split(".")])
-    if bazel_version > (4,0,0) or not native.bazel_version:
+    if bazel_version > (4, 0, 0) or not native.bazel_version:
         template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.local_java_runtime.tpl"))
     else:
         template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.java.tpl"))

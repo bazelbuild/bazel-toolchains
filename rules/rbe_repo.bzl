@@ -1203,4 +1203,3 @@ def rbe_autoconfig(
         use_checked_in_confs = use_checked_in_confs,
         use_legacy_platform_definition = use_legacy_platform_definition,
     )
-
