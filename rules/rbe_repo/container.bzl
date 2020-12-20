@@ -218,6 +218,39 @@ def get_java_home(ctx, docker_tool_path, image_name):
     else:
         return None
 
+def get_java_version(ctx, docker_tool_path, image_name, java_home):
+    if ctx.attr.java_version:
+        return ctx.attr.java_version
+    elif docker_tool_path:
+        properties_out = ctx.execute([
+            str(docker_tool_path),
+            "run",
+            image_name,
+            java_home + "/bin/java",
+            "-XshowSettings:properties",
+        ]).stderr
+        # This returns an indented list of properties separated with newlines:
+        # "  java.vendor.url.bug = ... \n"
+        # "  java.version = 11.0.8\n"
+        # "  java.version.date = 2020-11-05\"
+
+        strip_properties = [property.strip() for property in properties_out.splitlines()]
+        version_property = [property for property in strip_properties if property.startswith("java.version = ")]
+        if len(version_property) != 1:
+            fail("Could not detect Java verison in the container and one was " +
+                 "passed to rbe_autoconfig rule. Java version is required " +
+                 "because create_java_configs is set to True")
+
+        version_value = version_property[0][len("java.version = "):]
+        (major, minor, rest) = version_value.split(".", 2)
+
+        if major == "1":  # handles versions below 1.8
+            return minor
+        return major
+    elif ctx.attr.export_configs:
+        fail(("%s failed: export_configs was set but neither java_version nor " +
+              "detect_java_home was set.") % ctx.attr.name)
+
 def run_and_extract(
         ctx,
         bazel_version,

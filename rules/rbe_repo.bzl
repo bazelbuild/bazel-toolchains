@@ -419,6 +419,7 @@ load(
 load(
     "//rules/rbe_repo:container.bzl",
     "get_java_home",
+    "get_java_version",
     "pull_container_needed",
     "pull_image",
     "run_and_extract",
@@ -545,8 +546,9 @@ def _rbe_autoconfig_impl(ctx):
     java_home = None
     if ctx.attr.create_java_configs:
         java_home = get_java_home(ctx, docker_tool_path, image_name)
+        java_version = get_java_version(ctx, docker_tool_path, image_name, java_home)
         if java_home:
-            create_java_runtime(ctx, java_home)
+            create_java_runtime(ctx, java_home, java_version)
 
     toolchain_config_spec_name = ctx.attr.toolchain_config_spec_name
     if ctx.attr.config_version:
@@ -811,6 +813,10 @@ _rbe_autoconfig = repository_rule(
                    "JAVA_HOME env var from the container. If that is not set, the rule " +
                    "will fail."),
         ),
+        "java_version": attr.string(
+            doc = ("Optional. The Java release version in the container. For " +
+                   " example, 11. Should only be set if java_home is set."),
+        ),
         "registry": attr.string(
             doc = ("Optional. The registry to pull the container from. For example, " +
                    "marketplace.gcr.io. The default is the value for the selected " +
@@ -899,6 +905,7 @@ def rbe_autoconfig(
         exec_properties = None,
         export_configs = False,
         java_home = None,
+        java_version = None,
         tag = None,
         toolchain_config_suite_spec = default_toolchain_config_suite_spec(),
         registry = None,
@@ -988,6 +995,8 @@ def rbe_autoconfig(
           the 'toolchain_config_suite_spec', fallback to turning on 'detect_java_home'
           (unless use_checked_in_confs = Force was set), or otherwise fail with an
           informative error.
+      java_version: Optional. The Java release version in the container. For
+          example, 11. Should only be set if java_home is set.
       tag: Optional. The tag of the container to use.
           Should not be set if 'digest' is used.
           Must be set together with 'registry' and 'repository'.
@@ -1031,8 +1040,8 @@ def rbe_autoconfig(
     if bazel_rc_version and not bazel_version:
         fail("bazel_rc_version can only be used with bazel_version.")
 
-    if not create_java_configs and (java_home or detect_java_home):
-        fail("java_home / detect_java_home should not be set when " +
+    if not create_java_configs and (java_home or java_version or detect_java_home):
+        fail("java_home, java_version, or detect_java_home should not be set when " +
              "create_java_configs is False.")
     if java_home and detect_java_home:
         fail("java_home should not be set when detect_java_home is True.")
@@ -1195,6 +1204,7 @@ def rbe_autoconfig(
         internal_exec_properties = exec_properties,
         export_configs = export_configs,
         java_home = java_home,
+        java_version = java_version,
         toolchain_config_suite_spec = toolchain_config_suite_spec_stripped,
         registry = registry,
         repository = repository,

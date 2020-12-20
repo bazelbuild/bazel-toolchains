@@ -88,7 +88,7 @@ REPO_SPEC_STRING_KEYS = [
 
 REPO_SPEC_KEYS = REPO_SPEC_STRING_KEYS + ["toolchain_config_suite_autogen_spec"]
 
-REPO_SPEC_ALL_KEYS = REPO_SPEC_KEYS + ["default_java_home"]
+REPO_SPEC_ALL_KEYS = REPO_SPEC_KEYS + ["default_java_home", "default_java_version"]
 
 CONFIG_SPEC_FIELDS = [
     "bazel_to_config_spec_names_map",
@@ -105,6 +105,7 @@ def default_toolchain_config_suite_spec():
         "container_repo": "google/rbe-ubuntu16-04",
         "container_registry": "marketplace.gcr.io",
         "default_java_home": "/usr/lib/jvm/java-8-openjdk-amd64",
+        "default_java_version": "8",
         "toolchain_config_suite_autogen_spec": toolchain_config_suite_autogen_spec,
     }
 
