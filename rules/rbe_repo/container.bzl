@@ -219,6 +219,20 @@ def get_java_home(ctx, docker_tool_path, image_name):
         return None
 
 def get_java_version(ctx, docker_tool_path, image_name, java_home):
+    """Gets the release version of Java runtime.
+
+    Gets the release version of Java runtime either from attr or
+    by running docker run image_name java -XshowSettings:properties.
+
+    Args:
+      ctx: the Bazel context object.
+      docker_tool_path: path to the docker binary.
+      image_name: name of the image to pull.
+      java_home: java_home.
+
+    Returns:
+      Returns the release version of Java runtime.
+    """
     if ctx.attr.java_version:
         return ctx.attr.java_version
     elif docker_tool_path:
