@@ -237,10 +237,11 @@ def get_java_version(ctx, docker_tool_path, image_name, java_home):
         return ctx.attr.java_version
     elif docker_tool_path:
         properties_out = ctx.execute([
-            str(docker_tool_path),
+            docker_tool_path,
             "run",
-            image_name,
+            "--entrypoint",
             java_home + "/bin/java",
+            image_name,
             "-XshowSettings:properties",
         ]).stderr
         # This returns an indented list of properties separated with newlines:
@@ -252,7 +253,7 @@ def get_java_version(ctx, docker_tool_path, image_name, java_home):
         version_property = [property for property in strip_properties if property.startswith("java.version = ")]
         if len(version_property) != 1:
             fail("Could not detect Java verison in the container and one was " +
-                 "passed to rbe_autoconfig rule. Java version is required " +
+                 "not passed to rbe_autoconfig rule. Java version is required " +
                  "because create_java_configs is set to True")
 
         version_value = version_property[0][len("java.version = "):]
@@ -264,6 +265,7 @@ def get_java_version(ctx, docker_tool_path, image_name, java_home):
     elif ctx.attr.export_configs:
         fail(("%s failed: export_configs was set but neither java_version nor " +
               "detect_java_home was set.") % ctx.attr.name)
+    return "unknown"
 
 def run_and_extract(
         ctx,
