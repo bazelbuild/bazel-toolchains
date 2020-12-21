@@ -252,9 +252,7 @@ def get_java_version(ctx, docker_tool_path, image_name, java_home):
         strip_properties = [property.strip() for property in properties_out.splitlines()]
         version_property = [property for property in strip_properties if property.startswith("java.version = ")]
         if len(version_property) != 1:
-            fail("Could not detect Java verison in the container and one was " +
-                 "not passed to rbe_autoconfig rule. Java version is required " +
-                 "because create_java_configs is set to True")
+            return "unknown"
 
         version_value = version_property[0][len("java.version = "):]
         (major, minor, rest) = version_value.split(".", 2)
