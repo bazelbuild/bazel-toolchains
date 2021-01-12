@@ -544,6 +544,7 @@ def _rbe_autoconfig_impl(ctx):
     # Get the value of JAVA_HOME to set in the produced
     # java_runtime
     java_home = None
+    java_version = None
     if ctx.attr.create_java_configs:
         java_home = get_java_home(ctx, docker_tool_path, image_name)
         java_version = get_java_version(ctx, docker_tool_path, image_name, java_home)
