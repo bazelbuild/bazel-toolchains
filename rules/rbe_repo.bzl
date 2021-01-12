@@ -605,6 +605,7 @@ def _rbe_autoconfig_impl(ctx):
                     digest = digest,
                     toolchain_config_spec_name = toolchain_config_spec_name,
                     java_home = java_home,
+                    java_version = java_version,
                     project_root = export_project_root,
                 )
 
@@ -1045,6 +1046,8 @@ def rbe_autoconfig(
              "create_java_configs is False.")
     if java_home and detect_java_home:
         fail("java_home should not be set when detect_java_home is True.")
+    if java_version and detect_java_home:
+        fail("java_version should not be set when detect_java_home is True.")
 
     validate_toolchain_config_suite_spec(name, toolchain_config_suite_spec)
 
@@ -1120,6 +1123,35 @@ def rbe_autoconfig(
                   "but no checked-in configs were found which provide a value for java_home. " +
                   "This may be solved by defining a 'default_java_home' in the " +
                   "toolchain_config_spec or by explicitly setting 'java_home' in '{name}'").format(
+                name = name,
+                force = CHECKED_IN_CONFS_FORCE,
+            ))
+
+    # If create_java_configs was requested but no java_version or detect_java_home was
+    # set, we try to resolve a java_home
+    if create_java_configs and not java_version and not detect_java_home:
+        # If a spec was found and that has a java_home, use it
+        if toolchain_config_spec and toolchain_config_spec.create_java_configs:
+            java_version = toolchain_config_spec.java_version
+
+        elif toolchain_config_suite_spec.get("default_java_version"):
+            # Fallback to try to using the default_java_version set in the
+            # toolchain_config_suite_spec
+            java_version = toolchain_config_suite_spec.get("default_java_version")
+
+        elif use_checked_in_confs != CHECKED_IN_CONFS_FORCE:
+            # Fallback to detecting the java_home if CHECKED_IN_CONFS_FORCE
+            # was not passed
+            detect_java_home = True
+
+        elif toolchain_config_spec and use_checked_in_confs == CHECKED_IN_CONFS_FORCE:
+            # If we get here, the toolchain_config_spec we found does not
+            # provide a java_home that we can use, and the toolchain_config_suite_spec
+            # does not have a default one either, so just fail early.
+            fail(("Target '{name}' failed: use_checked_in_confs was set to '{force}' " +
+                  "but no checked-in configs were found which provide a value for java_version. " +
+                  "This may be solved by defining a 'default_java_version' in the " +
+                  "toolchain_config_spec or by explicitly setting 'java_version' in '{name}'").format(
                 name = name,
                 force = CHECKED_IN_CONFS_FORCE,
             ))

@@ -374,13 +374,14 @@ def config_to_string_lists(toolchain_config_specs):
         env_values = env_values,
     )
 
-def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home):
+def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home, java_version):
     """Creates a list of structs with repo configs
 
     Args:
       ctx: the Bazel context object.
       requested_toolchain_config_spec_name: provided/selected name for the configs
       java_home: The provided/selected location of java_home.
+      java_version: The provided/selected version of Java.
 
     Returns:
       A list with structs, each an repo config with 'name'
@@ -424,6 +425,7 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home)
         configs += [struct(
             name = requested_toolchain_config_spec_name,
             java_home = java_home,
+            java_version = java_version,
             create_java_configs = ctx.attr.create_java_configs,
             create_cc_configs = ctx.attr.create_cc_configs,
             config_repos = ctx.attr.config_repos,
