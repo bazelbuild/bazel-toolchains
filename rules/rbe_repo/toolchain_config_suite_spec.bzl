@@ -341,6 +341,7 @@ def config_to_string_lists(toolchain_config_specs):
     """
     names = []
     java_home = []
+    java_version = []
     create_java_configs = []
     create_cc_configs = []
     config_repos = []
@@ -350,6 +351,7 @@ def config_to_string_lists(toolchain_config_specs):
     for toolchain_config_spec in toolchain_config_specs:
         names += [toolchain_config_spec.name]
         java_home += [toolchain_config_spec.java_home]
+        java_version += [toolchain_config_spec.java_version]
         create_java_configs += ["non_empty" if toolchain_config_spec.create_java_configs else ""]
         create_cc_configs += ["non_empty" if toolchain_config_spec.create_cc_configs else ""]
         config_repos += [_SEPARATOR.join(toolchain_config_spec.config_repos)]
@@ -367,6 +369,7 @@ def config_to_string_lists(toolchain_config_specs):
     return struct(
         names = names,
         java_home = java_home,
+        java_version = java_version,
         create_java_configs = create_java_configs,
         create_cc_configs = create_cc_configs,
         config_repos = config_repos,
@@ -409,6 +412,7 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home,
         config = struct(
             name = toolchain_config_spec_name,
             java_home = ctx.attr.configs_obj_java_home[index] if ctx.attr.configs_obj_java_home and ctx.attr.configs_obj_java_home[index] else None,
+            java_version = ctx.attr.configs_obj_java_version[index] if ctx.attr.configs_obj_java_version and ctx.attr.configs_obj_java_version[index] else None,
             create_java_configs = True if ctx.attr.configs_obj_create_java_configs[index] else False,
             create_cc_configs = True if ctx.attr.configs_obj_create_cc_configs[index] else False,
             config_repos = config_repos,
