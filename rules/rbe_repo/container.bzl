@@ -218,6 +218,53 @@ def get_java_home(ctx, docker_tool_path, image_name):
     else:
         return None
 
+def get_java_version(ctx, docker_tool_path, image_name, java_home):
+    """Gets the release version of Java runtime.
+
+    Gets the release version of Java runtime either from attr or
+    by running docker run image_name java -XshowSettings:properties.
+
+    Args:
+      ctx: the Bazel context object.
+      docker_tool_path: path to the docker binary.
+      image_name: name of the image to pull.
+      java_home: java_home.
+
+    Returns:
+      Returns the release version of Java runtime.
+    """
+    if ctx.attr.java_version:
+        return ctx.attr.java_version
+    elif docker_tool_path:
+        properties_out = ctx.execute([
+            docker_tool_path,
+            "run",
+            "--entrypoint",
+            java_home + "/bin/java",
+            image_name,
+            "-XshowSettings:properties",
+        ]).stderr
+        # This returns an indented list of properties separated with newlines:
+        # "  java.vendor.url.bug = ... \n"
+        # "  java.version = 11.0.8\n"
+        # "  java.version.date = 2020-11-05\"
+
+        strip_properties = [property.strip() for property in properties_out.splitlines()]
+        version_property = [property for property in strip_properties if property.startswith("java.version = ")]
+        if len(version_property) != 1:
+            return "unknown"
+
+        version_value = version_property[0][len("java.version = "):]
+        (major, minor, rest) = version_value.split(".", 2)
+
+        if major == "1":  # handles versions below 1.8
+            return minor
+        return major
+    elif ctx.attr.export_configs:
+        fail(("%s failed: export_configs was set but neither java_version nor " +
+              "detect_java_home was set.") % ctx.attr.name)
+    return "unknown"
+
 def run_and_extract(
         ctx,
         bazel_version,

@@ -156,7 +156,7 @@ def _get_cc_conf_files(ctx):
         cc_conf_files = result.stdout.splitlines()[0].split(" ")
     return cc_conf_files
 
-def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, project_root):
+def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, java_version, project_root):
     """Creates the versions.bzl file.
 
     Args:
@@ -165,6 +165,7 @@ def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, pro
         project_root: The output directory where the versions.bzl file will be copied to.
         toolchain_config_spec_name: provided/selected name for the configs
         java_home: the provided/selected location for java_home
+        java_version: the provided/selected version of Java
     """
 
     # un-flatten rbe_repo_configs
@@ -174,7 +175,7 @@ def create_versions_file(ctx, toolchain_config_spec_name, digest, java_home, pro
     configs_list = []
 
     # Create the list of config_repo structs
-    configs = string_lists_to_config(ctx, toolchain_config_spec_name, java_home)
+    configs = string_lists_to_config(ctx, toolchain_config_spec_name, java_home, java_version)
     index = 0
     default_toolchain_config_spec = None
     for config in configs:

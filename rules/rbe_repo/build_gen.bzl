@@ -81,19 +81,25 @@ def create_config_aliases(ctx, toolchain_config_spec_name):
             False,
         )
 
-def create_java_runtime(ctx, java_home):
+def create_java_runtime(ctx, java_home, java_version):
     """Creates a BUILD file with the java_runtime target. 
 
     Args:
       ctx: the Bazel context object.
-      java_home: the seleceted/resolved location for java_home.
+      java_home: the selected/resolved location for java_home.
+      java_version: the Java runtime release version
     """
-    template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.java.tpl"))
+    bazel_version = tuple([int(n) for n in ctx.attr.bazel_version.split(".")])
+    if bazel_version > (4, 0, 0) or not native.bazel_version:
+        template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.local_java_runtime.tpl"))
+    else:
+        template = ctx.path(Label("@bazel_toolchains//rules/rbe_repo:BUILD.java.tpl"))
     ctx.template(
         JAVA_CONFIG_DIR + "/BUILD",
         template,
         {
             "%{java_home}": java_home,
+            "%{java_version}": java_version,
         },
         False,
     )

@@ -88,7 +88,7 @@ REPO_SPEC_STRING_KEYS = [
 
 REPO_SPEC_KEYS = REPO_SPEC_STRING_KEYS + ["toolchain_config_suite_autogen_spec"]
 
-REPO_SPEC_ALL_KEYS = REPO_SPEC_KEYS + ["default_java_home"]
+REPO_SPEC_ALL_KEYS = REPO_SPEC_KEYS + ["default_java_home", "default_java_version"]
 
 CONFIG_SPEC_FIELDS = [
     "bazel_to_config_spec_names_map",
@@ -105,6 +105,7 @@ def default_toolchain_config_suite_spec():
         "container_repo": "google/rbe-ubuntu16-04",
         "container_registry": "marketplace.gcr.io",
         "default_java_home": "/usr/lib/jvm/java-8-openjdk-amd64",
+        "default_java_version": "8",
         "toolchain_config_suite_autogen_spec": toolchain_config_suite_autogen_spec,
     }
 
@@ -340,6 +341,7 @@ def config_to_string_lists(toolchain_config_specs):
     """
     names = []
     java_home = []
+    java_version = []
     create_java_configs = []
     create_cc_configs = []
     config_repos = []
@@ -349,6 +351,7 @@ def config_to_string_lists(toolchain_config_specs):
     for toolchain_config_spec in toolchain_config_specs:
         names += [toolchain_config_spec.name]
         java_home += [toolchain_config_spec.java_home]
+        java_version += [toolchain_config_spec.java_version]
         create_java_configs += ["non_empty" if toolchain_config_spec.create_java_configs else ""]
         create_cc_configs += ["non_empty" if toolchain_config_spec.create_cc_configs else ""]
         config_repos += [_SEPARATOR.join(toolchain_config_spec.config_repos)]
@@ -366,6 +369,7 @@ def config_to_string_lists(toolchain_config_specs):
     return struct(
         names = names,
         java_home = java_home,
+        java_version = java_version,
         create_java_configs = create_java_configs,
         create_cc_configs = create_cc_configs,
         config_repos = config_repos,
@@ -373,13 +377,14 @@ def config_to_string_lists(toolchain_config_specs):
         env_values = env_values,
     )
 
-def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home):
+def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home, java_version):
     """Creates a list of structs with repo configs
 
     Args:
       ctx: the Bazel context object.
       requested_toolchain_config_spec_name: provided/selected name for the configs
       java_home: The provided/selected location of java_home.
+      java_version: The provided/selected version of Java.
 
     Returns:
       A list with structs, each an repo config with 'name'
@@ -407,6 +412,7 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home)
         config = struct(
             name = toolchain_config_spec_name,
             java_home = ctx.attr.configs_obj_java_home[index] if ctx.attr.configs_obj_java_home and ctx.attr.configs_obj_java_home[index] else None,
+            java_version = ctx.attr.configs_obj_java_version[index] if ctx.attr.configs_obj_java_version and ctx.attr.configs_obj_java_version[index] else None,
             create_java_configs = True if ctx.attr.configs_obj_create_java_configs[index] else False,
             create_cc_configs = True if ctx.attr.configs_obj_create_cc_configs[index] else False,
             config_repos = config_repos,
@@ -423,6 +429,7 @@ def string_lists_to_config(ctx, requested_toolchain_config_spec_name, java_home)
         configs += [struct(
             name = requested_toolchain_config_spec_name,
             java_home = java_home,
+            java_version = java_version,
             create_java_configs = ctx.attr.create_java_configs,
             create_cc_configs = ctx.attr.create_cc_configs,
             config_repos = ctx.attr.config_repos,
