@@ -1,14 +1,8 @@
 steps:
-# Launch a RBE hello world build + unit test using the @rbe_default toolchain
-# configs.
-- name: 'l.gcr.io/google/bazel'
+# Ensure the toolchain configs generator Go binary builds.
+- name: golang:1.15
   args:
-  - --bazelrc=../../../../bazelrc/latest.bazelrc
-  - test
-  - --config=remote
-  - --remote_instance_name=projects/asci-toolchain/instances/default_instance
-  - --
-  - //:say_hello_test
-  - "@java-sample//..."
-  dir: 'tests/rbe_repo/examples/bazel_toolchains_client'
+  - go
+  - build
+  - github.com/bazelbuild/bazel-toolchains/cmd/rbe_configs_gen
 
