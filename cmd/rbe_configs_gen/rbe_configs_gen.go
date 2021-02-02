@@ -21,6 +21,7 @@ var (
 
 	// Optional input arguments that affect config generation.
 	genCppConfigs  = flag.Bool("generate_cpp_configs", true, "(Optional) Generate C++ configs. Defaults to true.")
+	cppEnvJSON     = flag.String("cpp_env_json", "", "(Optional) JSON file containing a str -> str dict of environment variables to be set when generating C++ configs inside the toolchain container. This replaces any exec OS specific defauls that would usually be applied.")
 	genJavaConfigs = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
 
 	// Other misc arguments.
@@ -40,6 +41,7 @@ func main() {
 		OutputSourceRoot:   *outputSrcRoot,
 		OutputConfigPath:   *outputConfigPath,
 		GenCPPConfigs:      *genCppConfigs,
+		CppGenEnvJSON:      *cppEnvJSON,
 		GenJavaConfigs:     *genJavaConfigs,
 		TempWorkDir:        *tempWorkDir,
 		Cleanup:            *cleanup,

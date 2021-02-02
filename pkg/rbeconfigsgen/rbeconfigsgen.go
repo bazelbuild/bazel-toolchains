@@ -340,15 +340,16 @@ func (d *dockerRunner) getEnv() (map[string]string, error) {
 
 // installBazelisk downloads bazelisk locally to the specified directory for the given os and copies
 // it into the running toolchain container.
+// Returns the path Bazelisk was installed to inside the running toolchain container.
 func installBazelisk(r *dockerRunner, downloadDir, execOS string) (string, error) {
-	url, localPath := bazeliskDownloadInfo(execOS)
+	url, filename := bazeliskDownloadInfo(execOS)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("unable to initiate download for Bazelisk from %s: %w", url, err)
 	}
 	defer resp.Body.Close()
 
-	localPath = path.Join(downloadDir, localPath)
+	localPath := path.Join(downloadDir, filename)
 	o, err := os.Create(localPath)
 	if err != nil {
 		return "", fmt.Errorf("unable to open a file at %q to download Bazelisk to: %w", localPath, err)
@@ -357,43 +358,47 @@ func installBazelisk(r *dockerRunner, downloadDir, execOS string) (string, error
 		return "", fmt.Errorf("error while downloading Bazelisk to %s: %w", localPath, err)
 	}
 
-	bazeliskPath := path.Join(r.workdir, localPath)
-	if err := r.copyTo(localPath, bazeliskPath); err != nil {
+	bazeliskContainerPath := path.Join(r.workdir, filename)
+	if err := r.copyTo(localPath, bazeliskContainerPath); err != nil {
 		return "", fmt.Errorf("failed to copy the downloaded Bazelisk binary into the container: %w", err)
 	}
 
-	if _, err := r.execCmd("chmod", "+x", bazeliskPath); err != nil {
+	if _, err := r.execCmd("chmod", "+x", bazeliskContainerPath); err != nil {
 		return "", fmt.Errorf("failed to mark the Bazelisk binary as executable inside the container: %w", err)
 	}
-	return bazeliskPath, nil
+	return bazeliskContainerPath, nil
 }
 
-func appendCppEnv(outEnv []string, o *Options) error {
+func appendCppEnv(env []string, o *Options) ([]string, error) {
 	for k, v := range o.CppGenEnv {
-		outEnv = append(outEnv, fmt.Sprintf("%s=%s", k, v))
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
 
 	if len(o.CppGenEnvJSON) == 0 {
-		return nil
+		return env, nil
 	}
 
 	blob, err := ioutil.ReadFile(o.CppGenEnvJSON)
 	if err != nil {
-		return fmt.Errorf("unable to read JSON file %q to read C++ config generation environment variables from: %w", o.CppGenEnvJSON, err)
+		return nil, fmt.Errorf("unable to read JSON file %q to read C++ config generation environment variables from: %w", o.CppGenEnvJSON, err)
 	}
 
 	e := map[string]string{}
 	if err := json.Unmarshal(blob, &e); err != nil {
-		return fmt.Errorf("unable to parse file %q as a JSON string -> string dictionary: %w", o.CppGenEnvJSON, err)
+		return nil, fmt.Errorf("unable to parse file %q as a JSON string -> string dictionary: %w", o.CppGenEnvJSON, err)
 	}
 
 	for k, v := range e {
-		outEnv = append(outEnv, fmt.Sprintf("%s=%s", k, v))
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
 
-	return nil
+	return env, nil
 }
 
+// genCppConfigs generates C++ configs inside the running toolchain container represented by the
+// given docker runner according to the given options. bazeliskPath is the path to the bazelisk
+// binary inside the running toolchain container.
+// The return value is the path to the C++ configs tarball copied out of the toolchain container.
 func genCppConfigs(r *dockerRunner, o *Options, bazeliskPath string) (string, error) {
 	if !o.GenCPPConfigs {
 		return "", nil
@@ -415,16 +420,25 @@ func genCppConfigs(r *dockerRunner, o *Options, bazeliskPath string) (string, er
 		return "", fmt.Errorf("failed to create empty build & workspace files in the container to initialize a blank Bazel repository: %w", err)
 	}
 
-	// Use the USE_BAZEL_VERSION environment variable to tell Bazelisk what Bazel version to use
-	// for the rest of the Bazelisk commands we run in this function.
+	// Backup the current environment.
 	oldEnv := r.env
+	// Create a new environment for bazelisk commands used to specify the Bazel version to use to
+	// Bazelisk.
+	bazeliskEnv := []string{fmt.Sprintf("USE_BAZEL_VERSION=%s", o.BazelVersion)}
 	r.env = []string{fmt.Sprintf("USE_BAZEL_VERSION=%s", o.BazelVersion)}
+	// Always restore the old env before returning.
 	defer func() {
 		r.env = oldEnv
 	}()
-	if err := appendCppEnv(r.env, o); err != nil {
+
+	// Add the environment variables needed for the generation only and remove them immediately
+	// because they aren't necessary for the config extraction and add unnecessary noise to the
+	// logs.
+	generationEnv, err := appendCppEnv(bazeliskEnv, o)
+	if err != nil {
 		return "", fmt.Errorf("failed to add additional environment variables to the C++ config generation docker command: %w", err)
 	}
+	r.env = generationEnv
 
 	cmd := []string{
 		bazeliskPath,
@@ -435,12 +449,18 @@ func genCppConfigs(r *dockerRunner, o *Options, bazeliskPath string) (string, er
 		return "", fmt.Errorf("Bazel was unable to build the C++ config generation targets in the toolchain container: %w", err)
 	}
 
+	// Restore the env needed for Bazelisk.
+	r.env = bazeliskEnv
 	bazelOutputRoot, err := r.execCmd(bazeliskPath, "info", "output_base")
 	if err != nil {
 		return "", fmt.Errorf("unable to determine the build output directory where Bazel produced C++ configs in the toolchain container: %w", err)
 	}
 	cppConfigDir := path.Join(bazelOutputRoot, "external", o.CPPConfigRepo)
 	log.Printf("Extracting C++ config files generated by Bazel at %q from the toolchain container.", cppConfigDir)
+
+	// Restore the old env now that we're done with Bazelisk commands. This is purely to reduce
+	// noise in the logs.
+	r.env = oldEnv
 
 	// 1. Get a list of symlinks in the config output directory.
 	// 2. Harden each link.
@@ -772,7 +792,6 @@ func assembleConfigs(o *Options, oc outputConfigs) error {
 //  - config- Toolchain entrypoint target for cc_crosstool_top & the auto-generated platform target.
 //  - java- Java toolchain definition.
 func Run(o Options) error {
-	// TODO: Support specifying custom env variables for C++ config generation.
 	if err := processTempDir(&o); err != nil {
 		return fmt.Errorf("unable to initialize a local temporary working directory to store intermediate files: %w", err)
 	}
