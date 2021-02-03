@@ -58,6 +58,7 @@ toolchain(
 
 platform(
     name = "platform",
+    parents = ["@local_config_platform//:host"],
     constraint_values = [
 {{ range .ExecConstraints }}        "{{ . }}",
 {{ end }}    ],
