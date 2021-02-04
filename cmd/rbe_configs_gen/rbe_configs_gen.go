@@ -1,3 +1,5 @@
+// Binary rbe_configs_gen provides the ability to generate toolchain targets along with a default
+// platform target to configure Bazel to run actions remotely.
 package main
 
 import (
