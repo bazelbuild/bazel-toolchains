@@ -188,12 +188,7 @@ type outputConfigs struct {
 // runCmd runs an arbitrary command in a shell, logs the exact command that was run and returns
 // the generated stdout/stderr. If the command fails, the stdout/stderr is always logged.
 func runCmd(cmd string, args ...string) (string, error) {
-	cmdStr := ""
-	if len(args) == 0 {
-		cmdStr = fmt.Sprintf("'%s'", cmd)
-	} else {
-		cmdStr = fmt.Sprintf("'%s %s'", cmd, strings.Join(args, " "))
-	}
+	cmdStr := fmt.Sprintf("'%s'", strings.Join(append([]string{cmd}, args...), " "))
 	log.Printf("Running: %s", cmdStr)
 	c := exec.Command(cmd, args...)
 	o, err := c.CombinedOutput()
@@ -214,7 +209,7 @@ func workdir(os string) string {
 		return "C:/workdir"
 	}
 	log.Fatalf("Invalid OS: %q", os)
-	return "<invalid os>"
+	return ""
 }
 
 // bazeliskDownloadInfo returns the URL and name of the local downloaded file to use for downloading
@@ -227,7 +222,7 @@ func bazeliskDownloadInfo(os string) (string, string) {
 		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-windows-amd64.exe", "bazelisk.exe"
 	}
 	log.Fatalf("Invalid OS: %q", os)
-	return "<invalid os>", "<invalid os>"
+	return "", ""
 }
 
 // newDockerRunner creates a new running container of the given containerImage. stopContainer
@@ -318,12 +313,12 @@ func (d *dockerRunner) copyFromContainer(src, dst string) error {
 // image config. Env value set or changed by running commands after starting the container aren't
 // captured by the return value of this function.
 // The return value of this function is a map from env keys to their values. If the image config,
-// specify the same env key multiple times, later values supercede earlier ones.
+// specifies the same env key multiple times, later values supercede earlier ones.
 func (d *dockerRunner) getEnv() (map[string]string, error) {
 	result := make(map[string]string)
 	o, err := runCmd(d.dockerPath, "inspect", "-f", "{{range $i, $v := .Config.Env}}{{println $v}}{{end}}", d.resolvedImage)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get inspect the docker image to get environment variables: %w", err)
+		return nil, fmt.Errorf("failed to inspect the docker image to get environment variables: %w", err)
 	}
 	split := strings.Split(o, "\n")
 	for _, s := range split {
@@ -540,15 +535,16 @@ func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 	for _, line := range strings.Split(out, "\n") {
 		// We're looking for a line that looks like `java.version = <version>` and we want to
 		// extract <version>.
-		line = strings.TrimSpace(line)
-		if !strings.HasPrefix(line, "java.version") {
-			continue
-		}
 		splitVersion := strings.SplitN(line, "=", 2)
 		if len(splitVersion) != 2 {
-			return generatedFile{}, fmt.Errorf("unable to determine java version installed in the toolchain container because %q returned by 'java -XshowSettings:properties' inside the toolchain container didn't split into two strings separated by '='", line)
+			continue
 		}
-		javaVersion = strings.TrimSpace(splitVersion[1])
+		key := strings.TrimSpace(splitVersion[0])
+		val := strings.TrimSpace(splitVersion[1])
+		if key != "java.version" {
+			continue
+		}
+		javaVersion = val
 	}
 	if len(javaVersion) == 0 {
 		return generatedFile{}, fmt.Errorf("unable to determine the java version installed in the container by running 'java -XshowSettings:properties' in the container because it didn't return a line that looked like java.version = <version>")
@@ -648,13 +644,15 @@ func copyCppConfigsToTarball(inTarPath string, outTar *tar.Writer) error {
 			if strings.HasSuffix(h.Name, "WORKSPACE") {
 				break
 			}
-			outH := &tar.Header{
-				Name:    path.Join(pathPrefix, h.Name),
-				Size:    h.Size,
-				Mode:    h.Mode,
-				ModTime: time.Unix(0, 0),
-			}
-			if err := outTar.WriteHeader(outH); err != nil {
+			outH := *h
+			// Update the name to be in a 'cc' directory and set the mod time to epoch because:
+			// 1. The output becomes deterministic.
+			// 2. The mod times of the files archived inside the toolchain container sometimes
+			//    seem to be well into the future and I didn't bother figuring out why. Maybe it
+			//    only happens on my machine (shrug).
+			outH.Name = path.Join(pathPrefix, h.Name)
+			outH.ModTime = time.Unix(0, 0)
+			if err := outTar.WriteHeader(&outH); err != nil {
 				return fmt.Errorf("error while adding tar header for %q from input tarball to output tarball: %w", h.Name, err)
 			}
 			if _, err := io.Copy(outTar, inTar); err != nil {
@@ -704,7 +702,7 @@ func assembleConfigTarball(o *Options, oc outputConfigs) error {
 		}
 	}
 	if err := writeGeneratedFileToTarball(oc.configBuild, outTar); err != nil {
-		return fmt.Errorf("unable to write the crostool top/platform BUILD file %q to the output tarball %q: %w", oc.configBuild.name, o.OutputTarball, err)
+		return fmt.Errorf("unable to write the crosstool top/platform BUILD file %q to the output tarball %q: %w", oc.configBuild.name, o.OutputTarball, err)
 	}
 
 	// Can't ignore failures when closing the output tarball because it writes metadata without which
