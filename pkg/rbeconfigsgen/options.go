@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/bazelbuild/bazelisk/core"
+	"github.com/bazelbuild/bazelisk/repositories"
 )
 
 // Options are the options to tweak Bazel C++/Java Toolchain config generation.
 type Options struct {
-	// BazelVersion is the version of Bazel to generate configs for.
+	// BazelVersion is the version of Bazel to generate configs for. If unset, the latest Bazel
+	// version is automatically populated into this field when Validate() is called.
 	BazelVersion string
 	// ToolchainContainer is the docker image of the toolchain container to generate configs for.
 	ToolchainContainer string
@@ -29,6 +33,9 @@ type Options struct {
 	// OutputConfigPath is the path relative to OutputSourceRoot where the generated configs will
 	// be copied to.
 	OutputConfigPath string
+	// OutputManifest is a path where a text file containing details about the generated configs.
+	// The manifest aims to be easily parseable by shell utilities like grep/sed.
+	OutputManifest string
 	// PlatformParams specify platform specific constraints used to generate a BUILD file with the
 	// toolchain & platform targets in the generated configs. It's recommended to use the defaults
 	// corresponding to the ExecOS.
@@ -172,11 +179,25 @@ func (o *Options) ApplyDefaults(os string) error {
 	return nil
 }
 
+// latestBazelVersion uses Bazelisk to determine the latest available Bazel version.
+func latestBazelVersion() (string, error) {
+	r := core.CreateRepositories(&repositories.GCSRepo{}, nil, nil, nil, false)
+	v, _, err := r.ResolveVersion("", "", "latest")
+	if err != nil {
+		return "", fmt.Errorf("unable to determine the latest available Bazel release using Bazelisk: %w", err)
+	}
+	return v, nil
+}
+
 // Validate verifies that mandatory arguments were provided and argument values don't conflict in
 // certain cases.
 func (o *Options) Validate() error {
 	if o.BazelVersion == "" {
-		return fmt.Errorf("BazelVersion was not specified")
+		v, err := latestBazelVersion()
+		if err != nil {
+			return fmt.Errorf("BazelVersion wasn't specified and was unable to determine the latest available Bazel version: %w", err)
+		}
+		o.BazelVersion = v
 	}
 	if o.ToolchainContainer == "" {
 		return fmt.Errorf("ToolchainContainer was not specified")
@@ -214,7 +235,7 @@ func (o *Options) Validate() error {
 	if len(o.CppGenEnv) != 0 && len(o.CppGenEnvJSON) != 0 {
 		return fmt.Errorf("only one of CppGenEnv=%v or CppGenEnvJSON=%q must be specified", o.CppGenEnv, o.CppGenEnvJSON)
 	}
-	log.Printf("Command line arguments:")
+	log.Printf("rbeconfigsgen.Options:")
 	log.Printf("BazelVersion=%q", o.BazelVersion)
 	log.Printf("ToolchainContainer=%q", o.ToolchainContainer)
 	log.Printf("ExecOS=%q", o.ExecOS)
@@ -222,6 +243,7 @@ func (o *Options) Validate() error {
 	log.Printf("OutputTarball=%q", o.OutputTarball)
 	log.Printf("OutputSourceRoot=%q", o.OutputSourceRoot)
 	log.Printf("OutputConfigPath=%q", o.OutputConfigPath)
+	log.Printf("OutputManifest=%q", o.OutputManifest)
 	log.Printf("PlatformParams=%v", *o.PlatformParams)
 	log.Printf("GenCPPConfigs=%v", o.GenCPPConfigs)
 	log.Printf("CPPConfigTargets=%v", o.CPPConfigTargets)

@@ -3,6 +3,8 @@ package rbeconfigsgen
 import (
 	"archive/tar"
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"strings"
 	"text/template"
 	"time"
@@ -40,6 +43,8 @@ const (
 )
 
 var (
+	// platformsToolchainBuildTemplate is the template for the BUILD file with the crosstool top
+	// toolchain entrypoint target and the default platform definition.
 	platformsToolchainBuildTemplate = template.Must(template.New("platformsBuild").Parse(buildHeader + `
 package(default_visibility = ["//visibility:public"])
 
@@ -68,7 +73,8 @@ platform(
     },
 )
 `))
-	// Java toolchain config BUILD file template for Bazel versions <4.1.0 (tentative?).
+	// legacyJavaBuildTemplate is the Java toolchain config BUILD file template for Bazel versions
+	// <4.1.0 (tentative?).
 	legacyJavaBuildTemplate = template.Must(template.New("javaBuild").Parse(buildHeader + `
 package(default_visibility = ["//visibility:public"])
 
@@ -79,7 +85,8 @@ java_runtime(
 )
 `))
 
-	// Java toolchain config BUILD file template for Bazel versions >=4.1.0 (tentative?).
+	// javaBuildTemplate is the Java toolchain config BUILD file template for Bazel versions
+	// >=4.1.0 (tentative?).
 	javaBuildTemplate = template.Must(template.New("javaBuild").Parse(buildHeader + `
 load("@bazel_tools//tools/jdk:local_java_repository.bzl", "local_java_runtime")
 
@@ -96,6 +103,10 @@ local_java_runtime(
     version = "{{ .JavaVersion }}",
 )
 `))
+
+	// imageDigestRegexp is the regex to extract the sha256 digest from a docker image name
+	// referenced by its digest.
+	imageDigestRegexp = regexp.MustCompile("sha256:([a-f0-9]{64})$")
 )
 
 // PlatformToolchainsTemplateParams is used as the input to the toolchains & platform BUILD file
@@ -806,6 +817,54 @@ func assembleConfigs(o *Options, oc outputConfigs) error {
 	return nil
 }
 
+// digestFile returns the sha256 digest of the contents of the given file.
+func digestFile(filePath string) (string, error) {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("unable to open file %q: %w", filePath, err)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", fmt.Errorf("error while hashing the contents of %q: %w", filePath, err)
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+// createManifest writes a manifest text file containing information about the generated configs if
+// the given options specified a manifest file.
+func createManifest(o *Options) error {
+	if len(o.OutputManifest) == 0 {
+		return nil
+	}
+	f, err := os.Create(o.OutputManifest)
+	if err != nil {
+		return fmt.Errorf("unable to open a new file for writing manifest to %q: %w", o.OutputManifest, err)
+	}
+	defer f.Close()
+	fmt.Fprintf(f, "BazelVersion=%s\n", o.BazelVersion)
+	fmt.Fprintf(f, "ToolchainContainer=%s\n", o.ToolchainContainer)
+	// Extract the sha256 digest from the image name to be included in the manifest.
+	s := imageDigestRegexp.FindStringSubmatch(o.PlatformParams.ToolchainContainer)
+	if len(s) != 2 {
+		return fmt.Errorf("failed to extract sha256 digest using regex from image name %q, got %d substrings, want 2", o.PlatformParams.ToolchainContainer, len(s))
+	}
+	fmt.Fprintf(f, "ImageDigest=%s\n", s[1])
+	fmt.Fprintf(f, "ExecPlatformOS=%s\n", o.PlatformParams.OSFamily)
+	// Include the sha256 digest of the configs tarball if output tarball generation was enabled by
+	// actually hashing the contents of the output tarball.
+	if len(o.OutputTarball) != 0 {
+		d, err := digestFile(o.OutputTarball)
+		if err != nil {
+			return fmt.Errorf("unable to compute the sha256 digest of the output tarball file for the output manifest: %w", err)
+		}
+		fmt.Fprintf(f, "ConfigsTarballDigest=%s\n", d)
+	}
+	log.Printf("Wrote output manifest to %q.", o.OutputManifest)
+	return nil
+}
+
 // Run is the main entrypoint to generate Bazel toolchain configs according to the options
 // specified in the given command line arguments.
 // The file structure of the generated configs will be as follows:
@@ -857,6 +916,10 @@ func Run(o Options) error {
 	}
 	if err := assembleConfigs(&o, oc); err != nil {
 		return fmt.Errorf("unable to assemble C++/Java/Crosstool top/Platform definitions to generate the final toolchain configs output: %w", err)
+	}
+
+	if err := createManifest(&o); err != nil {
+		return fmt.Errorf("unable to create the manifest file: %w", err)
 	}
 
 	if o.Cleanup {

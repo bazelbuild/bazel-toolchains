@@ -11,17 +11,20 @@ import (
 
 var (
 	// Mandatory input arguments.
-	bazelVersion       = flag.String("bazel_version", "", "Bazel release version to generate configs for. E.g., 4.0.0.")
 	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest")
 	execOS             = flag.String("exec_os", "", "The OS (linux|windows) of the toolchain container image a.k.a, the execution platform in Bazel.")
 	targetOS           = flag.String("target_os", "", "The OS (linux|windows) artifacts built will target a.k.a, the target platform in Bazel.")
 
-	// Arguments affecting how the generated configs are deployed by this tool.
+	// Optional input arguments.
+	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
+
+	// Arguments affecting output generation not specific to either C++ or Java Configs.
 	outputTarball    = flag.String("output_tarball", "", "(Optional) Path where a tarball with the generated configs will be dumped.")
 	outputSrcRoot    = flag.String("output_src_root", "", "(Optional) Path to root directory of Bazel repository where generated configs should be copied to. Configs aren't copied if this is blank. Use '.' to specify the current directory.")
 	outputConfigPath = flag.String("output_config_path", "", "(Optional) Path relative to what was specified to --output_src_root where configs will be extracted. Defaults to root if unspecified. --output_src_root is mandatory if this argument is specified.")
+	outputManifest   = flag.String("output_manifest", "", "(Optional) Generate a text file with details about the generated configs.")
 
-	// Optional input arguments that affect config generation.
+	// Optional input arguments that affect config generation for either C++ or Java configs.
 	genCppConfigs  = flag.Bool("generate_cpp_configs", true, "(Optional) Generate C++ configs. Defaults to true.")
 	cppEnvJSON     = flag.String("cpp_env_json", "", "(Optional) JSON file containing a str -> str dict of environment variables to be set when generating C++ configs inside the toolchain container. This replaces any exec OS specific defauls that would usually be applied.")
 	genJavaConfigs = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
@@ -42,6 +45,7 @@ func main() {
 		OutputTarball:      *outputTarball,
 		OutputSourceRoot:   *outputSrcRoot,
 		OutputConfigPath:   *outputConfigPath,
+		OutputManifest:     *outputManifest,
 		GenCPPConfigs:      *genCppConfigs,
 		CppGenEnvJSON:      *cppEnvJSON,
 		GenJavaConfigs:     *genJavaConfigs,
