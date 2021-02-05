@@ -432,17 +432,15 @@ func genCppConfigs(d *dockerRunner, o *Options, bazeliskPath string) (string, er
 		return "", fmt.Errorf("failed to create empty build & workspace files in the container to initialize a blank Bazel repository: %w", err)
 	}
 
-	// Backup the current environment.
+	// Backup the current environment & restore it before returning.
 	oldEnv := d.env
-	// Create a new environment for bazelisk commands used to specify the Bazel version to use to
-	// Bazelisk.
-	bazeliskEnv := []string{fmt.Sprintf("USE_BAZEL_VERSION=%s", o.BazelVersion)}
-	d.env = bazeliskEnv
-	// Always restore the old env before returning.
 	defer func() {
 		d.env = oldEnv
 	}()
 
+	// Create a new environment for bazelisk commands used to specify the Bazel version to use to
+	// Bazelisk.
+	bazeliskEnv := []string{fmt.Sprintf("USE_BAZEL_VERSION=%s", o.BazelVersion)}
 	// Add the environment variables needed for the generation only and remove them immediately
 	// because they aren't necessary for the config extraction and add unnecessary noise to the
 	// logs.
@@ -877,29 +875,29 @@ func Run(o Options) error {
 	if err := processTempDir(&o); err != nil {
 		return fmt.Errorf("unable to initialize a local temporary working directory to store intermediate files: %w", err)
 	}
-	r, err := newDockerRunner(o.ToolchainContainer, o.Cleanup)
+	d, err := newDockerRunner(o.ToolchainContainer, o.Cleanup)
 	if err != nil {
 		return fmt.Errorf("failed to initialize a docker container: %w", err)
 	}
-	defer r.cleanup()
+	defer d.cleanup()
 
-	o.PlatformParams.ToolchainContainer = r.resolvedImage
+	o.PlatformParams.ToolchainContainer = d.resolvedImage
 
-	if _, err := r.execCmd("mkdir", workdir(o.ExecOS)); err != nil {
+	if _, err := d.execCmd("mkdir", workdir(o.ExecOS)); err != nil {
 		return fmt.Errorf("failed to create an empty working directory in the container")
 	}
-	r.workdir = workdir(o.ExecOS)
+	d.workdir = workdir(o.ExecOS)
 
-	bazeliskPath, err := installBazelisk(r, o.TempWorkDir, o.ExecOS)
+	bazeliskPath, err := installBazelisk(d, o.TempWorkDir, o.ExecOS)
 	if err != nil {
 		return fmt.Errorf("failed to install Bazelisk into the toolchain container: %w", err)
 	}
 
-	cppConfigsTarball, err := genCppConfigs(r, &o, bazeliskPath)
+	cppConfigsTarball, err := genCppConfigs(d, &o, bazeliskPath)
 	if err != nil {
 		return fmt.Errorf("failed to generate C++ configs: %w", err)
 	}
-	javaBuild, err := genJavaConfigs(r, &o)
+	javaBuild, err := genJavaConfigs(d, &o)
 	if err != nil {
 		return fmt.Errorf("failed to extract information about the installed JDK version in the toolchain container needed to generate Java configs: %w", err)
 	}

@@ -62,8 +62,8 @@ type Options struct {
 	// can be specified.
 	CppGenEnv map[string]string
 	// CppGenEnvJSON is a JSON file with environment variables that'll be set when running the Bazel
-	// command to generate C++ configs inside the toolchain container. This field is union'd with
-	// CppGenEnv. Only one of CppGenEnv or CppGenEnvJSON can be specified.
+	// command to generate C++ configs inside the toolchain container. Only one of CppGenEnv or
+	// CppGenEnvJSON can be specified.
 	CppGenEnvJSON string
 
 	// Java config generation options.
