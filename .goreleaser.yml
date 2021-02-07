@@ -1,0 +1,38 @@
+# goreleaser config. See http://goreleaser.com for details.
+before:
+  hooks:
+  - go mod download
+builds:
+- id: rbe_configs_gen
+  env:
+  main: ./cmd/rbe_configs_gen/rbe_configs_gen.go
+  binary: rbe_configs_gen
+  goos:
+      - linux
+      # Windows & darwin are untested.
+      - windows
+      - darwin
+  goarch:
+      - amd64
+      - arm
+      - arm64
+  # Set the binary timestamp to the commit timestamp it's being
+  # built from.
+  mod_timestamp: '{{ .CommitTimestamp }}'
+archives:
+- replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
