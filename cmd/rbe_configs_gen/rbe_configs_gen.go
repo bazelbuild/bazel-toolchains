@@ -61,5 +61,5 @@ func main() {
 	if err := rbeconfigsgen.Run(o); err != nil {
 		log.Fatalf("Config generation failed: %v", err)
 	}
-	log.Printf("Config generation was successful.")
+	log.Printf("Config generation is done.")
 }
