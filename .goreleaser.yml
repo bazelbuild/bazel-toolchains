@@ -1,6 +1,8 @@
 # goreleaser config. See http://goreleaser.com for details.
 before:
   hooks:
+  # Downloads all Go modules beforehand so that if multiple Go binaries are built
+  # later in parallel, their downloads won't clobber each other.
   - go mod download
 builds:
 - id: rbe_configs_gen
@@ -20,12 +22,15 @@ builds:
   # built from.
   mod_timestamp: '{{ .CommitTimestamp }}'
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+  -
+    # We only ship the built binaries.
+    format: binary
+    # Name format for the shipped binaries.
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}{{ if .Windows }}.exe{{ end }}"
+    format_overrides:
+    # Create Zip archive for Windows only. Defaults to .tar.gz for everything else.
+    - goos: windows
+      format: zip
 checksum:
   name_template: 'checksums.txt'
 snapshot:
