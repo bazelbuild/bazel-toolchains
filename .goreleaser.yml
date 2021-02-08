@@ -9,23 +9,20 @@ builds:
   binary: rbe_configs_gen
   goos:
       - linux
-      # Windows & darwin are untested.
+      # Windows is untested.
       - windows
-      - darwin
   goarch:
       - amd64
-      - arm
-      - arm64
   # Set the binary timestamp to the commit timestamp it's being
   # built from.
   mod_timestamp: '{{ .CommitTimestamp }}'
 archives:
-- replacements:
-    darwin: Darwin
-    linux: Linux
-    windows: Windows
-    386: i386
-    amd64: x86_64
+-
+  # Only upload binary assets.
+  format: binary
+  # Define how the prebuilt binaries uploaded as release assets are named.
+  name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:

@@ -1,6 +1,10 @@
 name: goreleaser
 
-on: push
+# Only create a release when a new tag is created.
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   goreleaser:
