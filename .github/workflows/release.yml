@@ -1,6 +1,10 @@
 name: goreleaser
 
-on: push
+# Run the release workflow only if a new tag is created.
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   goreleaser:
