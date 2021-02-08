@@ -13,7 +13,7 @@ git checkout master
 # 2. git isn't configured to use a GPG signing key. For this see
 #    https://docs.github.com/en/github/authenticating-to-github/telling-git-about-your-signing-key
 echo "Tagging the master branch as $version signed with a GPG key."
-git -s tag $version
+git tag -s $version
 
 # If the following command fails complaining about there being no upstream just
 # run 'git remote add upstream git@github.com:bazelbuild/bazel-toolchains.git'.
