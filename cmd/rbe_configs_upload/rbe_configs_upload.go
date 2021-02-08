@@ -10,7 +10,7 @@
 // This tool will upload the above files even if the config tarball hasn't changed. This can happen
 // if there's been no new Bazel release or toolchain container release since the last time this tool
 // was run. Thus, the above GCS artifacts are unstable in the sense that their contents can change
-// if either a new Bazel or toolchain container is release. This is to avoid users depending on
+// if either a new Bazel or toolchain container is released. This is to avoid users depending on
 // these GCS artifacts in production. Instead, users should copy the artifacts into a GCS bucket
 // or other remote location under their control.
 package main
@@ -97,15 +97,16 @@ func (s *storageClient) upload(ctx context.Context, r io.Reader, objectName stri
 // uploadArtifacts uploads the given blob of bytes representing a JSON manifest and the configs
 // tarball at the given path to the given GCS directory.
 func (s *storageClient) uploadArtifacts(ctx context.Context, manifest []byte, tarballPath, remoteDir string) error {
-	if err := s.upload(ctx, bytes.NewBuffer(manifest), fmt.Sprintf("%s/manifest.json", remoteDir)); err != nil {
-		return fmt.Errorf("error uploading manifest to GCS: %w", err)
-	}
-
 	f, err := os.Open(tarballPath)
 	if err != nil {
 		return fmt.Errorf("unable to open configs tarball file %q: %w", tarballPath, err)
 	}
 	defer f.Close()
+
+	if err := s.upload(ctx, bytes.NewBuffer(manifest), fmt.Sprintf("%s/manifest.json", remoteDir)); err != nil {
+		return fmt.Errorf("error uploading manifest to GCS: %w", err)
+	}
+
 	if err := s.upload(ctx, f, fmt.Sprintf("%s/rbe_default.tar", remoteDir)); err != nil {
 		return fmt.Errorf("error uploading configs tarball to GCS: %w", err)
 	}
