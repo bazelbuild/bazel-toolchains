@@ -22,7 +22,7 @@ var (
 	outputTarball    = flag.String("output_tarball", "", "(Optional) Path where a tarball with the generated configs will be created.")
 	outputSrcRoot    = flag.String("output_src_root", "", "(Optional) Path to root directory of Bazel repository where generated configs should be copied to. Configs aren't copied if this is blank. Use '.' to specify the current directory.")
 	outputConfigPath = flag.String("output_config_path", "", "(Optional) Path relative to what was specified to --output_src_root where configs will be extracted. Defaults to root if unspecified. --output_src_root is mandatory if this argument is specified.")
-	outputManifest   = flag.String("output_manifest", "", "(Optional) Generate a text file with details about the generated configs.")
+	outputManifest   = flag.String("output_manifest", "", "(Optional) Generate a JSON file with details about the generated configs.")
 
 	// Optional input arguments that affect config generation for either C++ or Java configs.
 	genCppConfigs  = flag.Bool("generate_cpp_configs", true, "(Optional) Generate C++ configs. Defaults to true.")
