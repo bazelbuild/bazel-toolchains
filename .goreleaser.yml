@@ -26,7 +26,7 @@ archives:
     # We only ship the built binaries.
     format: binary
     # Name format for the shipped binaries.
-    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}{{ if .Windows }}.exe{{ end }}"
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
     # Create Zip archive for Windows only. Defaults to .tar.gz for everything else.
     - goos: windows
