@@ -16,13 +16,28 @@ const (
 	// Metric types for metrics reported by this package to Cloud Monitoring. See docs for "type" in
 	// https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#resource:-metricdescriptor.
 
-	// mtypeToolchainConfigsRuns is a cummulative integer tracking the number of times a toolchain
-	// configs generation job runs to completion. The metric should include the following string
-	// labels:
-	// 1. docker_image- A string representing the OS name of the toolchain docker image. e.g.,
-	//           "rbe-ubuntu1604".
-	// 2. result- Bool set to true if the config generation, upload & tests passed.
-	mtypeToolchainConfigsRuns = "custom.googleapis.com/toolchain_configs/runs"
+	// BEGIN Metrics for Toolchain Configs Generation
+	//
+	// All toolchain config generation metrics have the following characterics:
+	// 1. Cummulative integer tracking the number of times a toolchain configs release step 
+	//    (generation, upload & test) runs to completion. 
+	// 2. Each metric includes the following labels:
+	//    a. docker_image- A string representing the OS name of the toolchain docker image. e.g.,
+	//                     "rbe-ubuntu1604".
+	//    b. result- Bool set to true if the step succeeded.
+	//
+	// mtypeToolchainConfigsGenRuns tracks successful runs of rbe_configs_gen i.e., configs
+	// generation.
+	mtypeToolchainConfigsGenRuns = "custom.googleapis.com/toolchain_configs/generation/runs"
+	//
+	// mtypeToolchainConfigsUploadRuns tracks successful runs of rbe_configs_upload i.e., 
+	// configs publication/deployment.
+	mtypeToolchainConfigsUploadRuns = "custom.googleapis.com/toolchain_configs/upload/runs"
+	//
+	// mtypeToolchainConfigsTestRuns tracks successful runs of configs_e2e i.e., 
+	// configs end to end test.
+	mtypeToolchainConfigsTestRuns = "custom.googleapis.com/toolchain_configs/test/runs"
+	// END Metrics for Toolchain Configs Generation
 )
 
 // Client is the handle to interact with Google Cloud Monitoring.
@@ -46,22 +61,22 @@ func NewClient(ctx context.Context, projectID string) (*Client, error) {
 		mc:        mc,
 		projectID: projectID,
 	}
-	if err := c.initMetrics(ctx); err != nil {
+	if err := c.createMetrics(ctx); err != nil {
 		return nil, fmt.Errorf("error initializing Google Cloud Monitoring Metrics Descriptors: %w", err)
 	}
 	return c, nil
 }
 
-// initMetrics creates descriptors for metrics reported by this client.
-func (c *Client) initMetrics(ctx context.Context) error {
-	if err := c.initToolchainConfigRuns(ctx); err != nil {
+// createMetrics creates descriptors for metrics reported by this client.
+func (c *Client) createMetrics(ctx context.Context) error {
+	if err := c.createToolchainConfigsMetrics(ctx); err != nil {
 		return fmt.Errorf("unable to initialize the toolchain config runs metric: %w", err)
 	}
 	return nil
 }
 
-// initToolchainConfigRuns creates a metrics descriptor for the toolchain configs metric.
-func (c *Client) initToolchainConfigRuns(ctx context.Context) error {
+// createToolchainConfigsMetrics creates smetrics descriptors for the toolchain configs generation.
+func (c *Client) createToolchainConfigsMetrics(ctx context.Context) error {
 	md := &metric.MetricDescriptor{
 		Name: "RBE Toolchain Configs Generation",
 		Type: mtypeToolchainConfigsRuns,
@@ -92,3 +107,5 @@ func (c *Client) initToolchainConfigRuns(ctx context.Context) error {
 	}
 	return nil
 }
+
+func (c *Client) ReportToolchainConfigs
