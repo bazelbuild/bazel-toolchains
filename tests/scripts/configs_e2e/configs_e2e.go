@@ -47,11 +47,12 @@ import (
 )
 
 var (
-	manifestURL = flag.String("manifest_url", "", "Public URL to the JSON manifest uploaded to GCS by rbe_configs_upload.")
-	configsURL  = flag.String("configs_url", "", "Public URL to the configs tarball uploaded to GCS by rbe_configs_upload.")
-	srcRoot     = flag.String("src_root", "", "Path to root directory of the bazel-toolchains Github repo.")
-	destRoot    = flag.String("dest_root", "", "Path to an empty or non-existent output directory where the Bazel Hello world repo will be set up & a Bazel build will be executed.")
-	rbeInstance = flag.String("rbe_instance", "", "Name of the RBE instance to test the configs on in the format projects/<GCP project ID>/instances/<RBE Instance ID>.")
+	manifestURL    = flag.String("manifest_url", "", "Public URL to the JSON manifest uploaded to GCS by rbe_configs_upload.")
+	configsURL     = flag.String("configs_url", "", "Public URL to the configs tarball uploaded to GCS by rbe_configs_upload.")
+	srcRoot        = flag.String("src_root", "", "Path to root directory of the bazel-toolchains Github repo.")
+	destRoot       = flag.String("dest_root", "", "Path to an empty or non-existent output directory where the Bazel Hello world repo will be set up & a Bazel build will be executed.")
+	rbeInstance    = flag.String("rbe_instance", "", "Name of the RBE instance to test the configs on in the format projects/<GCP project ID>/instances/<RBE Instance ID>.")
+	timeoutSeconds = flag.Int("timeout_seconds", 0, "Number of seconds before the Bazel build run in the test is killed and a timeout failure is declared.")
 
 	// filesToCopy are the files that'll be copied from srcRoot to destRoot.
 	filesToCopy = []string{
@@ -68,7 +69,7 @@ var (
 	}
 
 	// workspaceTemplate is the template to create the Bazel WORKSPACE file in the test repo.
-	workspaceTemplate = template.Must(template.New("WORSPACE").Parse(`
+	workspaceTemplate = template.Must(template.New("WORKSPACE").Parse(`
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
@@ -182,18 +183,9 @@ func createBazelrcFile(m *rbeconfigsgen.Manifest, configTarballURL, outputDir, r
 #   Toolchain Container %s (sha256:%s)
 #   Configs Tarball URL %s (sha256:%s)
 `, m.BazelVersion, m.ToolchainContainer, m.ImageDigest, configTarballURL, m.ConfigsTarballDigest)
-	fmt.Fprintf(o, `
+	fmt.Fprintf(o, "\nbuild:remote --remote_instance_name=%s\n", rbeInst)
+	fmt.Fprint(o, `
 build:remote --jobs=6
-build:remote --remote_instance_name=%s
-
-# C++ toolchain & default platform configuration.
-build:remote --crosstool_top=@rbe_default//cc:toolchain
-build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
-build:remote --extra_toolchains=@rbe_default//config:cc-toolchain
-build:remote --extra_execution_platforms=@rbe_default//config:platform
-build:remote --host_platform=@rbe_default//config:platform
-build:remote --platforms=@rbe_default//config:platform
-
 build:remote --define=EXECUTOR=remote
 build:remote --remote_executor=grpcs://remotebuildexecution.googleapis.com
 
@@ -208,7 +200,15 @@ build:remote --remote_timeout=3600
 # default. You can use --google_credentials=some_file.json to use a service
 # account credential instead.
 build:remote --google_default_credentials=true
-`, rbeInst)
+
+# C++ toolchain & default platform configuration.
+build:remote --crosstool_top=@rbe_default//cc:toolchain
+build:remote --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+build:remote --extra_toolchains=@rbe_default//config:cc-toolchain
+build:remote --extra_execution_platforms=@rbe_default//config:platform
+build:remote --host_platform=@rbe_default//config:platform
+build:remote --platforms=@rbe_default//config:platform
+`)
 	// The Java toolchain rules used by Bazel are expected to change in a certain Bazel version
 	// that affects the bazelrc file.
 	u, err := rbeconfigsgen.UsesLocalJavaRuntime(m.BazelVersion)
@@ -324,8 +324,6 @@ func runTestBuild(ctx context.Context, workingDir, bazelVersion string) error {
 	if err := os.Chmod(bazeliskPath, os.ModePerm); err != nil {
 		return fmt.Errorf("unable to update the permissions of downloaded Bazelisk binary %q to make it executable: %w", bazeliskPath, err)
 	}
-	ctxWithDeadline, cancel := context.WithTimeout(ctx, 3*time.Minute)
-	defer cancel()
 
 	args := []string{
 		// Use a custom output base to ensure Bazel runs with a clean local cache.
@@ -337,15 +335,15 @@ func runTestBuild(ctx context.Context, workingDir, bazelVersion string) error {
 		// are actually valid.
 		"--noremote_accept_cached",
 		"//examples/..."}
-	c := exec.CommandContext(ctxWithDeadline, bazeliskPath, args...)
+	c := exec.CommandContext(ctx, bazeliskPath, args...)
 	c.Env = append(c.Env, fmt.Sprintf("USE_BAZEL_VERSION=%s", bazelVersion))
 	// Used by Bazelisk to determine where to download Bazel.
 	c.Env = append(c.Env, fmt.Sprintf("XDG_CACHE_HOME=%s/.bazeliskcache", workingDir))
 	c.Dir = workingDir
 	log.Printf("Running '%s %s' with env %v with working directory %q.", bazeliskPath, strings.Join(args, " "), c.Env, workingDir)
 	o, err := c.CombinedOutput()
-	if ctxWithDeadline.Err() == context.DeadlineExceeded {
-		return fmt.Errorf("bazel build timed out")
+	if ctx.Err() == context.DeadlineExceeded {
+		return fmt.Errorf("bazel build was killed because the timeout was reached")
 	}
 	if err != nil {
 		log.Printf("Output from Bazel:\n%s", string(o))
@@ -375,20 +373,22 @@ func main() {
 	if err := validateRBEInstName(*rbeInstance); err != nil {
 		log.Fatalf("--rbe_instance=%q was invalid: %v", *rbeInstance, err)
 	}
+	if *timeoutSeconds <= 0 {
+		log.Fatalf("--timeout_seconds was either not specified or negative.")
+	}
 
 	log.Printf("--manifest_url=%q", *manifestURL)
 	log.Printf("--configs_url=%q", *configsURL)
 	log.Printf("--src_root=%q", *srcRoot)
 	log.Printf("--dest_root=%q", *destRoot)
 	log.Printf("--rbe_instance=%q", *rbeInstance)
-
-	ctx := context.Background()
+	log.Printf("--timeout_seconds=%d", *timeoutSeconds)
 
 	m, err := downloadManifest(*manifestURL)
 	if err != nil {
 		log.Fatalf("Unable to download the manifest from %q: %v", *manifestURL, err)
 	}
-	log.Printf("Successfully downloaded the JSON manifest from %s.", *manifestURL)
+	log.Printf("Successfully downloaded the JSON manifest from %s", *manifestURL)
 
 	if err := verifyConfigSHA(m, *configsURL); err != nil {
 		log.Fatalf("Failed to cross-reference configs digest specified in the manifest with the configs tarball: %v", err)
@@ -400,7 +400,9 @@ func main() {
 		log.Fatalf("Error creating the test Bazel repository: %v", err)
 	}
 
-	log.Printf("Running test build for Bazel %s using configs downloaded from %s.", m.BazelVersion, *configsURL)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(*timeoutSeconds)*time.Second)
+	defer cancel()
+	log.Printf("Running test build for Bazel %s using configs downloaded from %s with timeout set to %d seconds.", m.BazelVersion, *configsURL, *timeoutSeconds)
 	if err := runTestBuild(ctx, *destRoot, m.BazelVersion); err != nil {
 		log.Fatalf("Test build for Bazel %s using configs downloaded from %s failed on RBE Instance %s: %v", m.BazelVersion, *configsURL, *rbeInstance, err)
 	}
