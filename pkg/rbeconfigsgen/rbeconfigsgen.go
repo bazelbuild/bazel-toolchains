@@ -226,17 +226,16 @@ func workdir(os string) string {
 	return ""
 }
 
-// bazeliskDownloadInfo returns the URL and name of the local downloaded file to use for downloading
+// BazeliskDownloadInfo returns the URL and name of the local downloaded file to use for downloading
 // bazelisk for the given OS.
-func bazeliskDownloadInfo(os string) (string, string) {
+func BazeliskDownloadInfo(os string) (string, string, error) {
 	switch os {
 	case OSLinux:
-		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-linux-amd64", "bazelisk"
+		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-linux-amd64", "bazelisk", nil
 	case OSWindows:
-		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-windows-amd64.exe", "bazelisk.exe"
+		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-windows-amd64.exe", "bazelisk.exe", nil
 	}
-	log.Fatalf("Invalid OS: %q", os)
-	return "", ""
+	return "", "", fmt.Errorf("invalid OS %q", os)
 }
 
 // newDockerRunner creates a new running container of the given containerImage. stopContainer
@@ -361,7 +360,10 @@ func (d *dockerRunner) getEnv() (map[string]string, error) {
 // it into the running toolchain container.
 // Returns the path Bazelisk was installed to inside the running toolchain container.
 func installBazelisk(d *dockerRunner, downloadDir, execOS string) (string, error) {
-	url, filename := bazeliskDownloadInfo(execOS)
+	url, filename, err := BazeliskDownloadInfo(execOS)
+	if err != nil {
+		return "", fmt.Errorf("unable to determine how to download Bazelisk for execution OS %q: %w", execOS, err)
+	}
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("unable to initiate download for Bazelisk from %s: %w", url, err)
@@ -514,6 +516,19 @@ func genCppConfigs(d *dockerRunner, o *Options, bazeliskPath string) (string, er
 	return outputTarballPath, nil
 }
 
+// UsesLocalJavaRuntime returns whether the given bazel version string uses the local_java_runtime
+// rule for Java toolchains instead of java_runtime.
+// Bazel is expected to switch to local_java_runtime in Bazel 4.1.0. See:
+// https://github.com/bazelbuild/bazel-toolchains/pull/926.
+func UsesLocalJavaRuntime(bazelVersion string) (bool, error) {
+	bv, err := semver.NewVersion(bazelVersion)
+	if err != nil {
+		return false, fmt.Errorf("unable to parse Bazel version %q as a semver: %w", bazelVersion, err)
+	}
+	// Returns if bv >= 4.1.0.
+	return !bv.LessThan(*semver.New("4.1.0")), nil
+}
+
 // genJavaConfigs returns a BUILD file containing a Java toolchain rule definition that contains
 // the following attributes determined by probing details about the JDK version installed in the
 // running toolchain container.
@@ -565,13 +580,13 @@ func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 	}
 	log.Printf("Java version: '%s'.", javaVersion)
 
-	bv, err := semver.NewVersion(o.BazelVersion)
+	usesNewJavaRule, err := UsesLocalJavaRuntime(o.BazelVersion)
 	if err != nil {
-		return generatedFile{}, fmt.Errorf("unable to parse Bazel version %q as a semver: %w", o.BazelVersion, err)
+		return generatedFile{}, fmt.Errorf("unable to determine what Java toolchain rule to use for Bazel %q: %w", o.BazelVersion, err)
 	}
-	t := javaBuildTemplate
-	if bv.LessThan(*semver.New("4.1.0")) {
-		t = legacyJavaBuildTemplate
+	t := legacyJavaBuildTemplate
+	if usesNewJavaRule {
+		t = javaBuildTemplate
 	}
 	buf := bytes.NewBuffer(nil)
 	if err := t.Execute(buf, &javaBuildTemplateParams{
