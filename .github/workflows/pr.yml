@@ -35,7 +35,7 @@ jobs:
           GOOS=linux GOARCH=amd64 go build -o rbe_configs_gen_linux_amd64 ./cmd/rbe_configs_gen/rbe_configs_gen.go
           GOOS=windows GOARCH=amd64 go build -o rbe_configs_gen_windows_amd64.exe ./cmd/rbe_configs_gen/rbe_configs_gen.go
           go build -o rbe_configs_upload_linux_amd64 ./cmd/rbe_configs_upload/rbe_configs_upload.go
-          go build -o configs_e2e_linux_amd64 ./tools/scripts/configs_e2e/configs_e2e.go
+          go build -o configs_e2e_linux_amd64 ./tests/scripts/configs_e2e/configs_e2e.go
       - name: Run Go unit tests
         run: |
           go test ./cmd/... ./pkg/...
