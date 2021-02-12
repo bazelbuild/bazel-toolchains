@@ -94,7 +94,7 @@ func newStorage(ctx context.Context) (*storageClient, error) {
 	}
 	return &storageClient{
 		client:     c,
-		bucketName: "rbe-bazel-toolchains",
+		bucketName: "rbe-toolchain",
 	}, nil
 }
 
@@ -142,7 +142,9 @@ func printFlags() {
 
 // uploadConfigs is the core config upload logic allowing the caller a convenient wrapper to
 // report results to monitoring before triggering a fatal exit.
-func uploadConfigs(ctx context.Context) error {
+// containerImage is the name of the toolchain container that will be used to name the directory
+// on GCS configs are uploaded to.
+func uploadConfigs(ctx context.Context, containerImage string) error {
 	sc, err := newStorage(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to initialize the GCS client: %v", err)
@@ -158,8 +160,8 @@ func uploadConfigs(ctx context.Context) error {
 	}
 
 	uploadDirs := []string{
-		"configs/latest",
-		fmt.Sprintf("configs/bazel_%s/latest", m.BazelVersion),
+		fmt.Sprintf("bazel-configs/%s/latest", containerImage),
+		fmt.Sprintf("bazel-configs/bazel_%s/%s/latest", m.BazelVersion, containerImage),
 	}
 	for _, u := range uploadDirs {
 		if err := sc.uploadArtifacts(ctx, manifestBlob, *configsTarball, u); err != nil {
@@ -194,7 +196,7 @@ func main() {
 	}
 
 	result := true
-	if err := uploadConfigs(ctx); err != nil {
+	if err := uploadConfigs(ctx, *monitoringDockerImage); err != nil {
 		log.Printf("Configs upload failed: %v", err)
 		result = false
 	} else {
