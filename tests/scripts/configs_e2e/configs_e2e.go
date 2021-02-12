@@ -43,16 +43,19 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/bazelbuild/bazel-toolchains/pkg/monitoring"
 	"github.com/bazelbuild/bazel-toolchains/pkg/rbeconfigsgen"
 )
 
 var (
-	manifestURL    = flag.String("manifest_url", "", "Public URL to the JSON manifest uploaded to GCS by rbe_configs_upload.")
-	configsURL     = flag.String("configs_url", "", "Public URL to the configs tarball uploaded to GCS by rbe_configs_upload.")
-	srcRoot        = flag.String("src_root", "", "Path to root directory of the bazel-toolchains Github repo.")
-	destRoot       = flag.String("dest_root", "", "Path to an empty or non-existent output directory where the Bazel Hello world repo will be set up & a Bazel build will be executed.")
-	rbeInstance    = flag.String("rbe_instance", "", "Name of the RBE instance to test the configs on in the format projects/<GCP project ID>/instances/<RBE Instance ID>.")
-	timeoutSeconds = flag.Int("timeout_seconds", 0, "Number of seconds before the Bazel build run in the test is killed and a timeout failure is declared.")
+	manifestURL           = flag.String("manifest_url", "", "Public URL to the JSON manifest uploaded to GCS by rbe_configs_upload.")
+	configsURL            = flag.String("configs_url", "", "Public URL to the configs tarball uploaded to GCS by rbe_configs_upload.")
+	srcRoot               = flag.String("src_root", "", "Path to root directory of the bazel-toolchains Github repo.")
+	destRoot              = flag.String("dest_root", "", "Path to an empty or non-existent output directory where the Bazel Hello world repo will be set up & a Bazel build will be executed.")
+	rbeInstance           = flag.String("rbe_instance", "", "Name of the RBE instance to test the configs on in the format projects/<GCP project ID>/instances/<RBE Instance ID>.")
+	timeoutSeconds        = flag.Int("timeout_seconds", 0, "Number of seconds before the Bazel build run in the test is killed and a timeout failure is declared.")
+	monitoringProjectID   = flag.String("monitoring_project_id", "", "GCP Project ID where monitoring results will be reported.")
+	monitoringDockerImage = flag.String("monitoring_docker_image", "", "Name of the toolchain docker image to be reported as a string label to monitoring.")
 
 	// filesToCopy are the files that'll be copied from srcRoot to destRoot.
 	filesToCopy = []string{
@@ -352,8 +355,51 @@ func runTestBuild(ctx context.Context, workingDir, bazelVersion string) error {
 	return nil
 }
 
+// printFlag prints flag values with the intent of allowing easy copy paste of flags to rerun this
+// binary.
+func printFlags() {
+	log.Println("configs_e2e.go \\")
+	log.Printf("--manifest_url=%q \\", *manifestURL)
+	log.Printf("--configs_url=%q \\", *configsURL)
+	log.Printf("--src_root=%q \\", *srcRoot)
+	log.Printf("--dest_root=%q \\", *destRoot)
+	log.Printf("--rbe_instance=%q \\", *rbeInstance)
+	log.Printf("--timeout_seconds=%d \\", *timeoutSeconds)
+	log.Printf("--monitoring_project_id=%q \\", *monitoringProjectID)
+	log.Printf("--monitoring_docker_image=%q", *monitoringDockerImage)
+}
+
+// runTest is the core e2e test logic allowing the caller a convenient wrapper to
+// report results to monitoring before triggering a fatal exit.
+func runTest(ctx context.Context) error {
+	m, err := downloadManifest(*manifestURL)
+	if err != nil {
+		return fmt.Errorf("unable to download the manifest from %q: %w", *manifestURL, err)
+	}
+	log.Printf("Successfully downloaded the JSON manifest from %s", *manifestURL)
+
+	if err := verifyConfigSHA(m, *configsURL); err != nil {
+		return fmt.Errorf("failed to cross-reference configs digest specified in the manifest with the configs tarball: %w", err)
+	}
+
+	log.Printf("Creating a new Bazel test repository at %q.", *destRoot)
+
+	if err := createTestRepo(m, *configsURL, *srcRoot, *destRoot, *rbeInstance); err != nil {
+		return fmt.Errorf("error creating the test Bazel repository: %w", err)
+	}
+
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Duration(*timeoutSeconds)*time.Second)
+	defer cancel()
+	log.Printf("Running test build for Bazel %s using configs downloaded from %s with timeout set to %d seconds.", m.BazelVersion, *configsURL, *timeoutSeconds)
+	if err := runTestBuild(ctxWithTimeout, *destRoot, m.BazelVersion); err != nil {
+		return fmt.Errorf("test build for Bazel %s using configs downloaded from %s failed on RBE Instance %s: %w", m.BazelVersion, *configsURL, *rbeInstance, err)
+	}
+	return fmt.Errorf("end to end test for toolchain configs for Bazel %s downloaded from %s passed on RBE Instance %s", m.BazelVersion, *configsURL, *rbeInstance)
+}
+
 func main() {
 	flag.Parse()
+	printFlags()
 
 	if len(*manifestURL) == 0 {
 		log.Fatalf("--manifest_url was not specified.")
@@ -376,35 +422,30 @@ func main() {
 	if *timeoutSeconds <= 0 {
 		log.Fatalf("--timeout_seconds was either not specified or negative.")
 	}
+	if len(*monitoringProjectID) == 0 {
+		log.Fatalf("--monitoring_project_id was not specified.")
+	}
+	if len(*monitoringDockerImage) == 0 {
+		log.Fatalf("--monitoring_docker_image was not specified.")
+	}
 
-	log.Printf("--manifest_url=%q", *manifestURL)
-	log.Printf("--configs_url=%q", *configsURL)
-	log.Printf("--src_root=%q", *srcRoot)
-	log.Printf("--dest_root=%q", *destRoot)
-	log.Printf("--rbe_instance=%q", *rbeInstance)
-	log.Printf("--timeout_seconds=%d", *timeoutSeconds)
-
-	m, err := downloadManifest(*manifestURL)
+	ctx := context.Background()
+	mc, err := monitoring.NewClient(ctx, *monitoringProjectID)
 	if err != nil {
-		log.Fatalf("Unable to download the manifest from %q: %v", *manifestURL, err)
-	}
-	log.Printf("Successfully downloaded the JSON manifest from %s", *manifestURL)
-
-	if err := verifyConfigSHA(m, *configsURL); err != nil {
-		log.Fatalf("Failed to cross-reference configs digest specified in the manifest with the configs tarball: %v", err)
+		log.Fatalf("Failed to initialize monitoring: %v", err)
 	}
 
-	log.Printf("Creating a new Bazel test repository at %q.", *destRoot)
-
-	if err := createTestRepo(m, *configsURL, *srcRoot, *destRoot, *rbeInstance); err != nil {
-		log.Fatalf("Error creating the test Bazel repository: %v", err)
+	result := true
+	if err := runTest(ctx); err != nil {
+		log.Printf("Config E2E test failed: %v", err)
+		result = false
+	} else {
+		log.Printf("Config E2E test passed.")
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(*timeoutSeconds)*time.Second)
-	defer cancel()
-	log.Printf("Running test build for Bazel %s using configs downloaded from %s with timeout set to %d seconds.", m.BazelVersion, *configsURL, *timeoutSeconds)
-	if err := runTestBuild(ctx, *destRoot, m.BazelVersion); err != nil {
-		log.Fatalf("Test build for Bazel %s using configs downloaded from %s failed on RBE Instance %s: %v", m.BazelVersion, *configsURL, *rbeInstance, err)
+	if err := mc.ReportToolchainConfigsTest(ctx, *monitoringDockerImage, result); err != nil {
+		log.Fatalf("Failed to report results to monitoring: %v", err)
 	}
-	log.Printf("End to end test for toolchain configs for Bazel %s downloaded from %s passed on RBE Instance %s.", m.BazelVersion, *configsURL, *rbeInstance)
+	if !result {
+		os.Exit(1)
+	}
 }

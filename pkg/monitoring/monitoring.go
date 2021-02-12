@@ -1,3 +1,17 @@
+// Copyright 2021 The Bazel Authors. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 // Package monitoring provides functionality to report metrics to Google Cloud Monitoring a.k.a.
 // Stackdriver.
 package monitoring
@@ -9,8 +23,10 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	gax "github.com/googleapis/gax-go/v2"
 	"google.golang.org/genproto/googleapis/api/label"
 	"google.golang.org/genproto/googleapis/api/metric"
+	"google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
@@ -42,10 +58,18 @@ const (
 	// END Metrics for Toolchain Configs Generation
 )
 
+// metricClient provides functionality used by this package to interact with the Cloud Monitoring
+// Metrics API.
+type metricClient interface {
+	CreateMetricDescriptor(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest, opts ...gax.CallOption) (*metric.MetricDescriptor, error)
+	DeleteMetricDescriptor(ctx context.Context, req *monitoringpb.DeleteMetricDescriptorRequest, opts ...gax.CallOption) error
+	CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
+}
+
 // Client is the handle to interact with Google Cloud Monitoring.
 type Client struct {
 	// mc is the internal handle to the Google Cloud Monitoring API client.
-	mc *monitoring.MetricClient
+	mc metricClient
 	// projectID is the GCP project ID where Stackdriver metrics will be reported to.
 	projectID string
 	resetTs   time.Time
@@ -136,7 +160,12 @@ func (c *Client) createToolchainConfigsMetrics(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) reportResult(ctx context.Context, metricType, imageName string, result bool) error {
+// reportCummulativeCount reports the given metric type which is expected to be of kind
+// cummulative (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#metrickind)
+// adding "1" to the cummulative count. Other arguments:
+// imageName: The toolchain container image for which the metric is being reported.
+// result: Indicates if the workflow was successful.
+func (c *Client) reportCummulativeCount(ctx context.Context, metricType, imageName string, result bool) error {
 	reset := &timestamp.Timestamp{
 		Seconds: c.resetTs.Unix(),
 	}
@@ -151,6 +180,21 @@ func (c *Client) reportResult(ctx context.Context, metricType, imageName string,
 				Labels: map[string]string{
 					"docker_image": imageName,
 					"result":       fmt.Sprintf("%v", result),
+				},
+			},
+			// Cloud Monitoring insists a "Resource" be defined if we want to create alerts based
+			// on the metric. The values here are mostly placeholders to satisfy Cloud Monitoring.
+			// See https://cloud.google.com/monitoring/api/resources#tag_generic_task
+			Resource: &monitoredres.MonitoredResource{
+				Type: "generic_task",
+				Labels: map[string]string{
+					"project_id": c.projectID,
+					"job":        "monitoring",
+					// Cloud monitoring errors out unless we provide a location recognized by GCP or
+					// AWS.
+					"location":  "us-central1",
+					"namespace": "monitoring",
+					"task_id":   "monitoring",
 				},
 			},
 			Points: []*monitoringpb.Point{{
@@ -175,8 +219,14 @@ func (c *Client) reportResult(ctx context.Context, metricType, imageName string,
 // ReportToolchainConfigsGeneration reports the completion of toolchain configs generation to
 // Stackdriver.
 func (c *Client) ReportToolchainConfigsGeneration(ctx context.Context, imageName string, result bool) error {
-	if err := c.reportResult(ctx, mtypeToolchainConfigsGenRuns, imageName, result); err != nil {
+	if err := c.reportCummulativeCount(ctx, mtypeToolchainConfigsGenRuns, imageName, result); err != nil {
 		return fmt.Errorf("unable to report toolchain config generation: %w", err)
+	}
+	// If config generation failed, we expect to skip running config upload & tests. However,
+	// this may trigger alerts related to "upload" & "test" because the rbe_config_upload &
+	// config_e2e binaries won't be run. Thus, we explicitly report failures for them here.
+	if !result {
+		return c.ReportToolchainConfigsUpload(ctx, imageName, false)
 	}
 	return nil
 }
@@ -184,8 +234,13 @@ func (c *Client) ReportToolchainConfigsGeneration(ctx context.Context, imageName
 // ReportToolchainConfigsUpload reports the completion of toolchain configs upload to
 // Stackdriver.
 func (c *Client) ReportToolchainConfigsUpload(ctx context.Context, imageName string, result bool) error {
-	if err := c.reportResult(ctx, mtypeToolchainConfigsUploadRuns, imageName, result); err != nil {
+	if err := c.reportCummulativeCount(ctx, mtypeToolchainConfigsUploadRuns, imageName, result); err != nil {
 		return fmt.Errorf("unable to report toolchain config upload: %w", err)
+	}
+	// If config upload failed, we expect to skip running config tests. However, this may trigger
+	// alerts related to "test" not running because the config_e2e binary won't be run.
+	if !result {
+		return c.ReportToolchainConfigsTest(ctx, imageName, false)
 	}
 	return nil
 }
@@ -193,8 +248,32 @@ func (c *Client) ReportToolchainConfigsUpload(ctx context.Context, imageName str
 // ReportToolchainConfigsTest reports the completion of toolchain configs test to
 // Stackdriver.
 func (c *Client) ReportToolchainConfigsTest(ctx context.Context, imageName string, result bool) error {
-	if err := c.reportResult(ctx, mtypeToolchainConfigsTestRuns, imageName, result); err != nil {
+	if err := c.reportCummulativeCount(ctx, mtypeToolchainConfigsTestRuns, imageName, result); err != nil {
 		return fmt.Errorf("unable to report toolchain config test run: %w", err)
+	}
+	return nil
+}
+
+// DeleteMetrics deletes all metrics known to this client. Exists for convenience to help with
+// cleanup when metrics are being renamed.
+// Caveat: This only deletes the metric descriptors. Metric data already reported can't be deleted &
+// are deleted according to Cloud Monitoring retention policies. Cloud monitoring will continue to
+// charge for the data until it's deleted by the retention policy. However, deleting the metric
+// descriptors renders the data inaccessible even though they still generate charges.
+func (c *Client) DeleteMetrics(ctx context.Context) error {
+	m := []string{
+		mtypeToolchainConfigsGenRuns,
+		mtypeToolchainConfigsTestRuns,
+		mtypeToolchainConfigsUploadRuns,
+	}
+	for _, metric := range m {
+		req := &monitoringpb.DeleteMetricDescriptorRequest{
+			Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", c.projectID, metric),
+		}
+
+		if err := c.mc.DeleteMetricDescriptor(ctx, req); err != nil {
+			return fmt.Errorf("could not delete metric %s: %v", metric, err)
+		}
 	}
 	return nil
 }
