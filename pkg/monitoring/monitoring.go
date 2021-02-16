@@ -169,6 +169,12 @@ func (c *Client) reportCummulativeCount(ctx context.Context, metricType, imageNa
 	reset := &timestamp.Timestamp{
 		Seconds: c.resetTs.Unix(),
 	}
+	// For cummulative metrics, end time should be > than reset time. Thus, sleep for 2 seconds if
+	// we find less than 1s has passed since resetTs. Sleep 2s instead of 1s to avoid flakes
+	// from floating point addition errors.
+	if time.Now().Sub(c.resetTs).Seconds() < 1 {
+		time.Sleep(time.Second * 2)
+	}
 	now := &timestamp.Timestamp{
 		Seconds: time.Now().Unix(),
 	}
