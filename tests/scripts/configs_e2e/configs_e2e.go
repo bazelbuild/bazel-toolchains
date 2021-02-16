@@ -394,7 +394,7 @@ func runTest(ctx context.Context) error {
 	if err := runTestBuild(ctxWithTimeout, *destRoot, m.BazelVersion); err != nil {
 		return fmt.Errorf("test build for Bazel %s using configs downloaded from %s failed on RBE Instance %s: %w", m.BazelVersion, *configsURL, *rbeInstance, err)
 	}
-	return fmt.Errorf("end to end test for toolchain configs for Bazel %s downloaded from %s passed on RBE Instance %s", m.BazelVersion, *configsURL, *rbeInstance)
+	return nil
 }
 
 func main() {
