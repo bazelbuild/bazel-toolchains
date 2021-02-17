@@ -138,7 +138,7 @@ func (c *Client) createToolchainConfigsMetrics(ctx context.Context) error {
 					Description: "Name of the OS of the toolchain container image",
 				},
 				{
-					Key:         "result",
+					Key:         "success",
 					ValueType:   label.LabelDescriptor_BOOL,
 					Description: "Indicates of configs generation, upload & testing was successful",
 				},
