@@ -379,7 +379,7 @@ func runTest(ctx context.Context) error {
 	log.Printf("Successfully downloaded the JSON manifest from %s", *manifestURL)
 
 	if err := verifyConfigSHA(m, *configsURL); err != nil {
-		return fmt.Errorf("failed to cross-reference configs digest specified in the manifest with the configs tarball: %w", err)
+		return fmt.Errorf("failed to cross-check configs digest specified in the manifest with the configs tarball: %w", err)
 	}
 
 	log.Printf("Creating a new Bazel test repository at %q.", *destRoot)

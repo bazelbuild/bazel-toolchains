@@ -43,18 +43,18 @@ func (f *fakeMonitoringClient) CreateTimeSeries(_ context.Context, req *monitori
 
 func TestReportToolchainConfigResults(t *testing.T) {
 	testCases := []struct {
-		name         string
-		reportGen    bool
-		reportUpload bool
-		reportTest   bool
-		reportResult bool
+		name          string
+		reportGen     bool
+		reportUpload  bool
+		reportTest    bool
+		reportSuccess bool
 
 		wantCreateTimeSeries int
 	}{
 		{
 			name:                 "GenerationSuccess",
 			reportGen:            true,
-			reportResult:         true,
+			reportSuccess:        true,
 			wantCreateTimeSeries: 1,
 		},
 		{
@@ -63,13 +63,13 @@ func TestReportToolchainConfigResults(t *testing.T) {
 			// will trigger.
 			name:                 "GenerationFailedChainsUploadTestFailures",
 			reportGen:            true,
-			reportResult:         false,
+			reportSuccess:        false,
 			wantCreateTimeSeries: 3,
 		},
 		{
 			name:                 "UploadSuccess",
 			reportUpload:         true,
-			reportResult:         true,
+			reportSuccess:        true,
 			wantCreateTimeSeries: 1,
 		},
 		{
@@ -77,19 +77,19 @@ func TestReportToolchainConfigResults(t *testing.T) {
 			// internal we'll get test jobs aren't running alerts
 			name:                 "UploadFailedChainsTestFailure",
 			reportUpload:         true,
-			reportResult:         false,
+			reportSuccess:        false,
 			wantCreateTimeSeries: 2,
 		},
 		{
 			name:                 "TestSuccess",
 			reportTest:           true,
-			reportResult:         true,
+			reportSuccess:        true,
 			wantCreateTimeSeries: 1,
 		},
 		{
 			name:                 "TestFailed",
 			reportTest:           true,
-			reportResult:         false,
+			reportSuccess:        false,
 			wantCreateTimeSeries: 1,
 		},
 	}
@@ -105,18 +105,18 @@ func TestReportToolchainConfigResults(t *testing.T) {
 				resetTs:   time.Unix(0, 0),
 			}
 			if tc.reportGen {
-				if err := mc.ReportToolchainConfigsGeneration(ctx, "fake", tc.reportResult); err != nil {
-					t.Errorf("ReportToolchainConfigsGeneration(ctx, fake, %v) failed, got error %v, want nil", tc.reportResult, err)
+				if err := mc.ReportToolchainConfigsGeneration(ctx, "fake", tc.reportSuccess); err != nil {
+					t.Errorf("ReportToolchainConfigsGeneration(ctx, fake, %v) failed, got error %v, want nil", tc.reportSuccess, err)
 				}
 			}
 			if tc.reportUpload {
-				if err := mc.ReportToolchainConfigsUpload(ctx, "fake", tc.reportResult); err != nil {
-					t.Errorf("ReportToolchainConfigsUpload(ctx, fake, %v) failed, got error %v, want nil", tc.reportResult, err)
+				if err := mc.ReportToolchainConfigsUpload(ctx, "fake", tc.reportSuccess); err != nil {
+					t.Errorf("ReportToolchainConfigsUpload(ctx, fake, %v) failed, got error %v, want nil", tc.reportSuccess, err)
 				}
 			}
 			if tc.reportTest {
-				if err := mc.ReportToolchainConfigsTest(ctx, "fake", tc.reportResult); err != nil {
-					t.Errorf("ReportToolchainConfigsTest(ctx, fake, %v) failed, got error %v, want nil", tc.reportResult, err)
+				if err := mc.ReportToolchainConfigsTest(ctx, "fake", tc.reportSuccess); err != nil {
+					t.Errorf("ReportToolchainConfigsTest(ctx, fake, %v) failed, got error %v, want nil", tc.reportSuccess, err)
 				}
 			}
 			if len(fc.createTimeSeriesRequests) != tc.wantCreateTimeSeries {

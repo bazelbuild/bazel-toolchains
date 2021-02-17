@@ -96,7 +96,10 @@ func printFlags() {
 		log.Printf("--enable_monitoring=%v \\", *enableMonitoring)
 	}
 	if len(*monitoringProjectID) != 0 {
-		log.Printf("--monitoring_project_id=%q", *monitoringProjectID)
+		log.Printf("--monitoring_project_id=%q \\", *monitoringProjectID)
+	}
+	if len(*monitoringDockerImage) != 0 {
+		log.Printf("--monitoring_docker_image=%q \\", *monitoringDockerImage)
 	}
 }
 

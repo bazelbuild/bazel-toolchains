@@ -37,24 +37,24 @@ const (
 	// BEGIN Metrics for Toolchain Configs Generation
 	//
 	// All toolchain config generation metrics have the following characterics:
-	// 1. Cummulative integer tracking the number of times a toolchain configs release step
+	// 1. Cumulative integer tracking the number of times a toolchain configs release step
 	//    (generation, upload & test) runs to completion.
 	// 2. Each metric includes the following labels:
 	//    a. docker_image- A string representing the OS name of the toolchain docker image. e.g.,
 	//                     "rbe-ubuntu1604".
-	//    b. result- Bool set to true if the step succeeded.
+	//    b. success- Bool set to true if the step succeeded.
 	//
 	// mtypeToolchainConfigsGenRuns tracks successful runs of rbe_configs_gen i.e., configs
 	// generation.
-	mtypeToolchainConfigsGenRuns = "custom.googleapis.com/toolchain_configs/generation/runs"
+	mtypeToolchainConfigsGenRuns = "custom.googleapis.com/rbe/bazel-toolchains/generation/runs"
 	//
 	// mtypeToolchainConfigsUploadRuns tracks successful runs of rbe_configs_upload i.e.,
 	// configs publication/deployment.
-	mtypeToolchainConfigsUploadRuns = "custom.googleapis.com/toolchain_configs/upload/runs"
+	mtypeToolchainConfigsUploadRuns = "custom.googleapis.com/rbe/bazel-toolchains/upload/runs"
 	//
 	// mtypeToolchainConfigsTestRuns tracks successful runs of configs_e2e i.e.,
 	// configs end to end test.
-	mtypeToolchainConfigsTestRuns = "custom.googleapis.com/toolchain_configs/test/runs"
+	mtypeToolchainConfigsTestRuns = "custom.googleapis.com/rbe/bazel-toolchains/test/runs"
 	// END Metrics for Toolchain Configs Generation
 )
 
@@ -160,18 +160,24 @@ func (c *Client) createToolchainConfigsMetrics(ctx context.Context) error {
 	return nil
 }
 
-// reportCummulativeCount reports the given metric type which is expected to be of kind
-// cummulative (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#metrickind)
-// adding "1" to the cummulative count. Other arguments:
+// reportCumulativeCount reports the given metric type which is expected to be of kind
+// cumulative (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#metrickind)
+// adding "1" to the cumulative count. Other arguments:
 // imageName: The toolchain container image for which the metric is being reported.
-// result: Indicates if the workflow was successful.
-func (c *Client) reportCummulativeCount(ctx context.Context, metricType, imageName string, result bool) error {
+// success: Indicates if the workflow was successful.
+func (c *Client) reportCumulativeCount(ctx context.Context, metricType, imageName string, success bool) error {
 	reset := &timestamp.Timestamp{
 		Seconds: c.resetTs.Unix(),
 	}
-	// For cummulative metrics, end time should be > than reset time. Thus, sleep for 2 seconds if
+	// For cumulative metrics, end time should be > than reset time. Thus, sleep for 2 seconds if
 	// we find less than 1s has passed since resetTs. Sleep 2s instead of 1s to avoid flakes
 	// from floating point addition errors.
+	// This logic doesn't handle when time jumps back during daylight savings but we don't care
+	// because:
+	// 1. May cause a spurious but self recovering alert once a year which is too infrequent to
+	//    bother handling.
+	// 2. We expect to run this tool during business hours and daylight savings usually doesn't
+	//    happen during then.
 	if time.Now().Sub(c.resetTs).Seconds() < 1 {
 		time.Sleep(time.Second * 2)
 	}
@@ -185,7 +191,7 @@ func (c *Client) reportCummulativeCount(ctx context.Context, metricType, imageNa
 				Type: metricType,
 				Labels: map[string]string{
 					"docker_image": imageName,
-					"result":       fmt.Sprintf("%v", result),
+					"success":      fmt.Sprintf("%v", success),
 				},
 			},
 			// Cloud Monitoring insists a "Resource" be defined if we want to create alerts based
@@ -224,14 +230,14 @@ func (c *Client) reportCummulativeCount(ctx context.Context, metricType, imageNa
 
 // ReportToolchainConfigsGeneration reports the completion of toolchain configs generation to
 // Stackdriver.
-func (c *Client) ReportToolchainConfigsGeneration(ctx context.Context, imageName string, result bool) error {
-	if err := c.reportCummulativeCount(ctx, mtypeToolchainConfigsGenRuns, imageName, result); err != nil {
+func (c *Client) ReportToolchainConfigsGeneration(ctx context.Context, imageName string, success bool) error {
+	if err := c.reportCumulativeCount(ctx, mtypeToolchainConfigsGenRuns, imageName, success); err != nil {
 		return fmt.Errorf("unable to report toolchain config generation: %w", err)
 	}
 	// If config generation failed, we expect to skip running config upload & tests. However,
 	// this may trigger alerts related to "upload" & "test" because the rbe_config_upload &
 	// config_e2e binaries won't be run. Thus, we explicitly report failures for them here.
-	if !result {
+	if !success {
 		return c.ReportToolchainConfigsUpload(ctx, imageName, false)
 	}
 	return nil
@@ -239,13 +245,13 @@ func (c *Client) ReportToolchainConfigsGeneration(ctx context.Context, imageName
 
 // ReportToolchainConfigsUpload reports the completion of toolchain configs upload to
 // Stackdriver.
-func (c *Client) ReportToolchainConfigsUpload(ctx context.Context, imageName string, result bool) error {
-	if err := c.reportCummulativeCount(ctx, mtypeToolchainConfigsUploadRuns, imageName, result); err != nil {
+func (c *Client) ReportToolchainConfigsUpload(ctx context.Context, imageName string, success bool) error {
+	if err := c.reportCumulativeCount(ctx, mtypeToolchainConfigsUploadRuns, imageName, success); err != nil {
 		return fmt.Errorf("unable to report toolchain config upload: %w", err)
 	}
 	// If config upload failed, we expect to skip running config tests. However, this may trigger
 	// alerts related to "test" not running because the config_e2e binary won't be run.
-	if !result {
+	if !success {
 		return c.ReportToolchainConfigsTest(ctx, imageName, false)
 	}
 	return nil
@@ -253,8 +259,8 @@ func (c *Client) ReportToolchainConfigsUpload(ctx context.Context, imageName str
 
 // ReportToolchainConfigsTest reports the completion of toolchain configs test to
 // Stackdriver.
-func (c *Client) ReportToolchainConfigsTest(ctx context.Context, imageName string, result bool) error {
-	if err := c.reportCummulativeCount(ctx, mtypeToolchainConfigsTestRuns, imageName, result); err != nil {
+func (c *Client) ReportToolchainConfigsTest(ctx context.Context, imageName string, success bool) error {
+	if err := c.reportCumulativeCount(ctx, mtypeToolchainConfigsTestRuns, imageName, success); err != nil {
 		return fmt.Errorf("unable to report toolchain config test run: %w", err)
 	}
 	return nil
