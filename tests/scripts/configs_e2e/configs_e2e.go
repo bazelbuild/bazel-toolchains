@@ -54,8 +54,9 @@ var (
 	destRoot              = flag.String("dest_root", "", "Path to an empty or non-existent output directory where the Bazel Hello world repo will be set up & a Bazel build will be executed.")
 	rbeInstance           = flag.String("rbe_instance", "", "Name of the RBE instance to test the configs on in the format projects/<GCP project ID>/instances/<RBE Instance ID>.")
 	timeoutSeconds        = flag.Int("timeout_seconds", 0, "Number of seconds before the Bazel build run in the test is killed and a timeout failure is declared.")
-	monitoringProjectID   = flag.String("monitoring_project_id", "", "GCP Project ID where monitoring results will be reported.")
-	monitoringDockerImage = flag.String("monitoring_docker_image", "", "Name of the toolchain docker image to be reported as a string label to monitoring.")
+	enableMonitoring      = flag.Bool("enable_monitoring", false, "(Optional) Enables reporting reporting results to Google Cloud Monitoring. Defaults to false.")
+	monitoringProjectID   = flag.String("monitoring_project_id", "", "GCP Project ID where monitoring results will be reported. Required if --enable_monitoring is true.")
+	monitoringDockerImage = flag.String("monitoring_docker_image", "", "Name of the toolchain docker image to be reported as a string label to monitoring. Required if --enable_monitoring is true.")
 
 	// filesToCopy are the files that'll be copied from srcRoot to destRoot.
 	filesToCopy = []string{
@@ -365,6 +366,7 @@ func printFlags() {
 	log.Printf("--dest_root=%q \\", *destRoot)
 	log.Printf("--rbe_instance=%q \\", *rbeInstance)
 	log.Printf("--timeout_seconds=%d \\", *timeoutSeconds)
+	log.Printf("--enable_monitoring=%v \\", *enableMonitoring)
 	log.Printf("--monitoring_project_id=%q \\", *monitoringProjectID)
 	log.Printf("--monitoring_docker_image=%q", *monitoringDockerImage)
 }
@@ -397,6 +399,23 @@ func runTest(ctx context.Context) error {
 	return nil
 }
 
+func initMonitoringClient(ctx context.Context) (*monitoring.Client, error) {
+	if !(*enableMonitoring) {
+		return nil, nil
+	}
+	if len(*monitoringProjectID) == 0 {
+		return nil, fmt.Errorf("--monitoring_project_id is required because --enable_monitoring is true")
+	}
+	if len(*monitoringDockerImage) == 0 {
+		return nil, fmt.Errorf("--monitoring_docker_image is required because --enable_monitoring is true")
+	}
+	c, err := monitoring.NewClient(ctx, *monitoringProjectID)
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize the monitoring client: %w", err)
+	}
+	return c, nil
+}
+
 func main() {
 	flag.Parse()
 	printFlags()
@@ -422,15 +441,9 @@ func main() {
 	if *timeoutSeconds <= 0 {
 		log.Fatalf("--timeout_seconds was either not specified or negative.")
 	}
-	if len(*monitoringProjectID) == 0 {
-		log.Fatalf("--monitoring_project_id was not specified.")
-	}
-	if len(*monitoringDockerImage) == 0 {
-		log.Fatalf("--monitoring_docker_image was not specified.")
-	}
 
 	ctx := context.Background()
-	mc, err := monitoring.NewClient(ctx, *monitoringProjectID)
+	mc, err := initMonitoringClient(ctx)
 	if err != nil {
 		log.Fatalf("Failed to initialize monitoring: %v", err)
 	}
@@ -442,8 +455,12 @@ func main() {
 	} else {
 		log.Printf("Config E2E test passed.")
 	}
-	if err := mc.ReportToolchainConfigsTest(ctx, *monitoringDockerImage, result); err != nil {
-		log.Fatalf("Failed to report results to monitoring: %v", err)
+
+	// Monitoring is optional and used for internal alerting by the owners of this repo only.
+	if mc != nil {
+		if err := mc.ReportToolchainConfigsTest(ctx, *monitoringDockerImage, result); err != nil {
+			log.Fatalf("Failed to report results to monitoring: %v", err)
+		}
 	}
 	if !result {
 		os.Exit(1)

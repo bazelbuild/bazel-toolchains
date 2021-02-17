@@ -168,8 +168,7 @@ func main() {
 	} else {
 		log.Printf("Config generation was successful.")
 	}
-	// Monitoring is optional for config generation and used for internal alerting by the owners
-	// of this repo only.
+	// Monitoring is optional and used for internal alerting by the owners of this repo only.
 	if mc != nil {
 		if err := mc.ReportToolchainConfigsGeneration(ctx, *monitoringDockerImage, result); err != nil {
 			log.Fatalf("Failed to report config result to monitoring: %v", err)
