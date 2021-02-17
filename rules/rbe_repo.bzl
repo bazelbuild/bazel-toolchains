@@ -823,6 +823,11 @@ _rbe_autoconfig = repository_rule(
             doc = ("Optional. The Java release version in the container. For " +
                    " example, 11. Should only be set if java_home is set."),
         ),
+        "os_family": attr.string(
+            doc = ("Optional. The os_family to generate the config for. For example, " +
+                   "Linux or Windows (Mac OS X is not supported at this time). The default is " +
+                   "OS Bazel runs on."),
+        ),
         "registry": attr.string(
             doc = ("Optional. The registry to pull the container from. For example, " +
                    "marketplace.gcr.io. The default is the value for the selected " +
@@ -912,6 +917,7 @@ def rbe_autoconfig(
         export_configs = False,
         java_home = None,
         java_version = None,
+        os_family = None,
         tag = None,
         toolchain_config_suite_spec = default_toolchain_config_suite_spec(),
         registry = None,
@@ -1244,6 +1250,7 @@ def rbe_autoconfig(
         export_configs = export_configs,
         java_home = java_home,
         java_version = java_version,
+        os_family = os_family,
         toolchain_config_suite_spec = toolchain_config_suite_spec_stripped,
         registry = registry,
         repository = repository,
