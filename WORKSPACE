@@ -87,11 +87,11 @@ container_pull(
 # https://github.com/bazelbuild/bazel-toolchains/releases/tag/cddc376
 http_file(
     name = "bazel_toolchains_test",
-    downloaded_file_path = "cddc376d428ada2927ad359211c3e356bd9c9fbb.tar.gz",
-    sha256 = "67335b3563d9b67dc2550b8f27cc689b64fadac491e69ce78763d9ba894cc5cc",
+    downloaded_file_path = "04ae943115e2b97c931da585b0e696ccdea7cf14.tar.gz",
+    sha256 = "4e3ea3609a4e7dfdffdd89215e667dcc1ba0b0e46d52968c35e9c70be309ccf5",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/cddc376d428ada2927ad359211c3e356bd9c9fbb.tar.gz",
-        "https://github.com/bazelbuild/bazel-toolchains/archive/cddc376d428ada2927ad359211c3e356bd9c9fbb.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/04ae943115e2b97c931da585b0e696ccdea7cf14.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/04ae943115e2b97c931da585b0e696ccdea7cf14.tar.gz",
     ],
 )
 
