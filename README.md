@@ -5,8 +5,8 @@ Bazel CI
 # bazel-toolchains
 
 https://github.com/bazelbuild/bazel-toolchains is a repository where Google
-hosts the source code for a CLI tool that can be used to generate Bazel toolchain configs. These 
-configs are required to configure Bazel to issue commands that will execute inside a Docker 
+hosts the source code for a CLI tool that can be used to generate Bazel toolchain configs. These
+configs are required to configure Bazel to issue commands that will execute inside a Docker
 container via a remote execution environment.
 
 These toolchain configs include:
@@ -23,27 +23,253 @@ the following formats:
 * Tarball
 * Config files copied directly to a local directory
 
+rbe_configs_gen requires [docker](https://docs.docker.com/get-docker/) to be installed locally and
+internet access to work.
+
 Config users are recommended to use the CLI tool to generate and self host their own configs.
 Pre-generated configs will be provided for new releases of Bazel & the [RBE Ubuntu 16.04](https://console.cloud.google.com/marketplace/details/google/rbe-ubuntu16-04)
-without any SLOs. See [Pre-generated Configs]() section below for details.
+without any SLOs. See [Pre-generated Configs](#pre-generated-configs) section below for details.
 
 The rest of this section describes how to use the rbe_configs_gen tool.
 
 ## Building
 
-## Generating Configs - Latest Bazel Version & Output Tarball
+### Building using Docker on Linux (Recommended)
 
-## Generating Configs - Specific Bazel Version & Output Directory
+Use the [official Golang docker image](https://hub.docker.com/_/golang) to build the rbe_configs_gen
+binary using Go 1.15. This avoids having to install the Go toolchain locally but requires
+[docker](https://docs.docker.com/get-docker/).
 
-## Using Configs - Remote Tarball Archive
+1. Clone this repository and set it as the working directory:
 
-## Using Configs - Remote Github Repository
+```bash
+$ git clone https://github.com/bazelbuild/bazel-toolchains.git
+$ cd bazel-toolchains
+```
+
+1. Run the following command:
+
+```bash
+$ docker run --rm -v $PWD:/srcdir -w /srcdir golang:1.15 go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
+```
+
+1. You should now be run `rbe_configs_gen` as follows:
+
+```
+$ ./rbe_configs_gen --help
+```
+
+### Building Locally
+
+1. Install [Go](https://golang.org/dl/) for your platform if necessary. Tested to work with Go 1.15.
+
+1. Clone this repository
+
+```bash
+$ git clone https://github.com/bazelbuild/bazel-toolchains.git
+$ cd bazel-toolchains
+```
+
+1. Build the rbe_configs_gen executable
+```
+# Use -o rbe_configs_gen.exe on Windows
+$ go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
+```
+
+
+## Generating Configs
+
+### Latest Bazel Version and Output Tarball
+
+If you'd like to generate toolchain configs for the latest available Bazel release and the toolchain
+container l.gcr.io/google/rbe-ubuntu16-04:latest and produce a tarball with the generated configs
+run:
+
+```bash
+$ ./rbe_configs_gen \
+    --toolchain_container=l.gcr.io/google/rbe-ubuntu16-04:latest \
+    --output_tarball=rbe_default.tar \
+    --exec_os=linux \
+    --target_os=linux
+```
+
+The `exec_os` and `target_os` correspond to the Bazel
+[execution & target platforms](https://docs.bazel.build/versions/master/platforms.html)
+respectively.
+
+You should see a tarball file `rbe_default.tar` locally containing the generated configs.
+
+### Specific Bazel Version and Output Directory
+
+If you'd like to generate toolchain configs for a specific Bazel release, e.g., Bazel 4.0.0 (tested
+for versions >= 3.7.2) and the toolchain container l.gcr.io/google/rbe-ubuntu16-04:latest and
+copy the generated configs to path `configs/path` relative to a source repository at
+`/path/to/source/repo` run:
+
+```bash
+$ ./rbe_configs_gen \
+    --bazel_version=4.0.0 \
+    --toolchain_container=l.gcr.io/google/rbe-ubuntu16-04:latest \
+    --output_src_root=/path/to/source/repo \
+    --output_config_path=configs/path \
+    --exec_os=linux \
+    --target_os=linux
+```
+
+`/path/to/source/repo` should be the directory containing a Bazel `WORKSPACE` file. The toolchain
+configs will be extracted to `/path/to/source/repo/configs/path`.
+
+The `exec_os` and `target_os` correspond to the Bazel
+[execution & target platforms](https://docs.bazel.build/versions/master/platforms.html)
+respectively.
+
+## Using Configs
+
+### .bazelrc
+
+Copy/import a `.bazelrc` file from [here](https://github.com/bazelbuild/bazel-toolchains/tree/master/bazelrc).
+Pick the file that has the highest Bazel version in the filename that's less than or equal to the
+Bazel version you're using.
+
+### Option 1: Same Source Repository (Recommended)
+
+If you [copied the generated configs](#specific-bazel-version-and-output-directory) to the source
+repository where the rest of your code lives, and assuming the configs were copied to the path
+`configs/path` (i.e., the value specified to the flag `--output_config_path` when running
+`rbe_configs_gen`) relative to the directory containing the Bazel `WORKSPACE` file, all you need to
+do is replace all occurences of `@rbe_default//` in your [`.bazelrc` file](#.bazelrc) with `//configs/path`.
+
+### Option 2: Remote Github Repository
+
+If you extract the contents of a
+[generated toolchain configs tarball](#specific-bazel-version-and-output-directory) into the root of
+a Github repository or copy the generated configs with the configs relative path (i.e., the value
+specified to the flag `--output_config_path` when running `rbe_configs_gen`) set to `""` to a Github
+repository, github.com/example/configs-repo, include the following in your `WORKSPACE`:
+
+```python
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+git_repository(
+    name = "rbe_default",
+    # Replace this with the actual commit id of the Github repo you'd like to pin to.
+    commit = "471da0273050b88d77529484ff89741ff586f9f5",
+    remote = "https://github.com/example/configs-repo.git",
+)
+
+```
+
+### Option 3: Remote Tarball Archive
+
+Then, assuming you've upload the toolchain configs tarball to a remote location available at the
+URL `https://example.com/rbe-default.tar`, include the following in your `WORKSPACE` file:
+
+```python
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rbe_default",
+    sha256 = "<replace this with the 64 character sha256 digest of the configs tarball>",
+    urls = ["https://example.com/rbe-default.tar"],
+)
+
+```
+
+### Custom Execution Properties
+
+TODO
 
 # Pre-generated Configs
 
+Pre-generated configs tarballs will be generated for every Bazel release starting with 4.0.0 & the
+latest available [Ubuntu 16.04 Clang + JDK](l.gcr.io/google/rbe-ubuntu16-04:latest) container and
+uploaded to GCS. However, these configs are provided as a convenience for users experimenting with
+Bazel & remote execution only without any SLOs or functionality guarantees. Further, there's no
+guarantees on how soon after a new release of Bazel or the Ubuntu 16.04 Clang + JDK, the
+corresponding configs will be available.
+
+It's strongly recommended to generate and host your own toolchain configs by running the
+`rbe_config_gen` tool if you intend to use the generated configs in production.
+
+See [here](#.bazelrc) for instructions on how to initialize your `.bazelrc` file.
+
+## Latest Bazel and Latest Ubuntu 16.04 Container
+
+1. Examine the contents of the JSON manifest of the latest configs.
+
+```bash
+$ curl https://storage.googleapis.com/rbe-toolchain/bazel-configs/rbe-ubuntu1604/latest/manifest.json
+{
+ "bazel_version": "4.0.0",
+ "toolchain_container": "l.gcr.io/google/rbe-ubuntu16-04:latest",
+ "image_digest": "f6568d8168b14aafd1b707019927a63c2d37113a03bcee188218f99bd0327ea1",
+ "exec_os": "Linux",
+ "configs_tarball_digest": "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
+ "upload_time": "2021-02-18T06:02:32.997892223-08:00"
+}
+```
+
+1. The manifest indicates the configs are for Bazel 4.0.0, generated for the container
+   `l.gcr.io/google/rbe-ubuntu16-04@sha256:f6568d8168b14aafd1b707019927a63c2d37113a03bcee188218f99bd0327ea1`
+   and the sha256 digest of the uploaded configs tarball is `c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea`.
+   To use these configs, add the following to your Bazel `WORKSPACE` file:
+
+```python
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rbe_default",
+    # Change the sha256 digest to the value of the `configs_tarball_digest` in the manifest you
+    # got when you ran the curl command above.
+    sha256 = "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
+    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/rbe-ubuntu1604/latest/rbe_default.json"],
+)
+```
+
+## Specific Bazel and Latest Ubuntu 16.04 Container
+
+1. Say you'd like to use configs for Bazel 4.0.0 specifically.
+
+1. Check if a manifest exists for the Bazel version you're interested in (version should be >=
+   4.0.0).
+
+```bash
+# Replace "bazel_4.0.0" in the URL below with whatever "bazel_<version>" you'd like to you.
+$ curl https://storage.googleapis.com/rbe-toolchain/bazel-configs/bazel_4.0.0/rbe-ubuntu1604/latest/manifest.json
+{
+ "bazel_version": "4.0.0",
+ "toolchain_container": "l.gcr.io/google/rbe-ubuntu16-04:latest",
+ "image_digest": "f6568d8168b14aafd1b707019927a63c2d37113a03bcee188218f99bd0327ea1",
+ "exec_os": "Linux",
+ "configs_tarball_digest": "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
+ "upload_time": "2021-02-18T06:02:32.997892223-08:00"
+}
+```
+
+1. The manifest confirms the configs are for Bazel 4.0.0, generated for the container
+   `l.gcr.io/google/rbe-ubuntu16-04@sha256:f6568d8168b14aafd1b707019927a63c2d37113a03bcee188218f99bd0327ea1`
+   and the sha256 digest of the uploaded configs tarball is `c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea`.
+   To use these configs, add the following to your Bazel `WORKSPACE` file:
+
+```python
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rbe_default",
+    # Change the sha256 digest to the value of the `configs_tarball_digest` in the manifest you
+    # got when you ran the curl command above.
+    sha256 = "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
+    # Change "bazel_4.0.0" in the URL below with whatever "bazel_<version>" you downloaded the
+    # manifest for in the previous step.
+    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/bazel_4.0.0/rbe-ubuntu1604/latest/rbe_default.json"],
+)
+```
+
 # Where is rbe_autoconfig?
 
-The [rbe_autoconfig](https://github.com/bazelbuild/bazel-toolchains/blob/4.0.0/rules/rbe_repo.bzl#L896) 
+The [rbe_autoconfig](https://github.com/bazelbuild/bazel-toolchains/blob/4.0.0/rules/rbe_repo.bzl#L896)
 Bazel repository rule used to generate & use toolchain configs has been deprecated with release
 [v4.0.0](https://github.com/bazelbuild/bazel-toolchains/releases/tag/4.0.0) of this repository
 being the last release that supports rbe_autoconfig. Release v4.0.0 supports Bazel versions up to
