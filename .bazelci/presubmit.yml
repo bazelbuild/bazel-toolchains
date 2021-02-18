@@ -9,42 +9,11 @@ buildifier:
   # are fixed.
   warnings: "attr-cfg,attr-license,attr-non-empty,attr-output-default,attr-single-file,confusing-name,constant-glob,ctx-actions,ctx-args,depset-iteration,depset-union,dict-concatenation,duplicated-name,filetype,function-docstring,git-repository,http-archive,integer-division,load,load-on-top,module-docstring,name-conventions,native-build,native-package,no-effect,output-group,package-name,package-on-top,positional-args,redefined-variable,repository-name,same-origin-load,string-iteration,unreachable,unused-variable"
 tasks:
-  rbe_autoconfig:
-    platform: rbe_ubuntu1604
+  presubmit:
+    platform: ubuntu1604
+    build_targets:
+    - "--"
+    - "..."
     test_targets:
     - "--"
-    # rbe_autoconfig tests
-    - "//tests/rbe_repo/..."
-    # tests that require output_base / config_repos are timing out.
-    # TODO(nlopezgi): debug, fix and enable these tests.
-    - "-//tests/rbe_repo:rbe_autoconf_output_base_test"
-    - "-//tests/rbe_repo:rbe_autoconf_output_base_no_java_test"
-    - "-//tests/rbe_repo:rbe_autoconf_output_base_no_cc_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_output_base_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_output_base_run_in_container_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_run_in_container_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_sh_toolchain_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_run_in_container_test"
-    - "-//tests/rbe_repo:rbe_autoconf_config_repos_no_cc_config_sh_toolchain_test"
-    # docker_autoconfig tests require 'docker' and run in GCB
-    test_flags:
-    - "--action_env=RBE_AUTOCONF_ROOT=/workdir"
-    - "--action_env=PATH"
-    - "--test_output=errors"
-    - "--verbose_failures"
-    - "--test_tag_filters=-windows"
-  rbe_exec_properties:
-    # Run tests on RBE. These tests run on platforms with various execution
-    # properties. the tests verify that the approriate properties are set (or not set).
-    # The properties are configured on the platforms using create_exec_properties_dict().
-    platform: rbe_ubuntu1604
-    test_targets:
-    - "--"
-    - "//tests/rules/exec_properties/..."
-    test_flags:
-    - "--test_output=errors"
-    - "--verbose_failures"
-    - "--extra_execution_platforms=@rbe_default_exec_properties//config:platform,//tests/rules/exec_properties:platform_privileged_on,//tests/rules/exec_properties:platform_network_enabled,//tests/rules/exec_properties:platform_bespoke_network_enabled,//tests/rules/exec_properties:platform_overridden_network_enabled"
-    - "--host_platform=@rbe_default_exec_properties//config:platform"
-    - "--platforms=@rbe_default_exec_properties//config:platform"
-    - "--test_tag_filters=-windows"
+    - "..."

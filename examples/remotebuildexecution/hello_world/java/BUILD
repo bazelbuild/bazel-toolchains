@@ -13,7 +13,7 @@
 # limitations under the License.
 
 java_binary(
-  name = "hello_java",
-  main_class = "HelloWorld",
-  srcs = ["HelloWorld.java"],
+    name = "hello_java",
+    srcs = ["HelloWorld.java"],
+    main_class = "HelloWorld",
 )

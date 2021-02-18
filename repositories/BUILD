@@ -19,18 +19,8 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 bzl_library(
-    name = "images",
-    srcs = [
-        "images.bzl",
-    ],
-    deps = [
-        "//rules:toolchain_containers",
-    ],
-)
-
-bzl_library(
     name = "repositories",
     srcs = [
-        "images.bzl",
+        "repositories.bzl",
     ],
 )
