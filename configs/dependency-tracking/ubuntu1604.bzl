@@ -1,6 +1,0 @@
-"""Information tracking the latest published configs."""
-bazel = "4.0.0"
-registry = "marketplace.gcr.io"
-repository = "google/rbe-ubuntu16-04"
-digest = "sha256:f6568d8168b14aafd1b707019927a63c2d37113a03bcee188218f99bd0327ea1"
-configs_version = "11.0.0"
