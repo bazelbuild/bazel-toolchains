@@ -267,13 +267,16 @@ latest available [Ubuntu 16.04 Clang + JDK](l.gcr.io/google/rbe-ubuntu16-04:late
 uploaded to GCS.
 
 **IMPORTANT**: Ensure you read & agree with the terms of the `LICENSE` file included in the
-configs tarball before using pre-generated configs. Basically, never depend directly on any of the
-URLs mentioned below to download toolchain configs in production because they may break without
-warning. Pre-generated configs are only provided as a convenience for experimenting with configuring
-Bazel for remote builds. Further, there are no guarantees on how long after a new release of Bazel
-or the Ubuntu 16.04 container mentioned above the corresponding pre-generated configs will be
-available. It's strongly recommended to generate and host your own toolchain configs by running the
-`rbe_config_gen` tool and test the functionality and correctness of the configs yourself before
+configs tarball before using pre-generated configs.
+
+Basically, never depend directly on any of the URLs mentioned below to download toolchain configs in
+production because they may break without warning. Pre-generated configs are only provided as a
+convenience for experimenting with configuring Bazel for remote builds. Further, there are no
+guarantees on how long after a new release of Bazel or the Ubuntu 16.04 container mentioned above
+the corresponding pre-generated configs will be available. It's strongly recommended to generate and
+host your own toolchain configs by running the `rbe_config_gen` tool and test the functionality and
+correctness of the configs yourself before using them in production. Alternatively, you could also
+copy pre-generated configs and host it in a location you control after verifying correctness before
 using them in production.
 
 See [here](#bazelrc) for instructions on how to initialize your `.bazelrc` file.
