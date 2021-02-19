@@ -80,6 +80,9 @@ http_archive(
     name = "rbe_default",
     urls = ["{{ .ConfigsTarballURL }}"],
     sha256 = "{{ .ConfigsTarballDigest }}",
+	build_file_content="""
+exports_files(["LICENSE"])
+"""
 )
 
 `))
@@ -171,6 +174,28 @@ func createWorkspaceFile(m *rbeconfigsgen.Manifest, configTarballURL string, out
 		return fmt.Errorf("error writing Bazel WORKSPACE file in %q: %w", outputDir, err)
 	}
 	log.Printf("Generated WORKSPACE file in %q.", outputDir)
+	return nil
+}
+
+// createBUILDFile creates a top level BUILD file with a file test to ensure the uploaded configs
+// included a LICENSE file.
+func createBUILDFile(outputDir string) error {
+	o, err := os.Create(path.Join(outputDir, "BUILD"))
+	if err != nil {
+		return fmt.Errorf("unable to create BUILD file in %q: %w", outputDir, err)
+	}
+	defer o.Close()
+	if _, err := fmt.Fprintf(o, `
+load("@bazel_tools//tools/build_rules:test_rules.bzl", "file_test")
+
+file_test(
+	name = "license_exists_test",
+	file = "@rbe_default//:LICENSE",
+	regexp = "Apache License",
+)
+`); err != nil {
+		return fmt.Errorf("unable to write BUILD file in %q: %w", outputDir, err)
+	}
 	return nil
 }
 
@@ -270,6 +295,9 @@ func createTestRepo(m *rbeconfigsgen.Manifest, configTarballURL, srcDir, outputD
 	if err := createWorkspaceFile(m, configTarballURL, outputDir); err != nil {
 		return fmt.Errorf("error creating the Bazel WORKSPACE file: %w", err)
 	}
+	if err := createBUILDFile(outputDir); err != nil {
+		return fmt.Errorf("error creating the Bazel BUILD file: %w", err)
+	}
 	if err := createBazelrcFile(m, configTarballURL, outputDir, rbeInst); err != nil {
 		return fmt.Errorf("error creating the .bazelrc file: %w", err)
 	}
@@ -338,6 +366,9 @@ func runTestBuild(ctx context.Context, workingDir, bazelVersion string) error {
 		// Disable remote caching to ensure the commands constructed from the toolchain configs
 		// are actually valid.
 		"--noremote_accept_cached",
+		// License existence test.
+		"//:license_exists_test",
+		// Hello World compilation targets.
 		"//examples/..."}
 	c := exec.CommandContext(ctx, bazeliskPath, args...)
 	c.Env = append(c.Env, fmt.Sprintf("USE_BAZEL_VERSION=%s", bazelVersion))
