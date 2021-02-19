@@ -17,7 +17,7 @@ These toolchain configs include:
 # rbe_configs_gen - CLI Tool to Generate Configs
 
 [rbe_configs_gen](https://github.com/bazelbuild/bazel-toolchains/blob/master/cmd/rbe_configs_gen/rbe_configs_gen.go) is the
-new CLI tool written in Go that can be used to generate toolchain configs for a given combination
+a CLI tool written in Go that can be used to generate toolchain configs for a given combination
 of Bazel release and docker image. The output of the tool are toolchain configs in one or more of
 the following formats:
 * Tarball
@@ -47,13 +47,13 @@ $ git clone https://github.com/bazelbuild/bazel-toolchains.git
 $ cd bazel-toolchains
 ```
 
-1. Run the following command:
+2. Run the following command:
 
 ```bash
 $ docker run --rm -v $PWD:/srcdir -w /srcdir golang:1.16 go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
 ```
 
-1. You should now be run `rbe_configs_gen` as follows:
+3. You should now be run `rbe_configs_gen` as follows:
 
 ```
 $ ./rbe_configs_gen --help
@@ -63,17 +63,27 @@ $ ./rbe_configs_gen --help
 
 1. Install [Go](https://golang.org/dl/) for your platform if necessary. Tested to work with Go 1.16.
 
-1. Clone this repository
+2. Clone this repository
 
 ```bash
 $ git clone https://github.com/bazelbuild/bazel-toolchains.git
 $ cd bazel-toolchains
 ```
 
-1. Build the rbe_configs_gen executable
+3. Build the rbe_configs_gen executable
 ```
 # Use -o rbe_configs_gen.exe on Windows
 $ go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
+```
+
+4. You should now be run `rbe_configs_gen` as follows:
+
+```
+# On Linux
+$ ./rbe_configs_gen --help
+
+# On Windows
+$ rbe_configs_gen.exe
 ```
 
 
@@ -143,9 +153,9 @@ do is replace all occurences of `@rbe_default//` in your [`.bazelrc` file](#baze
 
 If you extract the contents of a
 [generated toolchain configs tarball](#specific-bazel-version-and-output-directory) into the root of
-a Github repository or copy the generated configs with the configs relative path (i.e., the value
-specified to the flag `--output_config_path` when running `rbe_configs_gen`) set to `""` to a Github
-repository, github.com/example/configs-repo, include the following in your `WORKSPACE`:
+a Github repository to a Github repository `github.com/example/configs-repo` where this Github
+repository hosting the configs is different from the source repository where you'd like to use the
+configs, include the following in your `WORKSPACE`:
 
 ```python
 
