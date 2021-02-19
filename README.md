@@ -37,7 +37,7 @@ The rest of this section describes how to use the rbe_configs_gen tool.
 ### Building using Docker on Linux (Recommended)
 
 Use the [official Golang docker image](https://hub.docker.com/_/golang) to build the rbe_configs_gen
-binary using Go 1.15. This avoids having to install the Go toolchain locally but requires
+binary using Go 1.16. This avoids having to install the Go toolchain locally but requires
 [docker](https://docs.docker.com/get-docker/).
 
 1. Clone this repository and set it as the working directory:
@@ -50,7 +50,7 @@ $ cd bazel-toolchains
 1. Run the following command:
 
 ```bash
-$ docker run --rm -v $PWD:/srcdir -w /srcdir golang:1.15 go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
+$ docker run --rm -v $PWD:/srcdir -w /srcdir golang:1.16 go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
 ```
 
 1. You should now be run `rbe_configs_gen` as follows:
@@ -61,7 +61,7 @@ $ ./rbe_configs_gen --help
 
 ### Building Locally
 
-1. Install [Go](https://golang.org/dl/) for your platform if necessary. Tested to work with Go 1.15.
+1. Install [Go](https://golang.org/dl/) for your platform if necessary. Tested to work with Go 1.16.
 
 1. Clone this repository
 
@@ -185,13 +185,17 @@ TODO
 
 Pre-generated configs tarballs will be generated for every Bazel release starting with 4.0.0 & the
 latest available [Ubuntu 16.04 Clang + JDK](l.gcr.io/google/rbe-ubuntu16-04:latest) container and
-uploaded to GCS. However, these configs are provided as a convenience for users experimenting with
-Bazel & remote execution only without any SLOs or functionality guarantees. Further, there's no
-guarantees on how soon after a new release of Bazel or the Ubuntu 16.04 Clang + JDK, the
-corresponding configs will be available.
+uploaded to GCS.
 
-It's strongly recommended to generate and host your own toolchain configs by running the
-`rbe_config_gen` tool if you intend to use the generated configs in production.
+IMPORTANT: Ensure you read & agree with the terms of the `LICENSE` file included in the
+configs tarball before using pre-generated configs. Basically, never depend directly on any of the
+URLs mentioned below to download toolchain configs in production because they may break without
+warning. Pre-generated configs are only provided as a convenience for experimenting with configuring
+Bazel for remote builds. Further, there are no guarantees on how long after a new release of Bazel
+or the Ubuntu 16.04 container mentioned above the corresponding pre-generated configs will be
+available. It's strongly recommended to generate and host your own toolchain configs by running the
+`rbe_config_gen` tool and test the functionality and correctness of the configs yourself before
+using them in production.
 
 See [here](#bazelrc) for instructions on how to initialize your `.bazelrc` file.
 
