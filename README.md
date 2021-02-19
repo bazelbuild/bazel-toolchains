@@ -153,9 +153,9 @@ do is replace all occurences of `@rbe_default//` in your [`.bazelrc` file](#baze
 
 If you extract the contents of a
 [generated toolchain configs tarball](#specific-bazel-version-and-output-directory) into the root of
-a Github repository to a Github repository `github.com/example/configs-repo` where this Github
-repository hosting the configs is different from the source repository where you'd like to use the
-configs, include the following in your `WORKSPACE`:
+a Github repository e.g. `github.com/example/configs-repo` where this repository hosting the configs
+is different from the source repository where you'd like to use the configs, include the following
+in your `WORKSPACE`:
 
 ```python
 
@@ -196,7 +196,7 @@ on any property specified to the `exec_properties` attribute to a
 [platform](https://docs.bazel.build/versions/master/be/platform.html#platform) definition to the
 underlying remote execution system.
 
-If you're using RBE, continue reading to see how to easily specify custom execution properties.
+If you're using RBE, continue reading to see how to specify custom execution properties.
 
 First, in your `WORKSPACE` file, import the latest commit of this repository (replace the commit ID
 and sha256 digest with latest commit if necessary):
