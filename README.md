@@ -16,7 +16,7 @@ These toolchain configs include:
 
 # rbe_configs_gen - CLI Tool to Generate Configs
 
-[rbe_configs_gen](https://github.com/bazelbuild/bazel-toolchains/blob/master/cmd/rbe_configs_gen/rbe_configs_gen.go) is the
+[rbe_configs_gen](https://github.com/bazelbuild/bazel-toolchains/blob/master/cmd/rbe_configs_gen/rbe_configs_gen.go) is
 a CLI tool written in Go that can be used to generate toolchain configs for a given combination
 of Bazel release and docker image. The output of the tool are toolchain configs in one or more of
 the following formats:
@@ -53,7 +53,7 @@ $ cd bazel-toolchains
 $ docker run --rm -v $PWD:/srcdir -w /srcdir golang:1.16 go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
 ```
 
-3. You should now be run `rbe_configs_gen` as follows:
+3. Run `rbe_configs_gen` as follows to see the flags it accepts:
 
 ```
 $ ./rbe_configs_gen --help
@@ -76,7 +76,7 @@ $ cd bazel-toolchains
 $ go build -o rbe_configs_gen ./cmd/rbe_configs_gen/rbe_configs_gen.go
 ```
 
-4. You should now be run `rbe_configs_gen` as follows:
+4. Run `rbe_configs_gen` as follows to see the flags it accepts:
 
 ```
 # On Linux
