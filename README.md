@@ -137,7 +137,7 @@ If you [copied the generated configs](#specific-bazel-version-and-output-directo
 repository where the rest of your code lives, and assuming the configs were copied to the path
 `configs/path` (i.e., the value specified to the flag `--output_config_path` when running
 `rbe_configs_gen`) relative to the directory containing the Bazel `WORKSPACE` file, all you need to
-do is replace all occurences of `@rbe_default//` in your [`.bazelrc` file](#.bazelrc) with `//configs/path`.
+do is replace all occurences of `@rbe_default//` in your [`.bazelrc` file](#bazelrc) with `//configs/path`.
 
 ### Option 2: Remote Github Repository
 
@@ -193,7 +193,7 @@ corresponding configs will be available.
 It's strongly recommended to generate and host your own toolchain configs by running the
 `rbe_config_gen` tool if you intend to use the generated configs in production.
 
-See [here](#.bazelrc) for instructions on how to initialize your `.bazelrc` file.
+See [here](#bazelrc) for instructions on how to initialize your `.bazelrc` file.
 
 ## Latest Bazel and Latest Ubuntu 16.04 Container
 
