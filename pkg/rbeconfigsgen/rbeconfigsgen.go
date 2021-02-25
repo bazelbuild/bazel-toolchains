@@ -89,7 +89,7 @@ platform(
 )
 `))
 	// legacyJavaBuildTemplate is the Java toolchain config BUILD file template for Bazel versions
-	// <4.1.0 (tentative?).
+	// <5.0.0 (tentative?).
 	legacyJavaBuildTemplate = template.Must(template.New("javaBuild").Parse(buildHeader + `
 package(default_visibility = ["//visibility:public"])
 
@@ -101,7 +101,7 @@ java_runtime(
 `))
 
 	// javaBuildTemplate is the Java toolchain config BUILD file template for Bazel versions
-	// >=4.1.0 (tentative?).
+	// >=5.0.0 (tentative?).
 	javaBuildTemplate = template.Must(template.New("javaBuild").Parse(buildHeader + `
 load("@bazel_tools//tools/jdk:local_java_repository.bzl", "local_java_runtime")
 
@@ -527,15 +527,15 @@ func genCppConfigs(d *dockerRunner, o *Options, bazeliskPath string) (string, er
 
 // UsesLocalJavaRuntime returns whether the given bazel version string uses the local_java_runtime
 // rule for Java toolchains instead of java_runtime.
-// Bazel is expected to switch to local_java_runtime in Bazel 4.1.0. See:
+// Bazel is expected to switch to local_java_runtime in Bazel 5.0.0. See:
 // https://github.com/bazelbuild/bazel-toolchains/pull/926.
 func UsesLocalJavaRuntime(bazelVersion string) (bool, error) {
 	bv, err := semver.NewVersion(bazelVersion)
 	if err != nil {
 		return false, fmt.Errorf("unable to parse Bazel version %q as a semver: %w", bazelVersion, err)
 	}
-	// Returns if bv >= 4.1.0.
-	return !bv.LessThan(*semver.New("4.1.0")), nil
+	// Returns if bv >= 5.0.0.
+	return !bv.LessThan(*semver.New("5.0.0")), nil
 }
 
 // genJavaConfigs returns a BUILD file containing a Java toolchain rule definition that contains
