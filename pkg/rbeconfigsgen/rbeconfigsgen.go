@@ -29,6 +29,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
@@ -496,12 +497,29 @@ func genCppConfigs(d *dockerRunner, o *Options, bazeliskPath string) (string, er
 	// 2. Harden each link.
 	// 3. Archive the contents of the config output directory into a tarball.
 	// 4. Copy the tarball from the container to the local temp directory.
-	out, err := d.execCmd("find", cppConfigDir, "-type", "l")
+	var out string
+	if o.ExecOS == "windows" {
+		out, err = d.execCmd("cmd", "/r", "dir", filepath.Clean(cppConfigDir), "/a:l", "/b")
+	} else {
+		out, err = d.execCmd("find", cppConfigDir, "-type", "l")
+	}
 	if err != nil {
-		return "", fmt.Errorf("unable to list symlinks in the C++ config generation build output directory: %w", err)
+		errMsg := fmt.Sprintf("unable to list symlinks in the C++ config generation build output directory: ")
+		// Windows `dir` has a non-zero exit status if no files are found.
+		// Linux just doesn't return any files but has a zero exit.
+		switch o.ExecOS {
+		case "windows":
+			out = ""
+			log.Printf("Ignoring error indicating no symlinks were found in the Bazel output directory: %v", err)
+		default:
+			return "", fmt.Errorf("%s%w", errMsg, err)
+		}
 	}
 	symlinks := strings.Split(out, "\n")
 	for _, s := range symlinks {
+		if s == "" {
+			continue
+		}
 		resolvedPath, err := d.execCmd("readlink", s)
 		if err != nil {
 			return "", fmt.Errorf("unable to determine what the symlink %q in %q in the toolchain container points to: %w", s, cppConfigDir, err)
