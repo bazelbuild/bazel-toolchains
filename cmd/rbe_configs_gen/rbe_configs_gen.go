@@ -43,9 +43,10 @@ var (
 	outputManifest   = flag.String("output_manifest", "", "(Optional) Generate a JSON file with details about the generated configs.")
 
 	// Optional input arguments that affect config generation for either C++ or Java configs.
-	genCppConfigs  = flag.Bool("generate_cpp_configs", true, "(Optional) Generate C++ configs. Defaults to true.")
-	cppEnvJSON     = flag.String("cpp_env_json", "", "(Optional) JSON file containing a str -> str dict of environment variables to be set when generating C++ configs inside the toolchain container. This replaces any exec OS specific defaults that would usually be applied.")
-	genJavaConfigs = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
+	genCppConfigs      = flag.Bool("generate_cpp_configs", true, "(Optional) Generate C++ configs. Defaults to true.")
+	cppEnvJSON         = flag.String("cpp_env_json", "", "(Optional) JSON file containing a str -> str dict of environment variables to be set when generating C++ configs inside the toolchain container. This replaces any exec OS specific defaults that would usually be applied.")
+	cppToolchainTarget = flag.String("cpp_toolchain_target", "", "(Optional) Set the CPP toolchain target. When exec_os is linux, the default is cc-compiler-k8. When exec_os is windows, the default is cc-compiler-x64_windows.")
+	genJavaConfigs     = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
 
 	// Other misc arguments.
 	tempWorkDir = flag.String("temp_work_dir", "", "(Optional) Temporary directory to use to store intermediate files. Defaults to a temporary directory automatically allocated by the OS. The temporary working directory is deleted at the end unless --cleanup=false is specified.")
@@ -146,19 +147,20 @@ func main() {
 	}
 
 	o := rbeconfigsgen.Options{
-		BazelVersion:       *bazelVersion,
-		ToolchainContainer: *toolchainContainer,
-		ExecOS:             *execOS,
-		TargetOS:           *targetOS,
-		OutputTarball:      *outputTarball,
-		OutputSourceRoot:   *outputSrcRoot,
-		OutputConfigPath:   *outputConfigPath,
-		OutputManifest:     *outputManifest,
-		GenCPPConfigs:      *genCppConfigs,
-		CppGenEnvJSON:      *cppEnvJSON,
-		GenJavaConfigs:     *genJavaConfigs,
-		TempWorkDir:        *tempWorkDir,
-		Cleanup:            *cleanup,
+		BazelVersion:           *bazelVersion,
+		ToolchainContainer:     *toolchainContainer,
+		ExecOS:                 *execOS,
+		TargetOS:               *targetOS,
+		OutputTarball:          *outputTarball,
+		OutputSourceRoot:       *outputSrcRoot,
+		OutputConfigPath:       *outputConfigPath,
+		OutputManifest:         *outputManifest,
+		GenCPPConfigs:          *genCppConfigs,
+		CppGenEnvJSON:          *cppEnvJSON,
+		CPPToolchainTargetName: *cppToolchainTarget,
+		GenJavaConfigs:         *genJavaConfigs,
+		TempWorkDir:            *tempWorkDir,
+		Cleanup:                *cleanup,
 	}
 
 	result := true
