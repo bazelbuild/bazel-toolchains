@@ -19,6 +19,7 @@ package rbeconfigsgen
 import (
 	"fmt"
 	"log"
+	"path"
 	"strings"
 
 	"github.com/bazelbuild/bazelisk/core"
@@ -51,8 +52,8 @@ type Options struct {
 	// The manifest aims to be easily parseable by shell utilities like grep/sed.
 	OutputManifest string
 	// PlatformParams specify platform specific constraints used to generate a BUILD file with the
-	// toolchain & platform targets in the generated configs. It's recommended to use the defaults
-	// corresponding to the ExecOS.
+	// toolchain & platform targets in the generated configs. This is set to default values and not
+	// directly configurable.
 	PlatformParams *PlatformToolchainsTemplateParams
 
 	// C++ Config generation options.
@@ -79,6 +80,8 @@ type Options struct {
 	// command to generate C++ configs inside the toolchain container. Only one of CppGenEnv or
 	// CppGenEnvJSON can be specified.
 	CppGenEnvJSON string
+	// CPPToolchainTarget is the toolchain to be used by the cpp configs.
+	CPPToolchainTargetName string
 
 	// Java config generation options.
 	// GenJavaConfigs determines whether Java configs are generated.
@@ -94,11 +97,12 @@ type Options struct {
 // DefaultOptions are some option values that are populated as default values for certain fields
 // of "Options". See "Options" for explanation on what the fields mean.
 type DefaultOptions struct {
-	PlatformParams   PlatformToolchainsTemplateParams
-	CPPConfigTargets []string
-	CPPConfigRepo    string
-	CppBazelCmd      string
-	CppGenEnv        map[string]string
+	PlatformParams         PlatformToolchainsTemplateParams
+	CPPConfigTargets       []string
+	CPPConfigRepo          string
+	CppBazelCmd            string
+	CppGenEnv              map[string]string
+	CPPToolchainTargetName string
 }
 
 const (
@@ -144,6 +148,7 @@ var (
 				"CC":                  "clang",
 				"CC_TOOLCHAIN_NAME":   "linux_gnu_x86",
 			},
+			CPPToolchainTargetName: "cc-compiler-k8",
 		},
 		OSWindows: {
 			PlatformParams: PlatformToolchainsTemplateParams{
@@ -157,9 +162,10 @@ var (
 				},
 				OSFamily: "Windows",
 			},
-			CPPConfigTargets: []string{"@local_config_cc//..."},
-			CPPConfigRepo:    "local_config_cc",
-			CppBazelCmd:      "query",
+			CPPConfigTargets:       []string{"@local_config_cc//..."},
+			CPPConfigRepo:          "local_config_cc",
+			CppBazelCmd:            "query",
+			CPPToolchainTargetName: "cc-compiler-x64_windows",
 		},
 	}
 )
@@ -189,6 +195,9 @@ func (o *Options) ApplyDefaults(os string) error {
 	// to read environment variables from was specified.
 	if len(o.CppGenEnv) == 0 && len(o.CppGenEnvJSON) == 0 {
 		o.CppGenEnv = dopts.CppGenEnv
+	}
+	if o.CPPToolchainTargetName == "" {
+		o.CPPToolchainTargetName = dopts.CPPToolchainTargetName
 	}
 	return nil
 }
@@ -233,6 +242,9 @@ func (o *Options) Validate() error {
 	}
 	if o.OutputSourceRoot == "" && o.OutputConfigPath != "" {
 		return fmt.Errorf("OutputSourceRoot is required because OutputConfigPath was specified")
+	}
+	if path.IsAbs(o.OutputConfigPath) {
+		return fmt.Errorf("OutputConfigPath should be a relative path")
 	}
 	if o.PlatformParams == nil {
 		return fmt.Errorf("PlatformParams was not initialized")
