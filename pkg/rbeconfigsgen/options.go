@@ -110,12 +110,15 @@ const (
 	OSLinux = "linux"
 	// OSWindows represents Windows when selecting platforms.
 	OSWindows = "windows"
+	// OSWindows represents MacOS when selecting platforms.
+	OSMacos = "osx"
 )
 
 var (
 	validOS = []string{
 		OSLinux,
 		OSWindows,
+		OSMacos,
 	}
 
 	// DefaultExecOptions is a map from the ExecOS to default values for certain fields in Options
@@ -166,6 +169,30 @@ var (
 			CPPConfigRepo:          "local_config_cc",
 			CppBazelCmd:            "query",
 			CPPToolchainTargetName: "cc-compiler-x64_windows",
+		},
+		OSMacos: {
+			PlatformParams: PlatformToolchainsTemplateParams{
+				ExecConstraints: []string{
+					"@bazel_tools//platforms:osx",
+					"@bazel_tools//platforms:x86_64",
+					"@bazel_tools//tools/cpp:clang",
+				},
+				TargetConstraints: []string{
+					"@bazel_tools//platforms:osx",
+					"@bazel_tools//platforms:x86_64",
+				},
+				OSFamily: "MacOS",
+			},
+			CPPConfigTargets: []string{"@local_config_cc//...", "--", "-@local_config_cc//:osx_archs.bzl"},
+			CPPConfigRepo:    "local_config_cc",
+			CppBazelCmd:      "build",
+			CppGenEnv: map[string]string{
+				"ABI_VERSION":         "clang",
+				"BAZEL_COMPILER":      "clang",
+				"BAZEL_TARGET_CPU":    "k8",
+				"CC":                  "clang",
+			},
+			CPPToolchainTargetName: "cc-compiler-k8",
 		},
 	}
 )
@@ -222,7 +249,7 @@ func (o *Options) Validate() error {
 		}
 		o.BazelVersion = v
 	}
-	if o.ToolchainContainer == "" {
+	if o.ToolchainContainer == "" && (o.ExecOS == "linux" || o.ExecOS == "windows"){
 		return fmt.Errorf("ToolchainContainer was not specified")
 	}
 	if o.ExecOS == "" {
