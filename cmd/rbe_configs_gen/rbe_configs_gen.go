@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/bazelbuild/bazel-toolchains/pkg/options"
 	"log"
 	"os"
 
@@ -123,7 +124,7 @@ func initMonitoringClient(ctx context.Context) (*monitoring.Client, error) {
 
 // genConfigs is just a wrapper for the config generation code so that the caller can report
 // results if monitoring is enabled before exiting.
-func genConfigs(o rbeconfigsgen.Options) error {
+func genConfigs(o options.Options) error {
 	if err := o.ApplyDefaults(o.ExecOS); err != nil {
 		return fmt.Errorf("failed to apply default options for OS name %q specified to --exec_os: %w", *execOS, err)
 	}
@@ -146,7 +147,7 @@ func main() {
 		log.Fatalf("Failed to initialize monitoring: %v", err)
 	}
 
-	o := rbeconfigsgen.Options{
+	o := options.Options{
 		BazelVersion:           *bazelVersion,
 		ToolchainContainer:     *toolchainContainer,
 		ExecOS:                 *execOS,

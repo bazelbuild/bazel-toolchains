@@ -33,6 +33,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/bazelbuild/bazel-toolchains/pkg/options"
 	"io"
 	"log"
 	"net/http"
@@ -323,7 +324,7 @@ func validateRBEInstName(instName string) error {
 // downloadBazelisk downloads Bazelisk for Linux to the given directory and returns the path to the
 // downloaded Bazelisk executable.
 func downloadBazelisk(outputDir string) (string, error) {
-	bazeliskURL, bazeliskFile, err := rbeconfigsgen.BazeliskDownloadInfo(rbeconfigsgen.OSLinux)
+	bazeliskURL, bazeliskFile, err := rbeconfigsgen.BazeliskDownloadInfo(options.OSLinux)
 	if err != nil {
 		return "", fmt.Errorf("unable to determine URL to download Bazelisk from for Linux: %w", err)
 	}

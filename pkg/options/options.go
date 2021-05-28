@@ -14,7 +14,7 @@
 //
 // Package rbeconfigsgen contains utilities to generate C++ & Java Toolchain configs for Bazel to be
 // used to run RBE builds
-package rbeconfigsgen
+package options
 
 import (
 	"fmt"
@@ -25,6 +25,21 @@ import (
 	"github.com/bazelbuild/bazelisk/core"
 	"github.com/bazelbuild/bazelisk/repositories"
 )
+
+// PlatformToolchainsTemplateParams is used as the input to the toolchains & platform BUILD file
+// template 'platformsToolchainBuildTemplate'.
+type PlatformToolchainsTemplateParams struct {
+	ExecConstraints    []string
+	TargetConstraints  []string
+	CppToolchainTarget string
+	ToolchainContainer string
+	OSFamily           string
+}
+
+func (p PlatformToolchainsTemplateParams) String() string {
+	return fmt.Sprintf("{ExecConstraints: %v, TargetConstraints: %v, CppToolchainTarget: %q, ToolchainContainer: %q, OSFamily: %q}",
+		p.ExecConstraints, p.TargetConstraints, p.CppToolchainTarget, p.ToolchainContainer, p.OSFamily)
+}
 
 // Options are the options to tweak Bazel C++/Java Toolchain config generation.
 type Options struct {
@@ -189,10 +204,10 @@ var (
 			CppGenEnv: map[string]string{
 				"ABI_VERSION":         "clang",
 				"BAZEL_COMPILER":      "clang",
-				"BAZEL_TARGET_CPU":    "k8",
+				"BAZEL_TARGET_CPU":    "darwin_x86_64",
 				"CC":                  "clang",
 			},
-			CPPToolchainTargetName: "cc-compiler-k8",
+			CPPToolchainTargetName: "cc-compiler-darwin_x86_64",
 		},
 	}
 )

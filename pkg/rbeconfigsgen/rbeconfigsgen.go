@@ -22,12 +22,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/bazelbuild/bazel-toolchains/pkg/options"
+	"github.com/bazelbuild/bazel-toolchains/pkg/runner"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -131,21 +132,6 @@ local_java_runtime(
 	licenseBlob []byte
 )
 
-// PlatformToolchainsTemplateParams is used as the input to the toolchains & platform BUILD file
-// template 'platformsToolchainBuildTemplate'.
-type PlatformToolchainsTemplateParams struct {
-	ExecConstraints    []string
-	TargetConstraints  []string
-	CppToolchainTarget string
-	ToolchainContainer string
-	OSFamily           string
-}
-
-func (p PlatformToolchainsTemplateParams) String() string {
-	return fmt.Sprintf("{ExecConstraints: %v, TargetConstraints: %v, CppToolchainTarget: %q, ToolchainContainer: %q, OSFamily: %q}",
-		p.ExecConstraints, p.TargetConstraints, p.CppToolchainTarget, p.ToolchainContainer, p.OSFamily)
-}
-
 // javaBuildTemplateParams is used as the input to the Java toolchains BUILD file template.
 type javaBuildTemplateParams struct {
 	JavaHome    string
@@ -180,29 +166,15 @@ type outputConfigs struct {
 	javaBuild generatedFile
 }
 
-// runCmd runs an arbitrary command in a shell, logs the exact command that was run and returns
-// the generated stdout/stderr. If the command fails, the stdout/stderr is always logged.
-func runCmd(cmd string, args ...string) (string, error) {
-	cmdStr := fmt.Sprintf("'%s'", strings.Join(append([]string{cmd}, args...), " "))
-	log.Printf("Running: %s", cmdStr)
-	c := exec.Command(cmd, args...)
-	o, err := c.CombinedOutput()
-	if err != nil {
-		log.Printf("Output: %s", o)
-		return "", err
-	}
-	return string(o), nil
-}
-
 // BazeliskDownloadInfo returns the URL and name of the local downloaded file to use for downloading
 // bazelisk for the given OS.
 func BazeliskDownloadInfo(os string) (string, string, error) {
 	switch os {
-	case OSLinux:
+	case options.OSLinux:
 		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-linux-amd64", "bazelisk", nil
-	case OSWindows:
+	case options.OSWindows:
 		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-windows-amd64.exe", "bazelisk.exe", nil
-	case OSMacos:
+	case options.OSMacos:
 		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-darwin-amd64", "bazelisk", nil
 	}
 	return "", "", fmt.Errorf("invalid OS %q", os)
@@ -211,7 +183,7 @@ func BazeliskDownloadInfo(os string) (string, string, error) {
 // installBazelisk downloads bazelisk locally to the specified directory for the given os and copies
 // it into the running toolchain container.
 // Returns the path Bazelisk was installed to inside the running toolchain container.
-func installBazelisk(r runner, downloadDir, execOS string) (string, error) {
+func installBazelisk(r runner.Runner, downloadDir, execOS string) (string, error) {
 	url, filename, err := BazeliskDownloadInfo(execOS)
 	if err != nil {
 		return "", fmt.Errorf("unable to determine how to download Bazelisk for execution OS %q: %w", execOS, err)
@@ -231,13 +203,13 @@ func installBazelisk(r runner, downloadDir, execOS string) (string, error) {
 		return "", fmt.Errorf("error while downloading Bazelisk to %s: %w", localPath, err)
 	}
 
-	bazeliskRunnerPath := path.Join(r.getWorkdir(), filename)
+	bazeliskRunnerPath := path.Join(r.GetWorkdir(), filename)
 	log.Printf("Copying %s to %s", localPath, bazeliskRunnerPath)
-	if err := r.copyTo(localPath, bazeliskRunnerPath); err != nil {
+	if err := r.CopyTo(localPath, bazeliskRunnerPath); err != nil {
 		return "", fmt.Errorf("failed to copy the downloaded Bazelisk binary: %w", err)
 	}
 
-	if _, err := r.execCmd("chmod", "+x", bazeliskRunnerPath); err != nil {
+	if _, err := r.ExecCmd("chmod", "+x", bazeliskRunnerPath); err != nil {
 		return "", fmt.Errorf("failed to mark the Bazelisk binary as executable inside the container: %w", err)
 	}
 	return bazeliskRunnerPath, nil
@@ -245,7 +217,7 @@ func installBazelisk(r runner, downloadDir, execOS string) (string, error) {
 
 // appendCppEnv appends environment variables set in the C++ environment map as well as variables
 // specified in the C++ environment JSON file to the given environment as "key=value".
-func appendCppEnv(env map[string]string, o *Options) (map[string]string, error) {
+func appendCppEnv(env map[string]string, o *options.Options) (map[string]string, error) {
 	for k, v := range o.CppGenEnv {
 		env[k] = v
 	}
@@ -275,28 +247,28 @@ func appendCppEnv(env map[string]string, o *Options) (map[string]string, error) 
 // given docker runner according to the given options. bazeliskPath is the path to the bazelisk
 // binary inside the running toolchain container.
 // The return value is the path to the C++ configs tarball copied out of the toolchain container.
-func genCppConfigs(r runner, o *Options, bazeliskPath string) (string, error) {
+func genCppConfigs(r runner.Runner, o *options.Options, bazeliskPath string) (string, error) {
 	if !o.GenCPPConfigs {
 		return "", nil
 	}
 
 	// Change the working directory to a dedicated empty directory for C++ configs for each
 	// command we run in this function.
-	cppProjDir := path.Join(r.getWorkdir(), "cpp_configs_project")
-	if _, err := r.execCmd("mkdir", cppProjDir); err != nil {
+	cppProjDir := path.Join(r.GetWorkdir(), "cpp_configs_project")
+	if _, err := r.ExecCmd("mkdir", cppProjDir); err != nil {
 		return "", fmt.Errorf("failed to create empty directory %q inside the toolchain container: %w", cppProjDir, err)
 	}
-	oldWorkDir := r.getWorkdir()
-	r.setWorkdir(cppProjDir)
-	defer r.setWorkdir(oldWorkDir)
+	oldWorkDir := r.GetWorkdir()
+	r.SetWorkdir(cppProjDir)
+	defer r.SetWorkdir(oldWorkDir)
 
-	if _, err := r.execCmd("touch", "WORKSPACE", "BUILD.bazel"); err != nil {
+	if _, err := r.ExecCmd("touch", "WORKSPACE", "BUILD.bazel"); err != nil {
 		return "", fmt.Errorf("failed to create empty build & workspace files in the container to initialize a blank Bazel repository: %w", err)
 	}
 
 	// Backup the current environment & restore it before returning.
-	oldEnv := r.getAdditionalEnv()
-	defer r.setAdditionalEnv(oldEnv)
+	oldEnv := r.GetAdditionalEnv()
+	defer r.SetAdditionalEnv(oldEnv)
 
 	// Create a new environment for bazelisk commands used to specify the Bazel version to use to
 	// Bazelisk.
@@ -308,20 +280,20 @@ func genCppConfigs(r runner, o *Options, bazeliskPath string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to add additional environment variables to the C++ config generation docker command: %w", err)
 	}
-	r.setAdditionalEnv(generationEnv)
+	r.SetAdditionalEnv(generationEnv)
 
 	cmd := []string{
 		bazeliskPath,
 		o.CppBazelCmd,
 	}
 	cmd = append(cmd, o.CPPConfigTargets...)
-	if _, err := r.execCmd(cmd...); err != nil {
+	if _, err := r.ExecCmd(cmd...); err != nil {
 		return "", fmt.Errorf("Bazel was unable to build the C++ config generation targets in the toolchain container: %w", err)
 	}
 
 	// Restore the env needed for Bazelisk.
-	r.setAdditionalEnv(bazeliskEnv)
-	bazelOutputRoot, err := r.execCmd(bazeliskPath, "info", "output_base")
+	r.SetAdditionalEnv(bazeliskEnv)
+	bazelOutputRoot, err := r.ExecCmd(bazeliskPath, "info", "output_base")
 	if err != nil {
 		return "", fmt.Errorf("unable to determine the build output directory where Bazel produced C++ configs in the toolchain container: %w", err)
 	}
@@ -330,7 +302,7 @@ func genCppConfigs(r runner, o *Options, bazeliskPath string) (string, error) {
 
 	// Restore the old env now that we're done with Bazelisk commands. This is purely to reduce
 	// noise in the logs.
-	r.setAdditionalEnv(oldEnv)
+	r.SetAdditionalEnv(oldEnv)
 
 	// 1. Get a list of symlinks in the config output directory.
 	// 2. Harden each link.
@@ -338,9 +310,9 @@ func genCppConfigs(r runner, o *Options, bazeliskPath string) (string, error) {
 	// 4. Copy the tarball from the container to the local temp directory.
 	var out string
 	if o.ExecOS == "windows" {
-		out, err = r.execCmd("cmd", "/r", "dir", filepath.Clean(cppConfigDir), "/a:l", "/b")
+		out, err = r.ExecCmd("cmd", "/r", "dir", filepath.Clean(cppConfigDir), "/a:l", "/b")
 	} else {
-		out, err = r.execCmd("find", cppConfigDir, "-type", "l")
+		out, err = r.ExecCmd("find", cppConfigDir, "-type", "l")
 	}
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to list symlinks in the C++ config generation build output directory: ")
@@ -359,11 +331,11 @@ func genCppConfigs(r runner, o *Options, bazeliskPath string) (string, error) {
 		if s == "" {
 			continue
 		}
-		resolvedPath, err := r.execCmd("readlink", s)
+		resolvedPath, err := r.ExecCmd("readlink", s)
 		if err != nil {
 			return "", fmt.Errorf("unable to determine what the symlink %q in %q in the toolchain container points to: %w", s, cppConfigDir, err)
 		}
-		if _, err := r.execCmd("ln", "-f", resolvedPath, s); err != nil {
+		if _, err := r.ExecCmd("ln", "-f", resolvedPath, s); err != nil {
 			return "", fmt.Errorf("failed to harden symlink %q in %q pointing to %q: %w", s, cppConfigDir, resolvedPath, err)
 		}
 	}
@@ -372,10 +344,10 @@ func genCppConfigs(r runner, o *Options, bazeliskPath string) (string, error) {
 	// Explicitly use absolute paths to avoid confusion on what's the working directory.
 	outputTarballPath := path.Join(o.TempWorkDir, outputTarball)
 	outputTarballContainerPath := path.Join(cppProjDir, outputTarball)
-	if _, err := r.execCmd("tar", "-cf", outputTarballContainerPath, "-C", cppConfigDir, "."); err != nil {
+	if _, err := r.ExecCmd("tar", "-cf", outputTarballContainerPath, "-C", cppConfigDir, "."); err != nil {
 		return "", fmt.Errorf("failed to archive the C++ configs into a tarball inside the toolchain container: %w", err)
 	}
-	if err := r.copyFrom(outputTarballContainerPath, outputTarballPath); err != nil {
+	if err := r.CopyFrom(outputTarballContainerPath, outputTarballPath); err != nil {
 		return "", fmt.Errorf("failed to copy the C++ config tarball out of the toolchain container: %w", err)
 	}
 	log.Printf("Generated C++ configs at %s.", outputTarballPath)
@@ -401,12 +373,12 @@ func UsesLocalJavaRuntime(bazelVersion string) (bool, error) {
 // 1. Value of the JAVA_HOME environment variable set in the toolchain image.
 // 2. Value of the Java version as reported by the java binary installed in JAVA_HOME inside the
 //    running toolchain container.
-func genJavaConfigs(r runner, o *Options) (generatedFile, error) {
+func genJavaConfigs(r runner.Runner, o *options.Options) (generatedFile, error) {
 	if !o.GenJavaConfigs {
 		return generatedFile{}, nil
 	}
 	javaBin := "java"
-	imageEnv, err := r.getEnv()
+	imageEnv, err := r.GetEnv()
 	if err != nil {
 		return generatedFile{}, fmt.Errorf("unable to get the environment of the toolchain image to determine JAVA_HOME: %w", err)
 	}
@@ -419,7 +391,7 @@ func genJavaConfigs(r runner, o *Options) (generatedFile, error) {
 	// looking for in a more deterministic format. "-version" is just a placeholder so that the
 	// command doesn't error out. Although it will likely print the same version string but with
 	// some non-deterministic prefix.
-	out, err := r.execCmd(javaBin, "-XshowSettings:properties", "-version")
+	out, err := r.ExecCmd(javaBin, "-XshowSettings:properties", "-version")
 	if err != nil {
 		return generatedFile{}, fmt.Errorf("unable to determine the Java version installed in the toolchain container: %w", err)
 	}
@@ -467,7 +439,7 @@ func genJavaConfigs(r runner, o *Options) (generatedFile, error) {
 }
 
 // processTempDir creates a local temporary working directory to store intermediate files.
-func processTempDir(o *Options) error {
+func processTempDir(o *options.Options) error {
 	if o.TempWorkDir != "" {
 		s, err := os.Stat(o.TempWorkDir)
 		if err != nil {
@@ -486,7 +458,7 @@ func processTempDir(o *Options) error {
 	return nil
 }
 
-func genCppToolchainTarget(o *Options) string {
+func genCppToolchainTarget(o *options.Options) string {
 	if o.OutputConfigPath != "" {
 		return fmt.Sprintf("//%s/cc:%s", strings.ReplaceAll(o.OutputConfigPath, "\\", "/"), o.CPPToolchainTargetName)
 	}
@@ -495,7 +467,7 @@ func genCppToolchainTarget(o *Options) string {
 
 // genConfigBuild generates the contents of a BUILD file with a toolchain target pointing to the
 // C++ toolchain related rules generated by Bazel and a default platforms target.
-func genConfigBuild(o *Options) (generatedFile, error) {
+func genConfigBuild(o *options.Options) (generatedFile, error) {
 	if o.PlatformParams.CppToolchainTarget != "" {
 		return generatedFile{}, fmt.Errorf("<internal error> C++ toolchain target was already set")
 	}
@@ -583,7 +555,7 @@ func writeGeneratedFileToTarball(g generatedFile, outTar *tar.Writer) error {
 
 // assembleConfigTarball combines the C++/Java configs represented by 'oc' into a single output
 // tarball if requested in the given options.
-func assembleConfigTarball(o *Options, oc outputConfigs) error {
+func assembleConfigTarball(o *options.Options, oc outputConfigs) error {
 	out, err := os.Create(o.OutputTarball)
 	if err != nil {
 		return fmt.Errorf("unable to open output tarball %q for writing: %w", o.OutputTarball, err)
@@ -691,7 +663,7 @@ func writeGeneratedFile(outDir string, g generatedFile) error {
 // copyConfigsToOutputDir copies the C++/Java configs represented by 'oc' to an output directory
 // if one was specified in the given options. This involves extracting C++ configs and generating
 // BUILD files for the Java & toolchain entrypoint & platform targets.
-func copyConfigsToOutputDir(o *Options, oc outputConfigs) error {
+func copyConfigsToOutputDir(o *options.Options, oc outputConfigs) error {
 	configsRootDir := path.Join(o.OutputSourceRoot, o.OutputConfigPath)
 	if err := os.MkdirAll(configsRootDir, os.ModePerm); err != nil {
 		return fmt.Errorf("unable to create directory %q for writing configs: %w", configsRootDir, err)
@@ -721,7 +693,7 @@ func copyConfigsToOutputDir(o *Options, oc outputConfigs) error {
 // given options. This could involve:
 // 1. Generate a single output tarball.
 // 2. Copy all configs into a specified directory.
-func assembleConfigs(o *Options, oc outputConfigs) error {
+func assembleConfigs(o *options.Options, oc outputConfigs) error {
 	if len(o.OutputTarball) != 0 {
 		if err := assembleConfigTarball(o, oc); err != nil {
 			return fmt.Errorf("failed to assemble configs into a tarball: %w", err)
@@ -788,7 +760,7 @@ func ManifestFromJSONFile(filePath string) (*Manifest, error) {
 
 // createManifest writes a manifest JSON file containing information about the generated configs if
 // the given options specified a manifest file.
-func createManifest(o *Options) error {
+func createManifest(o *options.Options) error {
 	if len(o.OutputManifest) == 0 {
 		return nil
 	}
@@ -827,25 +799,25 @@ func createManifest(o *Options) error {
 //  - cc-  C++ configs as generated by Bazel's internal C++ toolchain detection logic.
 //  - config- Toolchain entrypoint target for cc_crosstool_top & the auto-generated platform target.
 //  - java- Java toolchain definition.
-func Run(o Options) error {
+func Run(o options.Options) error {
 	if err := processTempDir(&o); err != nil {
 		return fmt.Errorf("unable to initialize a local temporary working directory to store intermediate files: %w", err)
 	}
 
-	var r runner
+	var r runner.Runner
 	var err error
 
-	if o.ExecOS == OSMacos {
-		r, err = newHostRunner(o.Cleanup)
+	if o.ExecOS == options.OSMacos {
+		r, err = runner.NewHostRunner(o.Cleanup)
 	} else {
-		r, err = newDockerRunner(o.ToolchainContainer, o.Cleanup, o.ExecOS)
-		o.PlatformParams.ToolchainContainer = r.(*dockerRunner).resolvedImage
+		r, err = runner.NewDockerRunner(o.ToolchainContainer, o.Cleanup, o.ExecOS)
+		o.PlatformParams.ToolchainContainer = r.(*runner.DockerRunner).ResolvedImage
 	}
 
 	if err != nil {
 		return fmt.Errorf("failed to initialize a docker container: %w", err)
 	}
-	defer r.cleanup()
+	defer r.Cleanup()
 
 
 	bazeliskPath, err := installBazelisk(r, o.TempWorkDir, o.ExecOS)

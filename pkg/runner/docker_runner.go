@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package rbeconfigsgen
+package runner
 
 import (
 	"fmt"
+	"github.com/bazelbuild/bazel-toolchains/pkg/options"
 	"log"
 	"strings"
 )
@@ -24,20 +25,20 @@ import (
 // OS where the OS refers to the OS of the toolchain container.
 func workdir(os string) string {
 	switch os {
-	case OSLinux:
+	case options.OSLinux:
 		return "/workdir"
-	case OSWindows:
+	case options.OSWindows:
 		return "C:/workdir"
 	}
 	log.Fatalf("Invalid OS: %q", os)
 	return ""
 }
 
-// dockerRunner implements interface runner
-// dockerRunner allows starting a container for a given docker image and subsequently running
+// DockerRunner implements interface Runner
+// DockerRunner allows starting a container for a given docker image and subsequently running
 // arbitrary commands inside the container or extracting files from it.
-// dockerRunner uses the docker client to spin up & interact with containers.
-type dockerRunner struct {
+// DockerRunner uses the docker client to spin up & interact with containers.
+type DockerRunner struct {
 	// Input arguments.
 	// containerImage is the docker image to spin up as a running container. This could be a tagged
 	// or floating reference to a docker image but in a format acceptable to the docker client.
@@ -46,30 +47,30 @@ type dockerRunner struct {
 	stopContainer bool
 
 	// Parameters that affect how commands are executed inside the running toolchain container.
-	// These parameters can be changed between calls to the execCmd function.
+	// These parameters can be changed between calls to the ExecCmd function.
 
 	// workdir is the working directory to use to run commands inside the container.
 	workdir string
 	// additionalEnv is the environment variables to set when executing commands
 	additionalEnv map[string]string
 
-	// Populated by the runner.
+	// Populated by the Runner.
 	// dockerPath is the path to the docker client.
 	dockerPath string
 	// containerID is the ID of the running docker container.
 	containerID string
-	// resolvedImage is the container image referenced by its sha256 digest.
-	resolvedImage string
+	// ResolvedImage is the container image referenced by its sha256 digest.
+	ResolvedImage string
 }
 
-// newDockerRunner creates a new running container of the given containerImage. stopContainer
-// determines if the cleanup function on the dockerRunner will stop the running container when
+// NewDockerRunner creates a new running container of the given containerImage. stopContainer
+// determines if the Cleanup function on the DockerRunner will stop the running container when
 // called.
-func newDockerRunner(containerImage string, stopContainer bool, execOS string) (*dockerRunner, error) {
+func NewDockerRunner(containerImage string, stopContainer bool, execOS string) (*DockerRunner, error) {
 	if containerImage == "" {
 		return nil, fmt.Errorf("container image was not specified")
 	}
-	d := &dockerRunner{
+	d := &DockerRunner{
 		containerImage: containerImage,
 		stopContainer:  stopContainer,
 		dockerPath:     "docker",
@@ -83,9 +84,9 @@ func newDockerRunner(containerImage string, stopContainer bool, execOS string) (
 	}
 	resolvedImage = strings.TrimSpace(resolvedImage)
 	log.Printf("Resolved toolchain image %q to fully qualified reference %q.", d.containerImage, resolvedImage)
-	d.resolvedImage = resolvedImage
+	d.ResolvedImage = resolvedImage
 
-	cid, err := runCmd(d.dockerPath, "create", "--rm", d.resolvedImage, "sleep", "infinity")
+	cid, err := runCmd(d.dockerPath, "create", "--rm", d.ResolvedImage, "sleep", "infinity")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a container with the toolchain container image: %w", err)
 	}
@@ -94,21 +95,21 @@ func newDockerRunner(containerImage string, stopContainer bool, execOS string) (
 		return nil, fmt.Errorf("container ID %q extracted from the stdout of the container create command had unexpected length, got %d, want 64", cid, len(cid))
 	}
 	d.containerID = cid
-	log.Printf("Created container ID %v for toolchain container image %v.", d.containerID, d.resolvedImage)
+	log.Printf("Created container ID %v for toolchain container image %v.", d.containerID, d.ResolvedImage)
 	if _, err := runCmd(d.dockerPath, "start", d.containerID); err != nil {
 		return nil, fmt.Errorf("failed to run the toolchain container: %w", err)
 	}
-	if _, err := d.execCmd("mkdir", workdir(execOS)); err != nil {
-		d.cleanup()
+	if _, err := d.ExecCmd("mkdir", workdir(execOS)); err != nil {
+		d.Cleanup()
 		return nil, fmt.Errorf("failed to create workdir in toolchain container: %w", err)
 	}
-	d.setWorkdir(workdir(execOS))
+	d.SetWorkdir(workdir(execOS))
 	return d, nil
 }
 
 // execCmd runs the given command inside the docker container and returns the output with whitespace
 // trimmed from the edges.
-func (d *dockerRunner) execCmd(args ...string) (string, error) {
+func (d *DockerRunner) ExecCmd(args ...string) (string, error) {
 	a := []string{"exec"}
 	if d.workdir != "" {
 		a = append(a, "-w", d.workdir)
@@ -122,20 +123,20 @@ func (d *dockerRunner) execCmd(args ...string) (string, error) {
 	return strings.TrimSpace(o), err
 }
 
-// cleanup stops the running container if stopContainer was true when the dockerRunner was created.
-func (d *dockerRunner) cleanup() {
+// cleanup stops the running container if stopContainer was true when the DockerRunner was created.
+func (d *DockerRunner) Cleanup() {
 	if !d.stopContainer {
-		log.Printf("Not stopping container %v of image %v because the Cleanup option was set to false.", d.containerID, d.resolvedImage)
+		log.Printf("Not stopping container %v of image %v because the Cleanup option was set to false.", d.containerID, d.ResolvedImage)
 		return
 	}
 	if _, err := runCmd(d.dockerPath, "stop", "-t", "0", d.containerID); err != nil {
-		log.Printf("Failed to stop container %v of toolchain image %v but it's ok to ignore this error if config generation & extraction succeeded.", d.containerID, d.resolvedImage)
+		log.Printf("Failed to stop container %v of toolchain image %v but it's ok to ignore this error if config generation & extraction succeeded.", d.containerID, d.ResolvedImage)
 	}
 }
 
 // copyTo copies the local file at 'src' to the container where 'dst' is the path inside
 // the container. d.workdir has no impact on this function.
-func (d *dockerRunner) copyTo(src, dst string) error {
+func (d *DockerRunner) CopyTo(src, dst string) error {
 	if _, err := runCmd(d.dockerPath, "cp", src, fmt.Sprintf("%s:%s", d.containerID, dst)); err != nil {
 		return err
 	}
@@ -144,7 +145,7 @@ func (d *dockerRunner) copyTo(src, dst string) error {
 
 // copyFrom extracts the file at 'src' from inside the container and copies it to the path
 // 'dst' locally. d.workdir has no impact on this function.
-func (d *dockerRunner) copyFrom(src, dst string) error {
+func (d *DockerRunner) CopyFrom(src, dst string) error {
 	if _, err := runCmd(d.dockerPath, "cp", fmt.Sprintf("%s:%s", d.containerID, src), dst); err != nil {
 		return err
 	}
@@ -156,9 +157,9 @@ func (d *dockerRunner) copyFrom(src, dst string) error {
 // captured by the return value of this function.
 // The return value of this function is a map from env keys to their values. If the image config,
 // specifies the same env key multiple times, later values supercede earlier ones.
-func (d *dockerRunner) getEnv() (map[string]string, error) {
+func (d *DockerRunner) GetEnv() (map[string]string, error) {
 	result := make(map[string]string)
-	o, err := runCmd(d.dockerPath, "inspect", "-f", "{{range $i, $v := .Config.Env}}{{println $v}}{{end}}", d.resolvedImage)
+	o, err := runCmd(d.dockerPath, "inspect", "-f", "{{range $i, $v := .Config.Env}}{{println $v}}{{end}}", d.ResolvedImage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to inspect the docker image to get environment variables: %w", err)
 	}
@@ -185,18 +186,18 @@ func (d *dockerRunner) getEnv() (map[string]string, error) {
 	return result, nil
 }
 
-func (d *dockerRunner) getWorkdir() string {
+func (d *DockerRunner) GetWorkdir() string {
 	return d.workdir
 }
 
-func (d *dockerRunner) setWorkdir(wd string) {
+func (d *DockerRunner) SetWorkdir(wd string) {
 	d.workdir = wd
 }
 
-func (d *dockerRunner) getAdditionalEnv() map[string]string {
+func (d *DockerRunner) GetAdditionalEnv() map[string]string {
 	return d.additionalEnv
 }
 
-func (d *dockerRunner) setAdditionalEnv(env map[string]string) {
+func (d *DockerRunner) SetAdditionalEnv(env map[string]string) {
 	d.additionalEnv = env
 }

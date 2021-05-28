@@ -12,38 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package rbeconfigsgen
+package runner
 
 import "fmt"
 
-type runner interface {
-	// execCmd runs the given command in runner env and returns the output with whitespace
+type Runner interface {
+	// execCmd runs the given command in Runner env and returns the output with whitespace
 	// trimmed from the edges.
-	execCmd(args ...string) (string, error)
+	ExecCmd(args ...string) (string, error)
 
-	// copyTo copies the local file at 'src' to 'dst' in the runner env.
-	copyTo(src, dst string) error
+	// copyTo copies the local file at 'src' to 'dst' in the Runner env.
+	CopyTo(src, dst string) error
 
-	// copyFrom extracts the file at 'src' from runner and copies it to the path 'dst' locally.
-	copyFrom(src, dst string) error
+	// copyFrom extracts the file at 'src' from Runner and copies it to the path 'dst' locally.
+	CopyFrom(src, dst string) error
 
-	cleanup()
+	Cleanup()
 
-    // getEnv gets the shell environment values from the runner
-	getEnv() (map[string]string, error)
+    // getEnv gets the shell environment values from the Runner
+	GetEnv() (map[string]string, error)
 
-	setAdditionalEnv(map[string]string)
+	SetAdditionalEnv(map[string]string)
 
-	getAdditionalEnv() map[string]string
+	GetAdditionalEnv() map[string]string
 
-	getWorkdir() string
+	GetWorkdir() string
 
-	setWorkdir(string)
+	SetWorkdir(string)
 }
 
-func convertAdditionalEnv(r runner) []string {
+func convertAdditionalEnv(r Runner) []string {
 	addEnv := []string{}
-	for k, v := range r.getAdditionalEnv() {
+	for k, v := range r.GetAdditionalEnv() {
 		addEnv = append(addEnv, fmt.Sprintf("%s=%s", k, v))
 	}
 	return addEnv

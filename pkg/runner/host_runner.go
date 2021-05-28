@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package rbeconfigsgen
+package runner
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ import (
 	"strings"
 )
 
-// hostRunner implements interface runner
+// hostRunner implements interface Runner
 // hostRunner allows subsequently running
 // arbitrary commands directly on the host.
 type hostRunner struct {
@@ -39,13 +39,13 @@ type hostRunner struct {
 	additionalEnv map[string]string
 }
 
-// newHostRunner creates a new runner which executes commands directly in host environment. deleteWorkdir
-// determines if the cleanup function on the hostRunner will remove temporary directory
-func newHostRunner(deleteWorkdir bool) (*hostRunner, error) {
+// NewHostRunner creates a new Runner which executes commands directly in host environment. deleteWorkdir
+// determines if the Cleanup function on the hostRunner will remove temporary directory
+func NewHostRunner(deleteWorkdir bool) (*hostRunner, error) {
 
 	workdir, err := ioutil.TempDir("", "host_runner_")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create a temporary local directory for host runner: %w", err)
+		return nil, fmt.Errorf("failed to create a temporary local directory for host Runner: %w", err)
 	}
 
 	return &hostRunner{
@@ -57,7 +57,7 @@ func newHostRunner(deleteWorkdir bool) (*hostRunner, error) {
 
 // execCmd runs the given command and returns the output with whitespace
 // trimmed from the edges.
-func (r *hostRunner) execCmd(args ...string) (string, error) {
+func (r *hostRunner) ExecCmd(args ...string) (string, error) {
 	log.Printf("Running: %s", strings.Join(args, " "))
 	c := exec.Command(args[0], args[1:]...)
 	c.Env = append(os.Environ(), convertAdditionalEnv(r)...)
@@ -71,7 +71,7 @@ func (r *hostRunner) execCmd(args ...string) (string, error) {
 }
 
 // cleanup stops the running container if stopContainer was true when the hostRunner was created.
-func (r *hostRunner) cleanup() {
+func (r *hostRunner) Cleanup() {
 	if !r.deleteWorkdir {
 		log.Printf("Not deleting workdir %v because the Cleanup option was set to false.", r.globalWorkdir)
 		return
@@ -84,7 +84,7 @@ func (r *hostRunner) cleanup() {
 
 // copyTo copies the local file at 'src' to the container where 'dst' is the path inside
 // the container. d.workdir has no impact on this function.
-func (r *hostRunner) copyTo(src, dst string) error {
+func (r *hostRunner) CopyTo(src, dst string) error {
 	if _, err := runCmd("cp", src, dst); err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (r *hostRunner) copyTo(src, dst string) error {
 
 // copyFrom extracts the file at 'src' from inside the container and copies it to the path
 // 'dst' locally. d.workdir has no impact on this function.
-func (r *hostRunner) copyFrom(src, dst string) error {
+func (r *hostRunner) CopyFrom(src, dst string) error {
 	if _, err := runCmd("cp", src, dst); err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (r *hostRunner) copyFrom(src, dst string) error {
 // captured by the return value of this function.
 // The return value of this function is a map from env keys to their values. If the image config,
 // specifies the same env key multiple times, later values supercede earlier ones.
-func (r *hostRunner) getEnv() (map[string]string, error) {
+func (r *hostRunner) GetEnv() (map[string]string, error) {
 	result := make(map[string]string)
 	for _, s := range os.Environ() {
 		s = strings.TrimSpace(s)
@@ -129,18 +129,18 @@ func (r *hostRunner) getEnv() (map[string]string, error) {
 	return result, nil
 }
 
-func (r *hostRunner) getWorkdir() string {
+func (r *hostRunner) GetWorkdir() string {
 	return r.workdir
 }
 
-func (r *hostRunner) setWorkdir(wd string) {
+func (r *hostRunner) SetWorkdir(wd string) {
 	r.workdir = wd
 }
 
-func (r *hostRunner) getAdditionalEnv() map[string]string {
+func (r *hostRunner) GetAdditionalEnv() map[string]string {
 	return r.additionalEnv
 }
 
-func (r *hostRunner) setAdditionalEnv(env map[string]string) {
+func (r *hostRunner) SetAdditionalEnv(env map[string]string) {
 	r.additionalEnv = env
 }
