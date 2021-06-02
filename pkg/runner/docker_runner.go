@@ -109,15 +109,16 @@ func NewDockerRunner(containerImage string, stopContainer bool, execOS string) (
 
 // execCmd runs the given command inside the docker container and returns the output with whitespace
 // trimmed from the edges.
-func (d *DockerRunner) ExecCmd(args ...string) (string, error) {
+func (d *DockerRunner) ExecCmd(cmd string, args ...string) (string, error) {
 	a := []string{"exec"}
 	if d.workdir != "" {
 		a = append(a, "-w", d.workdir)
 	}
-	for _, e := range d.additionalEnv {
+	for _, e := range convertAdditionalEnv(d) {
 		a = append(a, "-e", e)
 	}
 	a = append(a, d.containerID)
+	a = append(a, cmd)
 	a = append(a, args...)
 	o, err := runCmd(d.dockerPath, a...)
 	return strings.TrimSpace(o), err

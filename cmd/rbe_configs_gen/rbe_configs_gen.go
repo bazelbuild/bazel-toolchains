@@ -30,11 +30,13 @@ import (
 
 var (
 	// Mandatory input arguments.
-	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest. Omit if configuration should be built locally")
-	execOS             = flag.String("exec_os", "", "The OS (linux|windows|osx) of the toolchain container image a.k.a, the execution platform in Bazel.")
-	targetOS           = flag.String("target_os", "", "The OS (linux|windows|osx) artifacts built will target a.k.a, the target platform in Bazel.")
+	execOS             = flag.String("exec_os", "", "The OS (linux|windows|macos) of the toolchain container image a.k.a, the execution platform in Bazel.")
+	targetOS           = flag.String("target_os", "", "The OS (linux|windows|macos) artifacts built will target a.k.a, the target platform in Bazel.")
 
 	// Optional input arguments.
+	runner = flag.String("runner", "", "Runner (host|docker) to use to generate configs. Defaults to docker for linux|windows, host for macos.")
+	// toolchainContainer is required option for runner=docker
+	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest. Required if runner=docker, ignored if runner=host.")
 	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
 
 	// Arguments affecting output generation not specific to either C++ or Java Configs.
@@ -63,7 +65,12 @@ var (
 // binary. Printing defaults are skipped as much as possible to avoid cluttering the output.
 func printFlags() {
 	log.Println("rbe_configs_gen.go \\")
-	log.Printf("--toolchain_container=%q \\", *toolchainContainer)
+	if len(*runner) != 0 {
+		log.Printf("--runner=%q \\", *runner)
+	}
+	if len(*toolchainContainer) != 0 {
+		log.Printf("--toolchain_container=%q \\", *toolchainContainer)
+	}
 	log.Printf("--exec_os=%q \\", *execOS)
 	log.Printf("--target_os=%q \\", *targetOS)
 	log.Printf("--bazel_version=%q \\", *bazelVersion)
@@ -149,6 +156,7 @@ func main() {
 
 	o := options.Options{
 		BazelVersion:           *bazelVersion,
+		Runner:                 *runner,
 		ToolchainContainer:     *toolchainContainer,
 		ExecOS:                 *execOS,
 		TargetOS:               *targetOS,

@@ -85,7 +85,7 @@ platform(
 {{ range .ExecConstraints }}        "{{ . }}",
 {{ end }}    ],
     exec_properties = {
-        "container-image": "docker://{{.ToolchainContainer}}",
+        {{ if .ToolchainContainer }}"container-image": "docker://{{.ToolchainContainer}}",{{ end }}
         "OSFamily": "{{.OSFamily}}",
     },
 )
@@ -282,12 +282,9 @@ func genCppConfigs(r runner.Runner, o *options.Options, bazeliskPath string) (st
 	}
 	r.SetAdditionalEnv(generationEnv)
 
-	cmd := []string{
-		bazeliskPath,
-		o.CppBazelCmd,
-	}
-	cmd = append(cmd, o.CPPConfigTargets...)
-	if _, err := r.ExecCmd(cmd...); err != nil {
+	args := []string{o.CppBazelCmd}
+	args = append(args, o.CPPConfigTargets...)
+	if _, err := r.ExecCmd(bazeliskPath, args...); err != nil {
 		return "", fmt.Errorf("Bazel was unable to build the C++ config generation targets in the toolchain container: %w", err)
 	}
 
@@ -807,22 +804,30 @@ func Run(o options.Options) error {
 	var r runner.Runner
 	var err error
 
-	if o.ExecOS == options.OSMacos {
+	switch o.Runner {
+	case "host":
 		r, err = runner.NewHostRunner(o.Cleanup)
-	} else {
+		// allow to specify toolchain container for host runner
+		// can be useful if host runner is in fact container
+		if o.ToolchainContainer != "" {
+			o.PlatformParams.ToolchainContainer = o.ToolchainContainer
+		}
+	case "docker":
 		r, err = runner.NewDockerRunner(o.ToolchainContainer, o.Cleanup, o.ExecOS)
 		o.PlatformParams.ToolchainContainer = r.(*runner.DockerRunner).ResolvedImage
+	default:
+		return fmt.Errorf("unknown runner: %s", o.Runner)
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to initialize a docker container: %w", err)
+		return fmt.Errorf("failed to initialize runner: %w", err)
 	}
 	defer r.Cleanup()
 
 
 	bazeliskPath, err := installBazelisk(r, o.TempWorkDir, o.ExecOS)
 	if err != nil {
-		return fmt.Errorf("failed to install Bazelisk into the toolchain container: %w", err)
+		return fmt.Errorf("failed to install Bazelisk into the runner: %w", err)
 	}
 
 	cppConfigsTarball, err := genCppConfigs(r, &o, bazeliskPath)
@@ -831,7 +836,7 @@ func Run(o options.Options) error {
 	}
 	javaBuild, err := genJavaConfigs(r, &o)
 	if err != nil {
-		return fmt.Errorf("failed to extract information about the installed JDK version in the toolchain container needed to generate Java configs: %w", err)
+		return fmt.Errorf("failed to extract information about the installed JDK version in the runner needed to generate Java configs: %w", err)
 	}
 
 	configBuild, err := genConfigBuild(&o)

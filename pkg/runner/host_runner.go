@@ -57,10 +57,11 @@ func NewHostRunner(deleteWorkdir bool) (*hostRunner, error) {
 
 // execCmd runs the given command and returns the output with whitespace
 // trimmed from the edges.
-func (r *hostRunner) ExecCmd(args ...string) (string, error) {
-	log.Printf("Running: %s", strings.Join(args, " "))
-	c := exec.Command(args[0], args[1:]...)
+func (r *hostRunner) ExecCmd(cmd string, args ...string) (string, error) {
+	log.Printf("Running: %s", strings.Join(append([]string{cmd}, args...), " "))
+	c := exec.Command(cmd, args...)
 	c.Env = append(os.Environ(), convertAdditionalEnv(r)...)
+	//log.Printf("Running env: %v", c.Env)
 	c.Dir = r.workdir
 	o, err := c.CombinedOutput()
 	if err != nil {
