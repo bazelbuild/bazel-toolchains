@@ -191,8 +191,9 @@ func (d *DockerRunner) GetWorkdir() string {
 	return d.workdir
 }
 
-func (d *DockerRunner) SetWorkdir(wd string) {
+func (d *DockerRunner) SetWorkdir(wd string) error {
 	d.workdir = wd
+	return nil
 }
 
 func (d *DockerRunner) GetAdditionalEnv() map[string]string {

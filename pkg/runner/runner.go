@@ -48,7 +48,7 @@ type Runner interface {
 	GetAdditionalEnv() map[string]string
 
 	// SetWorkdir sets new working directory for command execution inside the runner
-	SetWorkdir(string)
+	SetWorkdir(string) error
 
 	// GetWorkdir returns current workdir used for command execution.
 	GetWorkdir() string

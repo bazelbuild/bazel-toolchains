@@ -259,7 +259,9 @@ func genCppConfigs(r runner.Runner, o *options.Options, bazeliskPath string) (st
 		return "", fmt.Errorf("failed to create empty directory %q inside the toolchain container: %w", cppProjDir, err)
 	}
 	oldWorkDir := r.GetWorkdir()
-	r.SetWorkdir(cppProjDir)
+	if err := r.SetWorkdir(cppProjDir); err != nil {
+		return "", fmt.Errorf("failed to set working directory %q: %w", cppProjDir, err)
+	}
 	defer r.SetWorkdir(oldWorkDir)
 
 	if _, err := r.ExecCmd("touch", "WORKSPACE", "BUILD.bazel"); err != nil {

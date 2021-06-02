@@ -134,8 +134,12 @@ func (r *hostRunner) GetWorkdir() string {
 	return r.workdir
 }
 
-func (r *hostRunner) SetWorkdir(wd string) {
+func (r *hostRunner) SetWorkdir(wd string) error {
+	if !strings.HasPrefix(wd, r.globalWorkdir) {
+		return fmt.Errorf("refusing to set working directory %s: host runner allows workdirs only in parent temporary directory %s", wd, r.globalWorkdir)
+	}
 	r.workdir = wd
+	return nil
 }
 
 func (r *hostRunner) GetAdditionalEnv() map[string]string {
