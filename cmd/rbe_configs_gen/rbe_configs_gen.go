@@ -36,7 +36,7 @@ var (
 	// Optional input arguments.
 	runner = flag.String("runner", "", "Runner (host|docker) to use to generate configs. Defaults to docker for linux|windows, host for osx.")
 	// toolchainContainer is required option for runner=docker
-	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest. Required if runner=docker, ignored if runner=host.")
+	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest. Required if runner=docker.")
 	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
 
 	// Arguments affecting output generation not specific to either C++ or Java Configs.

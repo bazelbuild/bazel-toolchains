@@ -39,8 +39,8 @@ type hostRunner struct {
 	additionalEnv map[string]string
 }
 
-// NewHostRunner creates a new Runner which executes commands directly in host environment. deleteWorkdir
-// determines if the Cleanup function on the hostRunner will remove temporary directory
+// NewHostRunner creates a new Runner which executes commands directly on the host where rbe_configs_gen runs.
+// deleteWorkdir determines if the Cleanup function of the hostRunner will remove temporary directory
 func NewHostRunner(deleteWorkdir bool) (*hostRunner, error) {
 
 	workdir, err := ioutil.TempDir("", "host_runner_")
@@ -55,7 +55,7 @@ func NewHostRunner(deleteWorkdir bool) (*hostRunner, error) {
 	}, nil
 }
 
-// execCmd runs the given command and returns the output with whitespace
+// ExecCmd runs the given command and returns the output with whitespace
 // trimmed from the edges.
 func (r *hostRunner) ExecCmd(cmd string, args ...string) (string, error) {
 	log.Printf("Running: %s", strings.Join(append([]string{cmd}, args...), " "))
@@ -71,7 +71,7 @@ func (r *hostRunner) ExecCmd(cmd string, args ...string) (string, error) {
 	return strings.TrimSpace(string(o)), err
 }
 
-// cleanup stops the running container if stopContainer was true when the hostRunner was created.
+// Cleanup deletes runner temporary files if deleteWorkdir was true when the hostRunner was created.
 func (r *hostRunner) Cleanup() {
 	if !r.deleteWorkdir {
 		log.Printf("Not deleting workdir %v because the Cleanup option was set to false.", r.globalWorkdir)
@@ -83,8 +83,8 @@ func (r *hostRunner) Cleanup() {
 	}
 }
 
-// copyTo copies the local file at 'src' to the container where 'dst' is the path inside
-// the container. d.workdir has no impact on this function.
+// CopyTo copies the local file at 'src' to 'dst' on the host
+// CopyTo works the same way as CopyFrom for the host runner
 func (r *hostRunner) CopyTo(src, dst string) error {
 	if _, err := runCmd("cp", src, dst); err != nil {
 		return err
@@ -92,8 +92,8 @@ func (r *hostRunner) CopyTo(src, dst string) error {
 	return nil
 }
 
-// copyFrom extracts the file at 'src' from inside the container and copies it to the path
-// 'dst' locally. d.workdir has no impact on this function.
+// CopyFrom copies the local file at 'src' to 'dst' on the host
+// CopyFrom works the same way as CopyTo for the host runner
 func (r *hostRunner) CopyFrom(src, dst string) error {
 	if _, err := runCmd("cp", src, dst); err != nil {
 		return err
@@ -101,11 +101,10 @@ func (r *hostRunner) CopyFrom(src, dst string) error {
 	return nil
 }
 
-// getEnv gets the shell environment values from the toolchain container as determined by the
-// image config. Env value set or changed by running commands after starting the container aren't
+// GetEnv gets the shell environment values from the host.
+// Env values set or changed by running commands inside the runner aren't
 // captured by the return value of this function.
-// The return value of this function is a map from env keys to their values. If the image config,
-// specifies the same env key multiple times, later values supercede earlier ones.
+// The return value of this function is a map from env keys to their values.
 func (r *hostRunner) GetEnv() (map[string]string, error) {
 	result := make(map[string]string)
 	for _, s := range os.Environ() {

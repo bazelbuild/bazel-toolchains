@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Package rbeconfigsgen contains utilities to generate C++ & Java Toolchain configs for Bazel to be
-// used to run RBE builds
+// Package options describes cli options for rbe_configs_gen
 package options
 
 import (
@@ -211,6 +210,7 @@ var (
 				"BAZEL_COMPILER":      "clang",
 				"BAZEL_TARGET_CPU":    "darwin_x86_64",
 				"CC":                  "clang",
+				"CC_TOOLCHAIN_NAME":   "darwin_x86_64",
 			},
 			CPPToolchainTargetName: "cc-compiler-darwin_x86_64",
 		},
