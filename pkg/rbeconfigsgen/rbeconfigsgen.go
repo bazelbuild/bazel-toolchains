@@ -716,6 +716,9 @@ func copyCppConfigsToOutputDir(outDir string, cppConfigsTarball string) error {
 		}
 		switch h.Typeflag {
 		case tar.TypeReg:
+			if strings.HasSuffix(h.Name, "WORKSPACE") {
+				break
+			}
 			filePath := path.Join(outDir, h.Name)
 			dirPath := path.Dir(filePath)
 			if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
