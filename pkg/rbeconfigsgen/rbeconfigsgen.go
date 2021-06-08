@@ -442,7 +442,8 @@ func genCppConfigs(r runner.Runner, o *options.Options, bazeliskPath string) (st
 	// Explicitly use absolute paths to avoid confusion on what's the working directory.
 	outputTarballPath := path.Join(o.TempWorkDir, outputTarball)
 	outputTarballRunnerPath := path.Join(cppProjDir, outputTarball)
-	if _, err := r.ExecCmd("tar", "-cf", outputTarballRunnerPath, "-C", cppConfigDir, "."); err != nil {
+	if _, err := r.ExecCmd("tar","-cf", outputTarballRunnerPath, "-C", cppConfigDir,
+		"--exclude", "WORKSPACE", "."); err != nil {
 		return "", fmt.Errorf("failed to archive the C++ configs into a tarball inside the toolchain container: %w", err)
 	}
 	if err := r.CopyFrom(outputTarballRunnerPath, outputTarballPath); err != nil {
