@@ -310,7 +310,7 @@ http_archive(
     # Change the sha256 digest to the value of the `configs_tarball_digest` in the manifest you
     # got when you ran the curl command above.
     sha256 = "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
-    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/rbe-ubuntu1604/latest/rbe_default.json"],
+    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/rbe-ubuntu1604/latest/rbe_default.tar"],
 )
 ```
 
@@ -349,7 +349,7 @@ http_archive(
     sha256 = "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
     # Change "bazel_4.0.0" in the URL below with whatever "bazel_<version>" you downloaded the
     # manifest for in the previous step.
-    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/bazel_4.0.0/rbe-ubuntu1604/latest/rbe_default.json"],
+    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/bazel_4.0.0/rbe-ubuntu1604/latest/rbe_default.tar"],
 )
 ```
 
