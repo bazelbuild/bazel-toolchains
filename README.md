@@ -263,7 +263,7 @@ build:remote --platforms=//:custom_platform
 # Pre-generated Configs
 
 Pre-generated configs tarballs will be generated for every Bazel release starting with 4.0.0 & the
-latest available [Ubuntu 16.04 Clang + JDK](l.gcr.io/google/rbe-ubuntu16-04:latest) container and
+latest available [Ubuntu 16.04 Clang + JDK](https://l.gcr.io/google/rbe-ubuntu16-04:latest) container and
 uploaded to GCS.
 
 **IMPORTANT**: Ensure you read & agree with the terms of the `LICENSE` file included in the
