@@ -31,6 +31,9 @@ type Options struct {
 	// BazelVersion is the version of Bazel to generate configs for. If unset, the latest Bazel
 	// version is automatically populated into this field when Validate() is called.
 	BazelVersion string
+	// BazelPath is the path within the container where Bazel is preinstalled. If unspecified,
+	// Bazelisk will be downloaded and installed.
+	BazelPath string
 	// ToolchainContainer is the docker image of the toolchain container to generate configs for.
 	ToolchainContainer string
 	// ExecOS is the OS of the toolchain container image or the OS in which the build actions will

@@ -35,6 +35,7 @@ var (
 
 	// Optional input arguments.
 	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
+	bazelPath = flag.String("bazel_path", "", "(Optional) Path to preinstalled Bazel within the container. If unspecified, Bazelisk will be downloaded and installed.")
 
 	// Arguments affecting output generation not specific to either C++ or Java Configs.
 	outputTarball    = flag.String("output_tarball", "", "(Optional) Path where a tarball with the generated configs will be created.")
@@ -66,6 +67,9 @@ func printFlags() {
 	log.Printf("--exec_os=%q \\", *execOS)
 	log.Printf("--target_os=%q \\", *targetOS)
 	log.Printf("--bazel_version=%q \\", *bazelVersion)
+	if len(*bazelPath) != 0 {
+		log.Printf("--bazel_path=%q \\", *bazelPath)
+	}
 	if len(*outputTarball) != 0 {
 		log.Printf("--output_tarball=%q \\", *outputTarball)
 	}
@@ -148,6 +152,7 @@ func main() {
 
 	o := rbeconfigsgen.Options{
 		BazelVersion:           *bazelVersion,
+		BazelPath:              *bazelPath,
 		ToolchainContainer:     *toolchainContainer,
 		ExecOS:                 *execOS,
 		TargetOS:               *targetOS,

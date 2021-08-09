@@ -429,10 +429,10 @@ func appendCppEnv(env []string, o *Options) ([]string, error) {
 }
 
 // genCppConfigs generates C++ configs inside the running toolchain container represented by the
-// given docker runner according to the given options. bazeliskPath is the path to the bazelisk
+// given docker runner according to the given options. bazelPath is the path to the Bazel
 // binary inside the running toolchain container.
 // The return value is the path to the C++ configs tarball copied out of the toolchain container.
-func genCppConfigs(d *dockerRunner, o *Options, bazeliskPath string) (string, error) {
+func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error) {
 	if !o.GenCPPConfigs {
 		return "", nil
 	}
@@ -472,7 +472,7 @@ func genCppConfigs(d *dockerRunner, o *Options, bazeliskPath string) (string, er
 	d.env = generationEnv
 
 	cmd := []string{
-		bazeliskPath,
+		bazelPath,
 		o.CppBazelCmd,
 	}
 	cmd = append(cmd, o.CPPConfigTargets...)
@@ -482,7 +482,7 @@ func genCppConfigs(d *dockerRunner, o *Options, bazeliskPath string) (string, er
 
 	// Restore the env needed for Bazelisk.
 	d.env = bazeliskEnv
-	bazelOutputRoot, err := d.execCmd(bazeliskPath, "info", "output_base")
+	bazelOutputRoot, err := d.execCmd(bazelPath, "info", "output_base")
 	if err != nil {
 		return "", fmt.Errorf("unable to determine the build output directory where Bazel produced C++ configs in the toolchain container: %w", err)
 	}
@@ -992,12 +992,15 @@ func Run(o Options) error {
 	}
 	d.workdir = workdir(o.ExecOS)
 
-	bazeliskPath, err := installBazelisk(d, o.TempWorkDir, o.ExecOS)
-	if err != nil {
-		return fmt.Errorf("failed to install Bazelisk into the toolchain container: %w", err)
+	bazelPath := o.BazelPath
+	if bazelPath == "" {
+		bazelPath, err = installBazelisk(d, o.TempWorkDir, o.ExecOS)
+		if err != nil {
+			return fmt.Errorf("failed to install Bazelisk into the toolchain container: %w", err)
+		}
 	}
 
-	cppConfigsTarball, err := genCppConfigs(d, &o, bazeliskPath)
+	cppConfigsTarball, err := genCppConfigs(d, &o, bazelPath)
 	if err != nil {
 		return fmt.Errorf("failed to generate C++ configs: %w", err)
 	}
