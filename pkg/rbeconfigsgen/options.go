@@ -195,8 +195,13 @@ func (o *Options) ApplyDefaults(os string) error {
 	if !ok {
 		return fmt.Errorf("got unknown OS %q, want one of %s", os, strings.Join(validOS, ", "))
 	}
-	o.PlatformParams = new(PlatformToolchainsTemplateParams)
-	*o.PlatformParams = dopts.PlatformParams
+
+	if len(o.PlatformParams.ExecConstraints) == 0 {
+		o.PlatformParams.ExecConstraints = dopts.PlatformParams.ExecConstraints
+	}
+	o.PlatformParams.TargetConstraints = dopts.PlatformParams.TargetConstraints
+	o.PlatformParams.OSFamily = dopts.PlatformParams.OSFamily
+
 	o.CPPConfigTargets = dopts.CPPConfigTargets
 	o.CPPConfigRepo = dopts.CPPConfigRepo
 	o.CppBazelCmd = dopts.CppBazelCmd
