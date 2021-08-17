@@ -241,7 +241,7 @@ platform(
 See [here](https://github.com/bazelbuild/bazel-toolchains/blob/dac71231098d891e5c4b74a2078fe9343feef510/rules/exec_properties/exec_properties.bzl#L143)
 for a list of parameters accepted by `create_rbe_exec_properties_dict`.
 
-Finally, in your [`.bazelrc`][#bazelrc] file, replace all options specifying a platform target with
+Finally, in your `.bazelrc` file, replace all options specifying a platform target with
 the above custom platform target instead. So for example, if your `.bazelrc` previously looked like
 
 ```bash
