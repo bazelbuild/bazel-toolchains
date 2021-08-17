@@ -196,6 +196,10 @@ func (o *Options) ApplyDefaults(os string) error {
 		return fmt.Errorf("got unknown OS %q, want one of %s", os, strings.Join(validOS, ", "))
 	}
 
+	if o.PlatformParams == nil {
+		o.PlatformParams = new(PlatformToolchainsTemplateParams)
+	}
+
 	if len(o.PlatformParams.ExecConstraints) == 0 {
 		o.PlatformParams.ExecConstraints = dopts.PlatformParams.ExecConstraints
 	}
