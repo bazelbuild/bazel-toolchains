@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/bazelbuild/bazel-toolchains/pkg/options"
 	"log"
 	"os"
 
@@ -29,11 +30,13 @@ import (
 
 var (
 	// Mandatory input arguments.
-	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest")
-	execOS             = flag.String("exec_os", "", "The OS (linux|windows) of the toolchain container image a.k.a, the execution platform in Bazel.")
-	targetOS           = flag.String("target_os", "", "The OS (linux|windows) artifacts built will target a.k.a, the target platform in Bazel.")
+	execOS             = flag.String("exec_os", "", "The OS (linux|windows|osx) of the toolchain container image a.k.a, the execution platform in Bazel.")
+	targetOS           = flag.String("target_os", "", "The OS (linux|windows|osx) artifacts built will target a.k.a, the target platform in Bazel.")
 
 	// Optional input arguments.
+	runner = flag.String("runner", "", "Runner (host|docker) to use to generate configs. Defaults to docker for linux|windows, host for osx.")
+	// toolchainContainer is required option for runner=docker
+	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest. Required if runner=docker.")
 	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
 
 	// Arguments affecting output generation not specific to either C++ or Java Configs.
@@ -62,7 +65,12 @@ var (
 // binary. Printing defaults are skipped as much as possible to avoid cluttering the output.
 func printFlags() {
 	log.Println("rbe_configs_gen.go \\")
-	log.Printf("--toolchain_container=%q \\", *toolchainContainer)
+	if len(*runner) != 0 {
+		log.Printf("--runner=%q \\", *runner)
+	}
+	if len(*toolchainContainer) != 0 {
+		log.Printf("--toolchain_container=%q \\", *toolchainContainer)
+	}
 	log.Printf("--exec_os=%q \\", *execOS)
 	log.Printf("--target_os=%q \\", *targetOS)
 	log.Printf("--bazel_version=%q \\", *bazelVersion)
@@ -123,7 +131,7 @@ func initMonitoringClient(ctx context.Context) (*monitoring.Client, error) {
 
 // genConfigs is just a wrapper for the config generation code so that the caller can report
 // results if monitoring is enabled before exiting.
-func genConfigs(o rbeconfigsgen.Options) error {
+func genConfigs(o options.Options) error {
 	if err := o.ApplyDefaults(o.ExecOS); err != nil {
 		return fmt.Errorf("failed to apply default options for OS name %q specified to --exec_os: %w", *execOS, err)
 	}
@@ -146,8 +154,9 @@ func main() {
 		log.Fatalf("Failed to initialize monitoring: %v", err)
 	}
 
-	o := rbeconfigsgen.Options{
+	o := options.Options{
 		BazelVersion:           *bazelVersion,
+		Runner:                 *runner,
 		ToolchainContainer:     *toolchainContainer,
 		ExecOS:                 *execOS,
 		TargetOS:               *targetOS,

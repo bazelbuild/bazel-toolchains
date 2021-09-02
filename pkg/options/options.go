@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Package rbeconfigsgen contains utilities to generate C++ & Java Toolchain configs for Bazel to be
-// used to run RBE builds
-package rbeconfigsgen
+// Package options describes cli options for rbe_configs_gen
+package options
 
 import (
 	"fmt"
@@ -25,6 +24,21 @@ import (
 	"github.com/bazelbuild/bazelisk/core"
 	"github.com/bazelbuild/bazelisk/repositories"
 )
+
+// PlatformToolchainsTemplateParams is used as the input to the toolchains & platform BUILD file
+// template 'platformsToolchainBuildTemplate'.
+type PlatformToolchainsTemplateParams struct {
+	ExecConstraints    []string
+	TargetConstraints  []string
+	CppToolchainTarget string
+	ToolchainContainer string
+	OSFamily           string
+}
+
+func (p PlatformToolchainsTemplateParams) String() string {
+	return fmt.Sprintf("{ExecConstraints: %v, TargetConstraints: %v, CppToolchainTarget: %q, ToolchainContainer: %q, OSFamily: %q}",
+		p.ExecConstraints, p.TargetConstraints, p.CppToolchainTarget, p.ToolchainContainer, p.OSFamily)
+}
 
 // Options are the options to tweak Bazel C++/Java Toolchain config generation.
 type Options struct {
@@ -39,6 +53,9 @@ type Options struct {
 	// TargetOS is the OS to be used as the target platform in the generated platform rule. This
 	// is the OS that artifacts built by Bazel will be executed on.
 	TargetOS string
+	// Runner is a name of the runner to use for generating toolchain configuration.
+	// Allowed values are: docker (default), host
+	Runner string
 	// OutputTarball is the path at with a tarball will be generated containing the C++/Java
 	// configs.
 	OutputTarball string
@@ -110,12 +127,15 @@ const (
 	OSLinux = "linux"
 	// OSWindows represents Windows when selecting platforms.
 	OSWindows = "windows"
+	// OSMacos represents MacOS when selecting platforms.
+	OSMacos = "osx"
 )
 
 var (
 	validOS = []string{
 		OSLinux,
 		OSWindows,
+		OSMacos,
 	}
 
 	// DefaultExecOptions is a map from the ExecOS to default values for certain fields in Options
@@ -167,6 +187,33 @@ var (
 			CppBazelCmd:            "query",
 			CPPToolchainTargetName: "cc-compiler-x64_windows",
 		},
+		OSMacos: {
+			PlatformParams: PlatformToolchainsTemplateParams{
+				ExecConstraints: []string{
+					"@bazel_tools//platforms:osx",
+					"@bazel_tools//platforms:x86_64",
+					"@bazel_tools//tools/cpp:clang",
+				},
+				TargetConstraints: []string{
+					"@bazel_tools//platforms:osx",
+					//"@bazel_tools//platforms:x86_64",
+				},
+				OSFamily: "MacOS",
+			},
+			// excluding osx_archs.bzl because of issue
+			// described here https://github.com/bazelbuild/bazel/pull/13528
+			CPPConfigTargets: []string{"@local_config_cc//...", "--", "-@local_config_cc//:osx_archs.bzl"},
+			CPPConfigRepo:    "local_config_cc",
+			CppBazelCmd:      "build",
+			CppGenEnv: map[string]string{
+				"ABI_VERSION":         "clang",
+				"BAZEL_COMPILER":      "clang",
+				"BAZEL_TARGET_CPU":    "darwin_x86_64",
+				"CC":                  "clang",
+				"CC_TOOLCHAIN_NAME":   "darwin_x86_64",
+			},
+			CPPToolchainTargetName: "cc-compiler-darwin_x86_64",
+		},
 	}
 )
 
@@ -182,6 +229,14 @@ func strListContains(l []string, s string) bool {
 // ApplyDefaults applies platform specific default values to the given options for the given
 // OS.
 func (o *Options) ApplyDefaults(os string) error {
+	if o.Runner == "" {
+		switch o.ExecOS {
+		case OSMacos:
+			o.Runner = "host"
+		case OSLinux, OSWindows:
+			o.Runner = "docker"
+		}
+	}
 	dopts, ok := DefaultExecOptions[os]
 	if !ok {
 		return fmt.Errorf("got unknown OS %q, want one of %s", os, strings.Join(validOS, ", "))
@@ -222,14 +277,17 @@ func (o *Options) Validate() error {
 		}
 		o.BazelVersion = v
 	}
-	if o.ToolchainContainer == "" {
-		return fmt.Errorf("ToolchainContainer was not specified")
-	}
 	if o.ExecOS == "" {
 		return fmt.Errorf("ExecOS was not specified")
 	}
 	if !strListContains(validOS, o.ExecOS) {
 		return fmt.Errorf("invalid exec_os, got %q, want one of %s", o.ExecOS, strings.Join(validOS, ", "))
+	}
+	if o.Runner == "" {
+		return fmt.Errorf("Runner wasn't specified")
+	}
+	if o.ToolchainContainer == "" && (o.Runner == "docker"){
+		return fmt.Errorf("ToolchainContainer was not specified")
 	}
 	if o.TargetOS == "" {
 		return fmt.Errorf("TargetOS was not specified")
@@ -263,6 +321,7 @@ func (o *Options) Validate() error {
 	}
 	log.Printf("rbeconfigsgen.Options:")
 	log.Printf("BazelVersion=%q", o.BazelVersion)
+	log.Printf("Runner=%q", o.Runner)
 	log.Printf("ToolchainContainer=%q", o.ToolchainContainer)
 	log.Printf("ExecOS=%q", o.ExecOS)
 	log.Printf("TargetOS=%q", o.TargetOS)

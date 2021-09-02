@@ -15,6 +15,7 @@
 package rbeconfigsgen
 
 import (
+	"github.com/bazelbuild/bazel-toolchains/pkg/options"
 	"testing"
 )
 
@@ -22,38 +23,38 @@ func TestGenCppToolchainTarget(t *testing.T) {
 	tests := []struct {
 		name string
 		want string
-		opt  *Options
+		opt  *options.Options
 	}{
 		{
 			name: "No options, linux, choose default",
 			want: "//cc:cc-compiler-k8",
-			opt: &Options{
+			opt: &options.Options{
 				ExecOS: "linux",
 			},
 		}, {
 			name: "No options, windows, choose default",
 			want: "//cc:cc-compiler-x64_windows",
-			opt: &Options{
+			opt: &options.Options{
 				ExecOS: "windows",
 			},
 		}, {
 			name: "Windows pick compiler",
 			want: "//cc:cc-compiler-x64_windows_mingw",
-			opt: &Options{
+			opt: &options.Options{
 				ExecOS:                 "windows",
 				CPPToolchainTargetName: "cc-compiler-x64_windows_mingw",
 			},
 		}, {
 			name: "Linux pick output path",
 			want: "//configs/foo/bar/cc:cc-compiler-k8",
-			opt: &Options{
+			opt: &options.Options{
 				ExecOS:           "linux",
 				OutputConfigPath: "configs/foo/bar",
 			},
 		}, {
 			name: "Windows pick output path and compiler",
 			want: "//configs/fizz/buzz/cc:foobar-cc-good",
-			opt: &Options{
+			opt: &options.Options{
 				ExecOS:                 "windows",
 				OutputConfigPath:       "configs/fizz/buzz",
 				CPPToolchainTargetName: "foobar-cc-good",
@@ -61,7 +62,7 @@ func TestGenCppToolchainTarget(t *testing.T) {
 		}, {
 			name: "Windows pick backslash style path and compiler",
 			want: "//configs/fizz/buzz/cc:foobar-cc-good",
-			opt: &Options{
+			opt: &options.Options{
 				ExecOS:                 "windows",
 				OutputConfigPath:       "configs\\fizz\\buzz",
 				CPPToolchainTargetName: "foobar-cc-good",
