@@ -241,9 +241,9 @@ func workdir(os string) string {
 func BazeliskDownloadInfo(os string) (string, string, error) {
 	switch os {
 	case OSLinux:
-		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-linux-amd64", "bazelisk", nil
+		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-linux-amd64", "bazelisk", nil
 	case OSWindows:
-		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.4/bazelisk-windows-amd64.exe", "bazelisk.exe", nil
+		return "https://github.com/bazelbuild/bazelisk/releases/download/v1.10.1/bazelisk-windows-amd64.exe", "bazelisk.exe", nil
 	}
 	return "", "", fmt.Errorf("invalid OS %q", os)
 }
