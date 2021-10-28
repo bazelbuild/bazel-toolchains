@@ -241,7 +241,7 @@ platform(
 See [here](https://github.com/bazelbuild/bazel-toolchains/blob/dac71231098d891e5c4b74a2078fe9343feef510/rules/exec_properties/exec_properties.bzl#L143)
 for a list of parameters accepted by `create_rbe_exec_properties_dict`.
 
-Finally, in your [`.bazelrc`][#bazelrc] file, replace all options specifying a platform target with
+Finally, in your `.bazelrc` file, replace all options specifying a platform target with
 the above custom platform target instead. So for example, if your `.bazelrc` previously looked like
 
 ```bash
@@ -263,7 +263,7 @@ build:remote --platforms=//:custom_platform
 # Pre-generated Configs
 
 Pre-generated configs tarballs will be generated for every Bazel release starting with 4.0.0 & the
-latest available [Ubuntu 16.04 Clang + JDK](l.gcr.io/google/rbe-ubuntu16-04:latest) container and
+latest available [Ubuntu 16.04 Clang + JDK](https://l.gcr.io/google/rbe-ubuntu16-04:latest) container and
 uploaded to GCS.
 
 **IMPORTANT**: Ensure you read & agree with the terms of the `LICENSE` file included in the
@@ -310,7 +310,7 @@ http_archive(
     # Change the sha256 digest to the value of the `configs_tarball_digest` in the manifest you
     # got when you ran the curl command above.
     sha256 = "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
-    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/rbe-ubuntu1604/latest/rbe_default.json"],
+    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/rbe-ubuntu1604/latest/rbe_default.tar"],
 )
 ```
 
@@ -349,7 +349,7 @@ http_archive(
     sha256 = "c0d428774cbe70d477e1d07581d863f8dbff4ba6a66d20502d7118354a814bea",
     # Change "bazel_4.0.0" in the URL below with whatever "bazel_<version>" you downloaded the
     # manifest for in the previous step.
-    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/bazel_4.0.0/rbe-ubuntu1604/latest/rbe_default.json"],
+    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/bazel_4.0.0/rbe-ubuntu1604/latest/rbe_default.tar"],
 )
 ```
 
