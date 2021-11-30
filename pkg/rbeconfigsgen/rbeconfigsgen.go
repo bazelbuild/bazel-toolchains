@@ -607,9 +607,12 @@ func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 	}
 	log.Printf("Java version: '%s'.", javaVersion)
 
-	usesNewJavaRule, err := UsesLocalJavaRuntime(o.BazelVersion)
-	if err != nil {
-		return generatedFile{}, fmt.Errorf("unable to determine what Java toolchain rule to use for Bazel %q: %w", o.BazelVersion, err)
+	usesNewJavaRule := o.JavaUseLocalRuntime
+	if !usesNewJavaRule {
+		usesNewJavaRule, err = UsesLocalJavaRuntime(o.BazelVersion)
+		if err != nil {
+			return generatedFile{}, fmt.Errorf("unable to determine what Java toolchain rule to use for Bazel %q: %w", o.BazelVersion, err)
+		}
 	}
 	t := legacyJavaBuildTemplate
 	if usesNewJavaRule {
