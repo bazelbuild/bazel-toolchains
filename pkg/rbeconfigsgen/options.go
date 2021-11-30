@@ -89,6 +89,10 @@ type Options struct {
 	// Java config generation options.
 	// GenJavaConfigs determines whether Java configs are generated.
 	GenJavaConfigs bool
+	// JavaUseLocalRuntime forces the generated java toolchain to use the local_java_runtime
+	// rule instead of java_runtime. Otherwise, the Bazel version will be used to infer which rule
+	// to use. Older Bazel versions use java_runtime.
+	JavaUseLocalRuntime bool
 	// TempWorkDir is a temporary directory that will be used by this tool to store intermediate
 	// files. If unspecified, a temporary directory will be requested from the OS.
 	TempWorkDir string
@@ -281,6 +285,7 @@ func (o *Options) Validate() error {
 	log.Printf("CppGenEnv=%v", o.CppGenEnv)
 	log.Printf("CppGenEnvJSON=%q", o.CppGenEnvJSON)
 	log.Printf("GenJavaConfigs=%v", o.GenJavaConfigs)
+	log.Printf("JavaUseLocalRuntime=%v", o.JavaUseLocalRuntime)
 	log.Printf("TempWorkDir=%q", o.TempWorkDir)
 	log.Printf("Cleanup=%v", o.Cleanup)
 	return nil

@@ -35,7 +35,7 @@ var (
 
 	// Optional input arguments.
 	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
-	bazelPath = flag.String("bazel_path", "", "(Optional) Path to preinstalled Bazel within the container. If unspecified, Bazelisk will be downloaded and installed.")
+	bazelPath    = flag.String("bazel_path", "", "(Optional) Path to preinstalled Bazel within the container. If unspecified, Bazelisk will be downloaded and installed.")
 
 	// Arguments affecting output generation not specific to either C++ or Java Configs.
 	outputTarball    = flag.String("output_tarball", "", "(Optional) Path where a tarball with the generated configs will be created.")
@@ -44,10 +44,11 @@ var (
 	outputManifest   = flag.String("output_manifest", "", "(Optional) Generate a JSON file with details about the generated configs.")
 
 	// Optional input arguments that affect config generation for either C++ or Java configs.
-	genCppConfigs      = flag.Bool("generate_cpp_configs", true, "(Optional) Generate C++ configs. Defaults to true.")
-	cppEnvJSON         = flag.String("cpp_env_json", "", "(Optional) JSON file containing a str -> str dict of environment variables to be set when generating C++ configs inside the toolchain container. This replaces any exec OS specific defaults that would usually be applied.")
-	cppToolchainTarget = flag.String("cpp_toolchain_target", "", "(Optional) Set the CPP toolchain target. When exec_os is linux, the default is cc-compiler-k8. When exec_os is windows, the default is cc-compiler-x64_windows.")
-	genJavaConfigs     = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
+	genCppConfigs       = flag.Bool("generate_cpp_configs", true, "(Optional) Generate C++ configs. Defaults to true.")
+	cppEnvJSON          = flag.String("cpp_env_json", "", "(Optional) JSON file containing a str -> str dict of environment variables to be set when generating C++ configs inside the toolchain container. This replaces any exec OS specific defaults that would usually be applied.")
+	cppToolchainTarget  = flag.String("cpp_toolchain_target", "", "(Optional) Set the CPP toolchain target. When exec_os is linux, the default is cc-compiler-k8. When exec_os is windows, the default is cc-compiler-x64_windows.")
+	genJavaConfigs      = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
+	javaUseLocalRuntime = flag.Bool("java_use_local_runtime", false, "(Optional) Make the generated java toolchain use the new local_java_runtime rule instead of java_runtime. Otherwise, the Bazel version will be used to infer which rule to use.")
 
 	// Other misc arguments.
 	tempWorkDir = flag.String("temp_work_dir", "", "(Optional) Temporary directory to use to store intermediate files. Defaults to a temporary directory automatically allocated by the OS. The temporary working directory is deleted at the end unless --cleanup=false is specified.")
@@ -90,6 +91,9 @@ func printFlags() {
 	}
 	if !(*genJavaConfigs) {
 		log.Printf("--generate_java_configs=%v \\", *genJavaConfigs)
+	}
+	if *javaUseLocalRuntime {
+		log.Printf("--java_use_local_runtime=%v \\", *javaUseLocalRuntime)
 	}
 	if len(*tempWorkDir) != 0 {
 		log.Printf("--temp_work_dir=%q \\", *tempWorkDir)
@@ -164,6 +168,7 @@ func main() {
 		CppGenEnvJSON:          *cppEnvJSON,
 		CPPToolchainTargetName: *cppToolchainTarget,
 		GenJavaConfigs:         *genJavaConfigs,
+		JavaUseLocalRuntime:    *javaUseLocalRuntime,
 		TempWorkDir:            *tempWorkDir,
 		Cleanup:                *cleanup,
 	}
