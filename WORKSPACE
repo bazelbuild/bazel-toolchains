@@ -13,7 +13,7 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
-# Use pre-generated toolchain configs the latest Bazel and latest Ubuntu 16.04
+# Use pre-generated toolchain configs for the latest Bazel and latest Ubuntu 16.04
 # container. Pre-generated configs are only provided as a convenience for
 # experimenting with configuring Bazel for remote builds. Further, there are
 # no guarantees on how long after a new release of Bazel or the Ubuntu 16.04
@@ -21,7 +21,7 @@ workspace(name = "bazel_toolchains")
 # available. So, never depend directly on the URL mentioned below to download
 # toolchain configs in production because they may break without warning.
 # For more information and alternatives, please visit:
-# https://github.com/bazelbuild/bazel-toolchains
+# https://github.com/bazelbuild/bazel-toolchains#rbe_configs_gen---cli-tool-to-generate-configs
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
