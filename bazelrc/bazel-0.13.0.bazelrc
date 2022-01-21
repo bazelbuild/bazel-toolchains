@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This .bazelrc file contains all of the flags required for the toolchain,
-# Remote Build Execution, and the Bazel Build Results UI. Specific flags in
-# your Bazel command allow you to use only the remote build, to use only the
-# results UI, or to use them both together.
+# This .bazelrc file contains all of the flags required for the provided
+# toolchain with Remote Build Execution.
 
 # Remote Build Execution requires a strong hash function, such as SHA256.
 startup --host_jvm_args=-Dbazel.DigestFunction=SHA256
@@ -33,7 +31,7 @@ build:remote --jobs=50
 build:remote --host_javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
 build:remote --javabase=@bazel_toolchains//configs/ubuntu16_04_clang/1.0:jdk8
 build:remote --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.0/bazel_0.13.0/default:toolchain
-build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://gcr.io/cloud-marketplace/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f" }'
+build:remote --experimental_remote_platform_override='properties:{ name:"container-image" value:"docker://marketplace.gcr.io/google/rbe-ubuntu16-04@sha256:59bf0e191a6b5cc1ab62c2224c810681d1326bad5a27b1d36c9f40113e79da7f" }'
 
 # Set various strategies so that all actions execute remotely. Mixing remote
 # and local execution will lead to errors unless the toolchain and remote
@@ -66,22 +64,3 @@ build:remote --remote_timeout=3600
 # default. You can use --auth_credentials=some_file.json to use a service
 # account credential instead.
 build:remote --auth_enabled=true
-
-# Set flags for uploading to BES in order to view results in the Bazel Build
-# Results UI.
-build:results --bes_backend="buildeventservice.googleapis.com"
-build:results --bes_timeout=10s
-
-# If the upload to BES fails, the build will fail.
-build:results --bes_best_effort=false
-
-# Set flags for uploading to BES without Remote Build Execution.
-build:results-local --bes_backend="buildeventservice.googleapis.com"
-build:results-local --bes_timeout=10s
-build:results-local --bes_best_effort=false
-build:results-local --tls_enabled=true
-build:results-local --auth_enabled=true
-build:results-local --spawn_strategy=local
-build:results-local --experimental_remote_spawn_cache
-build:results-local --remote_cache=remotebuildexecution.googleapis.com
-build:results-local --remote_timeout=3600

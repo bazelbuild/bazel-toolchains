@@ -1,44 +1,19 @@
 ---
-platforms:
-  ubuntu1404:
+buildifier:
+  version: latest
+  # Check for issues with the format of our bazel config files.
+  # All warnings from https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md
+  # are enabled except:
+  # rule-impl-return,uninitialized,return-value,rule-impl-return,unsorted-dict-items,out-of-order-load
+  # TODO (suvanjan): Re-enable once issues and https://github.com/bazelbuild/buildtools/issues/575
+  # are fixed.
+  warnings: "attr-cfg,attr-license,attr-non-empty,attr-output-default,attr-single-file,confusing-name,constant-glob,ctx-actions,ctx-args,depset-iteration,depset-union,dict-concatenation,duplicated-name,filetype,function-docstring,git-repository,http-archive,integer-division,load,load-on-top,module-docstring,name-conventions,native-build,native-package,no-effect,output-group,package-name,package-on-top,positional-args,redefined-variable,repository-name,same-origin-load,string-iteration,unreachable,unused-variable"
+tasks:
+  presubmit:
+    platform: ubuntu1604
+    build_targets:
+    - "--"
+    - "..."
     test_targets:
-    - "//test/configs:debian-jessie-autoconfig_test"
-    - "//test/configs:debian-jessie-bazel-head-autoconfig_test"
-    - "//test/configs:debian-jessie-custom-bazel-rc-version-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-bazel-head-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
-    - "//test/configs:debian8_clang_autoconfig_test"
-    - "//configs/debian8_clang:debian8-clang-0.3.0-bazel_0.14.1-autoconfig_test"
-    - "//configs/debian8_clang:msan-debian8-clang-0.3.0-bazel_0.14.1-autoconfig_test"
-    - "//configs/ubuntu16_04_clang:ubuntu16_04-clang-1.0-bazel_0.14.1-autoconfig_test"
-    - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.0-bazel_0.14.1-autoconfig_test"
-    - "//container/debian8/builders/rbe-debian8:toolchain-test"
-    - "//container/ubuntu16_04/builders/rbe-ubuntu16_04:toolchain-test"
-    - "//container/experimental/rbe-debian9:toolchain-test"
-    - "//container/ubuntu16_04/builders/bazel:bazel-test"
-    - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
-    test_flags:
-    - "--test_output=errors"
-    - "--verbose_failures"
-  ubuntu1604:
-    test_targets:
-    - "//test/configs:debian-jessie-autoconfig_test"
-    - "//test/configs:debian-jessie-bazel-head-autoconfig_test"
-    - "//test/configs:debian-jessie-custom-bazel-rc-version-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-bazel-head-autoconfig_test"
-    - "//test/configs:ubuntu-xenial-custom-bazel-rc-version-autoconfig_test"
-    - "//test/configs:debian8_clang_autoconfig_test"
-    - "//configs/debian8_clang:debian8-clang-0.3.0-bazel_0.14.1-autoconfig_test"
-    - "//configs/debian8_clang:msan-debian8-clang-0.3.0-bazel_0.14.1-autoconfig_test"
-    - "//configs/ubuntu16_04_clang:ubuntu16_04-clang-1.0-bazel_0.14.1-autoconfig_test"
-    - "//configs/ubuntu16_04_clang:msan-ubuntu16_04-clang-1.0-bazel_0.14.1-autoconfig_test"
-    - "//container/debian8/builders/rbe-debian8:toolchain-test"
-    - "//container/ubuntu16_04/builders/rbe-ubuntu16_04:toolchain-test"
-    - "//container/experimental/rbe-debian9:toolchain-test"
-    - "//container/ubuntu16_04/builders/bazel:bazel-test"
-    - "//container/ubuntu16_04/builders/bazel:bazel_docker-test"
-    test_flags:
-    - "--test_output=errors"
-    - "--verbose_failures"
+    - "--"
+    - "..."

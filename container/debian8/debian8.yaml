@@ -1,7 +1,0 @@
-schemaVersion: "2.0.0"
-
-# Distro-specific tests
-fileContentTests:
-- name: 'os-version'
-  expectedContents: ['Debian GNU/Linux 8']
-  path: '/etc/issue.net'

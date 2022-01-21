@@ -1,0 +1,42 @@
+# Copyright 2016 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# A sample bazelrc flag with a minimal set of flags for Remote
+# Build Execution
+
+# Strategy flags
+build:remote --spawn_strategy=remote
+build:remote --strategy=Javac=remote
+build:remote --strategy=Closure=remote
+build:remote --strategy=Genrule=remote
+build:remote --define=EXECUTOR=remote
+
+# Enable the remote API flags
+build:remote --remote_cache=remotebuildexecution.googleapis.com
+build:remote --remote_executor=remotebuildexecution.googleapis.com
+build:remote --tls_enabled=true
+build:remote --auth_enabled=true
+
+# Toolchain/platform flags that work with rbe_autoconfig rule.
+# Note target name must be set to "rbe_default" to use these flags as is.
+build:remote --crosstool_top=@rbe_default//cc:toolchain
+build:remote --host_javabase=@rbe_default//java:jdk
+build:remote --javabase=@rbe_default//java:jdk
+build:remote --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+build:remote --java_toolchain=@bazel_tools//tools/jdk:toolchain_hostjdk8
+build:remote --extra_execution_platforms=@rbe_default//config:platform
+build:remote --host_platform=@rbe_default//config:platform
+build:remote --platforms=@rbe_default//config:platform
+build:remote --extra_toolchains=@rbe_default//config:cc-toolchain
+

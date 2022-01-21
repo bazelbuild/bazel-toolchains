@@ -1,0 +1,16 @@
+
+# See Config struct in https://github.com/kubernetes/test-infra/blob/master/prow/repoowners/repoowners.go
+
+# Reviewers may be auto-assigned by blunderbuss
+reviewers:
+- smukherj1
+- rbe-toolchains-pr-bot
+- davegay
+- eytankidron
+
+# Approvers can /approve changes to files within this directory tree.
+approvers:
+- smukherj1
+- rbe-toolchains-pr-bot
+- davegay
+- eytankidron

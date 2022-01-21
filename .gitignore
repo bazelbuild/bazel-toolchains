@@ -12,5 +12,14 @@
 # Ignore all bazel-* symlinks. There is no full list since this can change
 # based on the name of the directory bazel is cloned into.
 /bazel-*
+/tests/rbe_repo/examples/bazel_toolchains_client/bazel-*
+/tests/rbe_repo/examples/toolchain_config_host/bazel-*
+/rbe-test-output/
 # Ignore outputs generated during Bazel bootstrapping.
 /output/
+# Python runtime generated from .bzl files.
+*.bzlc
+*.pyc
+
+# Go binaries built natively by the Go toolchain
+/rbe_configs_gen
