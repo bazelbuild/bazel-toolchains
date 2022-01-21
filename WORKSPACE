@@ -13,6 +13,18 @@
 # limitations under the License.
 workspace(name = "bazel_toolchains")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rbe_default",
+    # Change the sha256 digest to the value of the `configs_tarball_digest` in the manifest you
+    # got when you ran the curl command above.
+    sha256 = "9f81180099ebc84da906c53cf56c1e9835d7dbc4bbc8ac5c7e075f050c450c3a",
+    # Change "bazel_4.0.0" in the URL below with whatever "bazel_<version>" you downloaded the
+    # manifest for in the previous step.
+    urls = ["https://storage.googleapis.com/rbe-toolchain/bazel-configs/rbe-ubuntu1604/latest/rbe_default.tar"],
+)
+
 load(
     "//repositories:repositories.bzl",
     bazel_toolchains_repositories = "repositories",
