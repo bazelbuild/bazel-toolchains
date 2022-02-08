@@ -58,6 +58,7 @@ var (
 	enableMonitoring      = flag.Bool("enable_monitoring", false, "(Optional) Enables reporting reporting results to Google Cloud Monitoring. Defaults to false.")
 	monitoringProjectID   = flag.String("monitoring_project_id", "", "GCP Project ID where monitoring results will be reported. Required if --enable_monitoring is true.")
 	monitoringDockerImage = flag.String("monitoring_docker_image", "", "Name of the toolchain docker image to be reported as a string label to monitoring. Required if --enable_monitoring is true.")
+	httpsProxy            = flag.String("https_proxy", "", "The proxy argument to send to Docker.")
 )
 
 // printFlag prints flag values with the intent of allowing easy copy paste of flags to rerun this
@@ -109,6 +110,9 @@ func printFlags() {
 	}
 	if len(*monitoringDockerImage) != 0 {
 		log.Printf("--monitoring_docker_image=%q \\", *monitoringDockerImage)
+	}
+	if len(*httpsProxy) != 0 {
+		log.Printf("--https_proxy=%q \\", *httpsProxy)
 	}
 }
 
@@ -171,6 +175,7 @@ func main() {
 		JavaUseLocalRuntime:    *javaUseLocalRuntime,
 		TempWorkDir:            *tempWorkDir,
 		Cleanup:                *cleanup,
+		HttpsProxy:             *httpsProxy,
 	}
 
 	result := true

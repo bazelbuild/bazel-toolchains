@@ -166,6 +166,8 @@ type dockerRunner struct {
 	// Parameters that affect how commands are executed inside the running toolchain container.
 	// These parameters can be changed between calls to the execCmd function.
 
+	// httpsProxy is the proxy to use by commands inside the container.
+	httpsProxy string
 	// workdir is the working directory to use to run commands inside the container.
 	workdir string
 	// env is the environment variables to set when executing commands specified in the given order
@@ -251,7 +253,7 @@ func BazeliskDownloadInfo(os string) (string, string, error) {
 // newDockerRunner creates a new running container of the given containerImage. stopContainer
 // determines if the cleanup function on the dockerRunner will stop the running container when
 // called.
-func newDockerRunner(containerImage string, stopContainer bool) (*dockerRunner, error) {
+func newDockerRunner(containerImage string, stopContainer bool, httpsProxy string) (*dockerRunner, error) {
 	if containerImage == "" {
 		return nil, fmt.Errorf("container image was not specified")
 	}
@@ -259,6 +261,7 @@ func newDockerRunner(containerImage string, stopContainer bool) (*dockerRunner, 
 		containerImage: containerImage,
 		stopContainer:  stopContainer,
 		dockerPath:     "docker",
+		httpsProxy:     httpsProxy,
 	}
 	if _, err := runCmd(d.dockerPath, "pull", d.containerImage); err != nil {
 		return nil, fmt.Errorf("docker was unable to pull the toolchain container image %q: %w", d.containerImage, err)
@@ -293,6 +296,9 @@ func (d *dockerRunner) execCmd(args ...string) (string, error) {
 	a := []string{"exec"}
 	if d.workdir != "" {
 		a = append(a, "-w", d.workdir)
+	}
+	if len(d.httpsProxy) != 0 {
+		a = append(a, "-e", fmt.Sprintf("https_proxy=%s", d.httpsProxy))
 	}
 	for _, e := range d.env {
 		a = append(a, "-e", e)
@@ -982,7 +988,7 @@ func Run(o Options) error {
 	if err := processTempDir(&o); err != nil {
 		return fmt.Errorf("unable to initialize a local temporary working directory to store intermediate files: %w", err)
 	}
-	d, err := newDockerRunner(o.ToolchainContainer, o.Cleanup)
+	d, err := newDockerRunner(o.ToolchainContainer, o.Cleanup, o.HttpsProxy)
 	if err != nil {
 		return fmt.Errorf("failed to initialize a docker container: %w", err)
 	}
