@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -131,13 +131,13 @@ var (
 		OSLinux: {
 			PlatformParams: PlatformToolchainsTemplateParams{
 				ExecConstraints: []string{
-					"@bazel_tools//platforms:linux",
-					"@bazel_tools//platforms:x86_64",
+					"@platforms//os:linux",
+					"@platforms//cpu:x86_64",
 					"@bazel_tools//tools/cpp:clang",
 				},
 				TargetConstraints: []string{
-					"@bazel_tools//platforms:linux",
-					"@bazel_tools//platforms:x86_64",
+					"@platforms//os:linux",
+					"@platforms//cpu:x86_64",
 				},
 				OSFamily: "Linux",
 			},
@@ -160,12 +160,12 @@ var (
 		OSWindows: {
 			PlatformParams: PlatformToolchainsTemplateParams{
 				ExecConstraints: []string{
-					"@bazel_tools//platforms:windows",
-					"@bazel_tools//platforms:x86_64",
+					"@platforms//os:windows",
+					"@platforms//cpu:x86_64",
 				},
 				TargetConstraints: []string{
-					"@bazel_tools//platforms:windows",
-					"@bazel_tools//platforms:x86_64",
+					"@platforms//os:windows",
+					"@platforms//cpu:x86_64",
 				},
 				OSFamily: "Windows",
 			},
