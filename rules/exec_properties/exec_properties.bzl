@@ -161,6 +161,10 @@ PARAMS = {
         key = "dockerPrivileged",
         verifier_fcn = _verify_bool,
     ),
+    "docker_run_as_container_provided_user": struct(
+        key = "dockerRunAsContainerProvidedUser",
+        verifier_fcn = _verify_string,
+    ),
     "docker_run_as_root": struct(
         key = "dockerRunAsRoot",
         verifier_fcn = _verify_bool,

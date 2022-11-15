@@ -22,6 +22,12 @@ compare_dicts_test(
 )
 
 compare_dicts_test(
+    name = "docker_run_as_container_provided_user_compare_test",
+    actual = create_rbe_exec_properties_dict(docker_run_as_container_provided_user = "0:0"),
+    expected = {"dockerRunAsContainerProvidedUser": "0:0"},
+)
+
+compare_dicts_test(
     name = "multiple_properties_compare_test",
     actual = create_rbe_exec_properties_dict(
         docker_privileged = True,
