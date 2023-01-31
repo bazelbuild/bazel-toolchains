@@ -12,7 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 # Defaults to auto which means off for Windows, explicitly enable for sh tests
 build --enable_runfiles=yes
