@@ -99,6 +99,8 @@ type Options struct {
 	// Cleanup determines whether the running container & intermediate files will be deleted once
 	// config generation is done. Setting it to false is useful for debugging intermediate state.
 	Cleanup bool
+	// HttpsProxy set the proxy to pass to the Docker daemon
+	HttpsProxy string
 }
 
 // DefaultOptions are some option values that are populated as default values for certain fields
