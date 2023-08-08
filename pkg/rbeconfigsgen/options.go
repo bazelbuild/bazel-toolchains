@@ -36,6 +36,8 @@ type Options struct {
 	BazelPath string
 	// ToolchainContainer is the docker image of the toolchain container to generate configs for.
 	ToolchainContainer string
+	// Specify --platform when executing docker create.
+	DockerPlatform string
 	// ExecOS is the OS of the toolchain container image or the OS in which the build actions will
 	// execute.
 	ExecOS string
@@ -273,6 +275,7 @@ func (o *Options) Validate() error {
 	log.Printf("ToolchainContainer=%q", o.ToolchainContainer)
 	log.Printf("ExecOS=%q", o.ExecOS)
 	log.Printf("TargetOS=%q", o.TargetOS)
+	log.Printf("DockerPlatform=%q", o.DockerPlatform)
 	log.Printf("OutputTarball=%q", o.OutputTarball)
 	log.Printf("OutputSourceRoot=%q", o.OutputSourceRoot)
 	log.Printf("OutputConfigPath=%q", o.OutputConfigPath)

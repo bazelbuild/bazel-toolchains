@@ -251,7 +251,7 @@ func BazeliskDownloadInfo(os string) (string, string, error) {
 // newDockerRunner creates a new running container of the given containerImage. stopContainer
 // determines if the cleanup function on the dockerRunner will stop the running container when
 // called.
-func newDockerRunner(containerImage string, stopContainer bool) (*dockerRunner, error) {
+func newDockerRunner(containerImage string, dockerPlatform string, stopContainer bool) (*dockerRunner, error) {
 	if containerImage == "" {
 		return nil, fmt.Errorf("container image was not specified")
 	}
@@ -271,7 +271,13 @@ func newDockerRunner(containerImage string, stopContainer bool) (*dockerRunner, 
 	log.Printf("Resolved toolchain image %q to fully qualified reference %q.", d.containerImage, resolvedImage)
 	d.resolvedImage = resolvedImage
 
-	cid, err := runCmd(d.dockerPath, "create", "--rm", d.resolvedImage, "sleep", "infinity")
+	args := []string{"create", "--rm"}
+	if dockerPlatform != "" {
+		args = append(args, "--platform", dockerPlatform)
+	}
+	args = append(args, d.resolvedImage, "sleep", "infinity")
+
+	cid, err := runCmd(d.dockerPath, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create a container with the toolchain container image: %w", err)
 	}
@@ -982,7 +988,7 @@ func Run(o Options) error {
 	if err := processTempDir(&o); err != nil {
 		return fmt.Errorf("unable to initialize a local temporary working directory to store intermediate files: %w", err)
 	}
-	d, err := newDockerRunner(o.ToolchainContainer, o.Cleanup)
+	d, err := newDockerRunner(o.ToolchainContainer, o.DockerPlatform, o.Cleanup)
 	if err != nil {
 		return fmt.Errorf("failed to initialize a docker container: %w", err)
 	}

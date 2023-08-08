@@ -32,6 +32,7 @@ var (
 	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest")
 	execOS             = flag.String("exec_os", "", "The OS (linux|windows) of the toolchain container image a.k.a, the execution platform in Bazel.")
 	targetOS           = flag.String("target_os", "", "The OS (linux|windows) artifacts built will target a.k.a, the target platform in Bazel.")
+	dockerPlatform     = flag.String("docker_platform", "", "(Optional) Set platform when creating container, if given the Docker server is multi-platform capable.")
 
 	// Optional input arguments.
 	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
@@ -158,6 +159,7 @@ func main() {
 		BazelVersion:           *bazelVersion,
 		BazelPath:              *bazelPath,
 		ToolchainContainer:     *toolchainContainer,
+		DockerPlatform:         *dockerPlatform,
 		ExecOS:                 *execOS,
 		TargetOS:               *targetOS,
 		OutputTarball:          *outputTarball,
