@@ -101,10 +101,31 @@ java_runtime(
 )
 `))
 
-	// javaBuildTemplate is the Java toolchain config BUILD file template for Bazel versions
-	// >=5.0.0 (tentative?).
-	javaBuildTemplate = template.Must(template.New("javaBuild").Parse(buildHeader + `
+	// javaBuildTemplateLt7 is the Java toolchain config BUILD file template for Bazel versions
+	// >=5.0.0 (tentative?) and < 7.0.0.
+	javaBuildTemplateLt7 = template.Must(template.New("javaBuild").Parse(buildHeader + `
 load("@bazel_tools//tools/jdk:local_java_repository.bzl", "local_java_runtime")
+
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "jdk",
+    actual = "rbe_jdk",
+)
+
+local_java_runtime(
+    name = "rbe_jdk",
+    java_home = "{{ .JavaHome }}",
+    version = "{{ .JavaVersion }}",
+)
+`))
+
+	// javaBuildTemplate is the Java toolchain config BUILD file template for Bazel versions
+	// >=7.0.0 (including pre-releases).
+	// The difference between the older template is directly referencing to @rules_java
+	// instead of the indirection via @bazel_tools
+	javaBuildTemplate = template.Must(template.New("javaBuild").Parse(buildHeader + `
+load("@rules_java//toolchains:local_java_repository.bzl", "local_java_runtime")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -562,6 +583,25 @@ func UsesLocalJavaRuntime(bazelVersion string) (bool, error) {
 	return !bv.LessThan(*semver.New("5.0.0")), nil
 }
 
+func getJavaTemplate(o *Options) (*template.Template, error) {
+  usesNewJavaRule := o.JavaUseLocalRuntime
+	if !usesNewJavaRule {
+  	var err error
+		usesNewJavaRule, err = UsesLocalJavaRuntime(o.BazelVersion)
+    if (err != nil) {
+      return nil, fmt.Errorf("unable to determine what Java toolchain rule to use for Bazel %q: %w", o.BazelVersion, err)
+    }
+	}
+  if !usesNewJavaRule {
+    return legacyJavaBuildTemplate, nil
+	}
+	// use latest template if BazelVersion is unspecified
+  if o.BazelVersion != "" && o.BazelVersion < "7" {
+    return javaBuildTemplateLt7, nil
+  }
+  return javaBuildTemplate, nil
+}
+
 // genJavaConfigs returns a BUILD file containing a Java toolchain rule definition that contains
 // the following attributes determined by probing details about the JDK version installed in the
 // running toolchain container.
@@ -613,17 +653,11 @@ func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 	}
 	log.Printf("Java version: '%s'.", javaVersion)
 
-	usesNewJavaRule := o.JavaUseLocalRuntime
-	if !usesNewJavaRule {
-		usesNewJavaRule, err = UsesLocalJavaRuntime(o.BazelVersion)
-		if err != nil {
-			return generatedFile{}, fmt.Errorf("unable to determine what Java toolchain rule to use for Bazel %q: %w", o.BazelVersion, err)
-		}
-	}
-	t := legacyJavaBuildTemplate
-	if usesNewJavaRule {
-		t = javaBuildTemplate
-	}
+	t, err := getJavaTemplate(o)
+  if err != nil {
+    return generatedFile{}, err
+  }
+
 	buf := bytes.NewBuffer(nil)
 	if err := t.Execute(buf, &javaBuildTemplateParams{
 		JavaHome:    javaHome,

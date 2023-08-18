@@ -16,6 +16,7 @@ package rbeconfigsgen
 
 import (
 	"testing"
+  "text/template"
 )
 
 func TestGenCppToolchainTarget(t *testing.T) {
@@ -80,6 +81,105 @@ func TestGenCppToolchainTarget(t *testing.T) {
 			// regular execution.
 			if got := genCppToolchainTarget(tc.opt); got != tc.want {
 				t.Fatalf("GenCppToolchainTarget: %v, wanted %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestGetJavaTemplate(t *testing.T) {
+	tests := []struct {
+		name string
+		want *template.Template
+		opt  *Options
+	}{
+		{
+			name: "bazel 4, choose legacy",
+			want: legacyJavaBuildTemplate,
+			opt: &Options{
+        BazelVersion: "4.0.0",
+      },
+		},
+		{
+			name: "bazel 5, choose BazelLt7",
+			want: javaBuildTemplateLt7,
+			opt: &Options{
+        BazelVersion: "5.0.0",
+			},
+		},
+		{
+			name: "bazel 7, choose latest",
+			want: javaBuildTemplate,
+			opt: &Options{
+        BazelVersion: "7.0.0",
+			},
+		},
+		{
+			name: "bazel 7-pre, choose latest",
+			want: javaBuildTemplate,
+			opt: &Options{
+        BazelVersion: "7.0.0-pre.20230724.1",
+			},
+		},
+		{
+			name: "useLocalRuntime forced, choose latest",
+			want: javaBuildTemplate,
+			opt: &Options{
+			  JavaUseLocalRuntime: true,
+			},
+		},
+		{
+			name: "useLocalRuntime forced, bazel 4, choose BazelLt7",
+			want: javaBuildTemplateLt7,
+			opt: &Options{
+			  BazelVersion: "4.0.0",
+			  JavaUseLocalRuntime: true,
+			},
+		},
+		{
+			name: "useLocalRuntime forced, bazel 5, choose BazelLt7",
+			want: javaBuildTemplateLt7,
+			opt: &Options{
+			  BazelVersion: "5.0.0",
+			  JavaUseLocalRuntime: true,
+			},
+		},
+		{
+			name: "useLocalRuntime forced, bazel 6, choose BazelLt7",
+			want: javaBuildTemplateLt7,
+			opt: &Options{
+			  BazelVersion: "6.0.0",
+			  JavaUseLocalRuntime: true,
+			},
+		},
+		{
+			name: "useLocalRuntime forced, bazel 7, choose latest",
+			want: javaBuildTemplate,
+			opt: &Options{
+			  BazelVersion: "7.0.0",
+			  JavaUseLocalRuntime: true,
+			},
+		},
+		{
+			name: "useLocalRuntime forced, bazel 7-pre, choose latest",
+			want: javaBuildTemplate,
+			opt: &Options{
+			  BazelVersion: "7.0.0-pre.20200202",
+			  JavaUseLocalRuntime: true,
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			// We skip validation since we don't set all options required for
+			// regular execution.
+			got, err := getJavaTemplate(tc.opt);
+			if err != nil {
+			  t.Fatalf("getJavaTemplate failed: %v, wanted: %v", err, tc.want)
+			} else if got != tc.want {
+				t.Fatalf("getJavaTemplate: %v, wanted %v", got, tc.want)
 			}
 		})
 	}
