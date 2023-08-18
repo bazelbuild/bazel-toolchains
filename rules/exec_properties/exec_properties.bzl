@@ -203,7 +203,7 @@ PARAMS = {
     ),
 }
 
-def create_exec_properties_dict(**kwargs):
+def create_exec_properties_dict(**_kwargs):
     fail("create_exec_properties_dict is deprecated. Please use create_rbe_exec_properties_dict instead.")
 
 def create_rbe_exec_properties_dict(**kwargs):
@@ -242,7 +242,7 @@ def create_rbe_exec_properties_dict(**kwargs):
 
     return dict
 
-def merge_dicts(*dict_args):
+def merge_dicts(*_dict_args):
     fail("merge_dicts is deprecated. Please use dicts.add() instead. See https://github.com/bazelbuild/bazel-skylib/blob/master/docs/dicts_doc.md")
 
 def _exec_property_sets_repository_impl(repository_ctx):
