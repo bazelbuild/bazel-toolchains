@@ -14,3 +14,4 @@
 
 # Defaults to auto which means off for Windows, explicitly enable for sh tests
 build --enable_runfiles=yes
+common --enable_bzlmod
