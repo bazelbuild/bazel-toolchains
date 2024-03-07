@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/bazelbuild/bazel-toolchains/pkg/monitoring"
 	"github.com/bazelbuild/bazel-toolchains/pkg/rbeconfigsgen"
@@ -50,6 +51,7 @@ var (
 	cppToolchainTarget  = flag.String("cpp_toolchain_target", "", "(Optional) Set the CPP toolchain target. When exec_os is linux, the default is cc-compiler-k8. When exec_os is windows, the default is cc-compiler-x64_windows.")
 	genJavaConfigs      = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
 	javaUseLocalRuntime = flag.Bool("java_use_local_runtime", false, "(Optional) Make the generated java toolchain use the new local_java_runtime rule instead of java_runtime. Otherwise, the Bazel version will be used to infer which rule to use.")
+	execConstraints     = flag.String("exec_constraints", "", "(Optional) Set the platform constraint values. Use ',' to seperate multiple values.")
 
 	// Other misc arguments.
 	tempWorkDir = flag.String("temp_work_dir", "", "(Optional) Temporary directory to use to store intermediate files. Defaults to a temporary directory automatically allocated by the OS. The temporary working directory is deleted at the end unless --cleanup=false is specified.")
@@ -155,6 +157,9 @@ func main() {
 		log.Fatalf("Failed to initialize monitoring: %v", err)
 	}
 
+	platformParams := new(rbeconfigsgen.PlatformToolchainsTemplateParams)
+	platformParams.ExecConstraints = strings.Split(*execConstraints, ",")
+
 	o := rbeconfigsgen.Options{
 		BazelVersion:           *bazelVersion,
 		BazelPath:              *bazelPath,
@@ -168,6 +173,7 @@ func main() {
 		OutputManifest:         *outputManifest,
 		GenCPPConfigs:          *genCppConfigs,
 		CppGenEnvJSON:          *cppEnvJSON,
+		PlatformParams:         platformParams,
 		CPPToolchainTargetName: *cppToolchainTarget,
 		GenJavaConfigs:         *genJavaConfigs,
 		JavaUseLocalRuntime:    *javaUseLocalRuntime,
