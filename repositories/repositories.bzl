@@ -30,7 +30,7 @@ def repositories():
     if "bazel_skylib" not in excludes:
         http_archive(
             name = "bazel_skylib",
-            sha256 = "e5d90f0ec952883d56747b7604e2a15ee36e288bb556c3d0ed33e818a4d971f2",
-            strip_prefix = "bazel-skylib-1.0.2",
-            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/1.0.2.tar.gz"],
+            sha256 = "e3fea03ff75a9821e84199466799ba560dbaebb299c655b5307f4df1e5970696",
+            strip_prefix = "bazel-skylib-1.7.1",
+            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/1.7.1.tar.gz"],
         )
