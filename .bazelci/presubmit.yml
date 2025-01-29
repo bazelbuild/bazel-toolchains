@@ -1,16 +1,9 @@
 ---
 buildifier:
   version: latest
-  # Check for issues with the format of our bazel config files.
-  # All warnings from https://github.com/bazelbuild/buildtools/blob/master/WARNINGS.md
-  # are enabled except:
-  # rule-impl-return,uninitialized,return-value,rule-impl-return,unsorted-dict-items,out-of-order-load
-  # TODO (suvanjan): Re-enable once issues and https://github.com/bazelbuild/buildtools/issues/575
-  # are fixed.
-  warnings: "attr-cfg,attr-license,attr-non-empty,attr-output-default,attr-single-file,confusing-name,constant-glob,ctx-actions,ctx-args,depset-iteration,depset-union,dict-concatenation,duplicated-name,filetype,function-docstring,git-repository,http-archive,integer-division,load,module-docstring,name-conventions,native-build,native-package,no-effect,output-group,package-name,package-on-top,positional-args,redefined-variable,repository-name,same-origin-load,string-iteration,unreachable,unused-variable"
 tasks:
   presubmit:
-    platform: ubuntu1604
+    platform: ubuntu2204
     build_targets:
     - "--"
     - "..."
