@@ -41,12 +41,12 @@ jobs:
           go test ./cmd/... ./pkg/...
       # Upload the config generation binaries for easy sharing.
       - name: Upload Artifact Linux AMD64
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: rbe_configs_gen_linux_amd64
           path: rbe_configs_gen_linux_amd64
       - name: Upload Artifact Windows AMD64
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: rbe_configs_gen_windows_amd64.exe
           path: rbe_configs_gen_windows_amd64.exe

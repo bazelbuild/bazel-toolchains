@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load(":compare.bzl", "compare_dicts_test")
 load("//rules/exec_properties:exec_properties.bzl", "create_rbe_exec_properties_dict")
+load(":compare.bzl", "compare_dicts_test")
 
 compare_dicts_test(
     name = "docker_network_compare_test",

@@ -23,3 +23,4 @@
 
 # Go binaries built natively by the Go toolchain
 /rbe_configs_gen
+MODULE.bazel.lock
