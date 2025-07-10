@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,6 +52,8 @@ var (
 	genJavaConfigs      = flag.Bool("generate_java_configs", true, "(Optional) Generate Java configs. Defaults to true.")
 	javaUseLocalRuntime = flag.Bool("java_use_local_runtime", false, "(Optional) Make the generated java toolchain use the new local_java_runtime rule instead of java_runtime. Otherwise, the Bazel version will be used to infer which rule to use.")
 	execConstraints     = flag.String("exec_constraints", "", "(Optional) Set the platform constraint values. Use ',' to seperate multiple values.")
+	cppConfigTargets    = flag.String("cpp_config_targets", "", "(Optional) Set the build targets used to generate c++ configs. Use ',' to seperate multiple values.")
+	cppConfigRepo       = flag.String("cpp_config_repo", "", "(Optional) Set the name of the repo that contains the generated c++ configs.")
 
 	// Other misc arguments.
 	tempWorkDir = flag.String("temp_work_dir", "", "(Optional) Temporary directory to use to store intermediate files. Defaults to a temporary directory automatically allocated by the OS. The temporary working directory is deleted at the end unless --cleanup=false is specified.")
@@ -174,6 +176,8 @@ func main() {
 		GenCPPConfigs:          *genCppConfigs,
 		CppGenEnvJSON:          *cppEnvJSON,
 		PlatformParams:         platformParams,
+		CPPConfigTargets:       strings.Split(*cppConfigTargets, ","),
+		CPPConfigRepo:          *cppConfigRepo,
 		CPPToolchainTargetName: *cppToolchainTarget,
 		GenJavaConfigs:         *genJavaConfigs,
 		JavaUseLocalRuntime:    *javaUseLocalRuntime,
