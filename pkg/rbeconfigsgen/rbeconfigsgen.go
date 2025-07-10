@@ -583,6 +583,28 @@ func UsesLocalJavaRuntime(bazelVersion string) (bool, error) {
 	return !bv.LessThan(*semver.New("5.0.0")), nil
 }
 
+func maybeGetMajorJavaVersion(bazelVersion string, javaVersion string) (string, error) {
+	bv, err := semver.NewVersion(bazelVersion)
+	if err != nil {
+		return "", fmt.Errorf("unable to parse Bazel version %q as a semver: %w", bazelVersion, err)
+	}
+
+	if bv.LessThan(*semver.New("7.0.0")) {
+		return "", nil
+	}
+
+	jv, err := semver.NewVersion(javaVersion)
+	if err != nil {
+		return "", fmt.Errorf("unable to parse Java version %q as a semver: %w", javaVersion, err)
+	}
+
+	if jv.Major < 17 {
+		return "", nil
+	}
+
+	return fmt.Sprintf("%d", jv.Major), nil
+}
+
 func getJavaTemplate(o *Options) (*template.Template, error) {
   usesNewJavaRule := o.JavaUseLocalRuntime
 	if !usesNewJavaRule {
@@ -650,6 +672,13 @@ func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 	}
 	if len(javaVersion) == 0 {
 		return generatedFile{}, fmt.Errorf("unable to determine the java version installed in the container by running 'java -XshowSettings:properties' in the container because it didn't return a line that looked like java.version = <version>")
+	}
+	majorJavaVersion, err := maybeGetMajorJavaVersion(o.BazelVersion, javaVersion)
+	if err != nil {
+		return generatedFile{}, err
+	}
+	if len(majorJavaVersion) > 0 {
+		javaVersion = majorJavaVersion
 	}
 	log.Printf("Java version: '%s'.", javaVersion)
 
