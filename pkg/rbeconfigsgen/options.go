@@ -206,8 +206,12 @@ func (o *Options) ApplyDefaults(os string) error {
 	o.PlatformParams.TargetConstraints = dopts.PlatformParams.TargetConstraints
 	o.PlatformParams.OSFamily = dopts.PlatformParams.OSFamily
 
-	o.CPPConfigTargets = dopts.CPPConfigTargets
-	o.CPPConfigRepo = dopts.CPPConfigRepo
+	if len(o.CPPConfigTargets) == 0 {
+		o.CPPConfigTargets = dopts.CPPConfigTargets
+	}
+	if len(o.CPPConfigRepo) == 0 {
+		o.CPPConfigRepo = dopts.CPPConfigRepo
+	}
 	o.CppBazelCmd = dopts.CppBazelCmd
 	// Only apply C++ env defaults if the options didn't already specify defaults and no JSON file
 	// to read environment variables from was specified.
