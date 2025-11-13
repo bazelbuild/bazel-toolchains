@@ -149,6 +149,14 @@ func genConfigs(o rbeconfigsgen.Options) error {
 	return nil
 }
 
+func splitOption(option string) []string {
+	if len(option) == 0 {
+		return []string{}
+	}
+
+	return strings.Split(option, ",")
+}
+
 func main() {
 	flag.Parse()
 	printFlags()
@@ -160,7 +168,7 @@ func main() {
 	}
 
 	platformParams := new(rbeconfigsgen.PlatformToolchainsTemplateParams)
-	platformParams.ExecConstraints = strings.Split(*execConstraints, ",")
+	platformParams.ExecConstraints = splitOption(*execConstraints)
 
 	o := rbeconfigsgen.Options{
 		BazelVersion:           *bazelVersion,
@@ -176,7 +184,7 @@ func main() {
 		GenCPPConfigs:          *genCppConfigs,
 		CppGenEnvJSON:          *cppEnvJSON,
 		PlatformParams:         platformParams,
-		CPPConfigTargets:       strings.Split(*cppConfigTargets, ","),
+		CPPConfigTargets:       splitOption(*cppConfigTargets),
 		CPPConfigRepo:          *cppConfigRepo,
 		CPPToolchainTargetName: *cppToolchainTarget,
 		GenJavaConfigs:         *genJavaConfigs,
