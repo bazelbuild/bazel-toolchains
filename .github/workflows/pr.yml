@@ -25,7 +25,7 @@ jobs:
       - name: Set up Go 1.16
         uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.25
       - name: Checkout source
         uses: actions/checkout@v2
       # Build all binaries but cross-compile the config generation binary for both Linux & Windows
