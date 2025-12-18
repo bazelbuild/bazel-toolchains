@@ -1,6 +1,6 @@
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "rules_java", version = "8.7.2")
-bazel_dep(name = "rules_cc", version = "0.0.17")
+bazel_dep(name = "rules_cc", version = "0.2.16")
 
 # Use pre-generated toolchain configs for the latest Bazel and latest Ubuntu 16.04
 # container. Pre-generated configs are only provided as a convenience for
