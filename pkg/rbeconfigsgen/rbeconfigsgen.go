@@ -4,14 +4,13 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 package rbeconfigsgen
 
 import (
@@ -35,6 +34,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/bazelbuild/bazelisk/versions"
 	"github.com/coreos/go-semver/semver"
 )
 
@@ -214,9 +214,9 @@ type generatedFile struct {
 // directory structure:
 // <configs root>
 // |
-//  - cc- C++ configs (only if C++ config generation is enabled).
-//  - config- C++ crosstool top & default platform definitions.
-//  - java- Java toolchain definition.
+//   - cc- C++ configs (only if C++ config generation is enabled).
+//   - config- C++ crosstool top & default platform definitions.
+//   - java- Java toolchain definition.
 type outputConfigs struct {
 	// licence will contain the OSS license applicable for the generated configs.
 	license generatedFile
@@ -570,26 +570,23 @@ func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error
 	return outputTarballPath, nil
 }
 
+// Returns if bazelVersion >= targetBazelVersion.
+func isBazelVersionLessThan(bazelVersion, targetBazelVersion string) bool {
+	sorted := versions.GetInAscendingOrder([]string{targetBazelVersion, bazelVersion})
+	return sorted[0] != targetBazelVersion
+}
+
 // UsesLocalJavaRuntime returns whether the given bazel version string uses the local_java_runtime
 // rule for Java toolchains instead of java_runtime.
 // Bazel is expected to switch to local_java_runtime in Bazel 5.0.0. See:
 // https://github.com/bazelbuild/bazel-toolchains/pull/926.
 func UsesLocalJavaRuntime(bazelVersion string) (bool, error) {
-	bv, err := semver.NewVersion(bazelVersion)
-	if err != nil {
-		return false, fmt.Errorf("unable to parse Bazel version %q as a semver: %w", bazelVersion, err)
-	}
-	// Returns if bv >= 5.0.0.
-	return !bv.LessThan(*semver.New("5.0.0")), nil
+	// Returns if bazelVersion >= 5.0.0.
+	return !isBazelVersionLessThan(bazelVersion, "5.0.0"), nil
 }
 
 func maybeGetMajorJavaVersion(bazelVersion string, javaVersion string) (string, error) {
-	bv, err := semver.NewVersion(bazelVersion)
-	if err != nil {
-		return "", fmt.Errorf("unable to parse Bazel version %q as a semver: %w", bazelVersion, err)
-	}
-
-	if bv.LessThan(*semver.New("7.0.0")) {
+	if isBazelVersionLessThan(bazelVersion, "7.0.0") {
 		return "", nil
 	}
 
@@ -606,30 +603,30 @@ func maybeGetMajorJavaVersion(bazelVersion string, javaVersion string) (string, 
 }
 
 func getJavaTemplate(o *Options) (*template.Template, error) {
-  usesNewJavaRule := o.JavaUseLocalRuntime
+	usesNewJavaRule := o.JavaUseLocalRuntime
 	if !usesNewJavaRule {
-  	var err error
+		var err error
 		usesNewJavaRule, err = UsesLocalJavaRuntime(o.BazelVersion)
-    if (err != nil) {
-      return nil, fmt.Errorf("unable to determine what Java toolchain rule to use for Bazel %q: %w", o.BazelVersion, err)
-    }
+		if err != nil {
+			return nil, fmt.Errorf("unable to determine what Java toolchain rule to use for Bazel %q: %w", o.BazelVersion, err)
+		}
 	}
-  if !usesNewJavaRule {
-    return legacyJavaBuildTemplate, nil
+	if !usesNewJavaRule {
+		return legacyJavaBuildTemplate, nil
 	}
 	// use latest template if BazelVersion is unspecified
-  if o.BazelVersion != "" && o.BazelVersion < "7" {
-    return javaBuildTemplateLt7, nil
-  }
-  return javaBuildTemplate, nil
+	if o.BazelVersion != "" && o.BazelVersion < "7" {
+		return javaBuildTemplateLt7, nil
+	}
+	return javaBuildTemplate, nil
 }
 
 // genJavaConfigs returns a BUILD file containing a Java toolchain rule definition that contains
 // the following attributes determined by probing details about the JDK version installed in the
 // running toolchain container.
-// 1. Value of the JAVA_HOME environment variable set in the toolchain image.
-// 2. Value of the Java version as reported by the java binary installed in JAVA_HOME inside the
-//    running toolchain container.
+//  1. Value of the JAVA_HOME environment variable set in the toolchain image.
+//  2. Value of the Java version as reported by the java binary installed in JAVA_HOME inside the
+//     running toolchain container.
 func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 	if !o.GenJavaConfigs {
 		return generatedFile{}, nil
@@ -683,9 +680,9 @@ func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 	log.Printf("Java version: '%s'.", javaVersion)
 
 	t, err := getJavaTemplate(o)
-  if err != nil {
-    return generatedFile{}, err
-  }
+	if err != nil {
+		return generatedFile{}, err
+	}
 
 	buf := bytes.NewBuffer(nil)
 	if err := t.Execute(buf, &javaBuildTemplateParams{
@@ -1044,9 +1041,9 @@ func createManifest(o *Options) error {
 // The file structure of the generated configs will be as follows:
 // <config root>
 // |
-//  - cc-  C++ configs as generated by Bazel's internal C++ toolchain detection logic.
-//  - config- Toolchain entrypoint target for cc_crosstool_top & the auto-generated platform target.
-//  - java- Java toolchain definition.
+//   - cc-  C++ configs as generated by Bazel's internal C++ toolchain detection logic.
+//   - config- Toolchain entrypoint target for cc_crosstool_top & the auto-generated platform target.
+//   - java- Java toolchain definition.
 func Run(o Options) error {
 	if err := processTempDir(&o); err != nil {
 		return fmt.Errorf("unable to initialize a local temporary working directory to store intermediate files: %w", err)
