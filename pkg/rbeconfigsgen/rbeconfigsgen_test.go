@@ -291,7 +291,6 @@ func TestOptionsValidate(t *testing.T) {
 				tc.opt.PlatformParams = &PlatformToolchainsTemplateParams{}
 			}
 			tc.opt.GenCPPConfigs = true
-			tc.opt.CPPConfigTargets = []string{"dummy"}
 			tc.opt.CppBazelCmd = "build"
 
 			// If HostBazelPath is set and we expect no error, we must make sure it points to a valid file
@@ -366,6 +365,48 @@ func TestIsBazelVersionLessThan(t *testing.T) {
 			got := isBazelVersionLessThan(tc.bazelVersion, tc.targetVersion)
 			if got != tc.want {
 				t.Errorf("isBazelVersionLessThan(%q, %q) = %v, want %v", tc.bazelVersion, tc.targetVersion, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCppConfigTargetAndRepo(t *testing.T) {
+	tests := []struct {
+		name         string
+		bazelVersion string
+		wantTarget   string
+		wantRepo     string
+	}{
+		{
+			name:         "Bazel 7.4.0 (Legacy)",
+			bazelVersion: "7.4.0",
+			wantTarget:   "@local_config_cc//...",
+			wantRepo:     "local_config_cc",
+		},
+		{
+			name:         "Bazel 8.0.0 (Bzlmod)",
+			bazelVersion: "8.0.0",
+			wantTarget:   "@@rules_cc++cc_configure_extension+local_config_cc//...",
+			wantRepo:     "rules_cc++cc_configure_extension+local_config_cc",
+		},
+		{
+			name:         "Development version (assumed newer -> Bzlmod)",
+			bazelVersion: "development version",
+			wantTarget:   "@@rules_cc++cc_configure_extension+local_config_cc//...",
+			wantRepo:     "rules_cc++cc_configure_extension+local_config_cc",
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			gotTarget, gotRepo := cppConfigTargetAndRepo(tc.bazelVersion)
+			if gotTarget != tc.wantTarget {
+				t.Errorf("cppConfigTargetAndRepo(%q) gotTarget = %q, want %q", tc.bazelVersion, gotTarget, tc.wantTarget)
+			}
+			if gotRepo != tc.wantRepo {
+				t.Errorf("cppConfigTargetAndRepo(%q) gotRepo = %q, want %q", tc.bazelVersion, gotRepo, tc.wantRepo)
 			}
 		})
 	}
