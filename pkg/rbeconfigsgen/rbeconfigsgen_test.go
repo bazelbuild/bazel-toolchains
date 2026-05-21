@@ -15,8 +15,10 @@
 package rbeconfigsgen
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
-  "text/template"
+	"text/template"
 )
 
 func TestGenCppToolchainTarget(t *testing.T) {
@@ -167,6 +169,13 @@ func TestGetJavaTemplate(t *testing.T) {
 			  JavaUseLocalRuntime: true,
 			},
 		},
+		{
+			name: "development version, choose latest",
+			want: javaBuildTemplate,
+			opt: &Options{
+			  BazelVersion: "development version",
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -180,6 +189,183 @@ func TestGetJavaTemplate(t *testing.T) {
 			  t.Fatalf("getJavaTemplate failed: %v, wanted: %v", err, tc.want)
 			} else if got != tc.want {
 				t.Fatalf("getJavaTemplate: %v, wanted %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestDetectBazelVersion(t *testing.T) {
+	tmpDir := t.TempDir()
+	
+	// Test case 1: Valid version output
+	bazelScript := filepath.Join(tmpDir, "bazel_valid")
+	err := os.WriteFile(bazelScript, []byte("#!/bin/sh\necho 'bazel 5.4.0'\n"), 0755)
+	if err != nil {
+		t.Fatalf("Failed to write test script: %v", err)
+	}
+	
+	got, err := detectBazelVersion(bazelScript)
+	if err != nil {
+		t.Errorf("detectBazelVersion failed: %v", err)
+	}
+	if got != "5.4.0" {
+		t.Errorf("detectBazelVersion = %q, want 5.4.0", got)
+	}
+	
+	// Test case 2: Custom/development version output
+	bazelScriptDev := filepath.Join(tmpDir, "bazel_dev")
+	err = os.WriteFile(bazelScriptDev, []byte("#!/bin/sh\necho 'bazel development version'\n"), 0755)
+	if err != nil {
+		t.Fatalf("Failed to write test script: %v", err)
+	}
+	
+	got, err = detectBazelVersion(bazelScriptDev)
+	if err != nil {
+		t.Errorf("detectBazelVersion failed: %v", err)
+	}
+	if got != "development version" {
+		t.Errorf("detectBazelVersion = %q, want development version", got)
+	}
+
+	// Test case 3: Invalid output format
+	bazelScriptInvalid := filepath.Join(tmpDir, "bazel_invalid")
+	err = os.WriteFile(bazelScriptInvalid, []byte("#!/bin/sh\necho 'some random output'\n"), 0755)
+	if err != nil {
+		t.Fatalf("Failed to write test script: %v", err)
+	}
+	
+	_, err = detectBazelVersion(bazelScriptInvalid)
+	if err == nil {
+		t.Errorf("detectBazelVersion expected error for invalid output, got nil")
+	}
+}
+
+func TestOptionsValidate(t *testing.T) {
+	tests := []struct {
+		name    string
+		opt     *Options
+		wantErr bool
+	}{
+		{
+			name: "Both BazelPath and HostBazelPath set",
+			opt: &Options{
+				BazelPath:     "/bin/bazel",
+				HostBazelPath: "/usr/bin/bazel",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Both HostBazelPath and BazelVersion set",
+			opt: &Options{
+				HostBazelPath: "/usr/bin/bazel",
+				BazelVersion:  "5.4.0",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Only HostBazelPath set (valid)",
+			opt: &Options{
+				HostBazelPath: "/usr/bin/bazel",
+			},
+			wantErr: false,
+		},
+	}
+	
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// Populate mandatory fields to avoid unrelated validation errors
+			if tc.opt.ToolchainContainer == "" {
+				tc.opt.ToolchainContainer = "dummy"
+			}
+			if tc.opt.ExecOS == "" {
+				tc.opt.ExecOS = "linux"
+			}
+			if tc.opt.TargetOS == "" {
+				tc.opt.TargetOS = "linux"
+			}
+			if tc.opt.OutputTarball == "" && tc.opt.OutputSourceRoot == "" {
+				tc.opt.OutputTarball = "dummy.tar"
+			}
+			if tc.opt.PlatformParams == nil {
+				tc.opt.PlatformParams = &PlatformToolchainsTemplateParams{}
+			}
+			tc.opt.GenCPPConfigs = true
+			tc.opt.CPPConfigTargets = []string{"dummy"}
+			tc.opt.CppBazelCmd = "build"
+
+			// If HostBazelPath is set and we expect no error, we must make sure it points to a valid file
+			// because Validate() will try to detect version by running it!
+			if tc.name == "Only HostBazelPath set (valid)" {
+				tmpDir := t.TempDir()
+				bazelScript := filepath.Join(tmpDir, "bazel")
+				err := os.WriteFile(bazelScript, []byte("#!/bin/sh\necho 'bazel 5.4.0'\n"), 0755)
+				if err != nil {
+					t.Fatalf("Failed to write test script: %v", err)
+				}
+				tc.opt.HostBazelPath = bazelScript
+			}
+
+			err := tc.opt.Validate()
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestIsBazelVersionLessThan(t *testing.T) {
+	tests := []struct {
+		name          string
+		bazelVersion  string
+		targetVersion string
+		want          bool
+	}{
+		{
+			name:          "Standard comparison - less",
+			bazelVersion:  "5.0.0",
+			targetVersion: "6.0.0",
+			want:          true,
+		},
+		{
+			name:          "Standard comparison - equal",
+			bazelVersion:  "6.0.0",
+			targetVersion: "6.0.0",
+			want:          false,
+		},
+		{
+			name:          "Standard comparison - greater",
+			bazelVersion:  "7.0.0",
+			targetVersion: "6.0.0",
+			want:          false,
+		},
+		{
+			name:          "Pre-release comparison",
+			bazelVersion:  "7.0.0-pre.1",
+			targetVersion: "7.0.0",
+			want:          true,
+		},
+		{
+			name:          "Unparseable version (panic recovery) - development version",
+			bazelVersion:  "development version",
+			targetVersion: "6.0.0",
+			want:          false, // Should recover and assume newer (not less)
+		},
+		{
+			name:          "Unparseable version (panic recovery) - custom build",
+			bazelVersion:  "my-custom-build",
+			targetVersion: "6.0.0",
+			want:          false, // Should recover and assume newer (not less)
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := isBazelVersionLessThan(tc.bazelVersion, tc.targetVersion)
+			if got != tc.want {
+				t.Errorf("isBazelVersionLessThan(%q, %q) = %v, want %v", tc.bazelVersion, tc.targetVersion, got, tc.want)
 			}
 		})
 	}

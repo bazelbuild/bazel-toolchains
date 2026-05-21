@@ -19,6 +19,7 @@ package rbeconfigsgen
 import (
 	"fmt"
 	"log"
+	"os/exec"
 	"path"
 	"strings"
 
@@ -30,10 +31,16 @@ import (
 type Options struct {
 	// BazelVersion is the version of Bazel to generate configs for. If unset, the latest Bazel
 	// version is automatically populated into this field when Validate() is called.
+	// Cannot be specified if HostBazelPath is used.
 	BazelVersion string
 	// BazelPath is the path within the container where Bazel is preinstalled. If unspecified,
 	// Bazelisk will be downloaded and installed.
 	BazelPath string
+	// HostBazelPath is the path on the host machine to a Bazel binary. If specified, this
+	// binary will be copied into the container and used for config generation.
+	// The Bazel version will be automatically detected from this binary, so BazelVersion
+	// cannot be specified alongside this option.
+	HostBazelPath string
 	// ToolchainContainer is the docker image of the toolchain container to generate configs for.
 	ToolchainContainer string
 	// Specify --platform when executing docker create.
@@ -237,12 +244,33 @@ func latestBazelVersion() (string, error) {
 // Validate verifies that mandatory arguments were provided and argument values don't conflict in
 // certain cases.
 func (o *Options) Validate() error {
+	if o.BazelPath != "" && o.HostBazelPath != "" {
+		return fmt.Errorf("only one of BazelPath or HostBazelPath must be specified")
+	}
+	if o.HostBazelPath != "" && o.BazelVersion != "" {
+		return fmt.Errorf("BazelVersion cannot be specified when HostBazelPath is used (the version will be automatically detected)")
+	}
 	if o.BazelVersion == "" {
-		v, err := latestBazelVersion()
-		if err != nil {
-			return fmt.Errorf("BazelVersion wasn't specified and was unable to determine the latest available Bazel version: %w", err)
+		if o.HostBazelPath != "" {
+			v, err := detectBazelVersion(o.HostBazelPath)
+			if err == nil {
+				o.BazelVersion = v
+				log.Printf("Automatically detected Bazel version from host_bazel_path: %s", o.BazelVersion)
+			} else {
+				log.Printf("Warning: failed to detect Bazel version from host_bazel_path %q: %v. Falling back to latest Bazel version.", o.HostBazelPath, err)
+				v, err := latestBazelVersion()
+				if err != nil {
+					return fmt.Errorf("BazelVersion wasn't specified and was unable to determine the latest available Bazel version: %w", err)
+				}
+				o.BazelVersion = v
+			}
+		} else {
+			v, err := latestBazelVersion()
+			if err != nil {
+				return fmt.Errorf("BazelVersion wasn't specified and was unable to determine the latest available Bazel version: %w", err)
+			}
+			o.BazelVersion = v
 		}
-		o.BazelVersion = v
 	}
 	if o.ToolchainContainer == "" {
 		return fmt.Errorf("ToolchainContainer was not specified")
@@ -285,6 +313,8 @@ func (o *Options) Validate() error {
 	}
 	log.Printf("rbeconfigsgen.Options:")
 	log.Printf("BazelVersion=%q", o.BazelVersion)
+	log.Printf("BazelPath=%q", o.BazelPath)
+	log.Printf("HostBazelPath=%q", o.HostBazelPath)
 	log.Printf("ToolchainContainer=%q", o.ToolchainContainer)
 	log.Printf("ExecOS=%q", o.ExecOS)
 	log.Printf("TargetOS=%q", o.TargetOS)
@@ -305,4 +335,16 @@ func (o *Options) Validate() error {
 	log.Printf("TempWorkDir=%q", o.TempWorkDir)
 	log.Printf("Cleanup=%v", o.Cleanup)
 	return nil
+}
+
+func detectBazelVersion(bazelPath string) (string, error) {
+	out, err := exec.Command(bazelPath, "--version").Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to run %q: %w", bazelPath, err)
+	}
+	output := strings.TrimSpace(string(out))
+	if !strings.HasPrefix(output, "bazel ") {
+		return "", fmt.Errorf("unexpected version output: %q", output)
+	}
+	return strings.TrimPrefix(output, "bazel "), nil
 }
