@@ -36,8 +36,9 @@ var (
 	dockerPlatform     = flag.String("docker_platform", "", "(Optional) Set platform when creating container, if given the Docker server is multi-platform capable.")
 
 	// Optional input arguments.
-	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked.")
+	bazelVersion = flag.String("bazel_version", "", "(Optional) Bazel release version to generate configs for. E.g., 4.0.0. If unspecified, the latest available Bazel release is picked. Cannot be specified if --host_bazel_path is used.")
 	bazelPath    = flag.String("bazel_path", "", "(Optional) Path to preinstalled Bazel within the container. If unspecified, Bazelisk will be downloaded and installed.")
+	hostBazelPath = flag.String("host_bazel_path", "", "(Optional) Path on the host machine to a Bazel binary. If specified, this binary will be copied into the container and used for config generation. The Bazel version will be automatically detected from this binary, so --bazel_version cannot be specified alongside this flag.")
 
 	// Arguments affecting output generation not specific to either C++ or Java Configs.
 	outputTarball    = flag.String("output_tarball", "", "(Optional) Path where a tarball with the generated configs will be created.")
@@ -75,6 +76,9 @@ func printFlags() {
 	log.Printf("--bazel_version=%q \\", *bazelVersion)
 	if len(*bazelPath) != 0 {
 		log.Printf("--bazel_path=%q \\", *bazelPath)
+	}
+	if len(*hostBazelPath) != 0 {
+		log.Printf("--host_bazel_path=%q \\", *hostBazelPath)
 	}
 	if len(*outputTarball) != 0 {
 		log.Printf("--output_tarball=%q \\", *outputTarball)
@@ -173,6 +177,7 @@ func main() {
 	o := rbeconfigsgen.Options{
 		BazelVersion:           *bazelVersion,
 		BazelPath:              *bazelPath,
+		HostBazelPath:          *hostBazelPath,
 		ToolchainContainer:     *toolchainContainer,
 		DockerPlatform:         *dockerPlatform,
 		ExecOS:                 *execOS,

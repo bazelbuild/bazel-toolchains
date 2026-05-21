@@ -570,8 +570,14 @@ func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error
 	return outputTarballPath, nil
 }
 
-// Returns if bazelVersion >= targetBazelVersion.
-func isBazelVersionLessThan(bazelVersion, targetBazelVersion string) bool {
+// Returns if bazelVersion < targetBazelVersion.
+func isBazelVersionLessThan(bazelVersion, targetBazelVersion string) (res bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Warning: panic during version comparison for %q: %v. Assuming it is a development version (newer).", bazelVersion, r)
+			res = false // Assume it is NOT less than target (i.e., it is newer)
+		}
+	}()
 	sorted := versions.GetInAscendingOrder([]string{targetBazelVersion, bazelVersion})
 	return sorted[0] != targetBazelVersion
 }
@@ -1061,8 +1067,24 @@ func Run(o Options) error {
 	}
 	d.workdir = workdir(o.ExecOS)
 
-	bazelPath := o.BazelPath
-	if bazelPath == "" {
+	var bazelPath string
+	if o.HostBazelPath != "" {
+		if _, err := os.Stat(o.HostBazelPath); err != nil {
+			return fmt.Errorf("failed to stat host_bazel_path %q: %w", o.HostBazelPath, err)
+		}
+		log.Printf("Host bazel_path detected: %s. Copying to container...", o.HostBazelPath)
+		filename := filepath.Base(o.HostBazelPath)
+		bazelContainerPath := path.Join(d.workdir, filename)
+		if err := d.copyToContainer(o.HostBazelPath, bazelContainerPath); err != nil {
+			return fmt.Errorf("failed to copy host Bazel binary %q into the container: %w", o.HostBazelPath, err)
+		}
+		if _, err := d.execCmd("chmod", "+x", bazelContainerPath); err != nil {
+			return fmt.Errorf("failed to mark the Bazel binary as executable inside the container: %w", err)
+		}
+		bazelPath = bazelContainerPath
+	} else if o.BazelPath != "" {
+		bazelPath = o.BazelPath
+	} else {
 		bazelPath, err = installBazelisk(d, o.TempWorkDir, o.ExecOS)
 		if err != nil {
 			return fmt.Errorf("failed to install Bazelisk into the toolchain container: %w", err)
