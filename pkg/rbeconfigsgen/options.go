@@ -71,14 +71,7 @@ type Options struct {
 	// C++ Config generation options.
 	// GenCPPConfigs determines whether C++ configs are generated.
 	GenCPPConfigs bool
-	// CPPConfigTargets are the Bazel targets that will be used to make Bazel auto-generated C++
-	// configs.
-	// This field can be auto-populated with a default value. See DefaultExecOptions below.
-	CPPConfigTargets []string
-	// CPPConfigRepo is the name of the Bazel external repo (i.e., the repo name without the '@')
-	// whose Bazel build output directory will be used to extract generated C++ config files.
-	// This field can be auto-populated with a default value. See DefaultExecOptions below.
-	CPPConfigRepo string
+
 	// CppBazelCmd is the Bazel command that'll be executed (build|query) on CppConfigTargets to
 	// generate CppConfigTargets. So if CppConfigTargets is @foo//:blah & CppBazelCmd is build,
 	// this tool will run bazel build @foo//:blah.
@@ -114,8 +107,6 @@ type Options struct {
 // of "Options". See "Options" for explanation on what the fields mean.
 type DefaultOptions struct {
 	PlatformParams         PlatformToolchainsTemplateParams
-	CPPConfigTargets       []string
-	CPPConfigRepo          string
 	CppBazelCmd            string
 	CppGenEnv              map[string]string
 	CPPToolchainTargetName string
@@ -150,8 +141,6 @@ var (
 				},
 				OSFamily: "Linux",
 			},
-			CPPConfigTargets: []string{"@local_config_cc//..."},
-			CPPConfigRepo:    "local_config_cc",
 			CppBazelCmd:      "build",
 			CppGenEnv: map[string]string{
 				"ABI_LIBC_VERSION":    "glibc_2.19",
@@ -178,8 +167,6 @@ var (
 				},
 				OSFamily: "Windows",
 			},
-			CPPConfigTargets:       []string{"@local_config_cc//..."},
-			CPPConfigRepo:          "local_config_cc",
 			CppBazelCmd:            "query",
 			CPPToolchainTargetName: "cc-compiler-x64_windows",
 		},
@@ -213,12 +200,6 @@ func (o *Options) ApplyDefaults(os string) error {
 	o.PlatformParams.TargetConstraints = dopts.PlatformParams.TargetConstraints
 	o.PlatformParams.OSFamily = dopts.PlatformParams.OSFamily
 
-	if len(o.CPPConfigTargets) == 0 {
-		o.CPPConfigTargets = dopts.CPPConfigTargets
-	}
-	if len(o.CPPConfigRepo) == 0 {
-		o.CPPConfigRepo = dopts.CPPConfigRepo
-	}
 	o.CppBazelCmd = dopts.CppBazelCmd
 	// Only apply C++ env defaults if the options didn't already specify defaults and no JSON file
 	// to read environment variables from was specified.
@@ -302,9 +283,6 @@ func (o *Options) Validate() error {
 	if !o.GenCPPConfigs && !o.GenJavaConfigs {
 		return fmt.Errorf("both GenCPPConfigs & GenJavaConfigs were set to false which means there's no configs to generate")
 	}
-	if o.GenCPPConfigs && len(o.CPPConfigTargets) == 0 {
-		return fmt.Errorf("GenCPPConfigs was true but CppConfigTargets was not specified")
-	}
 	if o.GenCPPConfigs && len(o.CppBazelCmd) == 0 {
 		return fmt.Errorf("GenCPPConfigs was true but CppBazelCmd was not specified")
 	}
@@ -325,8 +303,6 @@ func (o *Options) Validate() error {
 	log.Printf("OutputManifest=%q", o.OutputManifest)
 	log.Printf("PlatformParams=%v", *o.PlatformParams)
 	log.Printf("GenCPPConfigs=%v", o.GenCPPConfigs)
-	log.Printf("CPPConfigTargets=%v", o.CPPConfigTargets)
-	log.Printf("CPPConfigRepo=%q", o.CPPConfigRepo)
 	log.Printf("CppBazelCmd=%q", o.CppBazelCmd)
 	log.Printf("CppGenEnv=%v", o.CppGenEnv)
 	log.Printf("CppGenEnvJSON=%q", o.CppGenEnvJSON)
