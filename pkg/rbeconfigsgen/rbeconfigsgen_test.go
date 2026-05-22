@@ -17,6 +17,7 @@ package rbeconfigsgen
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"text/template"
 )
@@ -407,6 +408,58 @@ func TestCppConfigTargetAndRepo(t *testing.T) {
 			}
 			if gotRepo != tc.wantRepo {
 				t.Errorf("cppConfigTargetAndRepo(%q) gotRepo = %q, want %q", tc.bazelVersion, gotRepo, tc.wantRepo)
+			}
+		})
+	}
+}
+
+func TestGenConfigBuild(t *testing.T) {
+	tests := []struct {
+		name         string
+		bazelVersion string
+		wantParent   string
+	}{
+		{
+			name:         "Bazel 6",
+			bazelVersion: "6.4.0",
+			wantParent:   "@local_config_platform//:host",
+		},
+		{
+			name:         "Bazel 7",
+			bazelVersion: "7.0.0",
+			wantParent:   "@platforms//host",
+		},
+		{
+			name:         "Bazel 8",
+			bazelVersion: "8.0.0",
+			wantParent:   "@platforms//host",
+		},
+		{
+			name:         "Development version",
+			bazelVersion: "development version",
+			wantParent:   "@platforms//host",
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			opt := &Options{
+				BazelVersion: tc.bazelVersion,
+				PlatformParams: &PlatformToolchainsTemplateParams{
+					ExecConstraints: []string{"@platforms//os:linux"},
+				},
+			}
+			gotFile, err := genConfigBuild(opt)
+			if err != nil {
+				t.Fatalf("genConfigBuild failed: %v", err)
+			}
+			
+			// Check if the generated content contains the expected parent platform
+			content := string(gotFile.contents)
+			expected := `parents = ["` + tc.wantParent + `"]`
+			if !strings.Contains(content, expected) {
+				t.Errorf("Expected content to contain %q, but got:\n%s", expected, content)
 			}
 		})
 	}
