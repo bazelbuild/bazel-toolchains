@@ -79,7 +79,7 @@ toolchain(
 
 platform(
     name = "platform",
-    parents = ["@platforms//host"],
+    parents = ["{{.ParentPlatform}}"],
     constraint_values = [
 {{ range .ExecConstraints }}        "{{ . }}",
 {{ end }}    ],
@@ -160,11 +160,12 @@ type PlatformToolchainsTemplateParams struct {
 	CppToolchainTarget string
 	ToolchainContainer string
 	OSFamily           string
+	ParentPlatform     string
 }
 
 func (p PlatformToolchainsTemplateParams) String() string {
-	return fmt.Sprintf("{ExecConstraints: %v, TargetConstraints: %v, CppToolchainTarget: %q, ToolchainContainer: %q, OSFamily: %q}",
-		p.ExecConstraints, p.TargetConstraints, p.CppToolchainTarget, p.ToolchainContainer, p.OSFamily)
+	return fmt.Sprintf("{ExecConstraints: %v, TargetConstraints: %v, CppToolchainTarget: %q, ToolchainContainer: %q, OSFamily: %q, ParentPlatform: %q}",
+		p.ExecConstraints, p.TargetConstraints, p.CppToolchainTarget, p.ToolchainContainer, p.OSFamily, p.ParentPlatform)
 }
 
 // javaBuildTemplateParams is used as the input to the Java toolchains BUILD file template.
@@ -745,6 +746,13 @@ func genConfigBuild(o *Options) (generatedFile, error) {
 		o.PlatformParams.CppToolchainTarget = ""
 		log.Printf("Not generating a toolchain target to be used for the C++ Crosstool top because C++ config generation is disabled.")
 	}
+
+	if isBazelVersionLessThan(o.BazelVersion, "7.0.0") {
+		o.PlatformParams.ParentPlatform = "@local_config_platform//:host"
+	} else {
+		o.PlatformParams.ParentPlatform = "@platforms//host"
+	}
+
 	buf := bytes.NewBuffer(nil)
 	log.Printf("Fully resolved platform params=%v", o.PlatformParams)
 	if err := platformsToolchainBuildTemplate.Execute(buf, o.PlatformParams); err != nil {
