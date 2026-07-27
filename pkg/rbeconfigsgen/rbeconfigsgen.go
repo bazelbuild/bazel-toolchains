@@ -30,6 +30,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -97,7 +98,7 @@ package(default_visibility = ["//visibility:public"])
 java_runtime(
     name = "jdk",
     srcs = [],
-    java_home = "{{ .JavaHome }}",
+    java_home = {{ .JavaHome }},
 )
 `))
 
@@ -115,8 +116,8 @@ alias(
 
 local_java_runtime(
     name = "rbe_jdk",
-    java_home = "{{ .JavaHome }}",
-    version = "{{ .JavaVersion }}",
+    java_home = {{ .JavaHome }},
+    version = {{ .JavaVersion }},
 )
 `))
 
@@ -136,8 +137,8 @@ alias(
 
 local_java_runtime(
     name = "rbe_jdk",
-    java_home = "{{ .JavaHome }}",
-    version = "{{ .JavaVersion }}",
+    java_home = {{ .JavaHome }},
+    version = {{ .JavaVersion }},
 )
 `))
 
@@ -695,8 +696,12 @@ func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
 
 	buf := bytes.NewBuffer(nil)
 	if err := t.Execute(buf, &javaBuildTemplateParams{
-		JavaHome:    javaHome,
-		JavaVersion: javaVersion,
+		// strconv.Quote produces a valid Starlark string literal: it escapes
+		// `"`, `\` and control characters, preventing values sourced from the
+		// untrusted toolchain container from breaking out of the literal and
+		// injecting Starlark into the generated BUILD file.
+		JavaHome:    strconv.Quote(javaHome),
+		JavaVersion: strconv.Quote(javaVersion),
 	}); err != nil {
 		return generatedFile{}, fmt.Errorf("failed to generate the contents of the BUILD file with the Java toolchain definition: %w", err)
 	}

@@ -15,8 +15,10 @@
 package rbeconfigsgen
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"text/template"
@@ -464,3 +466,70 @@ func TestGenConfigBuild(t *testing.T) {
 		})
 	}
 }
+
+func TestJavaBuildTemplateEscaping(t *testing.T) {
+	tests := []struct {
+		name        string
+		bazelVer    string
+		javaHome    string
+		javaVersion string
+		wantHome    string
+		wantVer     string
+	}{
+		{
+			name:        "Standard paths",
+			bazelVer:    "7.0.0",
+			javaHome:    "/usr/lib/jvm/java-11",
+			javaVersion: "11",
+			wantHome:    `java_home = "/usr/lib/jvm/java-11"`,
+			wantVer:     `version = "11"`,
+		},
+		{
+			name:        "Injection attempt in JAVA_HOME",
+			bazelVer:    "7.0.0",
+			javaHome:    `/jvm",); genrule(name="pwned"); _absorb=("`,
+			javaVersion: "11",
+			wantHome:    `java_home = "/jvm\",); genrule(name=\"pwned\"); _absorb=(\""`,
+			wantVer:     `version = "11"`,
+		},
+		{
+			name:        "Injection attempt in JavaVersion for Bazel < 7",
+			bazelVer:    "5.0.0",
+			javaHome:    "/usr/lib/jvm/java-11",
+			javaVersion: `11",); genrule(name="pwned"); _absorb=("`,
+			wantHome:    `java_home = "/usr/lib/jvm/java-11"`,
+			wantVer:     `version = "11\",); genrule(name=\"pwned\"); _absorb=(\""`,
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			opt := &Options{
+				BazelVersion: tc.bazelVer,
+			}
+			tmpl, err := getJavaTemplate(opt)
+			if err != nil {
+				t.Fatalf("getJavaTemplate failed: %v", err)
+			}
+
+			buf := bytes.NewBuffer(nil)
+			err = tmpl.Execute(buf, &javaBuildTemplateParams{
+				JavaHome:    strconv.Quote(tc.javaHome),
+				JavaVersion: strconv.Quote(tc.javaVersion),
+			})
+			if err != nil {
+				t.Fatalf("tmpl.Execute failed: %v", err)
+			}
+
+			content := buf.String()
+			if !strings.Contains(content, tc.wantHome) {
+				t.Errorf("Expected content to contain %q, got:\n%s", tc.wantHome, content)
+			}
+			if tc.wantVer != "" && !strings.Contains(content, tc.wantVer) {
+				t.Errorf("Expected content to contain %q, got:\n%s", tc.wantVer, content)
+			}
+		})
+	}
+}
+
