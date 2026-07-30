@@ -45,6 +45,9 @@ type Options struct {
 	ToolchainContainer string
 	// Specify --platform when executing docker create.
 	DockerPlatform string
+	// ExecMode is the execution mode for config generation ("docker" or "host").
+	// Defaults to "docker".
+	ExecMode string
 	// ExecOS is the OS of the toolchain container image or the OS in which the build actions will
 	// execute.
 	ExecOS string
@@ -124,6 +127,10 @@ var (
 		OSLinux,
 		OSWindows,
 	}
+	validExecModes = []string{
+		"docker",
+		"host",
+	}
 
 	// DefaultExecOptions is a map from the ExecOS to default values for certain fields in Options
 	// that vary based on the execution environment.
@@ -141,7 +148,7 @@ var (
 				},
 				OSFamily: "Linux",
 			},
-			CppBazelCmd:      "build",
+			CppBazelCmd: "build",
 			CppGenEnv: map[string]string{
 				"ABI_LIBC_VERSION":    "glibc_2.19",
 				"ABI_VERSION":         "clang",
@@ -256,6 +263,12 @@ func (o *Options) Validate() error {
 	if o.ToolchainContainer == "" {
 		return fmt.Errorf("ToolchainContainer was not specified")
 	}
+	if o.ExecMode == "" {
+		o.ExecMode = "docker"
+	}
+	if !strListContains(validExecModes, o.ExecMode) {
+		return fmt.Errorf("invalid exec_mode, got %q, want one of %s", o.ExecMode, strings.Join(validExecModes, ", "))
+	}
 	if o.ExecOS == "" {
 		return fmt.Errorf("ExecOS was not specified")
 	}
@@ -294,6 +307,7 @@ func (o *Options) Validate() error {
 	log.Printf("BazelPath=%q", o.BazelPath)
 	log.Printf("HostBazelPath=%q", o.HostBazelPath)
 	log.Printf("ToolchainContainer=%q", o.ToolchainContainer)
+	log.Printf("ExecMode=%q", o.ExecMode)
 	log.Printf("ExecOS=%q", o.ExecOS)
 	log.Printf("TargetOS=%q", o.TargetOS)
 	log.Printf("DockerPlatform=%q", o.DockerPlatform)

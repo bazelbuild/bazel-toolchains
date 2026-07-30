@@ -33,6 +33,7 @@ var (
 	toolchainContainer = flag.String("toolchain_container", "", "Repository path to toolchain image to generate configs for. E.g., l.gcr.io/google/rbe-ubuntu16-04:latest")
 	execOS             = flag.String("exec_os", "", "The OS (linux|windows) of the toolchain container image a.k.a, the execution platform in Bazel.")
 	targetOS           = flag.String("target_os", "", "The OS (linux|windows) artifacts built will target a.k.a, the target platform in Bazel.")
+	execMode           = flag.String("exec_mode", "docker", "(Optional) The execution mode for config generation (docker|host). Defaults to docker.")
 	dockerPlatform     = flag.String("docker_platform", "", "(Optional) Set platform when creating container, if given the Docker server is multi-platform capable.")
 
 	// Optional input arguments.
@@ -69,6 +70,9 @@ func printFlags() {
 	log.Println("rbe_configs_gen.go \\")
 	log.Printf("--toolchain_container=%q \\", *toolchainContainer)
 	log.Printf("--exec_os=%q \\", *execOS)
+	if *execMode != "docker" {
+		log.Printf("--exec_mode=%q \\", *execMode)
+	}
 	log.Printf("--target_os=%q \\", *targetOS)
 	log.Printf("--bazel_version=%q \\", *bazelVersion)
 	if len(*bazelPath) != 0 {
@@ -177,6 +181,7 @@ func main() {
 		HostBazelPath:          *hostBazelPath,
 		ToolchainContainer:     *toolchainContainer,
 		DockerPlatform:         *dockerPlatform,
+		ExecMode:               *execMode,
 		ExecOS:                 *execOS,
 		TargetOS:               *targetOS,
 		OutputTarball:          *outputTarball,

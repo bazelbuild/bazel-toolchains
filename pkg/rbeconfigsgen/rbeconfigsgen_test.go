@@ -272,6 +272,20 @@ func TestOptionsValidate(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Invalid ExecMode set",
+			opt: &Options{
+				ExecMode: "invalid-mode",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Host ExecMode set (valid)",
+			opt: &Options{
+				ExecMode: "host",
+			},
+			wantErr: false,
+		},
 	}
 	
 	for _, tc := range tests {
@@ -530,6 +544,107 @@ func TestJavaBuildTemplateEscaping(t *testing.T) {
 				t.Errorf("Expected content to contain %q, got:\n%s", tc.wantVer, content)
 			}
 		})
+	}
+}
+
+func TestHostRunner(t *testing.T) {
+	tmpDir := t.TempDir()
+	r := newHostRunner(tmpDir, "gcr.io/bazel-public/ubuntu2404:latest")
+
+	if got := r.getResolvedImage(); got != "gcr.io/bazel-public/ubuntu2404:latest" {
+		t.Errorf("getResolvedImage() = %q, want %q", got, "gcr.io/bazel-public/ubuntu2404:latest")
+	}
+
+	digest, err := r.getImageDigest()
+	if err != nil || digest != "" {
+		t.Errorf("getImageDigest() = (%q, %v), want empty string without error", digest, err)
+	}
+
+	rWithDigest := newHostRunner(tmpDir, "gcr.io/bazel-public/ubuntu2404@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef")
+	digest, err = rWithDigest.getImageDigest()
+	if err != nil || digest != "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" {
+		t.Errorf("getImageDigest() = (%q, %v), want sha256 digest without error", digest, err)
+	}
+
+	if err := r.initWorkDir("linux"); err != nil {
+		t.Fatalf("initWorkDir() error = %v", err)
+	}
+
+	if r.getWorkDir() == "" {
+		t.Errorf("getWorkDir() returned empty string after initWorkDir")
+	}
+
+	out, err := r.execCmd("echo", "hello host")
+	if err != nil {
+		t.Fatalf("execCmd(echo) error = %v", err)
+	}
+	if out != "hello host" {
+		t.Errorf("execCmd(echo) output = %q, want %q", out, "hello host")
+	}
+
+	// Test copyToContainer / copyFromContainer
+	srcFile := filepath.Join(tmpDir, "source.txt")
+	if err := os.WriteFile(srcFile, []byte("test content"), 0644); err != nil {
+		t.Fatalf("WriteFile error = %v", err)
+	}
+
+	containerFile := filepath.Join(r.getWorkDir(), "container.txt")
+	if err := r.copyToContainer(srcFile, containerFile); err != nil {
+		t.Fatalf("copyToContainer error = %v", err)
+	}
+
+	extractedFile := filepath.Join(tmpDir, "extracted.txt")
+	if err := r.copyFromContainer(containerFile, extractedFile); err != nil {
+		t.Fatalf("copyFromContainer error = %v", err)
+	}
+
+	data, err := os.ReadFile(extractedFile)
+	if err != nil {
+		t.Fatalf("ReadFile error = %v", err)
+	}
+	if string(data) != "test content" {
+		t.Errorf("copied file content = %q, want %q", string(data), "test content")
+	}
+
+	// Test getImageEnv
+	envMap, err := r.getImageEnv()
+	if err != nil {
+		t.Fatalf("getImageEnv() error = %v", err)
+	}
+	if len(envMap) == 0 {
+		t.Errorf("getImageEnv() returned empty map")
+	}
+}
+
+func TestCreateManifestHostMode(t *testing.T) {
+	tmpDir := t.TempDir()
+	manifestFile := filepath.Join(tmpDir, "manifest.json")
+
+	opt := &Options{
+		ExecMode:           "host",
+		BazelVersion:       "7.0.0",
+		ToolchainContainer: "gcr.io/bazel-public/ubuntu2404:latest",
+		OutputManifest:     manifestFile,
+		PlatformParams: &PlatformToolchainsTemplateParams{
+			ToolchainContainer: "gcr.io/bazel-public/ubuntu2404:latest",
+			OSFamily:           "Linux",
+		},
+	}
+
+	r := newHostRunner(tmpDir, opt.ToolchainContainer)
+	if err := createManifest(r, opt); err != nil {
+		t.Fatalf("createManifest() in host mode error = %v", err)
+	}
+
+	m, err := ManifestFromJSONFile(manifestFile)
+	if err != nil {
+		t.Fatalf("ManifestFromJSONFile() error = %v", err)
+	}
+	if m.ImageDigest != "" {
+		t.Errorf("ImageDigest = %q, want empty string for host mode without digest tag", m.ImageDigest)
+	}
+	if m.ToolchainContainer != opt.ToolchainContainer {
+		t.Errorf("ToolchainContainer = %q, want %q", m.ToolchainContainer, opt.ToolchainContainer)
 	}
 }
 

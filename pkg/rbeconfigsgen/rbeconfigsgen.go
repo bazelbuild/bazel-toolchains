@@ -175,6 +175,204 @@ type javaBuildTemplateParams struct {
 	JavaVersion string
 }
 
+// commandRunner is an abstraction for executing commands and transferring files in either a
+// container (dockerRunner) or on the host filesystem (hostRunner).
+type commandRunner interface {
+	execCmd(args ...string) (string, error)
+	copyToContainer(src, dst string) error
+	copyFromContainer(src, dst string) error
+	getImageEnv() (map[string]string, error)
+	initWorkDir(execOS string) error
+	getWorkDir() string
+	setWorkDir(dir string)
+	getEnv() []string
+	setEnv(env []string)
+	getResolvedImage() string
+	getImageDigest() (string, error)
+	getBazelStartupFlags() []string
+	discoverJava() (string, string, error)
+	cleanup()
+}
+
+// hostRunner runs commands directly on the host machine without using Docker.
+type hostRunner struct {
+	workdir        string
+	env            []string
+	containerImage string
+	tempWorkDir    string
+}
+
+func newHostRunner(tempWorkDir, containerImage string) *hostRunner {
+	return &hostRunner{
+		containerImage: containerImage,
+		tempWorkDir:    tempWorkDir,
+	}
+}
+
+func (r *hostRunner) initWorkDir(execOS string) error {
+	dir := filepath.Join(r.tempWorkDir, "workdir")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create working directory %q on host: %w", dir, err)
+	}
+	r.workdir = dir
+	return nil
+}
+
+func (r *hostRunner) getWorkDir() string {
+	return r.workdir
+}
+
+func (r *hostRunner) setWorkDir(dir string) {
+	r.workdir = dir
+}
+
+func (r *hostRunner) getEnv() []string {
+	return r.env
+}
+
+func (r *hostRunner) setEnv(env []string) {
+	r.env = env
+}
+
+func (r *hostRunner) getResolvedImage() string {
+	return r.containerImage
+}
+
+func (r *hostRunner) getImageDigest() (string, error) {
+	s := imageDigestRegexp.FindStringSubmatch(r.containerImage)
+	if len(s) == 2 {
+		return s[1], nil
+	}
+	return "", nil
+}
+
+func (r *hostRunner) getBazelStartupFlags() []string {
+	return []string{"--ignore_all_rc_files"}
+}
+
+func (r *hostRunner) execCmd(args ...string) (string, error) {
+	if len(args) == 0 {
+		return "", fmt.Errorf("no command specified")
+	}
+	cmd := exec.Command(args[0], args[1:]...)
+	if r.workdir != "" {
+		cmd.Dir = r.workdir
+	}
+	cmd.Env = append(os.Environ(), r.env...)
+	cmdStr := fmt.Sprintf("'%s'", strings.Join(args, " "))
+	log.Printf("Running on host: %s", cmdStr)
+	o, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Output: %s", o)
+		return strings.TrimSpace(string(o)), err
+	}
+	return strings.TrimSpace(string(o)), nil
+}
+
+func copyFile(src, dst string) error {
+	if filepath.Clean(src) == filepath.Clean(dst) {
+		return nil
+	}
+	in, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file %q for copying: %w", src, err)
+	}
+	defer in.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return fmt.Errorf("failed to create directory for destination file %q: %w", dst, err)
+	}
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file %q: %w", dst, err)
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, in); err != nil {
+		return fmt.Errorf("failed to copy %q to %q: %w", src, dst, err)
+	}
+
+	info, err := os.Stat(src)
+	if err == nil {
+		_ = os.Chmod(dst, info.Mode())
+	}
+	return nil
+}
+
+func (r *hostRunner) copyToContainer(src, dst string) error {
+	return copyFile(src, dst)
+}
+
+func (r *hostRunner) copyFromContainer(src, dst string) error {
+	return copyFile(src, dst)
+}
+
+func (r *hostRunner) getImageEnv() (map[string]string, error) {
+	result := make(map[string]string)
+	for _, e := range os.Environ() {
+		parts := strings.SplitN(e, "=", 2)
+		if len(parts) == 2 {
+			result[parts[0]] = parts[1]
+		} else if len(parts) == 1 {
+			result[parts[0]] = ""
+		}
+	}
+	return result, nil
+}
+
+// parseJavaProperties runs 'java -XshowSettings:properties -version' using the given runner and
+// javaBin path, and parses the returned java.home and java.version properties.
+func parseJavaProperties(r commandRunner, javaBin string) (string, string, error) {
+	out, err := r.execCmd(javaBin, "-XshowSettings:properties", "-version")
+	if err != nil {
+		return "", "", fmt.Errorf("unable to determine the Java version using %q: %w", javaBin, err)
+	}
+	javaHome := ""
+	javaVersion := ""
+	for _, line := range strings.Split(out, "\n") {
+		splitVersion := strings.SplitN(line, "=", 2)
+		if len(splitVersion) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(splitVersion[0])
+		val := strings.TrimSpace(splitVersion[1])
+		if key == "java.version" {
+			javaVersion = val
+		} else if key == "java.home" {
+			javaHome = val
+		}
+	}
+	if len(javaVersion) == 0 {
+		return "", "", fmt.Errorf("unable to determine java version by running '%s -XshowSettings:properties' because it didn't return a line that looked like java.version = <version>", javaBin)
+	}
+	return javaHome, javaVersion, nil
+}
+
+func (r *hostRunner) discoverJava() (string, string, error) {
+	imageEnv, err := r.getImageEnv()
+	if err != nil {
+		return "", "", fmt.Errorf("unable to get host environment: %w", err)
+	}
+	javaBin := "java"
+	if h := imageEnv["JAVA_HOME"]; h != "" {
+		javaBin = filepath.Join(h, "bin", "java")
+	}
+	javaHome, javaVersion, err := parseJavaProperties(r, javaBin)
+	if err != nil {
+		return "", "", err
+	}
+	if len(javaHome) == 0 {
+		return "", "", fmt.Errorf("unable to determine JAVA_HOME from '%s -XshowSettings:properties'", javaBin)
+	}
+	log.Printf("JAVA_HOME was %q.", javaHome)
+	return javaHome, javaVersion, nil
+}
+
+func (r *hostRunner) cleanup() {
+	// No-op for host runner.
+}
+
 // dockerRunner allows starting a container for a given docker image and subsequently running
 // arbitrary commands inside the container or extracting files from it.
 // dockerRunner uses the docker client to spin up & interact with containers.
@@ -361,12 +559,12 @@ func (d *dockerRunner) copyFromContainer(src, dst string) error {
 	return nil
 }
 
-// getEnv gets the shell environment values from the toolchain container as determined by the
+// getImageEnv gets the shell environment values from the toolchain container as determined by the
 // image config. Env value set or changed by running commands after starting the container aren't
 // captured by the return value of this function.
 // The return value of this function is a map from env keys to their values. If the image config,
 // specifies the same env key multiple times, later values supercede earlier ones.
-func (d *dockerRunner) getEnv() (map[string]string, error) {
+func (d *dockerRunner) getImageEnv() (map[string]string, error) {
 	result := make(map[string]string)
 	o, err := runCmd(d.dockerPath, "inspect", "-f", "{{range $i, $v := .Config.Env}}{{println $v}}{{end}}", d.resolvedImage)
 	if err != nil {
@@ -395,10 +593,79 @@ func (d *dockerRunner) getEnv() (map[string]string, error) {
 	return result, nil
 }
 
+func (d *dockerRunner) initWorkDir(execOS string) error {
+	dir := workdir(execOS)
+	if _, err := d.execCmd("mkdir", dir); err != nil {
+		return fmt.Errorf("failed to create working directory %q in container: %w", dir, err)
+	}
+	d.workdir = dir
+	return nil
+}
+
+func (d *dockerRunner) getWorkDir() string {
+	return d.workdir
+}
+
+func (d *dockerRunner) setWorkDir(dir string) {
+	d.workdir = dir
+}
+
+func (d *dockerRunner) getEnv() []string {
+	return d.env
+}
+
+func (d *dockerRunner) setEnv(env []string) {
+	d.env = env
+}
+
+func (d *dockerRunner) getResolvedImage() string {
+	return d.resolvedImage
+}
+
+func (d *dockerRunner) getImageDigest() (string, error) {
+	s := imageDigestRegexp.FindStringSubmatch(d.resolvedImage)
+	if len(s) == 2 {
+		return s[1], nil
+	}
+	return "", fmt.Errorf("failed to extract sha256 digest using regex from image name %q, got %d substrings, want 2", d.resolvedImage, len(s))
+}
+
+func (d *dockerRunner) getBazelStartupFlags() []string {
+	return nil
+}
+
+func (d *dockerRunner) discoverJava() (string, string, error) {
+	imageEnv, err := d.getImageEnv()
+	if err != nil {
+		return "", "", fmt.Errorf("unable to get the environment of the toolchain image to determine JAVA_HOME: %w", err)
+	}
+	javaHome, ok := imageEnv["JAVA_HOME"]
+	if !ok {
+		return "", "", fmt.Errorf("toolchain image didn't specify environment value JAVA_HOME")
+	}
+	if len(javaHome) == 0 {
+		return "", "", fmt.Errorf("the value of the JAVA_HOME environment variable was blank in the toolchain image")
+	}
+	log.Printf("JAVA_HOME was %q.", javaHome)
+	javaBin := path.Join(javaHome, "bin/java")
+	_, javaVersion, err := parseJavaProperties(d, javaBin)
+	if err != nil {
+		return "", "", err
+	}
+	return javaHome, javaVersion, nil
+}
+
+func newCommandRunner(o *Options) (commandRunner, error) {
+	if o.ExecMode == "host" {
+		return newHostRunner(o.TempWorkDir, o.ToolchainContainer), nil
+	}
+	return newDockerRunner(o.ToolchainContainer, o.DockerPlatform, o.Cleanup)
+}
+
 // installBazelisk downloads bazelisk locally to the specified directory for the given os and copies
 // it into the running toolchain container.
 // Returns the path Bazelisk was installed to inside the running toolchain container.
-func installBazelisk(d *dockerRunner, downloadDir, execOS string) (string, error) {
+func installBazelisk(r commandRunner, downloadDir, execOS string) (string, error) {
 	url, filename, err := BazeliskDownloadInfo(execOS)
 	if err != nil {
 		return "", fmt.Errorf("unable to determine how to download Bazelisk for execution OS %q: %w", execOS, err)
@@ -418,12 +685,12 @@ func installBazelisk(d *dockerRunner, downloadDir, execOS string) (string, error
 		return "", fmt.Errorf("error while downloading Bazelisk to %s: %w", localPath, err)
 	}
 
-	bazeliskContainerPath := path.Join(d.workdir, filename)
-	if err := d.copyToContainer(localPath, bazeliskContainerPath); err != nil {
+	bazeliskContainerPath := path.Join(r.getWorkDir(), filename)
+	if err := r.copyToContainer(localPath, bazeliskContainerPath); err != nil {
 		return "", fmt.Errorf("failed to copy the downloaded Bazelisk binary into the container: %w", err)
 	}
 
-	if _, err := d.execCmd("chmod", "+x", bazeliskContainerPath); err != nil {
+	if _, err := r.execCmd("chmod", "+x", bazeliskContainerPath); err != nil {
 		return "", fmt.Errorf("failed to mark the Bazelisk binary as executable inside the container: %w", err)
 	}
 	return bazeliskContainerPath, nil
@@ -461,33 +728,33 @@ func appendCppEnv(env []string, o *Options) ([]string, error) {
 // given docker runner according to the given options. bazelPath is the path to the Bazel
 // binary inside the running toolchain container.
 // The return value is the path to the C++ configs tarball copied out of the toolchain container.
-func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error) {
+func genCppConfigs(r commandRunner, o *Options, bazelPath string) (string, error) {
 	if !o.GenCPPConfigs {
 		return "", nil
 	}
 
 	// Change the working directory to a dedicated empty directory for C++ configs for each
 	// command we run in this function.
-	cppProjDir := path.Join(d.workdir, "cpp_configs_project")
-	if _, err := d.execCmd("mkdir", cppProjDir); err != nil {
+	cppProjDir := path.Join(r.getWorkDir(), "cpp_configs_project")
+	if _, err := r.execCmd("mkdir", cppProjDir); err != nil {
 		return "", fmt.Errorf("failed to create empty directory %q inside the toolchain container: %w", cppProjDir, err)
 	}
-	oldWorkDir := d.workdir
-	d.workdir = cppProjDir
+	oldWorkDir := r.getWorkDir()
+	r.setWorkDir(cppProjDir)
 	defer func() {
-		d.workdir = oldWorkDir
+		r.setWorkDir(oldWorkDir)
 	}()
 
-	if _, err := d.execCmd("touch", "WORKSPACE", "BUILD.bazel"); err != nil {
+	if _, err := r.execCmd("touch", "WORKSPACE", "BUILD.bazel"); err != nil {
 		return "", fmt.Errorf("failed to create empty build & workspace files in the container to initialize a blank Bazel repository: %w", err)
 	}
 
 	cppConfigTarget, cppConfigRepo := cppConfigTargetAndRepo(o.BazelVersion)
 
 	// Backup the current environment & restore it before returning.
-	oldEnv := d.env
+	oldEnv := r.getEnv()
 	defer func() {
-		d.env = oldEnv
+		r.setEnv(oldEnv)
 	}()
 
 	// Create a new environment for bazelisk commands used to specify the Bazel version to use to
@@ -500,20 +767,21 @@ func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error
 	if err != nil {
 		return "", fmt.Errorf("failed to add additional environment variables to the C++ config generation docker command: %w", err)
 	}
-	d.env = generationEnv
+	r.setEnv(generationEnv)
 
-	cmd := []string{
-		bazelPath,
-		o.CppBazelCmd,
-		cppConfigTarget,
-	}
-	if _, err := d.execCmd(cmd...); err != nil {
+	cmd := []string{bazelPath}
+	cmd = append(cmd, r.getBazelStartupFlags()...)
+	cmd = append(cmd, o.CppBazelCmd, cppConfigTarget)
+	if _, err := r.execCmd(cmd...); err != nil {
 		return "", fmt.Errorf("Bazel was unable to build the C++ config generation targets in the toolchain container: %w", err)
 	}
 
 	// Restore the env needed for Bazelisk.
-	d.env = bazeliskEnv
-	bazelOutputRoot, err := d.execCmd(bazelPath, "info", "output_base")
+	r.setEnv(bazeliskEnv)
+	infoCmd := []string{bazelPath}
+	infoCmd = append(infoCmd, r.getBazelStartupFlags()...)
+	infoCmd = append(infoCmd, "info", "output_base")
+	bazelOutputRoot, err := r.execCmd(infoCmd...)
 	if err != nil {
 		return "", fmt.Errorf("unable to determine the build output directory where Bazel produced C++ configs in the toolchain container: %w", err)
 	}
@@ -522,7 +790,7 @@ func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error
 
 	// Restore the old env now that we're done with Bazelisk commands. This is purely to reduce
 	// noise in the logs.
-	d.env = oldEnv
+	r.setEnv(oldEnv)
 
 	// 1. Get a list of symlinks in the config output directory.
 	// 2. Harden each link.
@@ -530,9 +798,9 @@ func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error
 	// 4. Copy the tarball from the container to the local temp directory.
 	var out string
 	if o.ExecOS == "windows" {
-		out, err = d.execCmd("cmd", "/r", "dir", filepath.Clean(cppConfigDir), "/a:l", "/b")
+		out, err = r.execCmd("cmd", "/r", "dir", filepath.Clean(cppConfigDir), "/a:l", "/b")
 	} else {
-		out, err = d.execCmd("find", cppConfigDir, "-type", "l")
+		out, err = r.execCmd("find", cppConfigDir, "-type", "l")
 	}
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to list symlinks in the C++ config generation build output directory: ")
@@ -551,12 +819,15 @@ func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error
 		if s == "" {
 			continue
 		}
-		resolvedPath, err := d.execCmd("readlink", s)
+		resolvedPath, err := r.execCmd("readlink", s)
 		if err != nil {
 			return "", fmt.Errorf("unable to determine what the symlink %q in %q in the toolchain container points to: %w", s, cppConfigDir, err)
 		}
-		if _, err := d.execCmd("ln", "-f", resolvedPath, s); err != nil {
-			return "", fmt.Errorf("failed to harden symlink %q in %q pointing to %q: %w", s, cppConfigDir, resolvedPath, err)
+		if _, err := r.execCmd("ln", "-f", resolvedPath, s); err != nil {
+			log.Printf("Hardlink failed for symlink %q -> %q (%v), falling back to copy", s, resolvedPath, err)
+			if _, cpErr := r.execCmd("cp", "-rfL", resolvedPath, s); cpErr != nil {
+				return "", fmt.Errorf("failed to harden symlink %q in %q pointing to %q: %w", s, cppConfigDir, resolvedPath, cpErr)
+			}
 		}
 	}
 
@@ -564,10 +835,10 @@ func genCppConfigs(d *dockerRunner, o *Options, bazelPath string) (string, error
 	// Explicitly use absolute paths to avoid confusion on what's the working directory.
 	outputTarballPath := path.Join(o.TempWorkDir, outputTarball)
 	outputTarballContainerPath := path.Join(cppProjDir, outputTarball)
-	if _, err := d.execCmd("tar", "-cf", outputTarballContainerPath, "-C", cppConfigDir, "."); err != nil {
+	if _, err := r.execCmd("tar", "-cf", outputTarballContainerPath, "-C", cppConfigDir, "."); err != nil {
 		return "", fmt.Errorf("failed to archive the C++ configs into a tarball inside the toolchain container: %w", err)
 	}
-	if err := d.copyFromContainer(outputTarballContainerPath, outputTarballPath); err != nil {
+	if err := r.copyFromContainer(outputTarballContainerPath, outputTarballPath); err != nil {
 		return "", fmt.Errorf("failed to copy the C++ config tarball out of the toolchain container: %w", err)
 	}
 	log.Printf("Generated C++ configs at %s.", outputTarballPath)
@@ -637,48 +908,13 @@ func getJavaTemplate(o *Options) (*template.Template, error) {
 //  1. Value of the JAVA_HOME environment variable set in the toolchain image.
 //  2. Value of the Java version as reported by the java binary installed in JAVA_HOME inside the
 //     running toolchain container.
-func genJavaConfigs(d *dockerRunner, o *Options) (generatedFile, error) {
+func genJavaConfigs(r commandRunner, o *Options) (generatedFile, error) {
 	if !o.GenJavaConfigs {
 		return generatedFile{}, nil
 	}
-	imageEnv, err := d.getEnv()
+	javaHome, javaVersion, err := r.discoverJava()
 	if err != nil {
-		return generatedFile{}, fmt.Errorf("unable to get the environment of the toolchain image to determine JAVA_HOME: %w", err)
-	}
-	javaHome, ok := imageEnv["JAVA_HOME"]
-	if !ok {
-		return generatedFile{}, fmt.Errorf("toolchain image didn't specify environment value JAVA_HOME")
-	}
-	if len(javaHome) == 0 {
-		return generatedFile{}, fmt.Errorf("the value of the JAVA_HOME environment variable was blank in the toolchain image")
-	}
-	log.Printf("JAVA_HOME was %q.", javaHome)
-	javaBin := path.Join(javaHome, "bin/java")
-	// "-XshowSettings:properties" is actually what makes java output the version string we're
-	// looking for in a more deterministic format. "-version" is just a placeholder so that the
-	// command doesn't error out. Although it will likely print the same version string but with
-	// some non-deterministic prefix.
-	out, err := d.execCmd(javaBin, "-XshowSettings:properties", "-version")
-	if err != nil {
-		return generatedFile{}, fmt.Errorf("unable to determine the Java version installed in the toolchain container: %w", err)
-	}
-	javaVersion := ""
-	for _, line := range strings.Split(out, "\n") {
-		// We're looking for a line that looks like `java.version = <version>` and we want to
-		// extract <version>.
-		splitVersion := strings.SplitN(line, "=", 2)
-		if len(splitVersion) != 2 {
-			continue
-		}
-		key := strings.TrimSpace(splitVersion[0])
-		val := strings.TrimSpace(splitVersion[1])
-		if key != "java.version" {
-			continue
-		}
-		javaVersion = val
-	}
-	if len(javaVersion) == 0 {
-		return generatedFile{}, fmt.Errorf("unable to determine the java version installed in the container by running 'java -XshowSettings:properties' in the container because it didn't return a line that looked like java.version = <version>")
+		return generatedFile{}, err
 	}
 	majorJavaVersion, err := maybeGetMajorJavaVersion(o.BazelVersion, javaVersion)
 	if err != nil {
@@ -1026,21 +1262,20 @@ func ManifestFromJSONFile(filePath string) (*Manifest, error) {
 
 // createManifest writes a manifest JSON file containing information about the generated configs if
 // the given options specified a manifest file.
-func createManifest(o *Options) error {
+func createManifest(r commandRunner, o *Options) error {
 	if len(o.OutputManifest) == 0 {
 		return nil
+	}
+	digest, err := r.getImageDigest()
+	if err != nil {
+		return err
 	}
 	m := Manifest{
 		BazelVersion:       o.BazelVersion,
 		ToolchainContainer: o.ToolchainContainer,
 		ExecOS:             o.PlatformParams.OSFamily,
+		ImageDigest:        digest,
 	}
-	// Extract the sha256 digest from the image name to be included in the manifest.
-	s := imageDigestRegexp.FindStringSubmatch(o.PlatformParams.ToolchainContainer)
-	if len(s) != 2 {
-		return fmt.Errorf("failed to extract sha256 digest using regex from image name %q, got %d substrings, want 2", o.PlatformParams.ToolchainContainer, len(s))
-	}
-	m.ImageDigest = s[1]
 	// Include the sha256 digest of the configs tarball if output tarball generation was enabled by
 	// actually hashing the contents of the output tarball.
 	if len(o.OutputTarball) != 0 {
@@ -1069,18 +1304,17 @@ func Run(o Options) error {
 	if err := processTempDir(&o); err != nil {
 		return fmt.Errorf("unable to initialize a local temporary working directory to store intermediate files: %w", err)
 	}
-	d, err := newDockerRunner(o.ToolchainContainer, o.DockerPlatform, o.Cleanup)
+	r, err := newCommandRunner(&o)
 	if err != nil {
-		return fmt.Errorf("failed to initialize a docker container: %w", err)
+		return fmt.Errorf("failed to initialize command runner: %w", err)
 	}
-	defer d.cleanup()
+	defer r.cleanup()
 
-	o.PlatformParams.ToolchainContainer = d.resolvedImage
+	o.PlatformParams.ToolchainContainer = r.getResolvedImage()
 
-	if _, err := d.execCmd("mkdir", workdir(o.ExecOS)); err != nil {
-		return fmt.Errorf("failed to create an empty working directory in the container")
+	if err := r.initWorkDir(o.ExecOS); err != nil {
+		return fmt.Errorf("failed to initialize working directory: %w", err)
 	}
-	d.workdir = workdir(o.ExecOS)
 
 	var bazelPath string
 	if o.HostBazelPath != "" {
@@ -1089,28 +1323,28 @@ func Run(o Options) error {
 		}
 		log.Printf("Host bazel_path detected: %s. Copying to container...", o.HostBazelPath)
 		filename := filepath.Base(o.HostBazelPath)
-		bazelContainerPath := path.Join(d.workdir, filename)
-		if err := d.copyToContainer(o.HostBazelPath, bazelContainerPath); err != nil {
+		bazelContainerPath := path.Join(r.getWorkDir(), filename)
+		if err := r.copyToContainer(o.HostBazelPath, bazelContainerPath); err != nil {
 			return fmt.Errorf("failed to copy host Bazel binary %q into the container: %w", o.HostBazelPath, err)
 		}
-		if _, err := d.execCmd("chmod", "+x", bazelContainerPath); err != nil {
+		if _, err := r.execCmd("chmod", "+x", bazelContainerPath); err != nil {
 			return fmt.Errorf("failed to mark the Bazel binary as executable inside the container: %w", err)
 		}
 		bazelPath = bazelContainerPath
 	} else if o.BazelPath != "" {
 		bazelPath = o.BazelPath
 	} else {
-		bazelPath, err = installBazelisk(d, o.TempWorkDir, o.ExecOS)
+		bazelPath, err = installBazelisk(r, o.TempWorkDir, o.ExecOS)
 		if err != nil {
 			return fmt.Errorf("failed to install Bazelisk into the toolchain container: %w", err)
 		}
 	}
 
-	cppConfigsTarball, err := genCppConfigs(d, &o, bazelPath)
+	cppConfigsTarball, err := genCppConfigs(r, &o, bazelPath)
 	if err != nil {
 		return fmt.Errorf("failed to generate C++ configs: %w", err)
 	}
-	javaBuild, err := genJavaConfigs(d, &o)
+	javaBuild, err := genJavaConfigs(r, &o)
 	if err != nil {
 		return fmt.Errorf("failed to extract information about the installed JDK version in the toolchain container needed to generate Java configs: %w", err)
 	}
@@ -1133,7 +1367,7 @@ func Run(o Options) error {
 		return fmt.Errorf("unable to assemble C++/Java/Crosstool top/Platform definitions to generate the final toolchain configs output: %w", err)
 	}
 
-	if err := createManifest(&o); err != nil {
+	if err := createManifest(r, &o); err != nil {
 		return fmt.Errorf("unable to create the manifest file: %w", err)
 	}
 
