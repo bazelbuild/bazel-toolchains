@@ -10,5 +10,5 @@ require (
 	github.com/golang/protobuf v1.4.1
 	github.com/google/go-containerregistry v0.4.0
 	github.com/googleapis/gax-go/v2 v2.0.5
-	google.golang.org/genproto v0.0.0-20200527145253-8367513e4ece
+	google.golang.org/genproto v0.0.0-20260810153831-ec0a7760b754
 )
