@@ -36,7 +36,6 @@ import (
 	"time"
 
 	"github.com/bazelbuild/bazelisk/versions"
-	//"github.com/coreos/go-semver/semver"
 )
 
 const (
