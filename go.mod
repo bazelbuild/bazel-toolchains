@@ -6,8 +6,7 @@ require (
 	cloud.google.com/go v0.57.0
 	cloud.google.com/go/storage v1.6.0
 	github.com/bazelbuild/bazelisk v1.7.4
-	github.com/golang/protobuf v1.4.1
-	github.com/google/go-cmp v0.5.2 // indirect
+	github.com/golang/protobuf v1.5.4
 	github.com/googleapis/gax-go/v2 v2.0.5
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
