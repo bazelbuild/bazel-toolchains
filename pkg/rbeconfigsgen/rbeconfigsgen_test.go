@@ -648,3 +648,33 @@ func TestCreateManifestHostMode(t *testing.T) {
 	}
 }
 
+func TestMaybeGetMajorJavaVersion(t *testing.T) {
+	tests := []struct {
+		name string
+		javaVersion string
+		want string
+	}{
+		{
+			name: "Java 21.0.12, expect 21",
+			javaVersion: "21.0.12",
+			want: "21",
+		},
+		{
+			name: "Java 21.0.12.1, expect 21",
+			javaVersion: "21.0.12.1",
+			want: "21",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			jv, err := maybeGetMajorJavaVersion(/* bazelVersion= */ "9.0.0", /* javaVersion=*/ tc.javaVersion)
+			if err != nil {
+				t.Errorf("maybeGetMajorJavaVersion failed: %v", err)
+			} else if jv != tc.want {
+				t.Errorf("Expected major version %s from Java version %s", tc.want, jv)
+			}
+		})
+	}
+}
+

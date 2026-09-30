@@ -36,7 +36,6 @@ import (
 	"time"
 
 	"github.com/bazelbuild/bazelisk/versions"
-	"github.com/coreos/go-semver/semver"
 )
 
 const (
@@ -871,16 +870,17 @@ func maybeGetMajorJavaVersion(bazelVersion string, javaVersion string) (string, 
 		return "", nil
 	}
 
-	jv, err := semver.NewVersion(javaVersion)
+	jvAsStr := strings.Split(javaVersion, ".")[0]
+	jvMajor, err := strconv.Atoi(jvAsStr)
 	if err != nil {
-		return "", fmt.Errorf("unable to parse Java version %q as a semver: %w", javaVersion, err)
+		return "", fmt.Errorf("Unable to convert '%v' to int for Java major version.", jvAsStr)
 	}
 
-	if jv.Major < 17 {
+	if jvMajor < 17 {
 		return "", nil
 	}
 
-	return fmt.Sprintf("%d", jv.Major), nil
+	return fmt.Sprintf("%d", jvMajor), nil
 }
 
 func getJavaTemplate(o *Options) (*template.Template, error) {
